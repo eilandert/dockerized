@@ -1,0 +1,20 @@
+# mkdir config
+
+services:
+  rspamd:
+    container_name: rspamd
+    build:
+      context: image/rspamd
+#    image: eilandert/clamav-unofficial-sigs:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 11334
+      target: 11334
+    restart: always
+    volumes:
+    - ./config/etc:/etc/rspamd/apps:rw
+    - ./config/var:/var/lib/rspamd
+
+version: '3.7'
+

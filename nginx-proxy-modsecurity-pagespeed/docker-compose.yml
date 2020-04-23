@@ -1,0 +1,21 @@
+# mkdir config
+
+services:
+  nginx:
+    container_name: nginx
+    image: docker pull eilandert/nginx-modsecurity3-pagespeed:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 80
+      target: 80
+    - mode: host
+      protocol: tcp
+      published: 443
+      target: 443
+    restart: always
+    volumes:
+    - ./config/nginx:/etc/nginx:rw
+    - ./config/modsecurity/:/etc/modsecurity:rw
+version: '3.7'
+

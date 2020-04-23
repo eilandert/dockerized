@@ -1,0 +1,22 @@
+services:
+  redis:
+#    container_name: redis-test
+    image: eilandert/redis-scratch:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 6379
+      target: 6379
+    restart: always
+#
+# Uncomment those line to start with /config/redis.conf
+# Make sure you have a readable ./config/redis.conf
+#
+#    volumes:
+#    - ./config:/config:rw
+#    command:
+#    - /usr/bin/redis-server
+#    - /config/redis.conf
+
+version: '3.8'
+

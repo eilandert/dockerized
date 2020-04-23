@@ -1,0 +1,21 @@
+# mkdir config
+
+version: '3.7'
+
+services:
+  clamav:
+    container_name: clamav
+    init: true
+    image: eilandert/clamav-unofficial-sigs:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 3310
+      target: 3310
+    restart: always
+    volumes:
+    - ./config:/config:rw
+    - clamav:/var/lib/clamav:rw
+
+volumes:
+  clamav:
