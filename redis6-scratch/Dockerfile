@@ -41,7 +41,7 @@ RUN set -eux; \
 	cd /opt/bin && ln -s redis-server redis-check-aof && ln -s redis-server redis-check-rdb;\
 	strip --strip-all /opt/bin/* ;\
 	strip --strip-all /lib/*so.1* ;\
-	mkdir /data && chown redis:redis /data ;\
+	mkdir /data && chown 1000:999 /data ;\
 	mkdir /config 
 
 #FROM scratch
