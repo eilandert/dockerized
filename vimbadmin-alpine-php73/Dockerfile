@@ -24,11 +24,9 @@ RUN  apk update && apk upgrade \
   && rm -rf /var/cache/apk/* /usr/src/* /tmp
 
 COPY bootstrap.sh /bootstrap.sh
-COPY check.sh /check.sh
 COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/
 
 RUN chmod +x /bootstrap.sh
-RUN chmod +x /check.sh
 
 EXPOSE 9000/TCP
 
