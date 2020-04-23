@@ -55,7 +55,6 @@ COPY --from=build /lib/libssl.so.1.1 /lib/
 COPY --from=build /config /config
 COPY --from=build /opt/ /usr/
 
-USER redis
 VOLUME ["/data"]
 
 CMD ["/usr/bin/redis-server"]
