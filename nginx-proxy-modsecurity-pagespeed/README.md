@@ -2,7 +2,7 @@ Dockerized NGINX+MODSECURITY3+GOOGLE PAGESPEED
 
 https://launchpad.net/~eilander/+archive/ubuntu/nginx
 
-https://github.com/eilandert/dockerized-nginx
+https://github.com/eilandert/dockerized/tree/master/nginx-proxy-modsecurity-pagespeed
 
 https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed
 
