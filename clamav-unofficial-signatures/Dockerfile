@@ -5,7 +5,7 @@ COPY config.orig /config.orig
 COPY bootstrap.sh /bootstrap.sh
 COPY check.sh /check.sh
 
-RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync \   
+RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tzdata \   
   && apk update && apk upgrade \
   && rm -rf /var/cache/apk/* /usr/src/* \
   && mkdir -p /run/clamav \
