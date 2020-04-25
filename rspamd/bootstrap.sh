@@ -9,7 +9,7 @@ set -eux
     fi
 
    echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-   echo 'dns { nameserver = ["hash:${NAMESERVER}"] }' > /etc/rspamd/override.d/options.inc
+   echo "dns { nameserver = [\"hash:${NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
 
    chown _rspamd:_rspamd -R /var/lib/rspamd
 
