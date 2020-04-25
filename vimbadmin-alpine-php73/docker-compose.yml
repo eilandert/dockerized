@@ -11,6 +11,9 @@ services:
     volumes:
     - ./config:/opt/vimbadmin/application/configs/:rw
 
+    environment:
+      - TZ=Europe/Amsterdam
+
 version: '3.7'
 
 

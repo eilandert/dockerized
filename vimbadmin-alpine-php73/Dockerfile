@@ -4,7 +4,7 @@ LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV INSTALL_PATH=/opt/vimbadmin
 
 RUN  apk update && apk upgrade \
-  && apk add --no-cache php7-apache2 php7-phar php7-mbstring php7-mcrypt php7-json php7-pdo php-gettext php7-memcached php7-pdo_mysql php7-opcache php7-tokenizer php7-simplexml php7-ctype php7-iconv php7-openssl \
+  && apk add --no-cache php7-apache2 php7-phar php7-mbstring php7-mcrypt php7-json php7-pdo php-gettext php7-memcached php7-pdo_mysql php7-opcache php7-tokenizer php7-simplexml php7-ctype php7-iconv php7-openssl tzdata\
   && apk add --no-cache git curl apache2 dovecot \
   && curl -sS https://getcomposer.org/installer | php7 -- --filename=composer --install-dir=/usr/local/bin \
   && echo "date.timezone = 'UTC'" >> /etc/php7/php.ini \

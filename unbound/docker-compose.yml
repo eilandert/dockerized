@@ -15,6 +15,10 @@ services:
       target: 53
     restart: always
     volumes:
-    - /opt/unbound/config:/config:rw
+    - ./config:/config:rw
+    environment:
+      - TZ=Europe/Amsterdam
+
+
 version: '3.7'
 

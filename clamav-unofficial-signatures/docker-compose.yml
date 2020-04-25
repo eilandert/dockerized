@@ -17,5 +17,8 @@ services:
     - ./config:/config:rw
     - clamav:/var/lib/clamav:rw
 
+    environment:
+      - TZ=Europe/Amsterdam
+
 volumes:
   clamav:

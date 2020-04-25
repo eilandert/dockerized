@@ -2,7 +2,7 @@ FROM alpine:edge
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 RUN  apk update && apk upgrade \
-  && apk add --no-cache unbound bind-tools \
+  && apk add --no-cache unbound bind-tools tzdata \
   && chown root:unbound /etc/unbound \
   && chmod 775 /etc/unbound \
   && /usr/sbin/unbound-anchor -a /etc/unbound/trusted-key.key | true \
