@@ -1,32 +1,19 @@
-FROM ubuntu:latest
+FROM alpine:latest
+LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-RUN	apt-get update && apt-get install -y --no-install-recommends gnupg dirmngr libterm-readline-perl-perl && rm -rf /var/lib/apt/lists/*
+RUN apk update && apk upgrade && apk add rspamd rspamd-openrc rspamd-client rspamd-controller rspamd-fuzzy rspamd-proxy rspamd-utils gnupg tzdata
 
-RUN	set -x \
-# gpg: key FFA232EDBF21E25E: public key "Rspamd Nightly Builds (Rspamd Nightly Builds) <vsevolod@highsecure.ru>" imported
-	&& key='3FA347D5E599BE4595CA2576FFA232EDBF21E25E' \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
-	&& gpg --export "$key" > /etc/apt/trusted.gpg.d/rspamd.gpg \
-	&& rm -rf "$GNUPGHOME" \
-	&& apt-key list > /dev/null
+COPY bootstrap.sh /bootstrap.sh
 
-RUN	echo "deb http://rspamd.com/apt-stable/ bionic main" > /etc/apt/sources.list.d/rspamd.list
+RUN     addgroup -S -g 1000 _rspamd && adduser -S -G _rspamd -u 1000 _rspamd \
+        && echo 'type = "console";' > /etc/rspamd/override.d/logging.inc \
+        && echo 'bind_socket = "*:11334";' > /etc/rspamd/override.d/worker-controller.inc \
+        && echo 'pidfile = false;' > /etc/rspamd/override.d/options.inc \
+        && chown _rspamd:_rspamd -R /var/lib/rspamd \
+        && mv /etc/rspamd /etc/rspamd.orig \
+        && chmod +x /bootstrap.sh
 
-RUN	apt-get update && apt -y upgrade\
-	&& apt-get install -y rspamd \
-	&& rm -rf /var/lib/apt/lists/*
+CMD [ "/bootstrap.sh" ]
 
-RUN	echo 'type = "console";' > /etc/rspamd/override.d/logging.inc \
-	&& echo 'bind_socket = "*:11334";' > /etc/rspamd/override.d/worker-controller.inc \
-	&& echo 'pidfile = false;' > /etc/rspamd/override.d/options.inc \
-	&& chown _rspamd:_rspamd -R /var/lib/rspamd
-
-
-
-
-VOLUME	[ "/var/lib/rspamd" ]
-
-CMD	[ "/usr/bin/rspamd", "-f", "-u", "_rspamd", "-g", "_rspamd" ]
-
-EXPOSE	11333 11334
+EXPOSE 11332 11333 11334
+VOLUME  [ "/var/lib/rspamd" ]

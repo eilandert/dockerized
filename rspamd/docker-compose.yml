@@ -4,17 +4,29 @@ services:
   rspamd:
     container_name: rspamd
     build:
-      context: image/rspamd
-#    image: eilandert/clamav-unofficial-sigs:latest
+      context: image
     ports:
+    - mode: host
+      protocol: tcp
+      published: 11332
+      target: 11332
+    - mode: host
+      protocol: tcp
+      published: 11333
+      target: 11333
     - mode: host
       protocol: tcp
       published: 11334
       target: 11334
     restart: always
     volumes:
-    - ./config/etc:/etc/rspamd/apps:rw
-    - ./config/var:/var/lib/rspamd
+    - ./config/etc:/etc/rspamd/
+    - rspamdlib:/var/lib/rspamd
+
+    environment:
+      - TZ=Europe/Amsterdam
 
 version: '3.7'
 
+volumes:
+  - rspamdlib:
