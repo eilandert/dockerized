@@ -7,4 +7,6 @@ if [ ! -f ${UNBOUNDCONF} ]; then
     cp -r config.orig/* /config/
 fi
 
+   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+
 exec /usr/sbin/unbound -c /config/unbound.conf

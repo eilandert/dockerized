@@ -12,4 +12,7 @@ fi
     chown -R root:root ${WORKDIR}/
     chown -R apache:apache ${WORKDIR}/var
 
+   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+
+
 exec /usr/sbin/httpd -DFOREGROUND

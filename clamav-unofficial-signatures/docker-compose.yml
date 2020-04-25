@@ -19,6 +19,7 @@ services:
 
     environment:
       - TZ=Europe/Amsterdam
+      - NAMESERVER=10.0.0.1
 
 volumes:
   clamav:
