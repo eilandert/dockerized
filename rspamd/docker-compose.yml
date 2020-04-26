@@ -20,8 +20,8 @@ services:
       target: 11334
     restart: always
     volumes:
-    - ./config/etc:/etc/rspamd/
-    - rspamdlib:/var/lib/rspamd
+    - ./config/rspamd:/etc/rspamd/
+    - ./config/librspamd:/var/lib/rspamd
 
     environment:
       - TZ=Europe/Amsterdam
@@ -29,5 +29,3 @@ services:
 
 version: '3.7'
 
-volumes:
-  - rspamdlib:
