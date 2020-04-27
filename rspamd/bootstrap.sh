@@ -1,5 +1,8 @@
 #!/bin/sh
-set -eux
+set -eu
+
+   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+   echo "dns { nameserver = [\"hash:${NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
 
     FIRSTRUN="/etc/rspamd/rspamd.conf"
     if [ ! -f ${FIRSTRUN} ]; then
@@ -7,9 +10,6 @@ set -eux
       mkdir -p /etc/rspamd \
       && cp -r /etc/rspamd.orig/* /etc/rspamd/
     fi
-
-   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-   echo "dns { nameserver = [\"hash:${NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
 
    chown _rspamd:_rspamd -R /var/lib/rspamd
 

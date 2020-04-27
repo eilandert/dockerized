@@ -1,8 +1,7 @@
 #!/bin/bash
-set -eux
+set -eu
 
    echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-
 
 # If there are no configfiles, copy them
     FIRSTRUN="/config/clamav/clamd.conf"
@@ -15,7 +14,6 @@ set -eux
       && ln -s /config/clamav /etc/clamav
     rm -rf /etc/clamav-unofficial-sigs \
       && ln -s /config/clamav-unofficial-sigs/ /etc/clamav-unofficial-sigs
-
     chmod 777 /dev/stdout
 
 #Are there signatures?
@@ -25,8 +23,8 @@ set -eux
       freshclam --user=clamav --no-warnings --show-progress --foreground
     fi
 
-   /usr/sbin/clamd
-
    while [ 1 ]; do /usr/local/sbin/clamav-unofficial-sigs -s; sleep 3683; done &
+
+   /usr/sbin/clamd
 
 exec   freshclam -d -c24  --user=clamav --show-progress --foreground

@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+   echo "[bootstrap] setting nameserver to ${NAMESERVER}"
+   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+
    FIRSTRUN="/etc/postfix/main.cf"
     if [ ! -f ${FIRSTRUN} ]; then
       echo "[bootstrap] no configs found, copying..."
@@ -21,12 +24,8 @@ set -eu
    crond
    postconf maillog_file=/var/log/mail.log
 
-   echo "[bootstrap] setting nameserver to ${NAMESERVER}"
-   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-
    touch /var/log/mail.log
    tail -F /var/log/mail.log &
-
 
 exec postfix start-fg
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-#set -ex
+set -eu
 
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/nginx/nginx.conf"
