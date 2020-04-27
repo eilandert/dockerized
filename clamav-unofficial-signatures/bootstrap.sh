@@ -20,11 +20,11 @@ set -eu
     CVD_FILE="/var/lib/clamav/main.cvd"
     if [ ! -f ${CVD_FILE} ]; then
       echo "[bootstrap] No signatures found, running updater"
-      freshclam --user=clamav --no-warnings --show-progress --foreground
+      freshclam --user=clamav --no-warnings --foreground
     fi
 
    while [ 1 ]; do /usr/local/sbin/clamav-unofficial-sigs -s; sleep 3683; done &
 
    /usr/sbin/clamd
 
-exec   freshclam -d -c24  --user=clamav --show-progress --foreground
+exec   freshclam -d -c24  --user=clamav --foreground
