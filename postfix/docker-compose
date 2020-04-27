@@ -1,0 +1,18 @@
+services:
+  postfix:
+    container_name: postfix
+    image: eilandert/postfix:latest
+    ports:
+    - 25:25/tcp
+    - 587:587/udp
+    restart: always
+    volumes:
+    - ./config:/etc/postfix:rw
+    - /var/log/postfix:/var/log
+#    - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment:
+      - TZ=Europe/Amsterdam
+      - NAMESERVER=10.0.0.198
+
+version: '3.7'
+
