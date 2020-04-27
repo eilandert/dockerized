@@ -54,6 +54,7 @@ COPY --from=build /lib/libcrypto.so.1.1 /lib/
 COPY --from=build /lib/libssl.so.1.1 /lib/
 COPY --from=build /config /config
 COPY --from=build /opt/ /usr/
+COPY --from=build --chown=999:1000 /data /data
 
 VOLUME ["/data"]
 
