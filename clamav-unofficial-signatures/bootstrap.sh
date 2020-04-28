@@ -16,6 +16,8 @@ set -eu
       && ln -s /config/clamav-unofficial-sigs/ /etc/clamav-unofficial-sigs
     chmod 777 /dev/stdout
 
+    while [ 1 ]; do /usr/local/sbin/clamav-unofficial-sigs -s; sleep 3683; done &
+
 #Are there signatures?
     CVD_FILE="/var/lib/clamav/main.cvd"
     if [ ! -f ${CVD_FILE} ]; then
@@ -23,8 +25,7 @@ set -eu
       freshclam --user=clamav --no-warnings --foreground
     fi
 
-   while [ 1 ]; do /usr/local/sbin/clamav-unofficial-sigs -s; sleep 3683; done &
+    freshclam -d -c24  --user=clamav
 
-   /usr/sbin/clamd
+exec   /usr/sbin/clamd
 
-exec   freshclam -d -c24  --user=clamav --foreground
