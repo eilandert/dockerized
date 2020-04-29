@@ -22,10 +22,6 @@ set -eu
    chmod +x ${HOURLY_CRON}
 
    crond
-   postconf maillog_file=/var/log/mail.log
-
-   touch /var/log/mail.log
-   tail -F /var/log/mail.log &
+   postconf maillog_file=/dev/stdout
 
 exec postfix start-fg
-
