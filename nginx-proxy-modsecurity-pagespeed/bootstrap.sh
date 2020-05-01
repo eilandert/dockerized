@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+  if [ -z ${NAMESERVER} ]; then
+   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+  fi
+
+
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/nginx/nginx.conf"
 if [ ! -f ${FIRSTRUN} ]; then

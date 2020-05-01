@@ -1,8 +1,15 @@
 #!/bin/sh
 set -eu
 
+  if [ -z ${NAMESERVER} ]; then
    echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
    echo "dns { nameserver = [\"hash:${NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
+  fi
+
+  if [ -z ${RSPAMD_NAMESERVER} ]; then
+   echo "dns { nameserver = [\"hash:${RSPAMD_NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
+  fi
+   
 
     FIRSTRUN="/etc/rspamd/rspamd.conf"
     if [ ! -f ${FIRSTRUN} ]; then

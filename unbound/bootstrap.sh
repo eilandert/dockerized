@@ -1,7 +1,9 @@
 #!/bin/sh
 set -eu
 
-        echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+	if [ -z ${NAMESERVER} ]; then
+	  echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+	fi
 
 	UNBOUNDCONF="/config/unbound.conf"
 	if [ ! -f ${UNBOUNDCONF} ]; then

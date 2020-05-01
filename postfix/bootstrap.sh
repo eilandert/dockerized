@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eu
 
-   echo "[bootstrap] setting nameserver to ${NAMESERVER}"
-   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+   if [ -z ${NAMESERVER} ]; then
+     echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+   fi
 
    FIRSTRUN="/etc/postfix/main.cf"
     if [ ! -f ${FIRSTRUN} ]; then
