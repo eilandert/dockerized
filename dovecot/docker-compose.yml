@@ -1,0 +1,19 @@
+services:
+  dovecot:
+    container_name: dovecot
+    image: eilandert/roundcube:latest
+    ports:
+    - 24:24/tcp
+    - 110:110/tcp
+    - 143:143/tcp
+    - 993:993/tcp
+    - 4190:4190/tcp
+    restart: always
+    volumes:
+    - ./config/dovecot:/etc/dovecot
+    - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment:
+      - TZ=Europe/Amsterdam
+
+version: '3.7'
+
