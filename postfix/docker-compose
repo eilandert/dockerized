@@ -4,7 +4,7 @@ services:
     image: eilandert/postfix:latest
     ports:
     - 25:25/tcp
-    - 587:587/udp
+    - 587:587/tcp
     restart: always
     volumes:
     - ./config:/etc/postfix:rw
