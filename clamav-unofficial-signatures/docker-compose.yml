@@ -16,10 +16,8 @@ services:
     volumes:
     - ./config:/config:rw
     - clamav:/var/lib/clamav:rw
-
     environment:
       - TZ=Europe/Amsterdam
-      - NAMESERVER=127.0.0.11
 
 volumes:
   clamav:
