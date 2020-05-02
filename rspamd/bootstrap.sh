@@ -6,11 +6,6 @@ set -eu
    echo "dns { nameserver = [\"hash:${NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
   fi
 
-  if [ -z ${RSPAMD_NAMESERVER} ]; then
-   echo "dns { nameserver = [\"hash:${RSPAMD_NAMESERVER}\"] }" > /etc/rspamd/override.d/options.inc
-  fi
-   
-
     FIRSTRUN="/etc/rspamd/rspamd.conf"
     if [ ! -f ${FIRSTRUN} ]; then
       echo "[bootstrap] no configs found, copying..."
