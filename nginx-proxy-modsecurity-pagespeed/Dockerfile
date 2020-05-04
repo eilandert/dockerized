@@ -1,4 +1,4 @@
-FROM ubuntu:devel
+FROM ubuntu:latest
 
 RUN     apt-get update && apt-get install -y --no-install-recommends ca-certificates software-properties-common && apt-get upgrade -y \
 	&& add-apt-repository -y ppa:eilander/nginx && apt-get update && apt-get -y upgrade \
