@@ -1,1 +1,1 @@
-A staticly compiled redis (6.0rc4) in an scratch (with busybox) container 
+A staticly compiled redis (6.0.1) in an scratch (with busybox) container 
