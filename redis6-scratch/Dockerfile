@@ -4,8 +4,8 @@ FROM alpine:edge as build
 RUN apk update && apk upgrade && addgroup -S -g 1000 redis && adduser -S -G redis -u 999 redis 
 # alpine already has a gid 999, so we'll use the next id
 
-ENV REDIS_VERSION 6.0-rc4
-ENV REDIS_DOWNLOAD_URL https://github.com/antirez/redis/archive/6.0-rc4.tar.gz
+ENV REDIS_VERSION 6.0.1
+ENV REDIS_DOWNLOAD_URL https://github.com/antirez/redis/archive/6.0.1.tar.gz
 ENV REDIS_DOWNLOAD_SHA dac1ad1253337c06adf2af7f6ec7d2f54371e6b37b3c3d1c9d8fb4b7713d12a7
 
 RUN set -eux; \
@@ -20,7 +20,7 @@ RUN set -eux; \
 	; \
 	\
 	wget -O redis.tar.gz "$REDIS_DOWNLOAD_URL"; \
-	echo "$REDIS_DOWNLOAD_SHA *redis.tar.gz" | sha256sum -c -; \
+#	echo "$REDIS_DOWNLOAD_SHA *redis.tar.gz" | sha256sum -c -; \
 	mkdir -p /usr/src/redis; \
 	tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1; \
 	rm redis.tar.gz; \
