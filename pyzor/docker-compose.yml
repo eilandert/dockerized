@@ -2,6 +2,10 @@ services:
   pyzor:
     container_name: pyzor
     image: eilandert/pyzor:latest
+    - mode: host
+      protocol: tcp
+      published: 5953
+      target: 5953
 
 version: '3.7'
 
