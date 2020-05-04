@@ -1,0 +1,7 @@
+services:
+  pyzor:
+    container_name: pyzor
+    image: eilandert/pyzor:latest
+
+version: '3.7'
+
