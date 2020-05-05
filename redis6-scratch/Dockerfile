@@ -44,6 +44,11 @@ RUN set -eux; \
 	mkdir /data && chown 1000:999 /data ;\
 	mkdir /config 
 
+
+
+
+
+
 #FROM scratch
 FROM busybox:musl
 
@@ -59,3 +64,5 @@ COPY --from=build --chown=999:1000 /data /data
 VOLUME ["/data"]
 
 CMD ["/usr/bin/redis-server"]
+
+EXPOSE 6379
