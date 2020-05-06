@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-   if [ -z ${NAMESERVER} ]; then
+   if [ -n "${NAMESERVER}" ]; then
      echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
    fi
 
@@ -12,17 +12,7 @@ set -eu
       && cp -r /etc/postfix.orig/* /etc/postfix/
     fi
 
-   DAILY_CRON="/etc/periodic/daily/postfix"
-   echo "#!/bin/sh"                             >  ${DAILY_CRON}
-   echo "/etc/postfix/cron.d/daily/*.sh"        >> ${DAILY_CRON}
-   chmod +x ${DAILY_CRON}
-
-   HOURLY_CRON="/etc/periodic/hourly/postfix"
-   echo "#!/bin/sh"                             >  ${HOURLY_CRON}
-   echo "/etc/postfix/cron.d/hourly/*.sh"       >> ${HOURLY_CRON}
-   chmod +x ${HOURLY_CRON}
-
-   crond
    postconf maillog_file=/dev/stdout
+   chmod 777 /dev/stdout
 
 exec postfix start-fg

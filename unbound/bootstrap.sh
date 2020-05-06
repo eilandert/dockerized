@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-	if [ -z ${NAMESERVER} ]; then
+	if [ -n "${NAMESERVER}" ]; then
 	  echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
 	fi
 

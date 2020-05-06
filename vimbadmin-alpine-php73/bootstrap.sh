@@ -14,9 +14,6 @@ fi
     chown -R root:root ${WORKDIR}/
     chown -R apache:apache ${WORKDIR}/var
     mkdir -p /tmp
-    chmod 1777 -R /tmp 
- 
-   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-
+    chmod 1777 -R /tmp
 
 exec /usr/sbin/httpd -DFOREGROUND

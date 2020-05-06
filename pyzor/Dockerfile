@@ -1,7 +1,7 @@
 FROM alpine:edge
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-COPY  pyzorsocket.py /pyzorsocket.py
+COPY pyzorsocket.py /pyzorsocket.py
 
 RUN apk update && apk upgrade \
     && apk add --no-cache python3 py-pip && pip install pyzor && apk del py-pip \
