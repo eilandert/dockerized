@@ -16,4 +16,6 @@ fi
     mkdir -p /tmp
     chmod 1777 -R /tmp
 
+    echo "[bootstrap] starting apache, please wait."
+
 exec /usr/sbin/httpd -DFOREGROUND
