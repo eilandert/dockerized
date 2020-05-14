@@ -12,7 +12,7 @@ RUN     apt-get update && apt-get install -y --no-install-recommends ca-certific
 
 COPY    bootstrap.sh /bootstrap.sh
 RUN	chmod +x /bootstrap.sh 
-CMD	/bootstrap.sh
+CMD	["/bootstrap.sh"]
 EXPOSE	80 80
 EXPOSE  443 443
 VOLUME "/var/log/nginx"
