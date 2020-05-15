@@ -1,9 +1,8 @@
 #!/bin/sh
-set -eu
 
-  if [ -n "${NAMESERVER}" ]; then
-   echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-  fi
+        if [ -n "${NAMESERVER}" ]; then
+                echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+        fi
 
     FIRSTRUN="/etc/rspamd/rspamd.conf"
     if [ ! -f ${FIRSTRUN} ]; then

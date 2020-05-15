@@ -1,5 +1,9 @@
 #!/bin/bash
-set -eu
+
+	if [ -n "${NAMESERVER}" ]; then
+		echo $nameserver ${NAMESERVER}" > /etc/resolv.conf
+	fi
+
 
 # If there are no configfiles, copy them
 	FIRSTRUN="/config/clamav/clamd.conf"

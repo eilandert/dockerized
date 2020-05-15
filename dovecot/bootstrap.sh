@@ -1,5 +1,9 @@
 #!/bin/sh
-set -eu
+
+	if [ -n "${NAMESERVER}" ]; then
+		echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+	fi
+
 
     FIRSTRUN="/etc/dovecot/dovecot.conf"
     if [ ! -f ${FIRSTRUN} ]; then
