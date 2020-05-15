@@ -1,14 +1,22 @@
 #!/bin/bash
 
+	echo "[BOOTSTRAP] This docker image can be found on"
+	echo "[BOOTSTRAP] https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
+	echo "[BOOTSTRAP]"
+	echo "[BOOTSTRAP] optional variables for this container:"
+	echo "[BOOTSTRAP] NAMESERVER"
+
+	#set nameserver if variable is set
 	if [ -n "${NAMESERVER}" ]; then
 		echo $nameserver ${NAMESERVER}" > /etc/resolv.conf
+		echo "[BOOTSTRAP] wait for nameserver to be up with timeout of 60 secs"
+		ping -c1 -W60 ${NAMESERVER}
 	fi
-
 
 # If there are no configfiles, copy them
 	FIRSTRUN="/config/clamav/clamd.conf"
 	if [ ! -f ${FIRSTRUN} ]; then
-	  echo "[BOOTSTRAP] no configs found, copying..."
+	  echo "[BOOTSTRAP] clamd.conf not found, populating default configs to /config"
 	  mkdir -p /config \
 	  && cp -r config.orig/* /config/
 	fi
@@ -22,8 +30,10 @@
 #Are there signatures?
 	CVD_FILE="/var/lib/clamav/main.cvd"
 	if [ ! -f ${CVD_FILE} ]; then
-	  echo "[BOOTSTRAP] main.cvd not found found, running updaters"
+	  echo "[BOOTSTRAP] main.cvd not found"
+	  echo "[BOOTSTRAP] Running clamav-unofficial-sigs in background"
           /usr/local/sbin/clamav-unofficial-sigs -s &
+	  echo "[BOOTSTRAP] Running Freshclam in foreground once"
 	  freshclam --user=clamav --no-warnings --foreground
 	fi
 
