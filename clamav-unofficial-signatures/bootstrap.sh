@@ -8,7 +8,7 @@
 
 	#set nameserver if variable is set
 	if [ -n "${NAMESERVER}" ]; then
-		echo $nameserver ${NAMESERVER}" > /etc/resolv.conf
+		echo "$nameserver ${NAMESERVER}" > /etc/resolv.conf
 		echo "[BOOTSTRAP] wait for nameserver to be up with timeout of 60 secs"
 		ping -c1 -W60 ${NAMESERVER}
 	fi
