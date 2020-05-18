@@ -1,4 +1,5 @@
 
-Dockerized unbound.
+Dockerized unbound on Alpine Edge
 
-Bind /config, bootstrap will create unbound.conf for you if it doesn't exist
+bootstrap will create unbound.conf for you if it doesn't exist, make sure to bind /config if you want to edit it.
+
