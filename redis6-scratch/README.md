@@ -1,4 +1,4 @@
-A staticly compiled redis (6.0.1) in an scratch (with busybox) container 
+A staticly compiled redis (6.0.3) in an scratch (with busybox) container 
 
 If you give a second argument (like redis.conf), it will try to read it as configfile.
 
