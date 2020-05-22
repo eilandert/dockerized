@@ -36,7 +36,7 @@
 	#poor mans cron
         echo "[BOOTSTRAP] Starting updaters in the background"
 	while [ 1 ]; do /usr/local/sbin/clamav-unofficial-sigs -s; sleep 3661; done &
-	freshclam -d -c24 --user=clamav
+	freshclam -d -c6 --user=clamav
 
 	 echo "[BOOTSTRAP] Starting clamd... Please wait while loading databases"
 
