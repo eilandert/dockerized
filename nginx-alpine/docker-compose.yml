@@ -1,0 +1,18 @@
+# mkdir config
+
+services:
+  nginx:
+    container_name: nginx-alpine
+    build:
+      context: ./image
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 9001
+      target: 80
+    restart: always
+    volumes:
+    - ./config/nginx:/etc/nginx:rw
+    - ./content:/var/www/localhost/htdocs:rw
+version: '3.7'
+
