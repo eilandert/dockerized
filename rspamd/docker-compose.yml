@@ -1,10 +1,8 @@
-# mkdir config
-
 services:
   rspamd:
     container_name: rspamd
-    build:
-      context: image
+    image: eilandert/rspamd:latest
+    dns: 8.8.8.8
     ports:
     - mode: host
       protocol: tcp
@@ -21,11 +19,10 @@ services:
     restart: always
     volumes:
     - ./config/rspamd:/etc/rspamd/
-    - ./config/librspamd:/var/lib/rspamd
+    - ./data/rspamd:/var/lib/rspamd
 
     environment:
       - TZ=Europe/Amsterdam
-      - NAMESERVER=127.0.0.11
 
-version: '3.7'
+version: '3.8'
 
