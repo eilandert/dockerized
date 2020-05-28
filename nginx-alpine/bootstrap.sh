@@ -2,11 +2,6 @@
 
         echo "[BOOTSTRAP] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
 
-        #set nameserver if variable is set
-        if [ -n "${NAMESERVER}" ]; then
-                echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
-        fi
-
 	# If there are no configfiles, copy them
 	FIRSTRUN="/etc/nginx/nginx.conf"
 	if [ ! -f ${FIRSTRUN} ]; then
