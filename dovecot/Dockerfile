@@ -10,6 +10,7 @@ RUN  apk add --no-cache dovecot dovecot-lmtpd dovecot-sql dovecot dovecot-pigeon
      && mv /etc/dovecot /etc/dovecot.orig \
      && addgroup -S -g 5000 vmail && adduser -S -G vmail -u 5000 vmail
 
+COPY syslog-ng.conf /etc/syslog-ng
 
 EXPOSE 24 143 110 993 995 4190
 

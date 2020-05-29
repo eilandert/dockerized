@@ -9,8 +9,10 @@
 	fi
 
         if [ -n "SYSLOG_HOST" ]; then
+          echo "destination dst { syslog(\"${SYSLOG_HOST}\" transport(\"udp\")); };" > /etc/syslog-ng/conf.d/remote.conf
+          echo "log { source(s_sys); destination(dst); };" >> /etc/syslog-ng/conf.d/remote.conf
+          syslog-ng
           sed -i s/"\log_path\ \=\ syslog"/"#log_path\ \=\ \/dev\/stdout"/ /etc/dovecot/conf.d/10-logging.conf
-          syslogd -R ${SYSLOG_HOST}
           echo "[DOVECOT] Output is set to remote syslog at ${SYSLOG_HOST}"
         else
           sed -i s/"\#log_path\ \=\ syslog"/"log_path\ \=\ \/dev\/stdout"/ /etc/dovecot/conf.d/10-logging.conf
