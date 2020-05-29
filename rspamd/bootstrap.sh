@@ -14,7 +14,7 @@
         if [ -n "SYSLOG_HOST" ]; then
           echo "type = \"syslog\";" > /etc/rspamd/override.d/logging.inc
 	  syslogd -R ${SYSLOG_HOST}
-          echo "Output is set to remote syslog at ${SYSLOG_HOST}"
+          echo "[RSPAMD] Output is set to remote syslog at ${SYSLOG_HOST}"
 	else
 	  echo "type = \"console\";" > /etc/rspamd/override.d/logging.inc
 	fi

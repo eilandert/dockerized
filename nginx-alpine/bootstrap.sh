@@ -1,6 +1,6 @@
 #!/bin/sh
 
-        echo "[NGINX-ALPINE] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
+        echo "[NGINX-ALPINE] This docker image can be found on https://hub.docker.com/u/eilandert and https://github.com/eilandert/dockerized"
 
 	# If there are no configfiles, copy them
 	FIRSTRUN="/etc/nginx/nginx.conf"

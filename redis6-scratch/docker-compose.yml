@@ -1,6 +1,6 @@
 services:
   redis:
-#    container_name: redis-test
+#    container_name: redis
     image: eilandert/redis-scratch:latest
     ports:
     - mode: host

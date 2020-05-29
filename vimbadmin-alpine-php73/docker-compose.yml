@@ -13,7 +13,6 @@ services:
 
     environment:
       - TZ=Europe/Amsterdam
-      - NAMESERVER=127.0.0.11
 
 version: '3.7'
 
