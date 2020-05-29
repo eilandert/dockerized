@@ -6,8 +6,15 @@
 	if [ ! -f ${FIRSTRUN} ]; then
 	  echo "[DOVECOT] no configs found, copying..."
 	  mkdir -p /etc/dovecot && cp -r /etc/dovecot.orig/* /etc/dovecot/
-	  sed -i s/"\#log_path\ \=\ syslog"/"log_path\ \=\ \/dev\/stdout"/ /etc/dovecot/conf.d/10-logging.conf
 	fi
+
+        if [ -n "SYSLOG_HOST" ]; then
+          sed -i s/"\log_path\ \=\ syslog"/"#log_path\ \=\ \/dev\/stdout"/ /etc/dovecot/conf.d/10-logging.conf
+          syslogd -R ${SYSLOG_HOST}
+          echo "[DOVECOT] Output is set to remote syslog at ${SYSLOG_HOST}"
+        else
+          sed -i s/"\#log_path\ \=\ syslog"/"log_path\ \=\ \/dev\/stdout"/ /etc/dovecot/conf.d/10-logging.conf
+        fi
 
 	chmod 777 /dev/stdout
 

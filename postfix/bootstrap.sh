@@ -9,7 +9,14 @@
           && cp -r /etc/postfix.orig/* /etc/postfix/
         fi
 
-        postconf maillog_file=/dev/stdout
+        if [ -n "SYSLOG_HOST" ]; then
+          postconf -# maillog_file
+          syslogd -R ${SYSLOG_HOST}
+          echo "[POSTFIX] Output is set to remote syslog at ${SYSLOG_HOST}"
+        else
+          postconf maillog_file=/dev/stdout
+        fi
+
         chmod 777 /dev/stdout
 
         exec postfix start-fg

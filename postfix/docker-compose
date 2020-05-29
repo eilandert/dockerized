@@ -12,6 +12,7 @@ services:
 #    - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       - TZ=Europe/Amsterdam
+#     - SYSLOG_HOST=10.0.0.118
 
 version: '3.7'
 

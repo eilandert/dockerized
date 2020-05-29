@@ -2,7 +2,7 @@ services:
   rspamd:
     container_name: rspamd
     image: eilandert/rspamd:latest
-    dns: 8.8.8.8
+#    dns: 8.8.8.8
     ports:
     - mode: host
       protocol: tcp
@@ -23,6 +23,7 @@ services:
 
     environment:
       - TZ=Europe/Amsterdam
+#      - SYSLOG_HOST = 10.0.0.198
 
 version: '3.8'
 

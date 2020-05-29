@@ -1,7 +1,7 @@
 FROM alpine:edge
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-RUN apk update && apk upgrade && apk add rspamd rspamd-openrc rspamd-client rspamd-controller rspamd-fuzzy rspamd-proxy rspamd-utils gnupg tzdata
+RUN apk update && apk upgrade && apk add rspamd rspamd-openrc rspamd-client rspamd-controller rspamd-fuzzy rspamd-proxy rspamd-utils gnupg tzdata rsyslog
 
 COPY bootstrap.sh /bootstrap.sh
 

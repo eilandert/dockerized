@@ -1,6 +1,6 @@
 #!/bin/bash
 
-	echo "[CLAMAV] This docker image can be found on https://hub.docker.com/u/eilandert / https://github.com/eilandert/dockerized"
+	echo "[CLAMAV] This docker image can be found on https://hub.docker.com/u/eilandert and https://github.com/eilandert/dockerized"
 
 # If there are no configfiles, copy them
 	FIRSTRUN="/config/clamav/clamd.conf"
