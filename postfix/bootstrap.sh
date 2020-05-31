@@ -19,6 +19,7 @@
           postconf maillog_file=/dev/stdout
         fi
 
+        chown postfix:postfix -R /var/lib/postfix
         chmod 777 /dev/stdout
 
         exec postfix start-fg
