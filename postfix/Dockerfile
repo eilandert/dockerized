@@ -16,5 +16,5 @@ CMD [ "/bootstrap.sh" ]
 
 EXPOSE 25 587
 
-VOLUME [ "/var/log/" ]
+VOLUME [ "/var/lib/postfix" ]
 

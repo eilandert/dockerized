@@ -7,8 +7,8 @@ services:
     - 587:587/tcp
     restart: always
     volumes:
-    - ./config:/etc/postfix:rw
-    - /var/log/postfix:/var/log
+    - ./config/postfix:/etc/postfix:rw
+    - ./data/postfix:/var/lib/postfix:rw
 #    - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       - TZ=Europe/Amsterdam
