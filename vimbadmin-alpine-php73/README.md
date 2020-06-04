@@ -1,5 +1,5 @@
 
-Dockerized vimbadmin image based on Alpine Edge, apache2 and php7.3 (or whatever Alpine's latest version of php is)
+Dockerized vimbadmin image based on Alpine Edge, apache2 and php7.x (whatever Alpine's latest version of php is)
 
 steps:
 
