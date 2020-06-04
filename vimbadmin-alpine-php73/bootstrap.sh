@@ -10,14 +10,19 @@
 	  cp -rp ${WORKDIR}/application/configs.orig/* ${WORKDIR}/application/configs/
 	  cp ${WORKDIR}/application/configs/application.ini.dist ${WORKDIR}/application/configs/application.ini
           echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini
+	  chown -R root:root ${WORKDIR}/
+          chown -R apache:apache ${WORKDIR}/var
+	else
+	  # 4-6-2020, change paths after upgrade to 3.2.0, removal from this file far in future.
+	  sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Resource"~"/../library/OSS/Resource"~' ${WORKDIR}/application/configs/application.ini
+	  sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Smarty/functions"~"/../library/OSS/Smarty/functions"~' ${WORKDIR}/application/configs/application.ini
+
+	  #copy new .dist to configs
+	  cp ${WORKDIR}/application/configs.orig/application.ini.dist ${WORKDIR}/application/configs/application.ini.dist
+          echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini.dist
 	fi
 
-        chown -R root:root ${WORKDIR}/application/configs/
-        chown -R root:root ${WORKDIR}/
-        chown -R apache:apache ${WORKDIR}/var
-        mkdir -p /tmp
-        chmod 1777 -R /tmp
-
-	echo "[VIMBADMIN] Starting apache, please wait.. This can take some time."
+	#fix for some apache lockfile problem.
+        mkdir -p /tmp && chmod 1777 -R /tmp
 
 	exec /usr/sbin/httpd -DFOREGROUND
