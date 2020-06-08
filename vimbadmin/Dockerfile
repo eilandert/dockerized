@@ -1,7 +1,6 @@
 FROM alpine:edge
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-ENV VERSION=3.2.0
 ENV INSTALL_PATH=/opt/vimbadmin
 
 RUN  apk update && apk upgrade \
@@ -10,7 +9,6 @@ RUN  apk update && apk upgrade \
   && curl -sS https://getcomposer.org/installer | php7 -- --filename=composer --install-dir=/usr/local/bin \
   && git clone --recursive https://github.com/opensolutions/ViMbAdmin.git ${INSTALL_PATH} \
   && cd ${INSTALL_PATH} \
-  && git fetch --all && git checkout ${VERSION} \
   && composer config -g secure-http false \
   && composer install --prefer-dist --no-dev \
   && chown -R apache:apache ${INSTALL_PATH}/var \
