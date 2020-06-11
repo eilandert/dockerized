@@ -1,0 +1,29 @@
+FROM alpine:edge as build
+
+RUN apk update && apk upgrade  && apk add git gcc musl-dev pkgconfig zlib-dev libev-dev make cmake
+
+RUN	mkdir -p /opt && cd /opt && \
+	git clone https://github.com/rspamd/rbldnsd && \
+	cd rbldnsd && \
+	cmake . && \
+	make && \
+	strip rbldnsd-1.0.0 && \
+        addgroup -S -g 1000 rbldns && adduser -S -G rbldns -u 1000 rbldns
+
+
+COPY badhosts.zone /opt/
+
+
+FROM scratch
+#FROM busybox:musl
+
+COPY --from=build /etc/passwd /etc/group /etc/
+COPY --from=build /opt/rbldnsd/rbldnsd-1.0.0 /opt/rbldnsd
+COPY --from=build /lib/ld-musl-*.so.1 /lib/
+COPY --from=build /lib/libz.so.1 /lib/
+COPY --from=build /usr/lib/libev.so.4 /usr/lib/
+COPY --from=build /opt/badhosts.zone /zones/
+
+CMD ["/opt/rbldnsd","-w","/zones","-b","0.0.0.0/53","-v","-f","-n","-q","bla:ip4set:badhosts.zone"]
+
+EXPOSE 53
