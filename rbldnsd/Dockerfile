@@ -1,5 +1,7 @@
 FROM alpine:edge as build
 
+COPY badhosts.zone /opt/
+
 RUN apk update && apk upgrade  && apk add git gcc musl-dev pkgconfig zlib-dev libev-dev make cmake
 
 RUN	mkdir -p /opt && cd /opt && \
@@ -11,7 +13,6 @@ RUN	mkdir -p /opt && cd /opt && \
         addgroup -S -g 1000 rbldns && adduser -S -G rbldns -u 1000 rbldns
 
 
-COPY badhosts.zone /opt/
 
 
 FROM scratch
