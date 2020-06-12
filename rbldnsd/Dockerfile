@@ -1,8 +1,7 @@
 FROM alpine:edge as build
 
-COPY badhosts.zone /opt/
 
-RUN apk update && apk upgrade  && apk add git gcc musl-dev pkgconfig zlib-dev libev-dev make cmake
+RUN apk update && apk upgrade  && apk add git gcc musl-dev pkgconfig zlib-dev libev-dev make cmake wget
 
 RUN	mkdir -p /opt && cd /opt && \
 	git clone https://github.com/rspamd/rbldnsd && \
@@ -10,8 +9,8 @@ RUN	mkdir -p /opt && cd /opt && \
 	cmake . && \
 	make && \
 	strip rbldnsd-1.0.0 && \
-        addgroup -S -g 1000 rbldns && adduser -S -G rbldns -u 1000 rbldns
-
+        addgroup -S -g 1000 rbldns && adduser -S -G rbldns -u 1000 rbldns && \
+	cd /opt && wget https://raw.githubusercontent.com/eilandert/dockerized/master/rbldnsd/badhosts.zone
 
 
 
