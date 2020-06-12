@@ -6,31 +6,31 @@ Compiled with alpine:edge and put in a SCRATCH container. Compiled from: https:/
 It will start with a default set. 
 Mount /zones and run with your own command to run other zonefiles.
 
-Sources of the default set, optimized and sorted with iprange
+Sources of the default set, sorted and optimized with iprange
 
         http://blocklist.greensnow.co/greensnow.txt
-        http://www.myip.ms/files/blacklist/csf/latest_blacklist.txt
-        https://www.projecthoneypot.org/list_of_ips.php?t=d&rss=1
         http://danger.rulez.sk/projects/bruteforceblocker/blist.php
-        https://www.badips.com/get/list/any/2?age=14d&format=ipset
         http://lists.blocklist.de/lists/all.txt
         http://www.darklist.de/raw.php
-        http://blocklist.greensnow.co/greensnow.txt
         http://www.myip.ms/files/blacklist/csf/latest_blacklist.txt
+        https://www.badips.com/get/list/any/2?age=14d&format=ipset
+        https://www.projecthoneypot.org/list_of_ips.php?t=d&rss=1
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/bi_wordpress_1_7d.ipset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/botscout_30d.ipset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/bruteforceblocker.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/cleanmx_phishing.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/cleanmx_viruses.ipset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/botscout_30d.ipset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_7d.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level2.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_abusers_1d.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_30d.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_top_1000.ipset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/cleantalk_updated_30d.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_1d.netset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_30d.netset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_7d.netset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_top_1000.ipset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_abusers_1d.netset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level2.netset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/iw_spamlist.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/malwaredomainlist.ipset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/bruteforceblocker.ipset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/bi_wordpress_1_7d.ipset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/cleantalk_updated_30d.ipset
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/spamhaus_drop.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/spamhaus_edrop.netset
+
