@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-RUN     apt-get update && && apt upgrade \
+RUN     apt-get update && apt upgrade \
 	apt-get install -y --no-install-recommends ca-certificates software-properties-common \
 	&& add-apt-repository -y ppa:eilander/nginx && apt-get update && apt-get -y upgrade \
 	&& apt-get -y purge software-properties-common unattended-upgrades \
