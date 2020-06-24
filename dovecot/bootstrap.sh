@@ -8,7 +8,7 @@
 	  mkdir -p /etc/dovecot && cp -r /etc/dovecot.orig/* /etc/dovecot/
 	fi
 
-        if [ -n "SYSLOG_HOST" ]; then
+        if [ -n "${SYSLOG_HOST}" ]; then
           echo "destination dst { syslog(\"${SYSLOG_HOST}\" transport(\"udp\")); };" > /etc/syslog-ng/conf.d/remote.conf
           echo "log { source(s_sys); destination(dst); };" >> /etc/syslog-ng/conf.d/remote.conf
           syslog-ng
