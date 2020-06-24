@@ -1,0 +1,21 @@
+services:
+  rspamd-dev:
+    container_name: rspamd-dev
+    build:
+      context: /opt/images/rspamd-dev
+    restart: always
+    environment:
+      - TZ=Europe/Amsterdam
+      - SYSLOG_HOST=10.0.0.118
+    dns: 8.8.8.8
+    ports:
+      - 11332:11332
+      - 11333:11333
+      - 11334:11334
+    volumes:
+    - ./config/rspamd:/usr/local/etc/rspamd:rw
+    - ./data/rspamd:/var/lib/rspamd
+#    - /coreland:/coreland:rw
+
+version: '3.8'
+
