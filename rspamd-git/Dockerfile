@@ -1,4 +1,5 @@
 FROM ubuntu:devel as build
+LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
 
@@ -52,6 +53,7 @@ RUN	cd /opt/src/rspamd \
 
 
 FROM frolvlad/alpine-glibc
+LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
 
