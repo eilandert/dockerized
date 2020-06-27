@@ -14,7 +14,6 @@ Sources of the default test-set, sorted and optimized with iprange
 
         http://www.darklist.de/raw.php
         https://www.badips.com/get/list/any/2?age=30d&format=ipset
-	https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/blocklist_de.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/botscout_30d.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/bruteforceblocker.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/cleanmx_phishing.ipset
