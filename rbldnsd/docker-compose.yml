@@ -8,7 +8,7 @@ services:
     stop_grace_period: 1s
 #    volumes:
 #    - ./zones:/zones:rw
-#    command: ["/opt/rbldnsd","-w","/zones","-b","0.0.0.0/53","-v","-f","-n","-q","bad:ip4set:badhosts.zone"] 
+#    command: ["/opt/rbldnsd","-w","/zones","-b","0.0.0.0/53","-v","-f","-n","-q","rbl.mailscreen.nl:ip4set:badhosts.zone"] 
 
 version: '3.8'
 

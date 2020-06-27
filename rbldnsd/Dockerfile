@@ -24,6 +24,6 @@ COPY --from=build /lib/libz.so.1 /lib/
 COPY --from=build /usr/lib/libev.so.4 /usr/lib/
 COPY --from=build /opt/badhosts.zone /zones/
 
-CMD ["/opt/rbldnsd","-w","/zones","-b","0.0.0.0/53","-v","-f","-n","-q","bla:ip4set:badhosts.zone"]
+CMD ["/opt/rbldnsd","-w","/zones","-b","0.0.0.0/53","-v","-f","-n","-q","rbl.mailscreen.nl:ip4set:badhosts.zone"]
 
 EXPOSE 53
