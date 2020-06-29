@@ -1,5 +1,5 @@
 
-Dockerized vimbadmin image based on Alpine Edge, apache2 and php7.3 (or whatever Alpine's latest version of php is)
+Dockerized vimbadmin image based on Alpine:latest, apache2 and php7.x (whatever Alpine's latest version of php is)
 
 steps:
 
@@ -7,7 +7,7 @@ steps:
 
 CREATE DATABASE `vimbadmin`;
 
-GRANT ALL ON `vimbadmin`.* TO `vimbadmin`@`10.0.0.%` IDENTIFIED BY 'password';
+GRANT ALL ON `vimbadmin`.* TO `vimbadmin`@`ipaddress` IDENTIFIED BY 'password';
 
 FLUSH PRIVILEGES;
 
