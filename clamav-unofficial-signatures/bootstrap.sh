@@ -10,6 +10,10 @@
 	  && cp -r config.orig/* /config/
 	fi
 
+        if [ -n "${TZ}" ]; then
+          echo "${TZ}" > /etc/timezone
+        fi
+
 # Make symlinks to /config so we can bind that
 	rm -rf /etc/clamav && ln -s /config/clamav /etc/clamav
 	rm -rf /etc/clamav-unofficial-sigs && ln -s /config/clamav-unofficial-sigs/ /etc/clamav-unofficial-sigs
