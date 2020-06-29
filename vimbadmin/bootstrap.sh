@@ -21,6 +21,11 @@
           echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini.dist
 	fi
 
+        if [ -n "${TZ}" ]; then
+          echo "${TZ}" > /etc/timezone
+        fi
+
+
 	#fix for some apache lockfile problem.
         mkdir -p /tmp && chmod 1777 -R /tmp
 
