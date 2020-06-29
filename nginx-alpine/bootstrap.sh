@@ -9,6 +9,10 @@
           cp -r /etc/nginx.orig/* /etc/nginx/
         fi
 
+        if [ -n "${TZ}" ]; then
+          echo "${TZ}" > /etc/timezone
+        fi
+
         chmod 777 /dev/stdout
         mkdir -p /run/nginx
 	chown nginx:nginx /run/nginx
