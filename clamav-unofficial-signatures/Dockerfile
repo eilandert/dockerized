@@ -7,11 +7,11 @@ COPY check.sh /check.sh
 
 RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tzdata \   
   && apk update && apk upgrade \
-  && rm -rf /var/cache/apk/* /usr/src/* \
+  && apk del alpine-keys apk-tools \
+  && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
   && mkdir -p /run/clamav \
   && chown clamav:clamav -R /run/clamav \
   && chown clamav:clamav -R /var/lib/clamav \
-  && rm -rf /var/cache/apk/* /usr/src/* \
   && mkdir -p /usr/local/sbin/ \
   && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/clamav-unofficial-sigs.sh -o /usr/local/sbin/clamav-unofficial-sigs \
   && chmod +x /usr/local/sbin/clamav-unofficial-sigs \
