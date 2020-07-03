@@ -4,7 +4,7 @@ FROM alpine:edge as build
 RUN apk update && apk upgrade && addgroup -S -g 1000 redis && adduser -S -G redis -u 999 redis 
 # alpine already has a gid 999, so we'll use the next id
 
-ENV REDIS_DOWNLOAD_URL http://download.redis.io/redis-stable.tar.gz
+#ENV REDIS_DOWNLOAD_URL http://download.redis.io/redis-stable.tar.gz
 
 RUN set -eux; \
 	\
@@ -15,9 +15,11 @@ RUN set -eux; \
 		make \
 		musl-dev \
 		openssl-dev \
+		curl \
 	; \
 	\
-	wget -O redis.tar.gz "$REDIS_DOWNLOAD_URL"; \
+	curl http://download.redis.io/redis-stable.tar.gz --output redis.tar.gz ;\
+#	wget -O redis.tar.gz http://download.redis.io/redis-stable.tar.gz ;\
 #	echo "$REDIS_DOWNLOAD_SHA *redis.tar.gz" | sha256sum -c -; \
 	mkdir -p /usr/src/redis; \
 	tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1; \
