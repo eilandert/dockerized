@@ -1,4 +1,0 @@
-name: cron
-on:
-  schedule:
-    - cron:  '00 08,17 * * *'
