@@ -51,8 +51,8 @@ RUN	cd /opt/src/rspamd \
 	&& mkdir -p /usr/local/var \
 	&& rm -rf /usr/local/share/man /usr/local/share/games /usr/local/share/include /usr/local/share/src /usr/local/lib/python3.8 /usr/local/sbin 
 
-#FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.31
-FROM frolvlad/alpine-glibc
+FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.31
+#FROM frolvlad/alpine-glibc
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
