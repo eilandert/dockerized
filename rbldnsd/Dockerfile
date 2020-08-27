@@ -1,4 +1,4 @@
-FROM alpine:edge as build
+FROM alpine:latest as build
 
 
 RUN apk update && apk upgrade  && apk add git gcc musl-dev pkgconfig zlib-dev libev-dev make cmake wget
