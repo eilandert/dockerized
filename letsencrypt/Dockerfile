@@ -1,9 +1,12 @@
 FROM alpine:edge
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-RUN apk update && apk upgrade && apk add --no-cache certbot tzdata \
-	&& apk del alpine-keys apk-tools \
-	&& rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* 
+COPY bootstrap.sh /bootstrap.sh
 
-CMD ["certbot","renew"]
+RUN apk update && apk upgrade && apk add --no-cache certbot tzdata \
+        && apk del alpine-keys apk-tools \
+        && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
+        && chmod 755 /bootstrap.sh
+
+CMD ["/bootstrap.sh"]
 
