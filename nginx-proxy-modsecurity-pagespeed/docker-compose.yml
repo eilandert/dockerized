@@ -1,7 +1,7 @@
 services:
   nginx:
     container_name: nginx
-    image: docker pull eilandert/nginx-modsecurity3-pagespeed:latest
+    image: eilandert/nginx-modsecurity3-pagespeed:latest
     ports:
     - mode: host
       protocol: tcp
