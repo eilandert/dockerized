@@ -13,3 +13,6 @@ services:
 #    ports:
 #    - 80:80
 #    - 443:443
+    environment:
+      - TZ=Europe/Amsterdam
+
