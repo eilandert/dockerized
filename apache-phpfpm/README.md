@@ -6,6 +6,6 @@ But I guess you could do anything with it.
 
 It includes nullmailer.
 
-See docker-compose.yml for examples.
+Bind /etc/php, /etc/apache2 and /etc/nullmailer to a local dir, it will be populated on first run. See docker-compose.yml for examples.
 
 I am open for suggestions.
