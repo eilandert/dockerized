@@ -1,0 +1,21 @@
+version: '2.2'
+services:
+
+  wordpress:
+    container_name: wordpress
+    image: eilandert/apache-phpfpm
+    restart: always
+    stop_grace_period: 10s
+    volumes:
+    - ./letsencrypt/certs:/etc/letsencrypt:ro
+    - ./config/wordpress/apache2:/etc/apache2:rw
+    - ./config/wordpress/php:/etc/php:rw
+    - ./site:/var/www/html:rw
+    - ./config/wordpress/hosts:/etc/hosts:ro
+    - ./config/wordpress/nullmailer:/etc/nullmailer:rw
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+    - 81:80
+    - 444:443
+
