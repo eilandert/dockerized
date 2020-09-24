@@ -24,4 +24,3 @@ RUN     apt-get -y update && apt -y upgrade \
 CMD	["/bootstrap.sh"]
 EXPOSE	80 80
 EXPOSE  443 443
-VOLUME "/var/log/nginx"

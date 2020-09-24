@@ -18,11 +18,9 @@ RUN     apt-get -y update && apt -y upgrade \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-        && chmod +x /bootstrap.sh \
-        && echo "Europe/Amsterdam" > /etc/timezone
+        && chmod +x /bootstrap.sh 
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80
 EXPOSE  443 443
-VOLUME "/var/log/apache"
 
