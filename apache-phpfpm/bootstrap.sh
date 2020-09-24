@@ -38,7 +38,7 @@
 	rm /var/spool/nullmailer/trigger
 	/usr/bin/mkfifo /var/spool/nullmailer/trigger
 	/bin/chmod 0622 /var/spool/nullmailer/trigger
-	/bin/chown -R mail:mail /etc/nullmailer
+	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
         runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
         chmod 777 /dev/stdout
