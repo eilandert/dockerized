@@ -28,12 +28,18 @@
           cp -r /etc/nullmailer.orig/* /etc/nullmailer
         fi
 
+	#fix some weird issue with php-fpm
         mkdir -p /run/php
         chown www-data:www-data /run/php
         chmod 755 /run/php
+        service php7.4-fpm restart 1>/dev/null 2>&1
 
-        service php7.4-fpm restart
-        /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+	#fix some weird issue with nullmailer
+	rm /var/spool/nullmailer/trigger
+	/usr/bin/mkfifo /var/spool/nullmailer/trigger
+	/bin/chmod 0622 /var/spool/nullmailer/trigger
+	/bin/chown -R mail:mail /etc/nullmailer
+        runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
         chmod 777 /dev/stdout
 
