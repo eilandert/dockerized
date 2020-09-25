@@ -21,6 +21,9 @@
 
         chmod 777 /dev/stdout
 
+	nginx -t
+
 	echo "[NGINX-PROXY] starting NGINX, no more output here"
+
 
 exec nginx -g 'daemon off;'
