@@ -35,7 +35,7 @@
         service php7.4-fpm restart 1>/dev/null 2>&1
 
 	#fix some weird issue with nullmailer
-	rm /var/spool/nullmailer/trigger
+	rm -f /var/spool/nullmailer/trigger
 	/usr/bin/mkfifo /var/spool/nullmailer/trigger
 	/bin/chmod 0622 /var/spool/nullmailer/trigger
 	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
