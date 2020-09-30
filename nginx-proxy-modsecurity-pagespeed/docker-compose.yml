@@ -15,5 +15,7 @@ services:
     volumes:
     - ./config/nginx:/etc/nginx:rw
     - ./config/modsecurity/:/etc/modsecurity:rw
+    - ./letsencrypt/html:/var/www/html
+
 version: '3.7'
 
