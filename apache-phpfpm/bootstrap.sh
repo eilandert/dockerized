@@ -1,6 +1,6 @@
 #!/bin/sh
 
-        echo "[APACHE-WP] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
+        echo "[APACHE-PHPFM] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
 
         if [ -n "${TZ}" ]; then
          rm /etc/timezone /etc/localtime
@@ -12,19 +12,19 @@
         # If there are no configfiles, copy them
         FIRSTRUN="/etc/apache2/apache2.conf"
         if [ ! -f ${FIRSTRUN} ]; then
-          echo "[APACHE-WP] no configs found, populating default configs to /etc/apache2"
+          echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/apache2"
           cp -r /etc/apache2.orig/* /etc/apache2/
         fi
 
         FIRSTRUN="/etc/php/7.4/fpm/php-fpm.conf"
         if [ ! -f ${FIRSTRUN} ]; then
-          echo "[APACHE-WP] no configs found, populating default configs to /etc/php"
+          echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/php"
           cp -r /etc/php.orig/* /etc/php/
         fi
 
         FIRSTRUN="/etc/nullmailer/defaultdomain"
         if [ ! -f ${FIRSTRUN} ]; then
-          echo "[APACHE-WP] no configs found, populating default configs to /etc/nullmailer"
+          echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/nullmailer"
           cp -r /etc/nullmailer.orig/* /etc/nullmailer
         fi
 
