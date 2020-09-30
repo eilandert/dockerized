@@ -20,7 +20,7 @@ mount a common dir in both the letsencryptcontainer (/var/www/html) and a webser
 nginx:
 location ^~ /.well-known/acme-challenge/ {
       default_type "text/plain";
-      root         /home/magento/live;
+      root         /var/www/html;
       return 404;  
 }
 
