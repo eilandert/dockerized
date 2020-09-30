@@ -15,10 +15,13 @@ RUN     apt-get -y update && apt -y upgrade \
         && apt-get -y purge software-properties-common unattended-upgrades apt-utils \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
         && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 \
+        && chmod +x /bootstrap.sh \
+	&& a2enmod proxy_fcgi setenvif rewrite expires headers ssl socache_shmcb.load \
+	&& a2enconf php7.4-fpm \
+	&& a2dismod status \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-        && chmod +x /bootstrap.sh \
         && dpkg-statoverride --update --add root adm 0000 /usr/bin/su \
         && dpkg-statoverride --update --add root adm 0000 /bin/su 
 
