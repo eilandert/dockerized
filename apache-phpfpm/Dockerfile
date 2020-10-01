@@ -22,7 +22,7 @@ RUN     apt-get -y update && apt -y upgrade \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-        && dpkg-statoverride --update --add root adm 0000 /usr/bin/su \
+        && dpkg-statoverride --update --add root adm 0000 /usr/bin/sudo \
         && dpkg-statoverride --update --add root adm 0000 /bin/su 
 
 RUN     sh -x \
