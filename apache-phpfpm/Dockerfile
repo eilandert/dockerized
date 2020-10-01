@@ -15,6 +15,7 @@ RUN     apt-get -y update && apt -y upgrade \
         && apt-get -y purge software-properties-common unattended-upgrades apt-utils \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
         && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 \
+	&& cd /usr/lib/php && rm -rf 20131226 20151012 20160303 20170718 20180731 
         && chmod +x /bootstrap.sh \
 	&& a2enmod proxy_fcgi setenvif rewrite expires headers ssl socache_shmcb.load \
 	&& a2enconf php7.4-fpm \
