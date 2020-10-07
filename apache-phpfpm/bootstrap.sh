@@ -44,7 +44,6 @@
         runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
         if [ ${CACHE} = yes ]; then
-            service htcacheclean stop
             #fix some weird issue with apache2 mod_cache
             mkdir -p /var/cache/apache2/mod_cache_disk
             chown -R www-data:www-data /var/cache/apache2/mod_cache_disk
