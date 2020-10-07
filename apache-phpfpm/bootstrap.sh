@@ -37,17 +37,25 @@
         service php7.4-fpm restart 1>/dev/null 2>&1
 
 	#fix some weird issue with nullmailer
-	if [ ! -f /var/spool/nullmailer/trigger ]
-	  /usr/bin/mkfifo /var/spool/nullmailer/trigger
-	  /bin/chmod 0622 /var/spool/nullmailer/trigger
-	  /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
-        fi
+	rm -r /var/spool/nullmailer/trigger
+	/usr/bin/mkfifo /var/spool/nullmailer/trigger
+	/bin/chmod 0622 /var/spool/nullmailer/trigger
+	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
         runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
-	#fix some weird issue with apache2 mod_cache
-	if [ -x /var/cache/apache2/mod_cache_disk ]; then
-	  chown -R www-data:www-data /var/cache/apache2/mod_cache_disk
-	fi
+        if [ ${CACHE} = yes ]; then
+            service htcacheclean stop
+            #fix some weird issue with apache2 mod_cache
+            mkdir -p /var/cache/apache2/mod_cache_disk
+            chown -R www-data:www-data /var/cache/apache2/mod_cache_disk
+            a2enmod cache_disk 1>/dev/null 2>&1
+            htcacheclean -d${CACHE_INTERVAL} -l${CACHE_SIZE} -t -i -p /var/cache/apache2/mod_cache_disk
+        else
+          if [ -f /etc/apache2/mods-enabled/cache_disk.load ]; then
+            a2dismod cache_disk 1>/dev/null 2>&1
+            a2dismod cache 1>/dev/null 2>&1
+          fi
+        fi
 
         chmod 777 /dev/stdout
 

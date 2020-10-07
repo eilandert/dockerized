@@ -15,7 +15,9 @@ services:
     - ./config/wordpress/nullmailer:/etc/nullmailer:rw
     environment:
       - TZ=Europe/Amsterdam
+      - CACHE=yes
+      - CACHE_SIZE=1024M 
+      - CACHE_INTERVAL=120
     ports:
     - 81:80
     - 444:443
-
