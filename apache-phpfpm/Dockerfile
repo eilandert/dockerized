@@ -10,7 +10,7 @@ RUN     apt-get -y update && apt -y upgrade \
         && apt-get -y update && apt-get -y upgrade \
         && apt install -y --no-install-recommends apache2 apache2-utils \
 		php7.4 php7.4-igbinary php-imagick php7.4-redis php7.4-mysql \
-                php7.4-bcmath php7.4-cli php7.4-curl php7.4-dom php7.4-fpm php7.4-gd 
+                php7.4-bcmath php7.4-cli php7.4-curl php7.4-dom php7.4-fpm php7.4-gd \
 		php7.4-json php7.4-mbstring php7.4-mysql php7.4-opcache \
                 php7.4-readline php7.4-soap php7.4-xml php7.4-zip php7.4-tidy php-apcu php-pgsql \
         && apt install -y nullmailer mailutils preload \
