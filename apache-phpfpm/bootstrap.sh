@@ -43,5 +43,7 @@
 
         chmod 777 /dev/stdout
 
+	apachectl configtest
+
 exec /usr/sbin/apache2ctl -DFOREGROUND
 
