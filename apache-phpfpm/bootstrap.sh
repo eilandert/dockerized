@@ -41,6 +41,11 @@
 	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
         runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
+	#fix some weird issue with apache2 mod_cache
+	if [ -x /var/cache/apache2/mod_cache_disk ]; then
+	  chown -R www-data:www-data /var/cache/apache2/mod_cache_disk
+	fi
+
         chmod 777 /dev/stdout
 
 	apachectl configtest
