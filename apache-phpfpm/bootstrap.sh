@@ -29,16 +29,19 @@
         fi
 
 	#fix some weird issue with php-fpm
-        mkdir -p /run/php
-        chown www-data:www-data /run/php
-        chmod 755 /run/php
+	if [ ! -x /run/php ]; then
+          mkdir -p /run/php
+          chown www-data:www-data /run/php
+          chmod 755 /run/php
+        fi
         service php7.4-fpm restart 1>/dev/null 2>&1
 
 	#fix some weird issue with nullmailer
-	rm -f /var/spool/nullmailer/trigger
-	/usr/bin/mkfifo /var/spool/nullmailer/trigger
-	/bin/chmod 0622 /var/spool/nullmailer/trigger
-	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
+	if [ ! -f /var/spool/nullmailer/trigger ]
+	  /usr/bin/mkfifo /var/spool/nullmailer/trigger
+	  /bin/chmod 0622 /var/spool/nullmailer/trigger
+	  /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
+        fi
         runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
 	#fix some weird issue with apache2 mod_cache
