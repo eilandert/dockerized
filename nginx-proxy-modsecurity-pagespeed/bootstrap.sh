@@ -1,15 +1,15 @@
 #!/bin/sh
 
+        chmod 777 /dev/stdout
+
         echo "[NGINX-PROXY] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
 	echo "[NGINX-PROXY] The NGINX packages can be found on https://launchpad.net/~eilander/+archive/ubuntu/nginx"
-
 
         if [ -n "${TZ}" ]; then
          rm /etc/timezone /etc/localtime
          echo "${TZ}" > /etc/timezone
          ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
         fi
-
 
 	# If there are no configfiles, copy them
 	FIRSTRUN="/etc/nginx/nginx.conf"
@@ -19,11 +19,9 @@
           cp -r /etc/modsecurity.orig/* /etc/modsecurity/
         fi
 
-        chmod 777 /dev/stdout
-
+	nginx -V 2>&1 | grep -v configure
+	echo "Enabled modules:"
+	ls /etc/nginx/modules-enabled/
 	nginx -t
-
-	echo "[NGINX-PROXY] starting NGINX, no more output here"
-
 
 exec nginx -g 'daemon off;'
