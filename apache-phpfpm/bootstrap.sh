@@ -43,16 +43,15 @@
 	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
         runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
-        if [ ${CACHE} = yes ]; then
-            #fix some weird issue with apache2 mod_cache
-            mkdir -p /var/cache/apache2/mod_cache_disk
-            chown -R www-data:www-data /var/cache/apache2/mod_cache_disk
-            a2enmod cache_disk 1>/dev/null 2>&1
-            htcacheclean -d${CACHE_INTERVAL} -l${CACHE_SIZE} -t -i -p /var/cache/apache2/mod_cache_disk
+        if [ "${CACHE}" = "yes" ]; then
+          mkdir -p /var/cache/apache2/mod_cache_disk
+          chmod 755 /var/cache/apache2/mod_cache_disk
+          chown -R www-data:www-data /var/cache/apache2/mod_cache_disk
+          a2enmod cache_disk 1>/dev/null 2>&1
+          #htcacheclean -d${CACHE_INTERVAL} -l${CACHE_SIZE} -t -i -p /var/cache/apache2/mod_cache_disk
         else
           if [ -f /etc/apache2/mods-enabled/cache_disk.load ]; then
-            a2dismod cache_disk 1>/dev/null 2>&1
-            a2dismod cache 1>/dev/null 2>&1
+            a2dismod cache cache_disk 1>/dev/null 2>&1
           fi
         fi
 
