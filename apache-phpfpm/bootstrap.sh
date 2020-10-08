@@ -2,6 +2,8 @@
 
         echo "[APACHE-PHPFM] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
 
+        chmod 777 /dev/stdout
+
         if [ -n "${TZ}" ]; then
          rm /etc/timezone /etc/localtime
          echo "${TZ}" > /etc/timezone
@@ -55,8 +57,11 @@
           fi
         fi
 
-        chmod 777 /dev/stdout
-
+        php -v
+	apachectl -v
+	apachectl -M | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g'
+        echo ""
+	echo "Checking configs:"
 	apachectl configtest
 
 exec /usr/sbin/apache2ctl -DFOREGROUND
