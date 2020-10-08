@@ -64,5 +64,9 @@
 	echo "Checking configs:"
 	apachectl configtest
 
+	# Reload everyday to pick up new ssl certificates
+	while [ 1 ]; do sleep 1d; apachectl graceful; done &
+
+
 exec /usr/sbin/apache2ctl -DFOREGROUND
 
