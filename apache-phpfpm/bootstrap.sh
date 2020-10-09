@@ -64,9 +64,11 @@
 	echo "Checking configs:"
 	apachectl configtest
 	echo ""
-	echo "Automaticly reloading configs everyday to pick up new ssl certificates"
-	while [ 1 ]; do sleep 1d; apachectl graceful; done &
 
+	if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
+	  echo "Automaticly reloading configs everyday to pick up new ssl certificates"
+	  while [ 1 ]; do sleep 1d; apachectl graceful; done &
+	fi
 
 exec /usr/sbin/apache2ctl -DFOREGROUND
 
