@@ -24,7 +24,7 @@
 	ls /etc/nginx/modules-enabled/
 	nginx -t
 
-	# Reload everyday to pick up new ssl certificates
+        echo "Automaticly reloading configs everyday to pick up new ssl certificates"
         while [ 1 ]; do sleep 1d; nginx -s reload; done &
 
 exec nginx -g 'daemon off;'
