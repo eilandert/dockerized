@@ -57,7 +57,7 @@
           fi
         fi
 
-        php -v
+	php-fpm7.4 -v
 	apachectl -v
 	apachectl -M | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g'
         echo ""
