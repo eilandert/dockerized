@@ -63,6 +63,7 @@
         echo ""
 	echo "Checking configs:"
 	apachectl configtest
+	php-fpm7.4 -t
 	echo ""
 
 	if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
