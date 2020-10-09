@@ -20,8 +20,6 @@
         fi
 
 	nginx -V 2>&1 | grep -v configure
-	echo "Enabled modules:"
-	ls /etc/nginx/modules-enabled/
 	nginx -t
 
         echo "Automaticly reloading configs everyday to pick up new ssl certificates"
