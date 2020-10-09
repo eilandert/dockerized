@@ -59,12 +59,10 @@
 
 	php-fpm7.4 -v
 	apachectl -v
-	apachectl -M | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ */g'
-        echo ""
+#	apachectl -M | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ */g'
 	echo "Checking configs:"
 	apachectl configtest
 	php-fpm7.4 -t
-	echo ""
 
 	if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
 	  echo "Automaticly reloading configs everyday to pick up new ssl certificates"
