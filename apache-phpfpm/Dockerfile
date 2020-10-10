@@ -1,6 +1,6 @@
 FROM    ubuntu:latest
-LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV DEBIAN_FRONTEND="noninteractive"
+LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV	DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
@@ -13,13 +13,13 @@ RUN     apt-get -y update && apt -y upgrade \
                 php7.4-bcmath php7.4-cli php7.4-curl php7.4-dom php7.4-fpm php7.4-gd \
 		php7.4-json php7.4-mbstring php7.4-mysql php7.4-opcache \
                 php7.4-readline php7.4-soap php7.4-xml php7.4-zip php7.4-tidy php-apcu php-pgsql \
-        && apt install -y nullmailer mailutils preload \
+        && apt install -y nullmailer mailutils \
         && apt-get -y purge software-properties-common unattended-upgrades apt-utils \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
         && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 \
 	&& cd /usr/lib/php && rm -rf 20131226 20151012 20160303 20170718 20180731 \
         && chmod +x /bootstrap.sh \
-	&& a2enmod proxy_fcgi setenvif rewrite expires headers ssl socache_shmcb.load \
+	&& a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
 	&& a2enconf php7.4-fpm \
 	&& a2dismod status \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
