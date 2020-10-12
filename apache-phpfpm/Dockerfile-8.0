@@ -4,17 +4,20 @@ ENV	DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get -y update && apt -y upgrade \ 
+RUN     apt-get -y update && apt -y upgrade \
         && apt-get install -y --no-install-recommends ca-certificates software-properties-common \
         && add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:ondrej/php \
         && apt-get -y update && apt-get -y upgrade \
-        && apt install -y --no-install-recommends apache2 apache2-utils \
+        && apt install -y nullmailer mailutils \
+        && apt install -y --no-install-recommends apache2 apache2-utils
+
+RUN     apt install -y --no-install-recommends \
 		php8.0 php8.0-igbinary php-imagick php8.0-redis php8.0-mysql \
                 php8.0-bcmath php8.0-cli php8.0-curl php8.0-dom php8.0-fpm php8.0-gd \
 		php8.0-json php8.0-mbstring php8.0-mysql php8.0-opcache \
-                php8.0-readline php8.0-soap php8.0-xml php8.0-zip php8.0-tidy php-apcu php-pgsql \
-        && apt install -y nullmailer mailutils \
-        && apt-get -y purge software-properties-common unattended-upgrades apt-utils \
+                php8.0-readline php8.0-soap php8.0-xml php8.0-zip php8.0-tidy php-apcu php-pgsql
+
+RUN	apt-get -y purge software-properties-common unattended-upgrades apt-utils \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
         && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 /etc/php/7.4 \
 	&& cd /usr/lib/php && rm -rf 20131226 20151012 20160303 20170718 20180731 20190902 \
