@@ -14,7 +14,7 @@ RUN     apt-get -y update && apt -y upgrade \
 RUN     apt install -y --no-install-recommends \
 		php8.0 php8.0-igbinary php-imagick php8.0-redis php8.0-mysql \
                 php8.0-bcmath php8.0-cli php8.0-curl php8.0-dom php8.0-fpm php8.0-gd \
-		php8.0-json php8.0-mbstring php8.0-mysql php8.0-opcache \
+		php8.0-mbstring php8.0-mysql php8.0-opcache \
                 php8.0-readline php8.0-soap php8.0-xml php8.0-zip php8.0-tidy php-apcu php-pgsql
 
 RUN	apt-get -y purge software-properties-common unattended-upgrades apt-utils \
