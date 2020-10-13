@@ -1,5 +1,5 @@
 
-Apache + PHP-FPM (packages from https://launchpad.net/~ondrej)
+Apache + PHP-FPM (packages from https://launchpad.net/~ondrej/+archive/ubuntu/php )
 
 A docker I created for serving wordpress behind a proxy, but I guess you could do anything with it. 
 
@@ -12,8 +12,13 @@ Bind /etc/php, /etc/apache2 and /etc/nullmailer to a local dir, it will be popul
 I am open for suggestions.
 
 Tags:
-eilandert/apache-phpfpm:7.2
-eilandert/apache-phpfpm:7.4
-eilandert/apache-phpfpm:8.0
 
 eilandert/apache-phpfpm:latest -> 7.4
+
+eilandert/apache-phpfpm:7.2
+
+eilandert/apache-phpfpm:7.4
+
+eilandert/apache-phpfpm:8.0
+
+eilandert/apache-phpfpm:5.6

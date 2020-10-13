@@ -5,15 +5,14 @@ ENV     PHPVERSION=7.4
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get -y update && apt -y upgrade \
-        && apt-get install -y --no-install-recommends ca-certificates software-properties-common \
-        && add-apt-repository -y ppa:ondrej/apache2 \
+RUN     add-apt-repository -y ppa:ondrej/apache2 \
 	&& add-apt-repository -y ppa:ondrej/php \
         && apt-get -y update && apt-get -y upgrade \
         && apt install -y nullmailer mailutils \
         && apt install -y --no-install-recommends \
 		apache2 \
 		apache2-utils \
+		libapache2-mod-php7.4 \
                 php7.4 \
                 php7.4-fpm \
                 php7.4-bcmath \
@@ -27,6 +26,7 @@ RUN     apt-get -y update && apt -y upgrade \
                 php7.4-mysql \
                 php7.4-opcache \
                 php7.4-readline \
+		php7.2-recode \
                 php7.4-redis \
                 php7.4-soap \
                 php7.4-tidy \

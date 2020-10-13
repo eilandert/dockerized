@@ -5,12 +5,14 @@ ENV	PHPVERSION=7.2
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:ondrej/php \
+RUN     add-apt-repository -y ppa:ondrej/apache2 \
+	&& add-apt-repository -y ppa:ondrej/php \
         && apt-get -y update && apt-get -y upgrade \
         && apt install -y nullmailer mailutils \
 	&& apt install -y --no-install-recommends \
                 apache2 \
                 apache2-utils \
+		libapache2-mod-php7.2 \
                 php7.2 \
                 php7.2-fpm \
                 php7.2-bcmath \
@@ -24,6 +26,7 @@ RUN     add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:on
                 php7.2-mysql \
                 php7.2-opcache \
                 php7.2-readline \
+		php7.2-recode \
                 php7.2-redis \
                 php7.2-soap \
                 php7.2-tidy \

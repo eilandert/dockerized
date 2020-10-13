@@ -5,15 +5,14 @@ ENV     PHPVERSION=8.0
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get -y update && apt -y upgrade \
-        && apt-get install -y --no-install-recommends ca-certificates software-properties-common \
-        && add-apt-repository -y ppa:ondrej/apache2 \
+RUN     add-apt-repository -y ppa:ondrej/apache2 \
 	&& add-apt-repository -y ppa:ondrej/php \
         && apt-get -y update && apt-get -y upgrade \
         && apt install -y nullmailer mailutils \
         && apt install -y --no-install-recommends \
 		apache2 \ 
 		apache2-utils \
+		libapache2-mod-php8.0 \
 		php8.0 \
 		php8.0-fpm \
 		php8.0-bcmath \
