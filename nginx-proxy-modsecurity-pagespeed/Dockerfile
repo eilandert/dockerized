@@ -1,12 +1,10 @@
-FROM	ubuntu:latest
-LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV DEBIAN_FRONTEND="noninteractive"
+FROM	eilandert/ubuntu-base:latest
+LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV	DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get -y update && apt -y upgrade \ 
-	&& apt-get install -y --no-install-recommends ca-certificates software-properties-common \
-	&& add-apt-repository -y ppa:eilander/nginx \
+RUN     add-apt-repository -y ppa:eilander/nginx \
 	&& apt-get update && apt-get -y upgrade \
 	&& apt-get -y --no-install-recommends install \
 		nginx-full \ 
@@ -21,16 +19,7 @@ RUN     apt-get -y update && apt -y upgrade \
 	&& apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
 	&& mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx \
 	&& mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity \
-	&& chmod +x /bootstrap.sh \
-        && dpkg-statoverride --update --add root adm 0000 /usr/bin/sudo \
-        && dpkg-statoverride --update --add root adm 0000 /bin/su
-
-RUN     sh -x \
-        && for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
-          if [ $user != "root" ]; then \
-            usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
-          fi ;\
-        done
+	&& chmod +x /bootstrap.sh 
 
 CMD	["/bootstrap.sh"]
 EXPOSE	80 80

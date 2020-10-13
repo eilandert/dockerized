@@ -1,26 +1,43 @@
-FROM    ubuntu:latest
-LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV	DEBIAN_FRONTEND="noninteractive"
+FROM    eilandert/ubuntu-base:latest
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     PHPVERSION=7.4
 
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN     apt-get -y update && apt -y upgrade \
         && apt-get install -y --no-install-recommends ca-certificates software-properties-common \
-        && add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:ondrej/php \
+        && add-apt-repository -y ppa:ondrej/apache2 \
+	&& add-apt-repository -y ppa:ondrej/php \
         && apt-get -y update && apt-get -y upgrade \
         && apt install -y nullmailer mailutils \
-        && apt install -y --no-install-recommends apache2 apache2-utils
-
-RUN     apt install -y --no-install-recommends \
-		php7.4 php7.4-igbinary php-imagick php7.4-redis php7.4-mysql \
-                php7.4-bcmath php7.4-cli php7.4-curl php7.4-dom php7.4-fpm php7.4-gd \
-		php7.4-json php7.4-mbstring php7.4-mysql php7.4-opcache \
-                php7.4-readline php7.4-soap php7.4-xml php7.4-zip php7.4-tidy php-apcu php-pgsql
-
-RUN	apt-get -y purge software-properties-common unattended-upgrades apt-utils \
+        && apt install -y --no-install-recommends \
+		apache2 \
+		apache2-utils \
+                php7.4 \
+                php7.4-fpm \
+                php7.4-bcmath \
+                php7.4-cli \
+                php7.4-curl \
+                php7.4-dom \
+                php7.4-gd \
+                php7.4-igbinary \
+		php7.4-json \
+                php7.4-mbstring \
+                php7.4-mysql \
+                php7.4-opcache \
+                php7.4-readline \
+                php7.4-redis \
+                php7.4-soap \
+                php7.4-tidy \
+                php7.4-xml \
+                php7.4-zip \
+                php-apcu \
+                php-imagick \
+                php-pgsql \
+	&& apt-get -y purge software-properties-common unattended-upgrades apt-utils \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
-        && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 /etc/php/8.0 \
+        && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 /etc/php/7.4 \
 	&& cd /usr/lib/php && rm -rf 20131226 20151012 20160303 20170718 20180731 20200930 \
         && chmod +x /bootstrap.sh \
 	&& a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
@@ -28,16 +45,7 @@ RUN	apt-get -y purge software-properties-common unattended-upgrades apt-utils \
 	&& a2dismod status \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
-        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-        && dpkg-statoverride --update --add root adm 0000 /usr/bin/sudo \
-        && dpkg-statoverride --update --add root adm 0000 /bin/su 
-
-RUN     sh -x \
-        && for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
-          if [ $user != "root" ]; then \
-            usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
-          fi ;\
-        done
+        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80
