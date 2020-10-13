@@ -17,7 +17,7 @@
           cp -r /etc/apache2.orig/* /etc/apache2/
         fi
 
-        FIRSTRUN="/etc/php/7.4/fpm/php-fpm.conf"
+        FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
         if [ ! -f ${FIRSTRUN} ]; then
           echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/php"
           cp -r /etc/php.orig/* /etc/php/
@@ -35,7 +35,7 @@
           chown www-data:www-data /run/php
           chmod 755 /run/php
         fi
-        service php7.4-fpm restart 1>/dev/null 2>&1
+        service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
 
 	#fix some weird issue with nullmailer
 	rm -f /var/spool/nullmailer/trigger
@@ -56,8 +56,8 @@
           fi
         fi
 
-        php-fpm7.4 -t
-	php-fpm7.4 -v
+        php-fpm${PHPVERSION} -t
+	php-fpm${PHPVERSION} -v
 	apachectl -v
 	echo "Checking configs:"
 	apachectl configtest
