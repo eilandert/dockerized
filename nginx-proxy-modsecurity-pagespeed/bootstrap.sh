@@ -22,7 +22,7 @@
 	nginx -V 2>&1 | grep -v configure
 	nginx -t
 
-        echo "Automaticly reloading configs everyday to pick up new ssl certificates"
+        #echo "Automaticly reloading configs everyday to pick up new ssl certificates"
         while [ 1 ]; do sleep 1d; nginx -s reload; done &
 
 exec nginx -g 'daemon off;'
