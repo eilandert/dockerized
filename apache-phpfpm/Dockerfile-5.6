@@ -1,0 +1,52 @@
+FROM    eilandert/ubuntu-base:latest
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+ENV	PHPVERSION=5.6
+
+COPY    bootstrap.sh /bootstrap.sh
+
+RUN     add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:ondrej/php \
+        && apt-get -y update && apt-get -y upgrade \
+        && apt install -y nullmailer mailutils \
+	&& apt install -y --no-install-recommends \
+                apache2 \
+                apache2-utils \
+                php5.6 \
+                php5.6-fpm \
+                php5.6-bcmath \
+                php5.6-cli \
+                php5.6-curl \
+                php5.6-dom \
+                php5.6-gd \
+                php5.6-igbinary \
+                php5.6-json \
+                php5.6-mbstring \
+		php5.6-mcrypt \
+                php5.6-mysql \
+                php5.6-opcache \
+                php5.6-readline \
+		php5.6-recode \
+                php5.6-redis \
+                php5.6-soap \
+                php5.6-tidy \
+                php5.6-xml \
+                php5.6-zip \
+                php-apcu \
+                php-imagick \
+                php-pgsql \
+	&& apt-get -y purge software-properties-common unattended-upgrades apt-utils \
+        && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
+        && rm -rf /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 /etc/php/7.4 /etc/php8.0 \
+	&& cd /usr/lib/php && rm -rf 20151012 20160303 20170718 20180731 20190902 20200930 \
+        && chmod +x /bootstrap.sh \
+	&& a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
+	&& a2enconf php5.6-fpm \
+	&& a2dismod status \
+        && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
+        && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
+        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer
+
+CMD     ["/bootstrap.sh"]
+EXPOSE  80 80
+EXPOSE  443 443
+
