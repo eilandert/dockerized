@@ -4,7 +4,8 @@ ENV	DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     add-apt-repository -y ppa:eilander/nginx \
+RUN     apt-get install -y --no-install-recommends software-properties-common \
+	&& add-apt-repository -y ppa:eilander/nginx \
 	&& apt-get update && apt-get -y upgrade \
 	&& apt-get -y --no-install-recommends install \
 		nginx-full \ 
