@@ -6,11 +6,11 @@ ENV     MODE=fpm
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     add-apt-repository -y ppa:ondrej/apache2 \
-	&& add-apt-repository -y ppa:ondrej/php \
+RUN     apt-get install -y --no-install-recommends software-properties-common \
+        && add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:ondrej/php \
         && apt-get -y update && apt-get -y upgrade \
-        && apt install -y nullmailer mailutils \
-	&& apt install -y --no-install-recommends \
+        && apt-get install -y nullmailer mailutils \
+        && apt-get install -y --no-install-recommends \
                 apache2 \
                 apache2-utils \
 		libapache2-mod-php7.2 \
