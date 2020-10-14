@@ -19,6 +19,7 @@ ENVIRONMENT:
 * use MODE=mod for using mod_php instead of php-fpm. Apache2 will be set to mpm_prefork.
 * use MODE=multi to enable running multiple php-fpm versions. You'll need to pull the multi-tag docker
 * in multimode set PHP56=yes PHP72=yes PHP74=yes PHP80=yes to enable specific versions.
+* in multimode you have to create the handler per vhost manually, examples in apache2/conf-available/php*-fpm.conf
 
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
 

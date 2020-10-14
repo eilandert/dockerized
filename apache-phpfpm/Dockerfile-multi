@@ -96,7 +96,7 @@ RUN     apt-get install -y --no-install-recommends software-properties-common \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
         && chmod +x /bootstrap.sh \
 	&& a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
-	&& a2enconf php7.4 \
+#	&& a2enconf php7.4 \
 	&& a2dismod status \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
