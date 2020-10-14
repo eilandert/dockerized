@@ -1,12 +1,12 @@
 # Apache + PHP-FPM 
 
-###### An Ubuntu-latest docker with packages from Ondrej ([Apache](https://launchpad.net/~ondrej/+archive/ubuntu/apache2) and [PHP](https://launchpad.net/~ondrej/+archive/ubuntu/php))
+##### An Ubuntu-latest docker with packages from Ondrej ([Apache](https://launchpad.net/~ondrej/+archive/ubuntu/apache2) and [PHP](https://launchpad.net/~ondrej/+archive/ubuntu/php))
 
 
-A docker I created for serving wordpress behind a reverse proxy, but all functionality is there<BR>
+A docker I created for serving wordpress behind a reverse nginx proxy, but all functionality is there<BR>
 
 
-###### Features:
+##### Features:
 
 * Nullmailer for easy mailing from within e.g. wordpress
 * Most php-modules are included.
@@ -20,7 +20,7 @@ A docker I created for serving wordpress behind a reverse proxy, but all functio
 
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
 
-###### Tags:
+##### Tags:
 
 eilandert/apache-phpfpm:5.6<BR>
 eilandert/apache-phpfpm:7.2<BR>
@@ -29,6 +29,6 @@ eilandert/apache-phpfpm:8.0<BR>
 
 eilandert/apache-phpfpm:latest defaults to 7.4 at this time until my wordpress environment is 8.0 ready.
 
-###### TODO
+##### TODO
 
 I am open for suggestions..
