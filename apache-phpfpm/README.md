@@ -9,7 +9,10 @@ Both php-mysql and php-pgsql and most php-modules are included.
 
 Bind /etc/php, /etc/apache2 and /etc/nullmailer to a local dir, it will be populated on first run. 
 
-If you want to run PHP as apache mod_php, you can set MODE=mod in environment, it will disable php-fpm and enable mod_php. Apache will be set in prefork instead of event
+If mod_ssl is loaded the configs will reloaded every day to pick up new (letsencrypt) certificates.
+
+
+If you insist to run PHP as apache module (mod_php), you can set MODE=mod in environment, it will disable php-fpm and enable mod_php. Apache will be set in prefork instead of event
 
 See docker-compose.yml on my github for examples.
 
@@ -27,5 +30,5 @@ eilandert/apache-phpfpm:8.0
 eilandert/apache-phpfpm:5.6
 
 
-I am open for suggestions.
+I am open for suggestions. 
 
