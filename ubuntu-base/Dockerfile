@@ -18,13 +18,5 @@ RUN     sh -x \
           fi ;\
         done
 
-
-#
-#	Don't forget to run this in the following docker:
-#
-#       apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
-#
-
-
 CMD     ["/bootstrap.sh"]
 
