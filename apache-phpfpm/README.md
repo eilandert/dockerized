@@ -3,7 +3,7 @@
 ##### An Ubuntu-latest docker with packages from Ondrej ([Apache](https://launchpad.net/~ondrej/+archive/ubuntu/apache2) and [PHP](https://launchpad.net/~ondrej/+archive/ubuntu/php))
 
 
-A docker I created for serving wordpress behind a reverse nginx proxy, but all functionality is there<BR>
+A docker I created for serving wordpress, opencart and magento behind a reverse nginx proxy, but all functionality is there so you should be able to use it any way you want<BR>
 
 
 ##### Features:
