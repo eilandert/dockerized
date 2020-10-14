@@ -22,8 +22,8 @@ services:
 #      - MODE=multi
 #     in MULTI MODE:
 #     - PHP56=yes
-#     - PHP72=YES
-#     - PHP74=YES
+#     - PHP72=yes
+#     - PHP74=yes
 #     - PHP80=yes
 
 #      Already pre-enabled mods: proxy_fcgi setenvif rewrite expires headers remoteip
@@ -32,7 +32,6 @@ services:
 #      - A2DISMOD=""
 #      - A2ENCONF=""
 #      - A2DISCONF=""
-
 
     ports:
     - 81:80
