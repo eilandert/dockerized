@@ -17,7 +17,7 @@ ENVIRONMENT:
 * variables A2ENMOD A2DISMOD A2ENCONF A2DISCONF (changes are persistent if you mount /etc/apache2)
 * use MODE=mod for using mod_php instead of php-fpm. Apache2 will be set to mpm_prefork.
 * use MODE=multi to enable running multiple PHP versions. Need to pull the multi-tag docker
-* in multimode set environment PHP56=yes PHP72=yes PHP74=yes PHP80=yes to enable specific versions.
+* in multimode set PHP56=yes PHP72=yes PHP74=yes PHP80=yes to enable specific versions.
 
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
 
