@@ -27,7 +27,7 @@ eilandert/apache-phpfpm:7.2<BR>
 eilandert/apache-phpfpm:7.4<BR>
 eilandert/apache-phpfpm:8.0<BR>
 
-eilandert/apache-phpfpm:latest defaults to 7.4 at this time until my wordpress environment is 8.0 ready.
+eilandert/apache-phpfpm:latest defaults to 7.4 at this time
 
 ##### TODO
 
