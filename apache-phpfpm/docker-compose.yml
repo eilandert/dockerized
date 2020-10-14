@@ -14,8 +14,15 @@ services:
     - ./config/wordpress/nullmailer:/etc/nullmailer:rw
     environment:
       - TZ=Europe/Amsterdam
-      - CACHE=yes
-      - MODE=fpm
+      - CACHE=no
+#     use MODE=mod for mod_php/mpm_prefork instead of php-fpm/mpm_event (default: fpm)
+#      - MODE=mod
+#      Already pre-enabled mods: proxy_fcgi setenvif rewrite expires headers remoteip
+#      When /etc/apache2 is mounted these changes will be persistent
+#      - A2ENMOD=""
+#      - A2DISMOD=""
+#      - A2ENCONF=""
+#      - A2DISCONF=""
     ports:
     - 81:80
     - 444:443

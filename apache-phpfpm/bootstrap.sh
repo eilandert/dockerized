@@ -1,6 +1,6 @@
 #!/bin/sh
 
-        echo "[APACHE-PHPFM] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
+        echo "[APACHE-PHPFM-${PHPVERSION}] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
 
         chmod 777 /dev/stdout
 
@@ -29,6 +29,14 @@
           cp -r /etc/nullmailer.orig/* /etc/nullmailer
         fi
 
+        #fix some weird issue with nullmailer
+        rm -f /var/spool/nullmailer/trigger
+        /usr/bin/mkfifo /var/spool/nullmailer/trigger
+        /bin/chmod 0622 /var/spool/nullmailer/trigger
+        /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
+        runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+
+
 	if [ "${MODE}" = "fpm" ]; then
     	  #fix some weird issue with php-fpm
 	  if [ ! -x /run/php ]; then
@@ -54,12 +62,21 @@
 	  php${PHPVERSION} -v
 	fi
 
-	#fix some weird issue with nullmailer
-	rm -f /var/spool/nullmailer/trigger
-	/usr/bin/mkfifo /var/spool/nullmailer/trigger
-	/bin/chmod 0622 /var/spool/nullmailer/trigger
-	/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer 
-        runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+	if [ -n "${A2ENMOD}" ]; then
+	  a2enmod ${A2ENMOD} 1>/dev/null 2>&1
+	fi
+
+        if [ -n "${A2DISMOD}" ]; then
+	  a2dismod ${A2DISMOD} 1>/dev/null 2>&1
+        fi
+
+        if [ -n "${A2ENCONF}" ]; then
+	  a2enconf ${A2ENCONF} 1>/dev/null 2>&1
+        fi
+
+        if [ -n "${A2DISCONF}" ]; then
+	  a2disconf ${A2DISCONF} 1>/dev/null 2>&1
+        fi
 
         if [ "${CACHE}" = "yes" ]; then
           mkdir -p /var/cache/apache2/mod_cache_disk
