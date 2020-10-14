@@ -2,6 +2,7 @@ FROM    eilandert/ubuntu-base:latest
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	PHPVERSION=7.2
+ENV     MODE=fpm
 
 COPY    bootstrap.sh /bootstrap.sh
 

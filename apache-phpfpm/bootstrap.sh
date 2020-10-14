@@ -29,13 +29,30 @@
           cp -r /etc/nullmailer.orig/* /etc/nullmailer
         fi
 
-	#fix some weird issue with php-fpm
-	if [ ! -x /run/php ]; then
-          mkdir -p /run/php
-          chown www-data:www-data /run/php
-          chmod 755 /run/php
-        fi
-        service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
+	if [ "${MODE}" = "fpm" ]; then
+    	  #fix some weird issue with php-fpm
+	  if [ ! -x /run/php ]; then
+            mkdir -p /run/php
+            chown www-data:www-data /run/php
+            chmod 755 /run/php
+          fi
+	  a2dismod php${PHPVERSION} 1>/dev/null 2>&1
+	  a2enconf php${PHPVERSION}-fpm 1>/dev/null 2>&1
+	  a2dismod mpm_prefork 1>/dev/null 2>&1
+	  a2enmod mpm_event 1>/dev/null 2>&1
+          service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
+	  php-fpm${PHPVERSION} -t
+	  php-fpm${PHPVERSION} -v
+	fi
+
+        if [ "${MODE}" = "mod" ]; then
+          service php${PHPVERSION}-fpm stop 1>/dev/null 2>&1
+	  a2enmod php${PHPVERSION} 1>/dev/null 2>&1
+	  a2disconf php${PHPVERSION}-fpm 1>/dev/null 2>&1
+	  a2dismod mpm_event 1>/dev/null 2>&1
+	  a2enmod mpm_prefork 1>/dev/null 2>&1
+	  php${PHPVERSION} -v
+	fi
 
 	#fix some weird issue with nullmailer
 	rm -f /var/spool/nullmailer/trigger
@@ -56,8 +73,6 @@
           fi
         fi
 
-        php-fpm${PHPVERSION} -t
-	php-fpm${PHPVERSION} -v
 	apachectl -v
 	echo "Checking configs:"
 	apachectl configtest

@@ -15,6 +15,7 @@ services:
     environment:
       - TZ=Europe/Amsterdam
       - CACHE=yes
+      - MODE=fpm
     ports:
     - 81:80
     - 444:443
