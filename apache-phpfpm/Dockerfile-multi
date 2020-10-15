@@ -7,8 +7,8 @@ ENV	TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get install -y --no-install-recommends software-properties-common \
-	&& add-apt-repository -y ppa:ondrej/apache2 && add-apt-repository -y ppa:ondrej/php \
+RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu focal main" > /etc/apt/sources.list.d/ondrej-ubuntu-apache2-focal.list \
+        && echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu focal main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
         && apt-get -y update && apt-get -y upgrade \
         && apt-get install -y nullmailer mailutils \
 	&& apt-get install -y --no-install-recommends \
@@ -92,7 +92,6 @@ RUN     apt-get install -y --no-install-recommends software-properties-common \
                 php8.0-tidy \
                 php8.0-xml \
                 php8.0-zip \
-	&& apt-get -y purge software-properties-common unattended-upgrades apt-utils \
         && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
         && chmod +x /bootstrap.sh \
 	&& a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
