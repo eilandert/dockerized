@@ -24,12 +24,13 @@ ENVIRONMENT:
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
 
 TAGS:
-eilandert/apache-phpfpm:latest defaults to 7.4 at this time<BR>
-eilandert/apache-phpfpm:multi for all php versions<BR>
-eilandert/apache-phpfpm:5.6<BR>
-eilandert/apache-phpfpm:7.2<BR>
-eilandert/apache-phpfpm:7.4<BR>
-eilandert/apache-phpfpm:8.0<BR>
+
+* eilandert/apache-phpfpm:latest defaults to 7.4 at this time<BR>
+* eilandert/apache-phpfpm:multi for all php versions<BR>
+* eilandert/apache-phpfpm:5.6<BR>
+* eilandert/apache-phpfpm:7.2<BR>
+* eilandert/apache-phpfpm:7.4<BR>
+* eilandert/apache-phpfpm:8.0<BR>
 
 TODO
 

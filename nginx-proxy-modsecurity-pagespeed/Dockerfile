@@ -4,8 +4,7 @@ ENV	DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get install -y --no-install-recommends software-properties-common \
-	&& add-apt-repository -y ppa:eilander/nginx \
+RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu focal main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-focal.list \
 	&& apt-get update && apt-get -y upgrade \
 	&& apt-get -y --no-install-recommends install \
 		nginx-full \ 
@@ -16,7 +15,6 @@ RUN     apt-get install -y --no-install-recommends software-properties-common \
 		libnginx-mod-brotli \
 		libnginx-mod-ssl-ct \
                 modsecurity-crs \
-        && apt-get -y purge software-properties-common unattended-upgrades \
 	&& apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
 	&& mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx \
 	&& mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity \
