@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:latest
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
