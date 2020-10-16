@@ -3,8 +3,7 @@ LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
 
-RUN	apt -y update \
-	&& apt -y upgrade \
+RUN	apt-get -y update && apt-get -y upgrade \
 	&& apt-get --no-install-recommends -y install apt-utils \
 	&& DEBIAN_FRONTEND="noninteractive" apt-get --no-install-recommends -y install \
 		git \

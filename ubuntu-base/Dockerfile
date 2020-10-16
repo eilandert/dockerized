@@ -4,7 +4,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get -y update && apt -y upgrade \
+RUN     apt-get -y update && apt-get -y upgrade \
         && apt-get install -y --no-install-recommends ca-certificates apt-utils \
         && dpkg-statoverride --update --add root adm 0000 /usr/bin/sudo \
         && dpkg-statoverride --update --add root adm 0000 /bin/su \
