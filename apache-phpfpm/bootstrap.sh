@@ -162,5 +162,9 @@
 	  while [ 1 ]; do sleep 1d; apachectl graceful; done &
 	fi
 
+	if [ -f /run/apache2/apache2.pid ]; then
+	  rm /run/apache2/apache2.pid
+	fi
+
 exec /usr/sbin/apache2ctl -DFOREGROUND
 
