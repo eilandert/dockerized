@@ -9,15 +9,52 @@ https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed
 Features:
  * Latest Mainline. (and not stable).
  * Removed ubuntu branding in server signature
- * Build with AIO support (better performance for eg ZFS)
- * Added configuration for SSL Early Data
- * Added HTTP2 HPACK Encoding Support. (cloudflare patch)
- * Added patch to reduce Time To First Byte in TLS Handshake (cloudflare patch)
+ * Compiled with -O3 -flto to squeeze some extra % performance.
+ * Build with file AIO support (better performance for eg ZFS)
+ * Linked all builds against OpenSSL 1.1.1g so there is ALPN and TLS1.3 support
+ * Added /etc/nginx/snippets/ssl.conf.example, should give A+ on SSLLABS
 
-ander other stuff
+Patches:
+ * Added HTTP2 HPACK Encoding Support. (Cloudflare patch)
+ * Added Optimizing TLS over TCP to reduce latency (Cloudflare patch)
+   (add ssl_dyn_rec_enable on; to the http{} block)
 
-Extra packages:
- * Added gitversion of mod-security v3.0.4
- * Added gitversion of the libmodsecurity3 connector
- * Added gitversion of google pagespeed module, https://www.modpagespeed.com/doc/
- * Added gitversion of ngx_brotli
+Extra NGINX packages build from git: (besides the packages included with ubuntu)
+ * libnginx-mod-brotli - NGINX module for Brotli compression
+         (https://github.com/google/ngx_brotli)
+ * libnginx-mod-naxsi - NAXSI is an open-source WAF for NGINX
+         (https://github.com/nbs-system/naxsi)
+ * libnginx-mod-security-headers NGINX Module for sending security headers
+         (https://github.com/GetPageSpeed/ngx_security_headers)
+ * libnginx-mod-ssl-ct Certificate Transparency module for nginx.
+         (https://github.com/grahamedgecombe/nginx-ct)
+ * libnginx-mod-modsecurity connector for libmodsecurity3
+         (https://github.com/SpiderLabs/ModSecurity-nginx)
+* libnginx-mod-pagespeed ngx_pagespeed speeds up your site
+         (https://www.modpagespeed.com/doc/)
+
+Standalone Libraries:
+ * libmodsecurity3 - ModSecurity v3 library component
+ * modsecurity-crs - OWASP ModSecurity Core Rule Set https://coreruleset.org
+
+Including default Ubuntu packages:
+* libnginx-mod-http-auth-pam PAM authentication module for Nginx
+* libnginx-mod-http-cache-purge Purge content from Nginx caches
+* libnginx-mod-http-dav-ext WebDAV missing commands support for Nginx
+* libnginx-mod-http-echo Bring echo and more shell style goodies to Nginx
+* libnginx-mod-http-fancyindex Fancy indexes module for the Nginx
+* libnginx-mod-http-geoip GeoIP HTTP module for Nginx
+* libnginx-mod-http-geoip2 GeoIP HTTP module for Nginx
+* libnginx-mod-http-headers-more-filter Set and clear input and output headers
+* libnginx-mod-http-image-filter HTTP image filter module for Nginx
+* libnginx-mod-http-lua Lua module for Nginx
+* libnginx-mod-http-ndk Nginx Development Kit module
+* libnginx-mod-http-perl Perl module for Nginx
+* libnginx-mod-http-subs-filter Substitution filter module for Nginx
+* libnginx-mod-http-uploadprogress Upload progress system for Nginx
+* libnginx-mod-http-upstream-fair Nginx Upstream Fair Proxy Load Balancer
+* libnginx-mod-http-xslt-filter XSLT Transformation module for Nginx
+* libnginx-mod-mail Mail module for Nginx
+* libnginx-mod-nchan Fast, flexible pub/sub server for Nginx
+* libnginx-mod-rtmp RTMP support for Nginx
+* libnginx-mod-stream Stream module for Nginx
