@@ -23,6 +23,7 @@ RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu f
 		php8.0-dom \
 		php8.0-gd \
 		php8.0-igbinary \
+                php8.0-memcached \
 		php8.0-mbstring \
 		php8.0-mysql \
 		php8.0-opcache \
