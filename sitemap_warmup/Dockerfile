@@ -1,4 +1,4 @@
-FROM    ubuntu:devel
+FROM    ubuntu:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY main.py /root/warmup_sitemaps/main.py
