@@ -1,0 +1,8 @@
+aiodns
+aiohttp
+lxml
+requests
+numpy
+pandas
+tabulate
+pytest
