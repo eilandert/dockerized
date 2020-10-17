@@ -1,4 +1,4 @@
-Stolen from https://github.com/ernestova/sitemap_warmup to rebuild with modern python and tinker around
+Stolen from https://github.com/ernestova/sitemap_warmup to rebuild with modern libs/python and maybe make some improvements
 
 # Sitemap WarmUp
 Sitemap Validation, Checker and CDN Warmup
