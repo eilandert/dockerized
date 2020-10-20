@@ -1,20 +1,15 @@
-FROM    eilandert/ubuntu-base:rolling
+FROM    eilandert/ubuntu-base
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	PHPVERSION=5.6
-ENV	MODE=fpm
 ENV	TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu focal main" > /etc/apt/sources.list.d/ondrej-ubuntu-apache2-focal.list \
-	&& echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu focal main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
+RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu focal main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
         && apt-get -y update && apt-get -y upgrade \
         && apt-get install -y nullmailer mailutils \
 	&& apt-get install -y --no-install-recommends \
-                apache2 \
-                apache2-utils \
-		libapache2-mod-php5.6 \
                 php5.6 \
                 php5.6-fpm \
                 php5.6-bcmath \
@@ -43,14 +38,10 @@ RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu f
         && rm -rf /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 /etc/php/7.4 /etc/php8.0 \
 	&& cd /usr/lib/php && rm -rf 20151012 20160303 20170718 20180731 20190902 20200930 \
         && chmod +x /bootstrap.sh \
-	&& a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
-	&& a2enconf php5.6-fpm \
-	&& a2dismod status \
-        && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer
 
 CMD     ["/bootstrap.sh"]
-EXPOSE  80 80
-EXPOSE  443 443
+
+EXPOSE  9000:9000
 
