@@ -6,6 +6,7 @@ services:
     image: eilandert/php-fpm:7.4
     restart: always
     stop_grace_period: 10s
+    volumes:
     - ./config/php:/etc/php:rw
     - ./config/nullmailer:/etc/nullmailer:rw
     environment:
