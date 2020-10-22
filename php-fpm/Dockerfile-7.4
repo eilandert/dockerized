@@ -8,6 +8,7 @@ COPY    bootstrap.sh /bootstrap.sh
 
 RUN     UBUNTU=`lsb_release -c -s` \
         && echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-${UBUNTU}.list \
+        && apt-get -y update && apt-get -y upgrade \
         && apt-get install -y nullmailer mailutils \
         && apt-get install -y --no-install-recommends \
                 php7.4 \
@@ -24,7 +25,7 @@ RUN     UBUNTU=`lsb_release -c -s` \
                 php7.4-mysql \
                 php7.4-opcache \
                 php7.4-readline \
-		php7.2-recode \
+		php7.4-recode \
                 php7.4-redis \
                 php7.4-soap \
                 php7.4-tidy \
