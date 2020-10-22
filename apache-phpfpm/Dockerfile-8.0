@@ -6,6 +6,7 @@ ENV     MODE=fpm
 ENV     TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
+COPY    --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN     UBUNTU=`lsb_release -c -s` \
         && echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/ondrej-ubuntu-apache2-${UBUNTU}.list \
