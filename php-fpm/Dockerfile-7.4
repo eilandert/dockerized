@@ -1,46 +1,58 @@
 FROM    eilandert/ubuntu-base:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     PHPVERSION=7.4
-ENV     TZ=Europe/Amsterdam
+ENV	PHPVERSION=7.4
+ENV	TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     UBUNTU=`lsb_release -c -s` \
+RUN     chmod +x /bootstrap.sh \
+        && UBUNTU=`lsb_release -c -s` \
         && echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-${UBUNTU}.list \
         && apt-get -y update && apt-get -y upgrade \
         && apt-get install -y nullmailer mailutils \
-        && apt-get install -y --no-install-recommends \
-                php7.4 \
-                php7.4-fpm \
-                php7.4-bcmath \
-                php7.4-cli \
-                php7.4-curl \
-                php7.4-dom \
-                php7.4-gd \
-                php7.4-igbinary \
-		php7.4-json \
-                php7.4-memcached \
-                php7.4-mbstring \
-                php7.4-mysql \
-                php7.4-opcache \
-                php7.4-readline \
-                php7.4-redis \
-                php7.4-soap \
-                php7.4-tidy \
-                php7.4-xml \
-                php7.4-zip \
-                php-apcu \
-                php-imagick \
-                php-pgsql \
-        && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
-        && rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.2 /etc/php/7.3 /etc/php/7.4 \
-	&& cd /usr/lib/php && rm -rf 20131226 20151012 20160303 20170718 20180731 20200930 \
-        && chmod +x /bootstrap.sh \
+        && apt-get -y autoremove && apt-get -y autoclean
+
+RUN     apt-get install -y --no-install-recommends \
+                php${PHPVERSION} \
+                php${PHPVERSION}-fpm \
+                php${PHPVERSION}-apcu \
+                php${PHPVERSION}-bcmath \
+                php${PHPVERSION}-cli \
+                php${PHPVERSION}-curl \
+                php${PHPVERSION}-dom \
+                php${PHPVERSION}-gd \
+                php${PHPVERSION}-igbinary \
+                php${PHPVERSION}-imagick \
+                php${PHPVERSION}-json \
+                php${PHPVERSION}-memcached \
+                php${PHPVERSION}-mbstring \
+#                php${PHPVERSION}-mcrypt \
+                php${PHPVERSION}-mysql \
+                php${PHPVERSION}-opcache \
+                php${PHPVERSION}-pgsql \
+                php${PHPVERSION}-readline \
+#                php${PHPVERSION}-recode \
+                php${PHPVERSION}-redis \
+                php${PHPVERSION}-soap \
+                php${PHPVERSION}-tidy \
+                php${PHPVERSION}-xml \
+                php${PHPVERSION}-zip \
+        && apt-get -y autoremove && apt-get -y autoclean
+
+RUN     #rm -rf /etc/php/5.6 /usr/lib/php/20131226 \
+        rm -rf /etc/php/7.0 /usr/lib/php/20151012 \
+        && rm -rf /etc/php/7.1 /usr/lib/php/20160303 \
+        && rm -rf /etc/php/7.2 /usr/lib/php/20170718 \
+        && rm -rf /etc/php/7.3 /usr/lib/php/20180731 \
+#        && rm -rf /etc/php/7.4 /usr/lib/php/20190902 \
+        && rm -rf /etc/php/8.0 /usr/lib/php/20200930 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
-        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer
+        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
+        && apt-get -y autoremove && apt-get -y autoclean \
+        && rm -rf /var/lib/apt/lists/*
 
 CMD     ["/bootstrap.sh"]
 
-EXPOSE  9000 9000
+EXPOSE  9000:9000
 

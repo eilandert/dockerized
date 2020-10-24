@@ -1,10 +1,11 @@
-FROM	eilandert/ubuntu-base:lts
+FROM	eilandert/ubuntu-base:rolling
 LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV	DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu focal main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-focal.list \
+RUN     UBUNTU=`lsb_release -c -s` \
+	echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU}.list \
 	&& apt-get update && apt-get -y upgrade \
 	&& apt-get -y --no-install-recommends install \
 		nginx-full \ 

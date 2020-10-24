@@ -1,10 +1,14 @@
 Dockerized NGINX+MODSECURITY3+GOOGLE PAGESPEED
 
-https://launchpad.net/~eilander/+archive/ubuntu/nginx
 
-https://github.com/eilandert/dockerized/tree/master/nginx-proxy-modsecurity-pagespeed
+This docker can be found on:
 
-https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed
+[Github](https://github.com/eilandert/dockerized/tree/master/nginx-proxy-modsecurity-pagespeed)
+[Dockerhub](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed)
+
+And complete packages on:
+[Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/nginx)
+
 
 Features:
  * Latest Mainline. (and not stable).
@@ -30,31 +34,36 @@ Extra NGINX packages build from git: (besides the packages included with ubuntu)
          (https://github.com/grahamedgecombe/nginx-ct)
  * libnginx-mod-modsecurity connector for libmodsecurity3
          (https://github.com/SpiderLabs/ModSecurity-nginx)
-* libnginx-mod-pagespeed ngx_pagespeed speeds up your site
+ * libnginx-mod-pagespeed ngx_pagespeed speeds up your site
          (https://www.modpagespeed.com/doc/)
 
 Standalone Libraries:
  * libmodsecurity3 - ModSecurity v3 library component
  * modsecurity-crs - OWASP ModSecurity Core Rule Set https://coreruleset.org
 
-Including default Ubuntu packages:
-* libnginx-mod-http-auth-pam PAM authentication module for Nginx
-* libnginx-mod-http-cache-purge Purge content from Nginx caches
-* libnginx-mod-http-dav-ext WebDAV missing commands support for Nginx
-* libnginx-mod-http-echo Bring echo and more shell style goodies to Nginx
-* libnginx-mod-http-fancyindex Fancy indexes module for the Nginx
-* libnginx-mod-http-geoip GeoIP HTTP module for Nginx
-* libnginx-mod-http-geoip2 GeoIP HTTP module for Nginx
-* libnginx-mod-http-headers-more-filter Set and clear input and output headers
-* libnginx-mod-http-image-filter HTTP image filter module for Nginx
-* libnginx-mod-http-lua Lua module for Nginx
-* libnginx-mod-http-ndk Nginx Development Kit module
-* libnginx-mod-http-perl Perl module for Nginx
-* libnginx-mod-http-subs-filter Substitution filter module for Nginx
-* libnginx-mod-http-uploadprogress Upload progress system for Nginx
-* libnginx-mod-http-upstream-fair Nginx Upstream Fair Proxy Load Balancer
-* libnginx-mod-http-xslt-filter XSLT Transformation module for Nginx
-* libnginx-mod-mail Mail module for Nginx
-* libnginx-mod-nchan Fast, flexible pub/sub server for Nginx
-* libnginx-mod-rtmp RTMP support for Nginx
-* libnginx-mod-stream Stream module for Nginx
+Including default Ubuntu Groovy packages:
+ * libnginx-mod-http-auth-pam PAM authentication module for Nginx
+ * libnginx-mod-http-cache-purge Purge content from Nginx caches
+ * libnginx-mod-http-dav-ext WebDAV missing commands support for Nginx
+ * libnginx-mod-http-echo Bring echo and more shell style goodies to Nginx
+ * libnginx-mod-http-fancyindex Fancy indexes module for the Nginx
+ * libnginx-mod-http-geoip GeoIP HTTP module for Nginx
+ * libnginx-mod-http-geoip2 GeoIP2 HTTP module for Nginx
+ * libnginx-mod-http-headers-more-filter Set and clear input and output headers
+ * libnginx-mod-http-image-filter HTTP image filter module for Nginx
+ * libnginx-mod-http-lua Lua module for Nginx
+ * libnginx-mod-http-ndk Nginx Development Kit module
+ * libnginx-mod-http-perl Perl module for Nginx
+ * libnginx-mod-http-subs-filter Substitution filter module for Nginx
+ * libnginx-mod-http-uploadprogress Upload progress system for Nginx
+ * libnginx-mod-http-upstream-fair Nginx Upstream Fair Proxy Load Balancer
+ * libnginx-mod-http-xslt-filter XSLT Transformation module for Nginx
+ * libnginx-mod-mail Mail module for Nginx
+ * libnginx-mod-nchan Fast, flexible pub/sub server for Nginx
+ * libnginx-mod-rtmp RTMP support for Nginx
+ * libnginx-mod-stream Stream module for Nginx
+ * libnginx-mod-stream-geoip GeoIP Stream module for Nginx
+ * libnginx-mod-stream-geoip2 GeoIP2 Stream module for Nginx
+
+If you like my packages, please consider a small donation at
+paypal nomad @ paranoid.nl

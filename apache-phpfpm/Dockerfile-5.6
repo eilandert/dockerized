@@ -16,8 +16,7 @@ RUN     chmod +x /bootstrap.sh \
 	&& apt-get install -y --no-install-recommends apache2 apache2-utils \
         && a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
         && a2dismod status \
-	&& apt-get -y autoremove && apt-get -y autoclean \
-	&& curl -sS https://getcomposer.org/installer | php7 -- --filename=composer --install-dir=/usr/local/bin
+	&& apt-get -y autoremove && apt-get -y autoclean
 
 RUN	apt-get install -y --no-install-recommends \
                 php${PHPVERSION} \
@@ -63,7 +62,6 @@ RUN     apt-get install -y --no-install-recommends libapache2-mod-php${PHPVERSIO
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
 	&& apt-get -y autoremove && apt-get -y autoclean \
 	&& rm -rf /var/lib/apt/lists/*
-
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80
