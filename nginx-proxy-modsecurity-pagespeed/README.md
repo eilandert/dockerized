@@ -1,13 +1,9 @@
 Dockerized NGINX+MODSECURITY3+GOOGLE PAGESPEED
 
 
-This docker can be found on:
+This docker can be found on [Github](https://github.com/eilandert/dockerized/tree/master/nginx-proxy-modsecurity-pagespeed) and [Dockerhub](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed)
 
-[Github](https://github.com/eilandert/dockerized/tree/master/nginx-proxy-modsecurity-pagespeed)
-[Dockerhub](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed)
-
-And complete packages on:
-[Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/nginx)
+And complete packages on [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/nginx)
 
 
 Features:

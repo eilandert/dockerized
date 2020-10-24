@@ -5,7 +5,7 @@ ENV	DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN     UBUNTU=`lsb_release -c -s` \
-	echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU}.list \
+	&& echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU}.list \
 	&& apt-get update && apt-get -y upgrade \
 	&& apt-get -y --no-install-recommends install \
 		nginx-full \ 
