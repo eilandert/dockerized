@@ -11,7 +11,7 @@ Features:
  * Removed ubuntu branding in server signature
  * Compiled with -O3 -flto to squeeze some extra % performance.
  * Build with file AIO support (better performance for eg ZFS)
- * Linked all builds against OpenSSL 1.1.1g so there is ALPN and TLS1.3 support
+ * Linked all builds against OpenSSL 1.1.1h so there is ALPN and TLS1.3 support
  * Added /etc/nginx/snippets/ssl.conf.example, should give A+ on SSLLABS
 
 Patches:
