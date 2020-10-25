@@ -9,7 +9,8 @@ Tags:
  * eilandert/eilandert/nginx-modsecurity3-pagespeed:php (with PHP and nullmailer, see below)
 
 For the tag with PHP, you can enable different versions with PHP56=yes PHP74=yes and PHP80=yes<BR>
-Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.
+Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.<BR>
+PHP-FPM packages are from [Ondrejs excellent php ppa](https://launchpad.net/~ondrej/+archive/ubuntu/php)
 
 Bind /etc/nginx and /etc/modsecurity (for php, /etc/nullmailer and /etc/php) to an empty local directory and it will be populated on first run with default configs.
 
