@@ -4,6 +4,15 @@ This docker can be found on [Github](https://github.com/eilandert/dockerized/tre
 
 Complete packages are on [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/nginx)
 
+Tags:
+ * eilandert/eilandert/nginx-modsecurity3-pagespeed:latest  (without PHP and without nullmailer)
+ * eilandert/eilandert/nginx-modsecurity3-pagespeed:php (with PHP and nullmailer, see below)
+
+For the tag with PHP, you can enable different versions with PHP56=yes PHP74=yes and PHP80=yes<BR>
+Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.
+
+Bind /etc/nginx and /etc/modsecurity (for php, /etc/nullmailer and /etc/php) to an empty local directory and it will be populated on first run with default configs.
+
 Features:
  * Latest Mainline. (and not stable).
  * Removed ubuntu branding in server signature
@@ -52,4 +61,5 @@ Including default Ubuntu Groovy packages:
  * libnginx-mod-stream Stream module for Nginx
  * libnginx-mod-stream-geoip GeoIP Stream module for Nginx
  * libnginx-mod-stream-geoip2 GeoIP2 Stream module for Nginx
+
 
