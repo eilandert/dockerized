@@ -1,10 +1,8 @@
 Dockerized NGINX+MODSECURITY3+GOOGLE PAGESPEED
 
-
 This docker can be found on [Github](https://github.com/eilandert/dockerized/tree/master/nginx-proxy-modsecurity-pagespeed) and [Dockerhub](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed)
 
-And complete packages on [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/nginx)
-
+Complete packages are on [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/nginx)
 
 Features:
  * Latest Mainline. (and not stable).
@@ -20,22 +18,16 @@ Patches:
    (add ssl_dyn_rec_enable on; to the http{} block)
 
 Extra NGINX packages build from git: (besides the packages included with ubuntu)
- * libnginx-mod-brotli - NGINX module for Brotli compression
-         (https://github.com/google/ngx_brotli)
- * libnginx-mod-naxsi - NAXSI is an open-source WAF for NGINX
-         (https://github.com/nbs-system/naxsi)
- * libnginx-mod-security-headers NGINX Module for sending security headers
-         (https://github.com/GetPageSpeed/ngx_security_headers)
- * libnginx-mod-ssl-ct Certificate Transparency module for nginx.
-         (https://github.com/grahamedgecombe/nginx-ct)
- * libnginx-mod-modsecurity connector for libmodsecurity3
-         (https://github.com/SpiderLabs/ModSecurity-nginx)
- * libnginx-mod-pagespeed ngx_pagespeed speeds up your site
-         (https://www.modpagespeed.com/doc/)
+ * [libnginx-mod-brotli](https://github.com/google/ngx_brotli) - NGINX module for Brotli compression
+ * [libnginx-mod-naxsi](https://github.com/nbs-system/naxsi) - NAXSI is an open-source WAF for NGINX
+ * [libnginx-mod-security-headers](https://github.com/GetPageSpeed/ngx_security_headers) NGINX Module for sending security headers
+ * [libnginx-mod-ssl-ct](https://github.com/grahamedgecombe/nginx-ct) - Certificate Transparency module for nginx.
+ * [libnginx-mod-modsecurity](https://github.com/SpiderLabs/ModSecurity-nginx) connector for libmodsecurity3
+ * [libnginx-mod-pagespeed](https://www.modpagespeed.com/doc/) ngx_pagespeed speeds up your site
 
 Standalone Libraries:
  * libmodsecurity3 - ModSecurity v3 library component
- * modsecurity-crs - OWASP ModSecurity Core Rule Set https://coreruleset.org
+ * [modsecurity-crs](https://coreruleset.org) - OWASP ModSecurity Core Rule Set 
 
 Including default Ubuntu Groovy packages:
  * libnginx-mod-http-auth-pam PAM authentication module for Nginx
@@ -61,5 +53,3 @@ Including default Ubuntu Groovy packages:
  * libnginx-mod-stream-geoip GeoIP Stream module for Nginx
  * libnginx-mod-stream-geoip2 GeoIP2 Stream module for Nginx
 
-If you like my packages, please consider a small donation at
-paypal nomad @ paranoid.nl
