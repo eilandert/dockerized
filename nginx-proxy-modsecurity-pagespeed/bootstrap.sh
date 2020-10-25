@@ -6,7 +6,7 @@
 	echo "[NGINX-PROXY] The NGINX packages can be found on https://launchpad.net/~eilander/+archive/ubuntu/nginx"
 
         if [ -n "${TZ}" ]; then
-         rm /etc/timezone /etc/localtime
+         rm -f /etc/timezone /etc/localtime
          echo "${TZ}" > /etc/timezone
          ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
         fi
