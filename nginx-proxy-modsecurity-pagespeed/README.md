@@ -13,6 +13,8 @@ Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.
 
 Bind /etc/nginx and /etc/modsecurity (for php, /etc/nullmailer and /etc/php) to an empty local directory and it will be populated on first run with default configs.
 
+See my github for an example of [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/nginx-proxy-modsecurity-pagespeed/docker-compose.yml)
+
 Features:
  * Latest Mainline. (and not stable).
  * Removed ubuntu branding in server signature
