@@ -5,11 +5,15 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN     apt-get -y update && apt-get -y upgrade \
-        && apt-get install -y --no-install-recommends ca-certificates apt-utils lsb-release curl \
+        && apt-get install -y --no-install-recommends ca-certificates apt-utils lsb-release \
         && dpkg-statoverride --update --add root adm 0000 /usr/bin/sudo \
         && dpkg-statoverride --update --add root adm 0000 /bin/su \
 	&& dpkg-statoverride --update --add root adm 0500 /usr/bin/ping \
-	&& chmod +x /bootstrap.sh
+	&& chmod +x /bootstrap.sh \
+        && apt-get -y autoremove \
+        && apt-get -y autoclean \
+        && rm -rf /var/lib/apt/lists/*
+
 
 RUN     sh -x \
         && for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
