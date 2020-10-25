@@ -44,7 +44,7 @@ headers = {'User-Agent': 'Googlebot/2.1 (+http://www.googlebot.com/bot.html)'}
 
 
 def get_links(mage_links):
-    r = requests.get(mage_links)
+    r = requests.get(mage_links, verify=False)
     if "200" not in str(r):
         sys.exit(red + "Sitemap fetch failed for %s with %s. Exiting..." % (mage_links, r) + no_color)
     root = etree.fromstring(r.content)
