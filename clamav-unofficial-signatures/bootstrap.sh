@@ -26,8 +26,8 @@
 	if [ ! -f ${CVD_FILE} ]; then
 	  echo "[CLAMAV] main.cvd not found"
           echo "[CLAMAV] waiting for internet to be up, pinging 8.8.8.8 with timeout of 60 secs"
-          ping -c1 -W60 8.8.8.8
-	  echo "[CLAMAV] Running Freshclam in foreground once"
+          ping -c3 -W60 8.8.8.8
+	  echo "[CLAMAV] Running Freshclam in foreground once. This can take a while."
 	  freshclam --user=clamav --no-warnings --foreground
 	fi
 
