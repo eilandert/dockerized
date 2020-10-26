@@ -4,16 +4,15 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     apt-get -y update && apt-get -y upgrade \
-        && apt-get install -y --no-install-recommends ca-certificates apt-utils lsb-release \
-        && dpkg-statoverride --update --add root adm 0000 /usr/bin/sudo \
-        && dpkg-statoverride --update --add root adm 0000 /bin/su \
-	&& dpkg-statoverride --update --add root adm 0500 /usr/bin/ping \
+RUN	. /etc/os-release \
+        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list \
+	&& apt-get -y update && apt-get -y upgrade \
+        && apt-get install -y --no-install-recommends ca-certificates \
 	&& chmod +x /bootstrap.sh \
         && apt-get -y autoremove \
         && apt-get -y autoclean \
-        && rm -rf /var/lib/apt/lists/*
-
+        && rm -rf /var/lib/apt/lists/* \
+	&& rm /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list
 
 RUN     sh -x \
         && for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
@@ -21,6 +20,20 @@ RUN     sh -x \
             usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
           fi ;\
         done
+
+RUN	sh -x \
+#	&& for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done \
+#	&& for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done \
+#        && for file in `ls /usr/bin/dpkg*`; do dpkg-statoverride --update --add root adm 0500 $file; done \
+        && for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --update --add root adm 0000 $file; done \
+        && for file in `ls /usr/sbin/fsck*`; do dpkg-statoverride --update --add root adm 0000 $file; done \
+        && for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --update --add root adm 0000 $file; done \
+        && for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --update --add root adm 0000 $file; done \
+	&& dpkg-statoverride --update --add root adm 0000 /bin/dmesg \
+        && dpkg-statoverride --update --add root adm 0000 /sbin/badblocks \
+        && dpkg-statoverride --update --add root adm 0000 /bin/su \
+        && dpkg-statoverride --add root adm 0000 /usr/bin/sudo \
+        && dpkg-statoverride --add root adm 0500 /usr/bin/ping 
 
 CMD     ["/bootstrap.sh"]
 

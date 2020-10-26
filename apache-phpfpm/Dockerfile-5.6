@@ -1,4 +1,4 @@
-FROM    eilandert/ubuntu-base:rolling
+FROM    eilandert/ubuntu-base:latest
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	PHPVERSION=5.6
@@ -7,10 +7,10 @@ ENV	TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     chmod +x /bootstrap.sh \
-	&& UBUNTU=`lsb_release -c -s` \
-	&& echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/ondrej-ubuntu-apache2-${UBUNTU}.list \
-	&& echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${UBUNTU} main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-${UBUNTU}.list \
+RUN     . /etc/os-release \
+	&& chmod +x /bootstrap.sh \
+	&& echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/apache2/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ubuntu-apache2-${UBUNTU_CODENAME}.list \
+	&& echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-${UBUNTU_CODENAME}.list \
         && apt-get -y update && apt-get -y upgrade \
         && apt-get install -y nullmailer mailutils \
 	&& apt-get install -y --no-install-recommends apache2 apache2-utils \
