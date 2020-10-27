@@ -4,6 +4,8 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
+# install PPA for latest openssl from my ppa
+
 RUN	. /etc/os-release \
         && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list \
 	&& apt-get -y update && apt-get -y upgrade \
