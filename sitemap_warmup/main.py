@@ -12,8 +12,6 @@ from lxml import etree, html
 from tabulate import tabulate
 from urllib.parse import urlparse
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 parser = argparse.ArgumentParser(description='Asynchronous CDN Cache Warmer')
 parser.add_argument('-s', '--site', action="append", dest='sites', default=None)
 parser.add_argument('-d', '--depth', action="store", dest='depth', default=None)
