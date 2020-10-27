@@ -1,4 +1,4 @@
-FROM    eilandert/ubuntu-base:latest
+FROM    eilandert/ubuntu-base:lts
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	PHPVERSION=0
