@@ -19,10 +19,17 @@ See my github for an example of [docker-compose.yml](https://github.com/eilander
 Features:
  * Latest Mainline. (and not stable).
  * Removed ubuntu branding in server signature
+ * Optimized nginx.conf
  * Compiled with -O3 -flto to squeeze some extra % performance.
  * Build with file AIO support (better performance for eg ZFS)
  * Linked all builds against OpenSSL 1.1.1h so there is ALPN and TLS1.3 support
  * Added /etc/nginx/snippets/ssl.conf.example, should give A+ on SSLLABS
+ * Added https://ssl-config.mozilla.org/ffdhe4096.txt as dhparams.pem (ssl)
+ * Added additional security in snippets/
+ * Added maps against bots in snippets/
+ * Added some hardening in snippets/
+ * Added proxy.conf in snippets/
+ * Added some performance in snippets/ (or it will, in a new build)
 
 Patches:
  * Added HTTP2 HPACK Encoding Support. (Cloudflare patch)
