@@ -7,14 +7,13 @@ COPY    bootstrap.sh /bootstrap.sh
 # install PPA for latest openssl from my ppa
 
 RUN	. /etc/os-release \
-        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list \
+        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/backports/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-backports-${UBUNTU_CODENAME}.list \
 	&& apt-get -y update && apt-get -y upgrade \
-        && apt-get install -y --no-install-recommends ca-certificates \
+        && apt-get install -y --no-install-recommends ca-certificates tzdata openssl \
 	&& chmod +x /bootstrap.sh \
         && apt-get -y autoremove \
         && apt-get -y autoclean \
-        && rm -rf /var/lib/apt/lists/* \
-	&& rm /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list
+        && rm -rf /var/lib/apt/lists/*
 
 RUN     sh -x \
         && for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \

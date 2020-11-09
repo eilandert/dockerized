@@ -1,4 +1,4 @@
-FROM    ubuntu:devel
+FROM    #TEMPLATE1#
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
