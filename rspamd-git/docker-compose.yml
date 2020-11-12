@@ -3,10 +3,6 @@ services:
     container_name: rspamd
     image: eilandert/rspamd-git:latest
     restart: always
-    environment:
-      - TZ=Europe/Amsterdam
-      - SYSLOG_HOST=10.0.0.118
-#    dns: 8.8.8.8
     ports:
       - 11332:11332
       - 11333:11333
@@ -15,6 +11,9 @@ services:
     - ./config/rspamd:/usr/local/etc/rspamd:rw
     - ./data/rspamd:/var/lib/rspamd
 #    - /coreland:/coreland:rw
+    environment:
+      - TZ=Europe/Amsterdam
+      - SYSLOG_HOST=10.0.0.118
 
 version: '3.8'
 
