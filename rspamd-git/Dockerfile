@@ -1,4 +1,4 @@
-FROM ubuntu:devel as build
+FROM eilandert/ubuntu-base:devel as build
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
@@ -58,7 +58,6 @@ COPY bootstrap.sh /bootstrap.sh
 
 RUN	apk update \
 	&& apk upgrade \
-	&& apk add --no-cache syslog-ng \
         && apk del alpine-keys apk-tools \
 	&& rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
 	&& addgroup -S -g 1000 _rspamd \
