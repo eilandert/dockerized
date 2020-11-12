@@ -29,7 +29,7 @@
 	  mkdir -p /etc/syslog-ng/conf.d
           echo "destination dst { syslog(\"${SYSLOG_HOST}\" transport(\"udp\")); };" > /etc/syslog-ng/conf.d/remote.conf
           echo "log { source(s_sys); destination(dst); };" >> /etc/syslog-ng/conf.d/remote.conf
-	  syslog-ng
+	  syslog-ng --no-caps
           echo "type = \"syslog\";" > /usr/local/etc/rspamd/override.d/logging.inc
           echo "[RSPAMD] Output is set to remote syslog at ${SYSLOG_HOST}"
         else
