@@ -18,9 +18,11 @@
 
 	fi
 
-	if [ -n "${TZ}" ]; then
-	  echo "${TZ}" > /etc/timezone
-	fi
+        if [ -n "${TZ}" ]; then
+         rm -f /etc/timezone /etc/localtime
+         echo "${TZ}" > /etc/timezone
+         ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
+        fi
 
 	mkdir -p /usr/local/etc/rspamd/override.d
         if [ -n "${SYSLOG_HOST}" ]; then
