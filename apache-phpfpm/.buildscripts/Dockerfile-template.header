@@ -1,0 +1,19 @@
+FROM    eilandert/php-fpm:#PHPVERSION#
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+ENV     MODE=fpm
+ENV     TZ=Europe/Amsterdam
+
+COPY    bootstrap.sh /bootstrap.sh
+
+RUN     . /etc/os-release \
+        && chmod +x /bootstrap.sh \
+        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/apache2/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-apache2-${UBUNTU_CODENAME}.list \
+        && apt-get -y update \
+        && apt-get install -y nullmailer mailutils \
+        && apt-get install -y --no-install-recommends apache2 apache2-utils \
+        && a2enmod proxy_fcgi setenvif rewrite expires headers remoteip \
+        && a2dismod status \
+        && apt-get -y autoremove && apt-get -y autoclean \
+        && rm -rf /var/lib/apt/lists/*
+
