@@ -9,7 +9,8 @@ RUN     apt-get -y update && apt-get -y upgrade \
         && rm -rf /etc/php/7.4 /usr/lib/php/20190902 \
         && rm -rf /etc/php/8.0 /usr/lib/php/20200930 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
-        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer 
+        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
+	&& chmod 755 /bootstrap.sh
 
 CMD     ["/bootstrap.sh"]
 
