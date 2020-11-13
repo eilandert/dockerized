@@ -49,30 +49,6 @@ sed -i 's/\&\& rm -rf \/etc\/php\/7.2/#\&\& rm -rf \/etc\/php\/7.2/' ${GITPATH}/
 sed -i 's/\&\& rm -rf \/etc\/php\/7.4/#\&\& rm -rf \/etc\/php\/7.4/' ${GITPATH}/php-fpm/Dockerfile-7.4
 sed -i 's/\&\& rm -rf \/etc\/php\/8.0/#\&\& rm -rf \/etc\/php\/8.0/' ${GITPATH}/php-fpm/Dockerfile-8.0
 
-exit
-
-#copy files for apache-fpm
-#cp ${FULLPATH}/Dockerfile-template.php.56 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php56
-#cp ${FULLPATH}/Dockerfile-template.php.72 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php72
-#cp ${FULLPATH}/Dockerfile-template.php.74 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php74
-#cp ${FULLPATH}/Dockerfile-template.php.80 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php80
-
-#cat ${FULLPATH}/Dockerfile-generated.php56 \
-#    ${FULLPATH}/Dockerfile-generated.php72 \
-#    ${FULLPATH}/Dockerfile-generated.php74 \
-#    ${FULLPATH}/Dockerfile-generated.php80 > ${GITPATH}/apache-fpm/.buildscripts/Dockerfile-generated.multi
-
-#copy files for nginx
-#cp ${FULLPATH}/Dockerfile-template.php.56 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php56
-#cp ${FULLPATH}/Dockerfile-template.php.72 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php72
-#cp ${FULLPATH}/Dockerfile-template.php.74 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php74
-#cp ${FULLPATH}/Dockerfile-template.php.80 ${GITPATH}/apache-phpfpm/.buildscripts/Dockerfile-generated.php80
-
-#cat ${FULLPATH}/Dockerfile-generated.php56 \
-#    ${FULLPATH}/Dockerfile-generated.php72 \
-#    ${FULLPATH}/Dockerfile-generated.php74 \
-#    ${FULLPATH}/Dockerfile-generated.php80 > ${GITPATH}/apache-fpm/.buildscripts/Dockerfile-generated.multi
-
 
 if [ "${BUILD}" = "yes" ]; then
 
