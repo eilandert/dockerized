@@ -12,14 +12,18 @@ sed -i 's/#PHPVERSION#/7.2/' ${FULLPATH}/Dockerfile-template.php72
 sed -i 's/#PHPVERSION#/7.4/' ${FULLPATH}/Dockerfile-template.php74
 sed -i 's/#PHPVERSION#/8.0/' ${FULLPATH}/Dockerfile-template.php80
 
-sed -i 's/#php72#//' ${FULLPATH}/Dockerfile-template.php56
-sed -i 's/#php74#//' ${FULLPATH}/Dockerfile-template.php56
-sed -i 's/#php80#//' ${FULLPATH}/Dockerfile-template.php56
-sed -i 's/#php74#//' ${FULLPATH}/Dockerfile-template.php72
-sed -i 's/#php80#//' ${FULLPATH}/Dockerfile-template.php72
-sed -i 's/#php80#//' ${FULLPATH}/Dockerfile-template.php74
+sed -i 's/#removedinphp72#//' ${FULLPATH}/Dockerfile-template.php56 #mcrypt
+sed -i 's/#removedinphp74#//' ${FULLPATH}/Dockerfile-template.php56 #recode
+sed -i 's/#removedinphp80#//' ${FULLPATH}/Dockerfile-template.php56 #json
+sed -i 's/#removedinphp74#//' ${FULLPATH}/Dockerfile-template.php72 #recode
+sed -i 's/#removedinphp80#//' ${FULLPATH}/Dockerfile-template.php72 #json
+sed -i 's/#removedinphp80#//' ${FULLPATH}/Dockerfile-template.php74 #json
 
-sed -i '/#php/d' ${FULLPATH}/Dockerfile-template.php*
+sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php56
+sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php72
+sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php74
+sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php80
+
 
 cat ${FULLPATH}/Dockerfile-template.header \
     ${FULLPATH}/Dockerfile-template.php56 \
@@ -44,11 +48,17 @@ cat ${FULLPATH}/Dockerfile-template.header \
     ${FULLPATH}/Dockerfile-template.php80 \
     ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/php-fpm/Dockerfile-multi
 
+sed -i 's/#PHPVERSION#/5.6/' ${GITPATH}/php-fpm/Dockerfile-5.6
+sed -i 's/#PHPVERSION#/7.2/' ${GITPATH}/php-fpm/Dockerfile-7.2
+sed -i 's/#PHPVERSION#/7.4/' ${GITPATH}/php-fpm/Dockerfile-7.4
+sed -i 's/#PHPVERSION#/8.0/' ${GITPATH}/php-fpm/Dockerfile-8.0
+sed -i 's/#PHPVERSION#/MULTI/' ${GITPATH}/php-fpm/Dockerfile-multi
+
 sed -i 's/\&\& rm -rf \/etc\/php\/5.6/#\&\& rm -rf \/etc\/php\/5.6/' ${GITPATH}/php-fpm/Dockerfile-5.6
 sed -i 's/\&\& rm -rf \/etc\/php\/7.2/#\&\& rm -rf \/etc\/php\/7.2/' ${GITPATH}/php-fpm/Dockerfile-7.2
 sed -i 's/\&\& rm -rf \/etc\/php\/7.4/#\&\& rm -rf \/etc\/php\/7.4/' ${GITPATH}/php-fpm/Dockerfile-7.4
 sed -i 's/\&\& rm -rf \/etc\/php\/8.0/#\&\& rm -rf \/etc\/php\/8.0/' ${GITPATH}/php-fpm/Dockerfile-8.0
-
+sed -i '/\&\& rm -rf \/etc\/php/d'  ${GITPATH}/php-fpm/Dockerfile-multi
 
 if [ "${BUILD}" = "yes" ]; then
 
@@ -57,7 +67,6 @@ if [ "${BUILD}" = "yes" ]; then
   && docker build -t eilandert/php-fpm:7.4 -t eilandert/php-fpm:latest -f ${GITPATH}/php-fpm/Dockerfile-7.4 ${GITPATH}/php-fpm \
   && docker build -t eilandert/php-fpm:8.0 -f ${GITPATH}/php-fpm/Dockerfile-8.0 ${GITPATH}/php-fpm \
   && docker build -t eilandert/php-fpm:multi -f ${GITPATH}/php-fpm/Dockerfile-multi ${GITPATH}/php-fpm
-
 
 fi
 
