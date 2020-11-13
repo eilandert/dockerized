@@ -24,10 +24,7 @@ sed -i 's/#PHPVERSION#/8.0/' ${GITPATH}/apache-phpfpm/Dockerfile-8.0
 sed -i 's/#PHPVERSION#/multi/' ${GITPATH}/apache-phpfpm/Dockerfile-multi
 
 sed -i 's/MODE=fpm/MODE=multi/'  ${GITPATH}/apache-phpfpm/Dockerfile-multi
-sed -i '/&& rm -rf \/etc\/php/d' ${GITPATH}/apache-phpfpm/Dockerfile-multi
 sed -i '/libapache2-mod-php/d'   ${GITPATH}/apache-phpfpm/Dockerfile-multi
-sed -i '/a2dismod php/d'         ${GITPATH}/apache-phpfpm/Dockerfile-multi
-sed -i '/a2enconf php/d'         ${GITPATH}/apache-phpfpm/Dockerfile-multi
 
 if [ "${BUILD}" = "yes" ]; then
 
