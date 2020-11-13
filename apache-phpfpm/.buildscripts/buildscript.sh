@@ -2,20 +2,11 @@
 
 export FULLPATH="${GITPATH}/apache-phpfpm/.buildscripts"
 
-cat ${FULLPATH}/Dockerfile-template.header \
-    ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/apache-phpfpm/Dockerfile-5.6
-
-cat ${FULLPATH}/Dockerfile-template.header \
-    ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/apache-phpfpm/Dockerfile-7.2
-
-cat ${FULLPATH}/Dockerfile-template.header \
-    ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/apache-phpfpm/Dockerfile-7.4
-
-cat ${FULLPATH}/Dockerfile-template.header \
-    ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/apache-phpfpm/Dockerfile-8.0
-
-cat ${FULLPATH}/Dockerfile-template.header \
-    ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/apache-phpfpm/Dockerfile-multi
+cp ${FULLPATH}/Dockerfile-template ${GITPATH}/apache-phpfpm/Dockerfile-5.6
+cp ${FULLPATH}/Dockerfile-template ${GITPATH}/apache-phpfpm/Dockerfile-7.2
+cp ${FULLPATH}/Dockerfile-template ${GITPATH}/apache-phpfpm/Dockerfile-7.4
+cp ${FULLPATH}/Dockerfile-template ${GITPATH}/apache-phpfpm/Dockerfile-8.0
+cp ${FULLPATH}/Dockerfile-template ${GITPATH}/apache-phpfpm/Dockerfile-multi
 
 sed -i 's/#PHPVERSION#/5.6/' ${GITPATH}/apache-phpfpm/Dockerfile-5.6
 sed -i 's/#PHPVERSION#/7.2/' ${GITPATH}/apache-phpfpm/Dockerfile-7.2
