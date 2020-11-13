@@ -21,4 +21,7 @@ RUN     . /etc/os-release \
         && mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity \
         && chmod +x /bootstrap.sh
 
+CMD     ["/bootstrap.sh"]
+EXPOSE  80 80
+EXPOSE  443 443
 
