@@ -14,7 +14,7 @@ fi
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/nginx/nginx.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-    echo "[NGINX-PROXY] no configs found, populating default configs to /etc/nginx and /etc/modsecurity"
+    echo "[NGINX] no configs found, populating default configs to /etc/nginx and /etc/modsecurity"
     cp -r /etc/nginx.orig/* /etc/nginx/
     cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
@@ -41,7 +41,7 @@ fi
 if [ "${PHPVERSION}" = "5.6" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
     FIRSTRUN="/etc/php/5.6/fpm/php-fpm.conf"
     if [ ! -f ${FIRSTRUN} ]; then
-        echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/php/5.6"
+        echo "[NGINX] no configs found, populating default configs to /etc/php/5.6"
         mkdir -p /etc/php/5.6
         cp -r /etc/php.orig/5.6/* /etc/php/5.6
     fi
@@ -53,7 +53,7 @@ fi
 if [ "${PHPVERSION}" = "7.2" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
     FIRSTRUN="/etc/php/7.2/fpm/php-fpm.conf"
     if [ ! -f ${FIRSTRUN} ]; then
-        echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/php/7.2"
+        echo "[NGINX] no configs found, populating default configs to /etc/php/7.2"
         mkdir -p /etc/php/7.2
         cp -r /etc/php.orig/7.2/* /etc/php/7.2
     fi
@@ -65,7 +65,7 @@ fi
 if [ "${PHPVERSION}" = "7.4" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
     FIRSTRUN="/etc/php/7.4/fpm/php-fpm.conf"
     if [ ! -f ${FIRSTRUN} ]; then
-        echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/php/7.4"
+        echo "[NGINX] no configs found, populating default configs to /etc/php/7.4"
         mkdir -p /etc/php/7.4
         cp -r /etc/php.orig/7.4/* /etc/php/7.4
     fi
@@ -77,7 +77,7 @@ fi
 if [ "${PHPVERSION}" = "8.0" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
     FIRSTRUN="/etc/php/8.0/fpm/php-fpm.conf"
     if [ ! -f ${FIRSTRUN} ]; then
-        echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/php/8.0"
+        echo "[NGINX] no configs found, populating default configs to /etc/php/8.0"
         mkdir -p /etc/php/8.0
         cp -r /etc/php.orig/8.0/* /etc/php/8.0
     fi
