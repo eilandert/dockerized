@@ -24,7 +24,6 @@ sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php72
 sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php74
 sed -i '/#removedinphp/d' ${FULLPATH}/Dockerfile-template.php80
 
-
 cat ${FULLPATH}/Dockerfile-template.header \
     ${FULLPATH}/Dockerfile-template.php56 \
     ${FULLPATH}/Dockerfile-template.footer > ${GITPATH}/php-fpm/Dockerfile-5.6
@@ -53,6 +52,8 @@ sed -i 's/#PHPVERSION#/7.2/' ${GITPATH}/php-fpm/Dockerfile-7.2
 sed -i 's/#PHPVERSION#/7.4/' ${GITPATH}/php-fpm/Dockerfile-7.4
 sed -i 's/#PHPVERSION#/8.0/' ${GITPATH}/php-fpm/Dockerfile-8.0
 sed -i 's/#PHPVERSION#/MULTI/' ${GITPATH}/php-fpm/Dockerfile-multi
+sed -i 's/MODE=FPM/MODE=MULTI/' ${GITPATH}/php-fpm/Dockerfile-multi
+
 
 sed -i 's/\&\& rm -rf \/etc\/php\/5.6/#\&\& rm -rf \/etc\/php\/5.6/' ${GITPATH}/php-fpm/Dockerfile-5.6
 sed -i 's/\&\& rm -rf \/etc\/php\/7.2/#\&\& rm -rf \/etc\/php\/7.2/' ${GITPATH}/php-fpm/Dockerfile-7.2
@@ -62,16 +63,14 @@ sed -i '/\&\& rm -rf \/etc\/php/d'  ${GITPATH}/php-fpm/Dockerfile-multi
 
 if [ "${BUILD}" = "yes" ]; then
 
-  docker build -t eilandert/php-fpm:5.6 -f ${GITPATH}/php-fpm/Dockerfile-5.6 ${GITPATH}/php-fpm \
-  && docker build -t eilandert/php-fpm:7.2 -f ${GITPATH}/php-fpm/Dockerfile-7.2 ${GITPATH}/php-fpm \
-  && docker build -t eilandert/php-fpm:7.4 -t eilandert/php-fpm:latest -f ${GITPATH}/php-fpm/Dockerfile-7.4 ${GITPATH}/php-fpm \
-  && docker build -t eilandert/php-fpm:8.0 -f ${GITPATH}/php-fpm/Dockerfile-8.0 ${GITPATH}/php-fpm \
-  && docker build -t eilandert/php-fpm:multi -f ${GITPATH}/php-fpm/Dockerfile-multi ${GITPATH}/php-fpm
+    docker build -t eilandert/php-fpm:5.6 -f ${GITPATH}/php-fpm/Dockerfile-5.6 ${GITPATH}/php-fpm \
+        && docker build -t eilandert/php-fpm:7.2 -f ${GITPATH}/php-fpm/Dockerfile-7.2 ${GITPATH}/php-fpm \
+        && docker build -t eilandert/php-fpm:7.4 -t eilandert/php-fpm:latest -f ${GITPATH}/php-fpm/Dockerfile-7.4 ${GITPATH}/php-fpm \
+        && docker build -t eilandert/php-fpm:8.0 -f ${GITPATH}/php-fpm/Dockerfile-8.0 ${GITPATH}/php-fpm \
+        && docker build -t eilandert/php-fpm:multi -f ${GITPATH}/php-fpm/Dockerfile-multi ${GITPATH}/php-fpm
+
+    docker pushrm eilandert/php-fpm -f ${GITPATH}/php-fpm/README.md
+
 
 fi
-
-docker pushrm eilandert/php-fpm -f ${GITPATH}/php-fpm/README.md
-
-
-
 
