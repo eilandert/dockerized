@@ -16,15 +16,15 @@ services:
       - TZ=Europe/Amsterdam
       - CACHE=no
 
-#     use MODE=mod for mod_php/mpm_prefork instead of php-fpm/mpm_event
-#     use MODE=multi for enabling multiple php versions (need to pull the tag "multi")
-#     use MODE=fpm for standard fpm (default)
-#      - MODE=multi
+#     use MODE=MOD for the apache module and mod_php/mpm_prefork instead of php-fpm/mpm_event
+#     use MODE=MULTI for enabling multiple php versions (need to pull the tag "multi")
+#     use MODE=FPM for standard fpm (default)
+#      - MODE=MULTI
 #     in MULTI MODE:
-#     - PHP56=yes
-#     - PHP72=yes
-#     - PHP74=yes
-#     - PHP80=yes
+#     - PHP56=YES
+#     - PHP72=YES
+#     - PHP74=YES
+#     - PHP80=YES
 
 #      Already pre-enabled mods: proxy_fcgi setenvif rewrite expires headers remoteip
 #      When /etc/apache2 is mounted these changes will be persistent
