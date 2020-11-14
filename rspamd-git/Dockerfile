@@ -4,7 +4,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY bootstrap.sh /bootstrap.sh
 
-RUN	apt-get -y update && apt-get -y upgrade \
+RUN	apt-get -y update \
 	&& apt-get --no-install-recommends -y install \
 		git \
 		cmake \
