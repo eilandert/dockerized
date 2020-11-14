@@ -12,8 +12,7 @@ Tags:
  * eilandert/eilandert/nginx-modsecurity3-pagespeed:7.4 (with php7.4 and nullmailer)
  * eilandert/eilandert/nginx-modsecurity3-pagespeed:8.0 (with php8.0 and nullmailer)
 
-
-For the tag with multi, you can enable different versions with PHP56=yes PHP74=yes and PHP80=yes<BR>
+For the tag with multi, you can enable different versions with PHP56=YES PHP72=YES PHP74=YES and PHP80=YES<BR>
 Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.<BR>
 PHP-FPM packages are from [Ondrejs excellent php ppa](https://launchpad.net/~ondrej/+archive/ubuntu/php)
 
