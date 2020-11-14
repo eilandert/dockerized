@@ -38,52 +38,49 @@ if [ ! -x /run/php ]; then
     chmod 755 /run/php
 fi
 
-if [ "${PHPVERSION}" = "5.6" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
-    FIRSTRUN="/etc/php/5.6/fpm/php-fpm.conf"
-    if [ ! -f ${FIRSTRUN} ]; then
-        echo "[NGINX] no configs found, populating default configs to /etc/php/5.6"
-        mkdir -p /etc/php/5.6
-        cp -r /etc/php.orig/5.6/* /etc/php/5.6
-    fi
-    php-fpm5.6 -v
-    php-fpm5.6 -t
-    service php5.6-fpm restart 1>/dev/null 2>&1
+if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ]; then
+    echo "[NGINX] You downloaded the MULTI-PHP edition of the docker"
+    echo "[NGINX] There is no PHP56 PHP72 PHP74 or PHP80 environment variable specified"
+    echo "[NGINX] exiting...."
+    sleep 10
+    exit
 fi
 
-if [ "${PHPVERSION}" = "7.2" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
-    FIRSTRUN="/etc/php/7.2/fpm/php-fpm.conf"
+startphp()
+{
+    # set PHPVERSION for MULTI mode
+    PHPVERSION="$1"
+
+    FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
     if [ ! -f ${FIRSTRUN} ]; then
-        echo "[NGINX] no configs found, populating default configs to /etc/php/7.2"
-        mkdir -p /etc/php/7.2
-        cp -r /etc/php.orig/7.2/* /etc/php/7.2
+        echo "[NGINX] no configs found, populating default configs to /etc/php/${PHPVERSION}"
+        mkdir -p /etc/php/${PHPVERSION}
+        cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION}
     fi
-    php-fpm7.2 -v
-    php-fpm7.2 -t
-    service php7.2-fpm restart 1>/dev/null 2>&1
+
+    php-fpm${PHPVERSION} -v
+    php-fpm${PHPVERSION} -t
+    service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
+}
+
+if [ "${MODE}" = "FPM" ] && [ ! "${MODE}" = "MULTI" ]; then
+    startphp "${PHPVERSION}"
 fi
 
-if [ "${PHPVERSION}" = "7.4" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
-    FIRSTRUN="/etc/php/7.4/fpm/php-fpm.conf"
-    if [ ! -f ${FIRSTRUN} ]; then
-        echo "[NGINX] no configs found, populating default configs to /etc/php/7.4"
-        mkdir -p /etc/php/7.4
-        cp -r /etc/php.orig/7.4/* /etc/php/7.4
-    fi
-    php-fpm7.4 -v 
-    php-fpm7.4 -t 
-    service php7.4-fpm restart 1>/dev/null 2>&1
+if [ "${MODE}" = "MULTI" ] && [ "${PHP56}" = "YES" ]; then
+    startphp "5.6"
 fi
 
-if [ "${PHPVERSION}" = "8.0" ]||[ "${PHPVERSION}" = "MULTI" ] ; then
-    FIRSTRUN="/etc/php/8.0/fpm/php-fpm.conf"
-    if [ ! -f ${FIRSTRUN} ]; then
-        echo "[NGINX] no configs found, populating default configs to /etc/php/8.0"
-        mkdir -p /etc/php/8.0
-        cp -r /etc/php.orig/8.0/* /etc/php/8.0
-    fi
-    php-fpm8.0 -v \
-    php-fpm8.0 -t
-    service php8.0-fpm restart 1>/dev/null 2>&1
+if [ "${MODE}" = "MULTI" ] && [ "${PHP72}" = "YES" ]; then
+    startphp "7.2"
+fi
+
+if [ "${MODE}" = "MULTI" ] && [ "${PHP74}" = "YES" ]; then
+    startphp "7.4"
+fi
+
+if [ "${MODE}" = "MULTI" ] && [ "${PHP80}" = "YES" ]; then
+    startphp "8.0"
 fi
 
 nginx -V 2>&1 | grep -v configure

@@ -25,8 +25,9 @@ services:
 
     environment:
       - TZ=Europe/Amsterdam
-# if pulled with tag :php
-#      - PHP56=yes
-#      - PHP74=yes
-#      - PHP80=yes
+# if pulled with tag :multi
+#      - PHP56=YES
+#      - PHP74=YES
+#      - PHP74=YES
+#      - PHP80=YES
 

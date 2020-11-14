@@ -27,12 +27,5 @@ if [ "${BUILD}" = "yes" ]; then
     docker build -t eilandert/nginx-modsecurity3-pagespeed:php80 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.php80 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
     docker build -t eilandert/nginx-modsecurity3-pagespeed:multi -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.multi ${GITPATH}/nginx-proxy-modsecurity-pagespeed
 
-    docker push eilandert/nginx-modsecurity3-pagespeed:5.6
-    docker push eilandert/nginx-modsecurity3-pagespeed:7.2
-    docker push eilandert/nginx-modsecurity3-pagespeed:7.4
-    docker push eilandert/nginx-modsecurity3-pagespeed:8.0
-    docker push eilandert/nginx-modsecurity3-pagespeed:multi
-    docker push eilandert/nginx-modsecurity3-pagespeed:latest
-
     docker pushrm eilandert/nginx-modsecurity3-pagespeed -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/README.md
 fi
