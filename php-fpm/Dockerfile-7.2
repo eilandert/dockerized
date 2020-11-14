@@ -12,32 +12,32 @@ RUN     . /etc/os-release \
         && apt-get -y update \
         && apt-get install -y nullmailer mailutils \
         && apt-get install -y --no-install-recommends \
-                php7.2 \
-                php7.2-fpm \
-                php7.2-apcu \
-                php7.2-bcmath \
-                php7.2-cli \
-                php7.2-curl \
-                php7.2-dom \
-                php7.2-gd \
-                php7.2-igbinary \
-                php7.2-imagick \
-		php7.2-json \
-                php7.2-memcached \
-                php7.2-mbstring \
-                php7.2-mysql \
-                php7.2-opcache \
-                php7.2-pgsql \
-                php7.2-readline \
-		php7.2-recode \
-                php7.2-redis \
-                php7.2-soap \
-                php7.2-tidy \
-                php7.2-xml \
-                php7.2-zip \
+	php7.2 \
+        php7.2-fpm \
+        php7.2-apcu \
+        php7.2-bcmath \
+        php7.2-cli \
+        php7.2-curl \
+        php7.2-dom \
+        php7.2-gd \
+        php7.2-igbinary \
+        php7.2-imagick \
+        php7.2-json \
+        php7.2-memcached \
+        php7.2-mbstring \
+        php7.2-mysql \
+        php7.2-opcache \
+        php7.2-pgsql \
+        php7.2-readline \
+        php7.2-recode \
+        php7.2-redis \
+        php7.2-soap \
+        php7.2-tidy \
+        php7.2-xml \
+        php7.2-zip \
 	&& apt-get -y autoremove && apt-get -y autoclean \
         && rm -rf /var/lib/apt/lists/* \
-	&& rm -rf /etc/php/5.6 /usr/lib/php/20131226 \
+        && rm -rf /etc/php/5.6 /usr/lib/php/20131226 \
         && rm -rf /etc/php/7.0 /usr/lib/php/20151012 \
         && rm -rf /etc/php/7.1 /usr/lib/php/20160303 \
         #&& rm -rf /etc/php/7.2 /usr/lib/php/20170718 \
@@ -46,7 +46,7 @@ RUN     . /etc/os-release \
         && rm -rf /etc/php/8.0 /usr/lib/php/20200930 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-	&& chmod 755 /bootstrap.sh
+        && chmod 755 /bootstrap.sh
 
 CMD     ["/bootstrap.sh"]
 

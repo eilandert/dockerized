@@ -1,3 +1,3 @@
 #!/bin/sh
 
- exec sleep 1d;
+exec sleep 1d;

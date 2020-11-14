@@ -21,11 +21,11 @@ sed -i '/a2dismod php/d'	 ${GITPATH}/apache-phpfpm/Dockerfile-multi
 
 if [ "${BUILD}" = "yes" ]; then
 
-  docker build -t eilandert/apache-phpfpm:5.6 -f /opt/dockerized/apache-phpfpm/Dockerfile-5.6 /opt/dockerized/apache-phpfpm \
-  && docker build -t eilandert/apache-phpfpm:7.2 -f /opt/dockerized/apache-phpfpm/Dockerfile-7.2 /opt/dockerized/apache-phpfpm \
-  && docker build -t eilandert/apache-phpfpm:7.4 -t eilandert/apache-phpfpm:latest -f /opt/dockerized/apache-phpfpm/Dockerfile-7.4 /opt/dockerized/apache-phpfpm \
-  && docker build -t eilandert/apache-phpfpm:8.0 -f /opt/dockerized/apache-phpfpm/Dockerfile-8.0 /opt/dockerized/apache-phpfpm \
-  && docker build -t eilandert/apache-phpfpm:multi -f /opt/dockerized/apache-phpfpm/Dockerfile-multi /opt/dockerized/apache-phpfpm
+    docker build -t eilandert/apache-phpfpm:5.6 -f /opt/dockerized/apache-phpfpm/Dockerfile-5.6 /opt/dockerized/apache-phpfpm \
+        && docker build -t eilandert/apache-phpfpm:7.2 -f /opt/dockerized/apache-phpfpm/Dockerfile-7.2 /opt/dockerized/apache-phpfpm \
+        && docker build -t eilandert/apache-phpfpm:7.4 -t eilandert/apache-phpfpm:latest -f /opt/dockerized/apache-phpfpm/Dockerfile-7.4 /opt/dockerized/apache-phpfpm \
+        && docker build -t eilandert/apache-phpfpm:8.0 -f /opt/dockerized/apache-phpfpm/Dockerfile-8.0 /opt/dockerized/apache-phpfpm \
+        && docker build -t eilandert/apache-phpfpm:multi -f /opt/dockerized/apache-phpfpm/Dockerfile-multi /opt/dockerized/apache-phpfpm
 
 fi
 

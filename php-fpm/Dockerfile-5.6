@@ -12,33 +12,33 @@ RUN     . /etc/os-release \
         && apt-get -y update \
         && apt-get install -y nullmailer mailutils \
         && apt-get install -y --no-install-recommends \
-                php5.6 \
-                php5.6-fpm \
-                php5.6-apcu \
-                php5.6-bcmath \
-                php5.6-cli \
-                php5.6-curl \
-                php5.6-dom \
-                php5.6-gd \
-                php5.6-igbinary \
-                php5.6-imagick \
-		php5.6-json \
-		php5.6-mcrypt \
-                php5.6-memcached \
-                php5.6-mbstring \
-                php5.6-mysql \
-                php5.6-opcache \
-                php5.6-pgsql \
-                php5.6-readline \
-		php5.6-recode \
-                php5.6-redis \
-                php5.6-soap \
-                php5.6-tidy \
-                php5.6-xml \
-                php5.6-zip \
+	php5.6 \
+        php5.6-fpm \
+        php5.6-apcu \
+        php5.6-bcmath \
+        php5.6-cli \
+        php5.6-curl \
+        php5.6-dom \
+        php5.6-gd \
+        php5.6-igbinary \
+        php5.6-imagick \
+        php5.6-json \
+        php5.6-mcrypt \
+        php5.6-memcached \
+        php5.6-mbstring \
+        php5.6-mysql \
+        php5.6-opcache \
+        php5.6-pgsql \
+        php5.6-readline \
+        php5.6-recode \
+        php5.6-redis \
+        php5.6-soap \
+        php5.6-tidy \
+        php5.6-xml \
+        php5.6-zip \
 	&& apt-get -y autoremove && apt-get -y autoclean \
         && rm -rf /var/lib/apt/lists/* \
-	#&& rm -rf /etc/php/5.6 /usr/lib/php/20131226 \
+        #&& rm -rf /etc/php/5.6 /usr/lib/php/20131226 \
         && rm -rf /etc/php/7.0 /usr/lib/php/20151012 \
         && rm -rf /etc/php/7.1 /usr/lib/php/20160303 \
         && rm -rf /etc/php/7.2 /usr/lib/php/20170718 \
@@ -47,7 +47,7 @@ RUN     . /etc/os-release \
         && rm -rf /etc/php/8.0 /usr/lib/php/20200930 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
         && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-	&& chmod 755 /bootstrap.sh
+        && chmod 755 /bootstrap.sh
 
 CMD     ["/bootstrap.sh"]
 
