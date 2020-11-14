@@ -1,6 +1,6 @@
 #!/bin/sh
 
-        echo "[PHPFM] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
+        echo "[PHP-FPM] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
 
         chmod 777 /dev/stdout
 
@@ -18,7 +18,7 @@
 
         FIRSTRUN="/etc/nullmailer/defaultdomain"
         if [ ! -f ${FIRSTRUN} ]; then
-          echo "[APACHE-PHPFM] no configs found, populating default configs to /etc/nullmailer"
+          echo "[PHP-FPM] no configs found, populating default configs to /etc/nullmailer"
           cp -r /etc/nullmailer.orig/* /etc/nullmailer
         fi
 
