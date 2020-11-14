@@ -1,7 +1,6 @@
 FROM    eilandert/php-fpm:multi
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     MODE=multi
 ENV     TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
@@ -12,7 +11,7 @@ RUN     . /etc/os-release \
         && apt-get -y update \
         && apt-get install -y nullmailer mailutils \
         && apt-get install -y --no-install-recommends apache2 apache2-utils \
-        && a2dismod status php${PHPVERSION} mpm_prefork \
+        && a2dismod status mpm_prefork \
         && a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip \
         && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
         && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
