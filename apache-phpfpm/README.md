@@ -1,26 +1,26 @@
 # Apache + PHP-FPM
 
+A docker I created for serving wordpress, opencart and magento behind a reverse nginx proxy, but all functionality is there so you should be able to use it any way you want
+
 An Ubuntu-rolling docker with PHP packages from [Ondrej](https://launchpad.net/~ondrej/+archive/ubuntu/php)
 
 This docker can be found on [Github](https://github.com/eilandert/dockerized/tree/master/apache-phpfpm) and [Dockerhub](https://hub.docker.com/r/eilandert/apache-phpfpm)
 
 Complete Apache packages are on my [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/apache2)
 
-Features of apache:
+Features:
 
-- Updated rebuild and backport of the Ubuntu-20.10 Groovy Apache2 Package with OpenSSL 1.1.1h
-- Compiled with -O3 -flto to squeeze some extra % performance.
-- Linked all builds against OpenSSL 1.1.1h so there is ALPN and TLS1.3 support
-
-A docker I created for serving wordpress, opencart and magento behind a reverse nginx proxy, but all functionality is there so you should be able to use it any way you want<BR>
-
-FEATURES:
-
+- Updated rebuild and backport of the Ubuntu-20.10 Groovy Apache2 Package
+- Apache compiled with -O3 -flto to squeeze some extra % performance.
+- Linked apache against against OpenSSL 1.1.1h so there is ALPN and TLS1.3 support
 - Nullmailer for easy mailing from within e.g. wordpress
-- Most php-modules are included.
-- Daily reload of configs when mod_ssl is enabled (for reloading e.g. letsencrypt certificates)
+- Latest Composer installed
 - Automatic population of /etc/apache2 /etc/php and /etc/nullmailer if configs are not found (e.g. first run on mounted empty dir)
-- pre-enabled modules during build: proxy_fcgi setenvif rewrite expires headers remoteip
+- Most php-modules from the Ondrej PPA are included
+- Daily rebuilds of the docker
+- Composer installed
+- Daily reload of configs when mod_ssl is enabled (for reloading e.g. letsencrypt certificates)
+
 
 ENVIRONMENT:
 
