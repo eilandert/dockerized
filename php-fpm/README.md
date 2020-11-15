@@ -9,7 +9,7 @@ FEATURES:
 - Nullmailer for easy mailing from within e.g. wordpress
 - Most php-modules from the Ondrej PPA are included
 - Daily rebuilds
-- composed installed
+- composer installed
 
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/php-fpm/docker-compose.yml) for examples.
 
