@@ -6,15 +6,15 @@ Complete packages are on [Launchpad](https://launchpad.net/~eilander/+archive/ub
 
 Tags:
 
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:latest (without php and without nullmailer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:multi (with all version of php and nullmailer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:5.6 (with php5.6 and nullmailer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:7.2 (with php7.2 and nullmailer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:7.4 (with php7.4 and nullmailer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:8.0 (with php8.0 and nullmailer)
+- eilandert/eilandert/nginx-modsecurity3-pagespeed:latest (without php, nullmailer or composer)
+- eilandert/eilandert/nginx-modsecurity3-pagespeed:multi (with all versions of php, nullmailer and composer)
+- eilandert/eilandert/nginx-modsecurity3-pagespeed:5.6 (with php5.6, nullmailer and composer)
+- eilandert/eilandert/nginx-modsecurity3-pagespeed:7.2 (with php7.2, nullmailer and composer)
+- eilandert/eilandert/nginx-modsecurity3-pagespeed:7.4 (with php7.4, nullmailer and composer)
+- eilandert/eilandert/nginx-modsecurity3-pagespeed:8.0 (with php8.0, nullmailer and composer)
 
-For the tag with multi, you can enable different versions with PHP56=YES PHP72=YES PHP74=YES and PHP80=YES<BR>
-Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.<BR>
+For the tag with multi, you can enable different versions with PHP56=YES PHP72=YES PHP74=YES and PHP80=YES
+Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.
 PHP-FPM packages are from [Ondrejs excellent php ppa](https://launchpad.net/~ondrej/+archive/ubuntu/php)
 
 Bind /etc/nginx and /etc/modsecurity (for php, /etc/nullmailer and /etc/php) to an empty local directory and it will be populated on first run with default configs.
