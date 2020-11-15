@@ -9,23 +9,21 @@ docker exec -it letsencrypt certbot certonly
 
 if choosing webroot, choose /var/www/html
 
-
 Two ways to use letsencrypt in normal mode:
 
-1) as webroot. 
+1. as webroot.
 
 mount a common dir for the certs in both the letsencryptcontainer and a webserver.
-mount a common dir in both the letsencryptcontainer (/var/www/html) and a webserver for the webrequests. Make sure your webservers has a locationblock for letsencrypt like this: 
+mount a common dir in both the letsencryptcontainer (/var/www/html) and a webserver for the webrequests. Make sure your webservers has a locationblock for letsencrypt like this:
 
 nginx:
 location ^~ /.well-known/acme-challenge/ {
-      default_type "text/plain";
-      root         /var/www/html;
-      return 404;  
+default_type "text/plain";
+root /var/www/html;
+return 404;  
 }
 
-
-2) as standalone.
+2. as standalone.
 
 Use the ports 80 and 443. If you run a webserver you have to shut that down first and restart it when letsencrypt is finished
 

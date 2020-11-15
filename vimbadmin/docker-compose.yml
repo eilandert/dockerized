@@ -3,16 +3,14 @@ services:
     container_name: vimbadmin
     image: eilandert/vimbadmin:latest
     ports:
-    - mode: host
-      protocol: tcp
-      published: 9000
-      target: 80
+      - mode: host
+        protocol: tcp
+        published: 9000
+        target: 80
     restart: always
     volumes:
-    - ./config:/opt/vimbadmin/application/configs/:rw
+      - ./config:/opt/vimbadmin/application/configs/:rw
     environment:
       - TZ=Europe/Amsterdam
 
-version: '3.7'
-
-
+version: "3.7"

@@ -2,28 +2,27 @@ services:
   rspamd:
     container_name: rspamd
     image: eilandert/rspamd:latest
-#    dns: 8.8.8.8
+    #    dns: 8.8.8.8
     ports:
-    - mode: host
-      protocol: tcp
-      published: 11332
-      target: 11332
-    - mode: host
-      protocol: tcp
-      published: 11333
-      target: 11333
-    - mode: host
-      protocol: tcp
-      published: 11334
-      target: 11334
+      - mode: host
+        protocol: tcp
+        published: 11332
+        target: 11332
+      - mode: host
+        protocol: tcp
+        published: 11333
+        target: 11333
+      - mode: host
+        protocol: tcp
+        published: 11334
+        target: 11334
     restart: always
     volumes:
-    - ./config/rspamd:/etc/rspamd/
-    - ./data/rspamd:/var/lib/rspamd
+      - ./config/rspamd:/etc/rspamd/
+      - ./data/rspamd:/var/lib/rspamd
 
     environment:
       - TZ=Europe/Amsterdam
 #      - SYSLOG_HOST = 10.0.0.198
 
-version: '3.8'
-
+version: "3.8"

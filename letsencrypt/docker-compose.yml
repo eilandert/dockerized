@@ -1,4 +1,4 @@
-version: '2.2'
+version: "2.2"
 services:
   letsencrypt:
     container_name: letsencrypt
@@ -7,12 +7,11 @@ services:
     init: true
     stop_grace_period: 1s
     volumes:
-    - ./letsencrypt/certs:/etc/letsecrypt:rw
-    - ./letsencrypt/html:/var/www/html
-#    - ./letsencrypt/log:/var/log/letsencrypt:rw
-#    ports:
-#    - 80:80
-#    - 443:443
+      - ./letsencrypt/certs:/etc/letsecrypt:rw
+      - ./letsencrypt/html:/var/www/html
+    #    - ./letsencrypt/log:/var/log/letsencrypt:rw
+    #    ports:
+    #    - 80:80
+    #    - 443:443
     environment:
       - TZ=Europe/Amsterdam
-

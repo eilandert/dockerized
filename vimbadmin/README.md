@@ -1,4 +1,3 @@
-
 Dockerized vimbadmin image based on Alpine:latest, apache2 and php7.x (whatever Alpine's latest version of php is)
 
 steps:
@@ -7,7 +6,7 @@ steps:
 
 CREATE DATABASE `vimbadmin`;
 
-GRANT ALL ON `vimbadmin`.* TO `vimbadmin`@`ipaddress` IDENTIFIED BY 'password';
+GRANT ALL ON `vimbadmin`.\* TO `vimbadmin`@`ipaddress` IDENTIFIED BY 'password';
 
 FLUSH PRIVILEGES;
 
@@ -20,4 +19,3 @@ FLUSH PRIVILEGES;
 5. point your reverse proxy or your browser to port 80 (or whatever port you map), in your browser use /vimbadmin
 
 6. happy setupping
-

@@ -5,20 +5,18 @@ services:
     container_name: unbound
     image: eilandert/unbound:latest
     ports:
-    - mode: host
-      protocol: tcp
-      published: 53
-      target: 53
-    - mode: host
-      protocol: udp
-      published: 53
-      target: 53
+      - mode: host
+        protocol: tcp
+        published: 53
+        target: 53
+      - mode: host
+        protocol: udp
+        published: 53
+        target: 53
     restart: always
     volumes:
-    - ./config:/config:rw
+      - ./config:/config:rw
     environment:
       - TZ=Europe/Amsterdam
 
-
-version: '3.7'
-
+version: "3.7"

@@ -1,38 +1,37 @@
-version: '2.2'
+version: "2.2"
 services:
-
   wordpress:
     container_name: wordpress
     image: eilandert/apache-phpfpm
     restart: always
     stop_grace_period: 10s
     volumes:
-    - ./site:/var/www/html:rw
-    - ./letsencrypt/certs:/etc/letsencrypt:ro
-    - ./config/wordpress/apache2:/etc/apache2:rw
-    - ./config/wordpress/php:/etc/php:rw
-    - ./config/wordpress/nullmailer:/etc/nullmailer:rw
+      - ./site:/var/www/html:rw
+      - ./letsencrypt/certs:/etc/letsencrypt:ro
+      - ./config/wordpress/apache2:/etc/apache2:rw
+      - ./config/wordpress/php:/etc/php:rw
+      - ./config/wordpress/nullmailer:/etc/nullmailer:rw
     environment:
       - TZ=Europe/Amsterdam
       - CACHE=no
 
-#     use MODE=MOD for the apache module and mod_php/mpm_prefork instead of php-fpm/mpm_event
-#     use MODE=MULTI for enabling multiple php versions (need to pull the tag "multi")
-#     use MODE=FPM for standard fpm (default)
-#      - MODE=MULTI
-#     in MULTI MODE:
-#     - PHP56=YES
-#     - PHP72=YES
-#     - PHP74=YES
-#     - PHP80=YES
+    #     use MODE=MOD for the apache module and mod_php/mpm_prefork instead of php-fpm/mpm_event
+    #     use MODE=MULTI for enabling multiple php versions (need to pull the tag "multi")
+    #     use MODE=FPM for standard fpm (default)
+    #      - MODE=MULTI
+    #     in MULTI MODE:
+    #     - PHP56=YES
+    #     - PHP72=YES
+    #     - PHP74=YES
+    #     - PHP80=YES
 
-#      Already pre-enabled mods: proxy_fcgi setenvif rewrite expires headers remoteip
-#      When /etc/apache2 is mounted these changes will be persistent
-#      - A2ENMOD=""
-#      - A2DISMOD=""
-#      - A2ENCONF=""
-#      - A2DISCONF=""
+    #      Already pre-enabled mods: proxy_fcgi setenvif rewrite expires headers remoteip
+    #      When /etc/apache2 is mounted these changes will be persistent
+    #      - A2ENMOD=""
+    #      - A2DISMOD=""
+    #      - A2ENCONF=""
+    #      - A2DISCONF=""
 
     ports:
-    - 81:80
-    - 444:443
+      - 81:80
+      - 444:443

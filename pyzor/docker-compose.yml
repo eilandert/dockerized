@@ -1,6 +1,5 @@
 services:
   pyzor:
-    container_name: pyzor
     image: eilandert/pyzor:latest
     - mode: host
       protocol: tcp

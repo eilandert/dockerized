@@ -1,27 +1,26 @@
-version: '2.2'
+version: "2.2"
 services:
-
   nginx:
     container_name: nginx
     image: eilandert/nginx-modsecurity3-pagespeed:latest
     stop_grace_period: 3s
     ports:
-    - 80:80
-    - 443:443
+      - 80:80
+      - 443:443
     restart: always
     volumes:
-    - ./config/nginx:/etc/nginx:rw
-    - ./config/modsecurity/:/etc/modsecurity:ro
-    - ./cache/pagespeed:/var/cache/pagespeed:rw
-    - ./cache/nginx:/var/cache/nginx:rw
+      - ./config/nginx:/etc/nginx:rw
+      - ./config/modsecurity/:/etc/modsecurity:ro
+      - ./cache/pagespeed:/var/cache/pagespeed:rw
+      - ./cache/nginx:/var/cache/nginx:rw
 
-# if pulled with tag :php
-#    - ./config/php:/etc/php:rw
-#    - ./config/nullmailer:/etc/nullmailer:rw
+    # if pulled with tag :php
+    #    - ./config/php:/etc/php:rw
+    #    - ./config/nullmailer:/etc/nullmailer:rw
 
-# for use with my letsencrypt docker
-#    - ./letsencrypt/certs:/etc/letsencrypt:ro
-#    - ./letsencrypt/html:/var/www/html:ro
+    # for use with my letsencrypt docker
+    #    - ./letsencrypt/certs:/etc/letsencrypt:ro
+    #    - ./letsencrypt/html:/var/www/html:ro
 
     environment:
       - TZ=Europe/Amsterdam

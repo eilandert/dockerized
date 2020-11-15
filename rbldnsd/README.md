@@ -1,11 +1,9 @@
-
 Quick docker to run rbldnsd.
 
 Compiled with alpine:edge and put in a SCRATCH container. Compiled from: https://github.com/rspamd/rbldnsd
 
-It will start with a default set. 
+It will start with a default set.
 Mount /zones and run with your own command to run other zonefiles.
-
 
 Please don't use included zone, it's included for testing purposes. I gathered those sources long time ago for blocking with iptables.
 I cannot support or guarantuee anything as I don't own the actual data nor can I remove ip's. I don't own the copyrights/licences either.
@@ -26,10 +24,9 @@ Sources of the default test-set, sorted and optimized with iprange
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/dshield_top_1000.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_abusers_1d.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_abusers_30d.netset
-        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset 
+        https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level2.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/greensnow.ipset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/spamhaus_drop.netset
         https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/spamhaus_edrop.netset
-
