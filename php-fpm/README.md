@@ -7,8 +7,9 @@ A docker I created for serving php content, used as base image for my apache/ngi
 FEATURES:
 
 - Nullmailer for easy mailing from within e.g. wordpress
-- Most php-modules are included.
+- Most php-modules from the Ondrej PPA are included
 - Daily rebuilds
+- composed installed
 
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/php-fpm/docker-compose.yml) for examples.
 

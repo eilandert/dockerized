@@ -61,6 +61,11 @@ sed -i 's/\&\& rm -rf \/etc\/php\/7.4/#\&\& rm -rf \/etc\/php\/7.4/' ${GITPATH}/
 sed -i 's/\&\& rm -rf \/etc\/php\/8.0/#\&\& rm -rf \/etc\/php\/8.0/' ${GITPATH}/php-fpm/Dockerfile-8.0
 sed -i '/\&\& rm -rf \/etc\/php/d'  ${GITPATH}/php-fpm/Dockerfile-multi
 
+
+#install composer
+wget https://getcomposer.org/installer -q -O ${GITPATH}/php-fpm/composer-setup.php
+
+
 if [ "${BUILD}" = "yes" ]; then
 
     docker build -t eilandert/php-fpm:5.6 -f ${GITPATH}/php-fpm/Dockerfile-5.6 ${GITPATH}/php-fpm \

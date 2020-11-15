@@ -38,4 +38,11 @@ fi
 php-fpm${PHPVERSION} -v
 php-fpm${PHPVERSION} -t
 
+COMPOSERPATH="/usr/bin/composer"
+if [ ! -f ${COMPOSERPATH} ]; then
+	cd /tmp
+	php composer-setup.php --quiet
+        mv composer.phar ${COMPOSERPATH}
+fi
+
 exec /usr/sbin/php-fpm${PHPVERSION} -F
