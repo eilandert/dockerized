@@ -8,6 +8,9 @@ This docker can be found on [Github](https://github.com/eilandert/dockerized/tre
 
 Complete Apache packages are on my [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/apache2)
 
+Bind /etc/php and /etc/apache2 for configfiles, those dirs will be populated if they are empty
+
+
 Features:
 
 - Updated rebuild and backport of the Ubuntu-20.10 Groovy Apache2 Package
@@ -18,7 +21,6 @@ Features:
 - Automatic population of /etc/apache2 /etc/php and /etc/nullmailer if configs are not found (e.g. first run on mounted empty dir)
 - Most php-modules from the Ondrej PPA are included
 - Daily rebuilds of the docker
-- Composer installed
 - Daily reload of configs when mod_ssl is enabled (for reloading e.g. letsencrypt certificates)
 
 
@@ -27,11 +29,9 @@ ENVIRONMENT:
 - use CACHE=yes to enable apache caching
 - use TZ=Europe/Amsterdam (for example) to set timezone
 - variables A2ENMOD A2DISMOD A2ENCONF A2DISCONF (changes are persistent if you mount /etc/apache2)
-- use MODE=FPM for using php-fpm (default)
 - use MODE=MOD for using mod_php instead of php-fpm. Apache2 will be set to mpm_prefork.
-- use MODE=MULTI to enable running multiple php-fpm versions. You'll need to pull the multi-tag docker
-- in multimode set PHP56=YES PHP72=YES PHP74=YES PHP80=YES to enable specific versions.
-- in multimode you have to create the handler per vhost manually, examples in apache2/conf-available/php\*-fpm.conf
+- in multimode (tag :multi) set PHP56=YES PHP72=YES PHP74=YES PHP80=YES to enable specific versions.
+- in multimode (tag: multi) you have to create the handler per vhost manually, examples in apache2/conf-available/php\*-fpm.conf
 
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
 
