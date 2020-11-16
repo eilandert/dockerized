@@ -1,0 +1,17 @@
+	&& apt-get -y autoremove && apt-get -y autoclean \
+        && rm -rf /var/lib/apt/lists/* \
+        && rm -rf /etc/php/5.6 /usr/lib/php/20131226 \
+        && rm -rf /etc/php/7.0 /usr/lib/php/20151012 \
+        && rm -rf /etc/php/7.1 /usr/lib/php/20160303 \
+        && rm -rf /etc/php/7.2 /usr/lib/php/20170718 \
+        && rm -rf /etc/php/7.3 /usr/lib/php/20180731 \
+        && rm -rf /etc/php/7.4 /usr/lib/php/20190902 \
+        && rm -rf /etc/php/8.0 /usr/lib/php/20200930 \
+        && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
+        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
+        && chmod 755 /bootstrap.sh
+
+CMD     ["/bootstrap.sh"]
+
+EXPOSE  9000
+
