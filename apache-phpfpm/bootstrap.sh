@@ -134,6 +134,13 @@ else
     fi
 fi
 
+COMPOSERPATH="/usr/bin/composer"
+if [ ! -f ${COMPOSERPATH} ]; then
+        cd /tmp
+        php composer-setup.php --quiet
+        mv composer.phar ${COMPOSERPATH}
+fi
+
 apachectl -v
 echo "Checking configs:"
 apachectl configtest

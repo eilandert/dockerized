@@ -38,6 +38,14 @@ if [ ! -x /run/php ]; then
     chmod 755 /run/php
 fi
 
+COMPOSERPATH="/usr/bin/composer"
+if [ ! -f ${COMPOSERPATH} ]; then
+        cd /tmp
+        php composer-setup.php --quiet
+        mv composer.phar ${COMPOSERPATH}
+fi
+
+
 if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ]; then
     echo "[NGINX] You downloaded the MULTI-PHP edition of the docker"
     echo "[NGINX] There is no PHP56 PHP72 PHP74 or PHP80 environment variable specified"
