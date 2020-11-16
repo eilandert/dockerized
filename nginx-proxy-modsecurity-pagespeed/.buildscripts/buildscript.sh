@@ -21,11 +21,11 @@ sed -i 's/bootstrap.sh\ /bootstrap-php.sh\ /' ${GITPATH}/nginx-proxy-modsecurity
 if [ "${BUILD}" = "yes" ]; then
 
     docker build -t eilandert/nginx-modsecurity3-pagespeed:latest -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile ${GITPATH}/nginx-proxy-modsecurity-pagespeed
-    docker build -t eilandert/nginx-modsecurity3-pagespeed:php56 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.php56 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
-    docker build -t eilandert/nginx-modsecurity3-pagespeed:php72 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.php72 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
-    docker build -t eilandert/nginx-modsecurity3-pagespeed:php74 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.php74 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
-    docker build -t eilandert/nginx-modsecurity3-pagespeed:php80 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.php80 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
-    docker build -t eilandert/nginx-modsecurity3-pagespeed:multi -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile.multi ${GITPATH}/nginx-proxy-modsecurity-pagespeed
+    docker build -t eilandert/nginx-modsecurity3-pagespeed:php56 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile-php56 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
+    docker build -t eilandert/nginx-modsecurity3-pagespeed:php72 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile-php72 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
+    docker build -t eilandert/nginx-modsecurity3-pagespeed:php74 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile-php74 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
+    docker build -t eilandert/nginx-modsecurity3-pagespeed:php80 -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile-php80 ${GITPATH}/nginx-proxy-modsecurity-pagespeed
+    docker build -t eilandert/nginx-modsecurity3-pagespeed:multi -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/Dockerfile-multi ${GITPATH}/nginx-proxy-modsecurity-pagespeed
 
     docker pushrm eilandert/nginx-modsecurity3-pagespeed -f ${GITPATH}/nginx-proxy-modsecurity-pagespeed/README.md
 fi
