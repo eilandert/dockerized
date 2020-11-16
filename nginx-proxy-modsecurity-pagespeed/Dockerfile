@@ -6,7 +6,7 @@ COPY    bootstrap.sh /bootstrap.sh
 
 RUN     . /etc/os-release \
         && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list \
-        && apt-get update && apt-get -y upgrade \
+        && apt-get update \
         && apt-get -y --no-install-recommends install \
                 nginx-full \
                 libmodsecurity3 \
