@@ -5,7 +5,6 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	INSTALL_PATH=/opt/vimbadmin
 
 COPY	bootstrap.sh /bootstrap.sh
-COPY    dovecotpasswd.php /tmp
 
 RUN apt-get update && apt-get -y install --no-install-recommends git unzip \
   && git clone \
@@ -26,8 +25,6 @@ RUN apt-get update && apt-get -y install --no-install-recommends git unzip \
   && echo "Include ${INSTALL_PATH}/application/configs/httpd.conf" > /etc/apache2.orig/sites-enabled/000-default.conf \
   && echo "php_admin_flag[opcache.enable] = 1" >> /etc/php.orig/${PHPVERSION}/fpm/pool.d/www.conf \
   && rm ${INSTALL_PATH}/application/configs.orig/application.ini.vagrant \
-  && mv /tmp/dovecotpasswd.php ${INSTALL_PATH}/application/configs.orig/ \
-  && chmod +x ${INSTALL_PATH}/application/configs.orig/dovecotpasswd.php \
   && apt-get -y purge git unzip mailutils nullmailer \
   && apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean \
   && rm -rf /var/lib/apt/lists/*  \

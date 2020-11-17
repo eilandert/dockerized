@@ -39,20 +39,22 @@ if [ ! -f ${FIRSTRUN} ]; then
     echo "[VIMBADMIN] vimbadmin: application.ini not found, populating default configs to ${WORKDIR}/application/configs/"
     cp -rp ${WORKDIR}/application/configs.orig/* ${WORKDIR}/application/configs/
     cp ${WORKDIR}/application/configs/application.ini.dist ${WORKDIR}/application/configs/application.ini
+    sed -i 's/defaults.mailbox.password_scheme\ \= \"dovecot:BLF-CRYPT\"/defaults.mailbox.password_scheme\ \= \"crypt:sha512"/' ${WORKDIR}/application/configs/application.ini
     chown -R www-data:www-data ${WORKDIR}/var
     echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini
+
 else
     # 4-6-2020, change existing application.ini after upgrade to 3.2.0, removal from this file far in future.
     sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Resource"~"/../library/OSS/Resource"~' ${WORKDIR}/application/configs/application.ini
     sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Smarty/functions"~"/../library/OSS/Smarty/functions"~' ${WORKDIR}/application/configs/application.ini
+
     # 17-11-2020 remove loadmodule in the sitesnippet (migrating from alpine to ubuntu)
     sed -i '/^LoadModule/d' /etc/apache2/sites-enabled/000-default.conf
-    # 17-11-2020 change dovecot for a script
-    sed -i 's/defaults\.mailbox\.dovecot_pw_binary\ \=\ \"\/usr\/bin\/doveadm\ pw/defaults.mailbox.dovecot_pw_binary = \"\/opt\/vimbadmin\/application\/configs\/dovecotpasswd\.php/' ${WORKDIR}/application/configs/application.ini
+
     #copy new .dist to configs
     cp ${WORKDIR}/application/configs.orig/application.ini.dist ${WORKDIR}/application/configs/application.ini.dist
+    sed -i 's/defaults.mailbox.password_scheme\ \= \"dovecot:BLF-CRYPT\"/defaults.mailbox.password_scheme\ \= \"crypt:sha512"/' ${WORKDIR}/application/configs/application.ini.dist
     echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini.dist
-    sed -i 's/defaults\.mailbox\.dovecot_pw_binary\ \=\ \"\/usr\/bin\/doveadm\ pw/defaults.mailbox.dovecot_pw_binary = \"\/opt\/vimbadmin\/application\/configs\/dovecotpasswd\.php/' ${WORKDIR}/application/configs/application.ini.dist
 fi
 
 if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
