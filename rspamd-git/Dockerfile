@@ -44,6 +44,7 @@ RUN	apt-get -y update \
 	&& mkdir -p /var/run/rspamd \
 	&& mkdir -p /usr/local/var \
 	&& rm -rf /usr/local/share/man /usr/local/share/games /usr/local/share/include /usr/local/share/src /usr/local/lib/python3.8 /usr/local/sbin \
+	&& cd /tmp \
 	&& rm -rf /opt \
 	&& apt-get purge -y \
                 git \

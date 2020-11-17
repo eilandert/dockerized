@@ -20,7 +20,6 @@ RUN	. /etc/os-release \
             usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
           fi ;\
         done \
-	&& sh -x \
 #	 && for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done \
 #	 && for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done \
 #        && for file in `ls /usr/bin/dpkg*`; do dpkg-statoverride --update --add root adm 0500 $file; done \

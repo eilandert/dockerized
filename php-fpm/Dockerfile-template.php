@@ -10,6 +10,7 @@
         php#PHPVERSION#-imagick \
         #removedinphp80#php#PHPVERSION#-json \
         #removedinphp72#php#PHPVERSION#-mcrypt \
+	php#PHPVERSION#-memcache \
         php#PHPVERSION#-memcached \
         php#PHPVERSION#-mbstring \
         php#PHPVERSION#-mysql \

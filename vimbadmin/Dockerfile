@@ -26,7 +26,8 @@ RUN  apk add --no-cache php7-apache2 php7-phar php7-mbstring php7-mcrypt php7-js
   && rm -rf ${INSTALL_PATH}/.git /root/.composer /usr/local/bin/composer \
   && apk del --no-cache git libcurl curl \
   && apk del alpine-keys apk-tools \
-  && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* 
+  && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
+  && mv /etc/dovecot/conf.d/10-ssl.conf /etc/dovecot/conf.d/10-ssl.bak
 
 COPY bootstrap.sh /bootstrap.sh
 COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/

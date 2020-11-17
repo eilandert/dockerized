@@ -2,7 +2,7 @@ FROM    eilandert/ubuntu-base:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
-COPY    bootstrap.sh /bootstrap.sh
+COPY    bootstrap-php.sh /bootstrap.sh
 
 RUN     . /etc/os-release \
         && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list \
