@@ -25,12 +25,13 @@ RUN     . /etc/os-release \
         php5.6-igbinary \
         php5.6-imagick \
         php5.6-json \
-        php5.6-mcrypt \
+	php5.6-mcrypt \
 	php5.6-memcache \
         php5.6-memcached \
         php5.6-mbstring \
         php5.6-mysql \
         php5.6-opcache \
+        php5.6-pspell \
         php5.6-pgsql \
         php5.6-readline \
         php5.6-recode \
@@ -55,6 +56,7 @@ RUN     . /etc/os-release \
         php7.2-mbstring \
         php7.2-mysql \
         php7.2-opcache \
+        php7.2-pspell \
         php7.2-pgsql \
         php7.2-readline \
         php7.2-recode \
@@ -79,6 +81,7 @@ RUN     . /etc/os-release \
         php7.4-mbstring \
         php7.4-mysql \
         php7.4-opcache \
+        php7.4-pspell \
         php7.4-pgsql \
         php7.4-readline \
         php7.4-redis \
@@ -101,6 +104,7 @@ RUN     . /etc/os-release \
         php8.0-mbstring \
         php8.0-mysql \
         php8.0-opcache \
+        php8.0-pspell \
         php8.0-pgsql \
         php8.0-readline \
         php8.0-redis \

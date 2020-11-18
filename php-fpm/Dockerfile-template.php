@@ -9,12 +9,13 @@
         php#PHPVERSION#-igbinary \
         php#PHPVERSION#-imagick \
         #removedinphp80#php#PHPVERSION#-json \
-        #removedinphp72#php#PHPVERSION#-mcrypt \
+	#removedinphp72#php#PHPVERSION#-mcrypt \
 	php#PHPVERSION#-memcache \
         php#PHPVERSION#-memcached \
         php#PHPVERSION#-mbstring \
         php#PHPVERSION#-mysql \
         php#PHPVERSION#-opcache \
+        php#PHPVERSION#-pspell \
         php#PHPVERSION#-pgsql \
         php#PHPVERSION#-readline \
         #removedinphp74#php#PHPVERSION#-recode \
