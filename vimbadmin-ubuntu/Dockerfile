@@ -16,7 +16,7 @@ RUN apt-get update && apt-get -y install --no-install-recommends git unzip \
      ${INSTALL_PATH} \
   && cd ${INSTALL_PATH} \
   && rm -rf /etc/php && cp -r /etc/php.orig /etc/php \
-  && composer update \
+  && composer update --prefer-dist --no-dev \
   && composer config -g secure-http false \
   && composer install --prefer-dist --no-dev \
   && rm -rf /etc/php && mkdir -p /etc/php \
