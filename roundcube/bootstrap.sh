@@ -1,10 +1,6 @@
 #!/bin/bash
 
-#set -ex
-
 echo "[ROUNDCUBE] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
-
-PWD=${INSTALLDIR}
 
 if [ -n "${TZ}" ]; then
     rm /etc/timezone /etc/localtime
@@ -22,13 +18,13 @@ fi
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/apache2/apache2.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-    #    echo "[VIMBADMIN] apache: no configs found, populating default configs to /etc/apache2"
+    #    echo "[ROUNDCUBE] apache: no configs found, populating default configs to /etc/apache2"
     cp -r /etc/apache2.orig/* /etc/apache2/
 fi
 
 FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-    #    echo "[VIMBADMIN] php: no configs found, populating default configs to /etc/php/${PHPVERSION}"
+    #    echo "[ROUNDCUBE] php: no configs found, populating default configs to /etc/php/${PHPVERSION}"
     mkdir -p /etc/php/${PHPVERSION}
     cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION}
 fi
@@ -53,7 +49,7 @@ if [ ! -z "${!POSTGRES_ENV_POSTGRES_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "pgsq
     : "${ROUNDCUBEMAIL_DB_NAME:=${POSTGRES_ENV_POSTGRES_DB:-roundcubemail}}"
     : "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}://${ROUNDCUBEMAIL_DB_USER}:${ROUNDCUBEMAIL_DB_PASSWORD}@${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}/${ROUNDCUBEMAIL_DB_NAME}}"
 
-    /wait-for-it.sh ${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT} -t 30
+    /wait-for-it.sh -q ${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT} -t 30
 
 elif [ ! -z "${!MYSQL_ENV_MYSQL_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "mysql" ]; then
     : "${ROUNDCUBEMAIL_DB_TYPE:=mysql}"
@@ -68,7 +64,7 @@ elif [ ! -z "${!MYSQL_ENV_MYSQL_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "mysql" ]
     : "${ROUNDCUBEMAIL_DB_NAME:=${MYSQL_ENV_MYSQL_DATABASE:-roundcubemail}}"
     : "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}://${ROUNDCUBEMAIL_DB_USER}:${ROUNDCUBEMAIL_DB_PASSWORD}@${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}/${ROUNDCUBEMAIL_DB_NAME}}"
 
-    /wait-for-it.sh ${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT} -t 30
+    /wait-for-it.sh -q ${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT} -t 30
 
 else
     # use local SQLite DB in /var/roundcube/db
@@ -89,12 +85,11 @@ fi
 : "${ROUNDCUBEMAIL_SKIN:=larry}"
 : "${ROUNDCUBEMAIL_TEMP_DIR:=/tmp/roundcube-temp}"
 
-    ROUNDCUBEMAIL_PLUGINS_PHP=`echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g"`
-    ROUNDCUBEMAIL_DES_KEY=`test -f /run/secrets/roundcube_des_key && cat /run/secrets/roundcube_des_key || head /dev/urandom | base64 | head -c 24`
-    touch config/config.inc.php
+ROUNDCUBEMAIL_PLUGINS_PHP=`echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g"`
+ROUNDCUBEMAIL_DES_KEY=`test -f /run/secrets/roundcube_des_key && cat /run/secrets/roundcube_des_key || head /dev/urandom | base64 | head -c 24`
 
-    echo "Write config to $PWD/config/config.inc.php"
-    echo "<?php
+#    echo "Write config to $PWD/config/config.inc.php"
+echo "<?php
     \$config = array();
     \$config['db_dsnw'] = '${ROUNDCUBEMAIL_DSNW}';
     \$config['db_dsnr'] = '${ROUNDCUBEMAIL_DSNR}';
@@ -108,16 +103,20 @@ fi
     \$config['zipdownload_selection'] = true;
     \$config['log_driver'] = 'stdout';
     \$config['skin'] = '${ROUNDCUBEMAIL_SKIN}';
-    " > ${INSTALLDIR}/config/config.inc.php
+" > ${INSTALLDIR}/config/config.inc.php
 
-    for fn in `ls /var/roundcube/config/*.php 2>/dev/null || true`; do
-        echo "include('$fn');" >> config/config.inc.php
-    done
+if [ ! -f /var/roundcube/config/config.inc.php ]; then
+	echo "# When mounted, you can make persistent additions to the roundcube config in this file" > /var/roundcube/config/config.inc.php
+fi
 
-    # initialize or update DB
-    bin/initdb.sh --dir=$PWD/SQL --create || bin/updatedb.sh --dir=$PWD/SQL --package=roundcube || echo "Failed to initialize database. Please run $PWD/bin/initdb.sh and $PWD/bin/updatedb.sh manually."
+for fn in `ls /var/roundcube/config/*.php 2>/dev/null || true`; do
+    echo "include('$fn');" >> config/config.inc.php
+done
 
-    cp -rp /opt/roundcube/plugins.orig/* /opt/roundcube/plugins/
+# initialize or update DB
+bin/initdb.sh --dir=$PWD/SQL --create 1>/dev/null 2>&1 || bin/updatedb.sh --dir=$PWD/SQL --package=roundcube || echo "Failed to initialize database. Please run $PWD/bin/initdb.sh and $PWD/bin/updatedb.sh manually."
+
+cp -rp /opt/roundcube/plugins.orig/* /opt/roundcube/plugins/
 
 if [ ! -z "${ROUNDCUBEMAIL_TEMP_DIR}" ]; then
     mkdir -p ${ROUNDCUBEMAIL_TEMP_DIR} && chown www-data ${ROUNDCUBEMAIL_TEMP_DIR}
@@ -135,14 +134,17 @@ if [ ! -z "${ROUNDCUBEMAIL_LOCALE}" ]; then
     /usr/sbin/locale-gen 1>/dev/null 2>&1
 fi
 
-cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.sample
+# Trigger garbage collecting routines manually
+${INSTALLDIR}/bin/gc.sh
+
+cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.php.orig
 
 if [ ! -f /var/roundcube/config/phpfpm.conf ]; then
-        cp -rp /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf
+    cp -rp /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf
 fi
 
 if [ ! -f /var/roundcube/config/httpd.conf ]; then
-	cp -rp /var/roundcube/config.orig/httpd.conf /var/roundcube/config/httpd.conf
+    cp -rp /var/roundcube/config.orig/httpd.conf /var/roundcube/config/httpd.conf
 fi
 
 if [ -f /etc/apache2/mods-enabled/ssl.load ]; then

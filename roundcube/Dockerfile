@@ -27,7 +27,7 @@ RUN set -x; \
 	  --recurse-submodules \
 	  --depth=1 \ 
 	  -c advice.detachedHead=false \
-	  --branch ${VERSION} \
+#	  --branch ${VERSION} \
 	  https://github.com/roundcube/roundcubemail.git \
           ${INSTALLDIR}; \
         cd ${INSTALLDIR} ;\
@@ -49,6 +49,7 @@ RUN set -x; \
 	apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean; \
         rm -rf /var/lib/apt/lists/* ;\
 	rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
+	rm -f /etc/apache2.orig/conf-enabled/other-vhosts-access-log.conf ;\
         chown -R www-data:www-data ${INSTALLDIR}/logs; \
         chown -R www-data:www-data ${INSTALLDIR}/temp ;\
         chmod +x /wait-for-it.sh; \
