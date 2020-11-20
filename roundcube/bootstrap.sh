@@ -2,6 +2,10 @@
 
 #set -ex
 
+echo "[ROUNDCUBE] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
+
+PWD=${INSTALLDIR}
+
 if [ -n "${TZ}" ]; then
     rm /etc/timezone /etc/localtime
     echo "${TZ}" > /etc/timezone
@@ -18,13 +22,13 @@ fi
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/apache2/apache2.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-#    echo "[VIMBADMIN] apache: no configs found, populating default configs to /etc/apache2"
+    #    echo "[VIMBADMIN] apache: no configs found, populating default configs to /etc/apache2"
     cp -r /etc/apache2.orig/* /etc/apache2/
 fi
 
 FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-#    echo "[VIMBADMIN] php: no configs found, populating default configs to /etc/php/${PHPVERSION}"
+    #    echo "[VIMBADMIN] php: no configs found, populating default configs to /etc/php/${PHPVERSION}"
     mkdir -p /etc/php/${PHPVERSION}
     cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION}
 fi
@@ -85,13 +89,13 @@ fi
 : "${ROUNDCUBEMAIL_SKIN:=larry}"
 : "${ROUNDCUBEMAIL_TEMP_DIR:=/tmp/roundcube-temp}"
 
-if [ ! -e config/config.inc.php ]; then
     ROUNDCUBEMAIL_PLUGINS_PHP=`echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g"`
     ROUNDCUBEMAIL_DES_KEY=`test -f /run/secrets/roundcube_des_key && cat /run/secrets/roundcube_des_key || head /dev/urandom | base64 | head -c 24`
     touch config/config.inc.php
 
     echo "Write config to $PWD/config/config.inc.php"
     echo "<?php
+    \$config = array();
     \$config['db_dsnw'] = '${ROUNDCUBEMAIL_DSNW}';
     \$config['db_dsnr'] = '${ROUNDCUBEMAIL_DSNR}';
     \$config['default_host'] = '${ROUNDCUBEMAIL_DEFAULT_HOST}';
@@ -104,7 +108,7 @@ if [ ! -e config/config.inc.php ]; then
     \$config['zipdownload_selection'] = true;
     \$config['log_driver'] = 'stdout';
     \$config['skin'] = '${ROUNDCUBEMAIL_SKIN}';
-    " > config/config.inc.php
+    " > ${INSTALLDIR}/config/config.inc.php
 
     for fn in `ls /var/roundcube/config/*.php 2>/dev/null || true`; do
         echo "include('$fn');" >> config/config.inc.php
@@ -112,25 +116,33 @@ if [ ! -e config/config.inc.php ]; then
 
     # initialize or update DB
     bin/initdb.sh --dir=$PWD/SQL --create || bin/updatedb.sh --dir=$PWD/SQL --package=roundcube || echo "Failed to initialize database. Please run $PWD/bin/initdb.sh and $PWD/bin/updatedb.sh manually."
-else
-    echo "WARNING: $PWD/config/config.inc.php already exists."
-    echo "ROUNDCUBEMAIL_* environment variables have been ignored."
-fi
+
+    cp -rp /opt/roundcube/plugins.orig/* /opt/roundcube/plugins/
 
 if [ ! -z "${ROUNDCUBEMAIL_TEMP_DIR}" ]; then
     mkdir -p ${ROUNDCUBEMAIL_TEMP_DIR} && chown www-data ${ROUNDCUBEMAIL_TEMP_DIR}
 fi
 
 if [ ! -z "${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" ]; then
-    echo "php_admin_value[upload_max_filesize]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf
-    echo "php_admin_value[post_max_size]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf
+    echo "php_admin_value[upload_max_filesize]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" > /var/roundcube/config/phpfpm.override
+    echo "php_admin_value[post_max_size]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" >> /var/roundcube/config/phpfpm.override
 fi
 
 : "${ROUNDCUBEMAIL_LOCALE:=en_US.UTF-8 UTF-8}"
 
 if [ ! -z "${ROUNDCUBEMAIL_LOCALE}" ]; then
     echo "${ROUNDCUBEMAIL_LOCALE}" > /etc/locale.gen
-    /usr/sbin/locale-gen
+    /usr/sbin/locale-gen 1>/dev/null 2>&1
+fi
+
+cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.sample
+
+if [ ! -f /var/roundcube/config/phpfpm.conf ]; then
+        cp -rp /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf
+fi
+
+if [ ! -f /var/roundcube/config/httpd.conf ]; then
+	cp -rp /var/roundcube/config.orig/httpd.conf /var/roundcube/config/httpd.conf
 fi
 
 if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
