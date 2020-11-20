@@ -34,8 +34,16 @@ RUN set -x; \
         mv composer.json-dist composer.json; \
 	composer update --prefer-dist --no-dev ;\
 #	composer config -g secure-http false; \
+	composer -q -n require texxasrulez/advanced_search ;\
 	bin/install-jsdeps.sh ;\
 	cd plugins ;\
+	VERSION=`git ls-remote --ta\gs https://github.com/mfreiholz/persistent_login.git | cut -d/ -f3- | sort -t. -nk1,2 -k3 | awk '/^[^{]*$/{version=$1}END{print version}'` ;\
+	git clone \
+	   --recurse-submodules \
+	   --depth=1 \
+	   -c advice.detachedHead=false \ 
+	   --branch ${VERSION} \
+	   https://github.com/mfreiholz/persistent_login.git ;\
 	for dir in `ls`; do cd $dir; composer update --prefer-dist --no-dev; cd ..; done ;\
 	echo "include=/var/roundcube/config/phpfpm.conf" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
         echo "include=/var/roundcube/config/phpfpm.conf.override" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
