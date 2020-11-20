@@ -1,7 +1,7 @@
 
 THIS DOCKER IS IN TESTING PHASE, PLEASE REPORT IF SOMETHING DOESN'T WORK
 
-Daily rebuild of roundcube based on [eilandert/apache-phpfpm:7.4](https://hub.docker.com/r/eilandert/apache-phpfpm)
+Daily rebuild of roundcube-git based on [eilandert/apache-phpfpm:8.0](https://hub.docker.com/r/eilandert/apache-phpfpm)
 (ubuntu:rolling with [Apache2](https://launchpad.net/~eilander/+archive/ubuntu/apache2) and [PHP](https://launchpad.net/~ondrej/+archive/ubuntu/php))
 
 Designed to be behind a [(nginx) reverse proxy](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed), but all functionality is there to do what you want.

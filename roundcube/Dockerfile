@@ -1,4 +1,4 @@
-FROM    eilandert/apache-phpfpm:7.4
+FROM    eilandert/apache-phpfpm:8.0
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -63,6 +63,6 @@ ENTRYPOINT ["/bootstrap.sh"]
 # expose these volumes
 VOLUME /var/roundcube/config
 VOLUME /var/roundcube/db
-VOLUME /opt/roundcube
-VOLUME /tmp/roundcube-temp
+#VOLUME /opt/roundcube
+#VOLUME /tmp/roundcube-temp
 
