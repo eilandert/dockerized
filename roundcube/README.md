@@ -6,8 +6,8 @@ Daily rebuild of roundcube-git based on [eilandert/apache-phpfpm:8.0](https://hu
 Designed to be behind a [(nginx) reverse proxy](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed), but all functionality is there to do what you want.
 
 Tags:<BR>
-eilandert/roundcube:php7.4 
-eilandert/roundcube:php8.0
+eilandert/roundcube:php7.4 (roundcube latest release + php7.4)
+eilandert/roundcube:php8.0 (roundcube git + php8.0)
 eilandert/roundcube:latest -> defaults to php8.0
 
 Extra plugins:<BR>
