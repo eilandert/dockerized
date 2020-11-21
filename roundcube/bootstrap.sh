@@ -123,8 +123,8 @@ if [ ! -z "${ROUNDCUBEMAIL_TEMP_DIR}" ]; then
 fi
 
 if [ ! -z "${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" ]; then
-    echo "php_admin_value[upload_max_filesize]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" > /var/roundcube/config/phpfpm.override
-    echo "php_admin_value[post_max_size]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" >> /var/roundcube/config/phpfpm.override
+    echo "php_admin_value[upload_max_filesize]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" > /var/roundcube/config/phpfpm.conf.override
+    echo "php_admin_value[post_max_size]=${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE}" >> /var/roundcube/config/phpfpm.conf.override
 fi
 
 : "${ROUNDCUBEMAIL_LOCALE:=en_US.UTF-8 UTF-8}"
