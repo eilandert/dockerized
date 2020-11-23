@@ -7,7 +7,7 @@ services:
     init: true
     stop_grace_period: 1s
     volumes:
-      - ./letsencrypt/certs:/etc/letsecrypt:rw
+      - ./letsencrypt/certs:/etc/letsencrypt:rw
       - ./letsencrypt/html:/var/www/html
     #    - ./letsencrypt/log:/var/log/letsencrypt:rw
     #    ports:
