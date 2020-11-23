@@ -41,12 +41,12 @@ RUN set -x; \
 	composer -n require roundcube/elastic4mobile ;\
 # Get plugin
 	# support for larry mobile theme
-	mkdir -p plugins/jquery_mobile ;\
-	curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-JQuery-Mobile/archive/master.tar.gz | \
-	tar xz --strip-components=1 -C plugins/jquery_mobile ;\
-	mkdir -p plugins/mobile ;\
-	curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Mobile/archive/master.tar.gz | \
-	tar xz --strip-components=1 -C plugins/mobile ;\
+#	mkdir -p plugins/jquery_mobile ;\
+#	curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-JQuery-Mobile/archive/master.tar.gz | \
+#	tar xz --strip-components=1 -C plugins/jquery_mobile ;\
+#	mkdir -p plugins/mobile ;\
+#	curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Mobile/archive/master.tar.gz | \
+#	tar xz --strip-components=1 -C plugins/mobile ;\
     # Context Menu
     mkdir -p plugins/contextmenu; \
     curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | \
@@ -77,9 +77,9 @@ RUN set -x; \
     tar xz --strip-components=1 -C plugins/html5_notifier; \
 # Get themes
     # larry_mobile
-    mkdir -p skins/melanie2_larry_mobile ;\
-    curl -L https://github.com/messagerie-melanie2/Roundcube-Skin-Melanie2-Larry-Mobile/archive/master.tar.gz | \
-    tar xz --strip-components=1 -C skins/melanie2_larry_mobile ;\
+#    mkdir -p skins/melanie2_larry_mobile ;\
+#    curl -L https://github.com/messagerie-melanie2/Roundcube-Skin-Melanie2-Larry-Mobile/archive/master.tar.gz | \
+#    tar xz --strip-components=1 -C skins/melanie2_larry_mobile ;\
     # Mabola Blue theme
     mkdir -p skins/mabola; \
     curl -L https://github.com/filhocf/mabola/archive/master.tar.gz | \

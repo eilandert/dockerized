@@ -106,7 +106,7 @@ echo "<?php
 " > ${INSTALLDIR}/config/config.inc.php
 
 if [ ! -f /var/roundcube/config/config.inc.php ]; then
-	echo "# When mounted, you can make persistent additions to the roundcube config in this file" > /var/roundcube/config/config.inc.php
+    echo "# When mounted, you can make persistent additions to the roundcube config in this file" > /var/roundcube/config/config.inc.php
 fi
 
 for fn in `ls /var/roundcube/config/*.php 2>/dev/null || true`; do
@@ -132,6 +132,11 @@ fi
 if [ ! -z "${ROUNDCUBEMAIL_LOCALE}" ]; then
     echo "${ROUNDCUBEMAIL_LOCALE}" > /etc/locale.gen
     /usr/sbin/locale-gen 1>/dev/null 2>&1
+fi
+
+if [ -z "${CLEAN_USERS_DAYS}" ]; then
+    echo "Clean userdatabase at ${CLEAN_USERS_DAYS} days"
+    ${INSTALLDIR}/bin/deluser.sh --age=${CLEAN_USERS_DAYS}
 fi
 
 # Trigger garbage collecting routines manually
