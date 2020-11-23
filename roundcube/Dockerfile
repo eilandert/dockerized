@@ -6,7 +6,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 ADD	https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
 COPY	bootstrap.sh /
 
-ENV	INSTALLDIR="/opt/roundcube"
+ENV	INSTALLDIR="/var/www/html"
 
 RUN set -x; \
 	apt-get -y update; \
@@ -22,44 +22,99 @@ RUN set -x; \
 	  unzip \
 	  curl \
 	  locales; \
-#	VERSION=`git ls-remote --ta\gs https://github.com/roundcube/roundcubemail.git | cut -d/ -f3- | sort -t. -nk1,2 -k3 | awk '/^[^{]*$/{version=$1}END{print version}'` ;\
+	VERSION=`git ls-remote --tags https://github.com/roundcube/roundcubemail.git | cut -d/ -f3- | sort -t. -nk1,2 -k3 | awk '/^[^{]*$/{version=$1}END{print version}'` ;\
+	rm -rf ${INSTALLDIR} ;\
 	git clone \
 	  --recurse-submodules \
-	  --depth=1 \ 
+	  --depth=1 \
 	  -c advice.detachedHead=false \
 #	  --branch ${VERSION} \
 	  https://github.com/roundcube/roundcubemail.git \
           ${INSTALLDIR}; \
         cd ${INSTALLDIR} ;\
         mv composer.json-dist composer.json; \
-	composer update --prefer-dist --no-dev ;\
-#	composer config -g secure-http false; \
+	composer config -g secure-http false ;\
+	composer -n update --no-dev;\
         bin/install-jsdeps.sh ;\
 	composer -n require texxasrulez/advanced_search ;\
 	composer -n require texxasrulez/persistent_login ;\
+# Get plugin
+	# support for larry mobile theme
+	mkdir -p plugins/jquery_mobile ;\
+	curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-JQuery-Mobile/archive/master.tar.gz | \
+	tar xz --strip-components=1 -C plugins/jquery_mobile ;\
+	mkdir -p plugins/mobile ;\
+	curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Mobile/archive/master.tar.gz | \
+	tar xz --strip-components=1 -C plugins/mobile ;\
+    # Context Menu
+    mkdir -p plugins/contextmenu; \
+    curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/contextmenu; \
+    # Context Menu Folder
+    mkdir -p plugins/contextmenu_folder; \
+    curl -L https://github.com/random-cuber/contextmenu_folder/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/contextmenu_folder; \
+    # Message Highlight
+    mkdir -p plugins/message_highlight; \
+    curl -L https://github.com/corbosman/message_highlight/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/message_highlight; \
+    #Infinte Scroll
+    mkdir -p plugins/infinitescroll; \
+    curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/infinitescroll; \
+    # Thunderbird Labels
+    mkdir -p plugins/thunderbird_labels; \
+    curl -L https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/thunderbird_labels; \
+    # Remove Attach Position
+    mkdir -p plugins/attachment_position; \
+    curl -L https://github.com/filhocf/roundcube-attachment_position/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/attachment_position; \
+    # HTML5 Notifier
+    mkdir -p plugins/html5_notifier; \
+    curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C plugins/html5_notifier; \
+# Get themes
+    # larry_mobile
+    mkdir -p skins/melanie2_larry_mobile ;\
+    curl -L https://github.com/messagerie-melanie2/Roundcube-Skin-Melanie2-Larry-Mobile/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C skins/melanie2_larry_mobile ;\
+    # Mabola Blue theme
+    mkdir -p skins/mabola; \
+    curl -L https://github.com/filhocf/mabola/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C skins/mabola; \
+    # Mabola theme
+    mkdir -p skins/mabola-blue; \
+    curl -L https://github.com/EstudioNexos/mabola-blue/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C skins/mabola-blue; \
+    # Chameleon theme
+    mkdir -p skins/chameleon; \
+    curl -L https://github.com/filhocf/roundcube-chameleon/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C skins/chameleon; \
+    # Chameleon Blue theme
+    mkdir -p skins/chameleon-blue; \
+    curl -L https://github.com/filhocf/roundcube-chameleon-blue/archive/master.tar.gz | \
+    tar xz --strip-components=1 -C skins/chameleon-blue ;\
 	cd plugins ;\
-#	VERSION=`git ls-remote --ta\gs https://github.com/mfreiholz/persistent_login.git | cut -d/ -f3- | sort -t. -nk1,2 -k3 | awk '/^[^{]*$/{version=$1}END{print version}'` ;\
-#	git clone \
-#	   --recurse-submodules \
-#	   --depth=1 \
-#	   -c advice.detachedHead=false \ 
-#	   --branch ${VERSION} \
-#	   https://github.com/mfreiholz/persistent_login.git ;\
-	for dir in `ls`; do cd $dir; composer update --prefer-dist --no-dev; cd ..; done ;\
+	for dir in `ls`; do cd $dir; echo $dir; composer -n update --no-dev ; cd ..; done ;\
 	composer clear-cache ;\
 	echo "include=/var/roundcube/config/phpfpm.conf" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
         echo "include=/var/roundcube/config/phpfpm.conf.override" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
         echo "Include /var/roundcube/config/httpd.conf" > /etc/apache2.orig/sites-enabled/000-default.conf ;\
         mv /etc/php /etc/php.orig && mkdir /etc/php ;\
         mkdir -p /var/roundcube/config.orig ;\
-        cp /opt/roundcube/config/defaults.inc.php /var/roundcube/config.orig ;\
+        cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;\
         touch /var/roundcube/config.orig/phpfpm.conf.override ;\
-        cp -rp /opt/roundcube/plugins /opt/roundcube/plugins.orig ;\
-	apt-get -y purge curl git unzip mailutils nullmailer; \
+        cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;\
+	apt-get -y purge curl git mailutils nullmailer; \
 	apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean; \
         rm -rf /var/lib/apt/lists/* ;\
-	rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
+	cd ${INSTALLDIR} ;\
+	rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
+	rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ;\
+#	rm -f composer.json composer.lock jsdeps.json bin/install-jsdeps.sh *.orig; rm -rf vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/endroid/qrcode/tests temp/js_cache
 	rm -f /etc/apache2.orig/conf-enabled/other-vhosts-access-log.conf ;\
+	rm -f ${INSTALLDIR}/index.html ;\
         chown -R www-data:www-data ${INSTALLDIR}/logs; \
         chown -R www-data:www-data ${INSTALLDIR}/temp ;\
         chmod +x /wait-for-it.sh; \
@@ -68,11 +123,13 @@ RUN set -x; \
 COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
 
+WORKDIR ${INSTALLDIR}
+
 ENTRYPOINT ["/bootstrap.sh"]
 
 # expose these volumes
 VOLUME /var/roundcube/config
 VOLUME /var/roundcube/db
-#VOLUME /opt/roundcube
+#VOLUME ${INSTALLDIR}
 #VOLUME /tmp/roundcube-temp
 

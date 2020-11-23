@@ -116,7 +116,7 @@ done
 # initialize or update DB
 bin/initdb.sh --dir=$PWD/SQL --create 1>/dev/null 2>&1 || bin/updatedb.sh --dir=$PWD/SQL --package=roundcube || echo "Failed to initialize database. Please run $PWD/bin/initdb.sh and $PWD/bin/updatedb.sh manually."
 
-cp -rp /opt/roundcube/plugins.orig/* /opt/roundcube/plugins/
+cp -rp ${INSTALLDIR}/plugins.orig/* ${INSTALLDIR}/plugins/
 
 if [ ! -z "${ROUNDCUBEMAIL_TEMP_DIR}" ]; then
     mkdir -p ${ROUNDCUBEMAIL_TEMP_DIR} && chown www-data ${ROUNDCUBEMAIL_TEMP_DIR}
@@ -138,6 +138,8 @@ fi
 ${INSTALLDIR}/bin/gc.sh
 
 cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.php.orig
+
+rm -f ${INSTALLDIR}/index.html
 
 if [ ! -f /var/roundcube/config/phpfpm.conf ]; then
     cp -rp /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf

@@ -3,7 +3,7 @@ services:
 
   roundcube:
     container_name: roundcube
-    image: eilandert/roundcube
+    image: eilandert/roundcube:php7.4
     restart: always
     depends_on:
     - "mariadb-mail"
