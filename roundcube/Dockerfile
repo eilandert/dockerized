@@ -1,4 +1,4 @@
-FROM    eilandert/apache-phpfpm:8.0
+FROM    eilandert/apache-phpfpm:7.4
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -106,7 +106,7 @@ RUN set -x; \
         cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;\
         touch /var/roundcube/config.orig/phpfpm.conf.override ;\
         cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;\
-	apt-get -y purge curl git mailutils nullmailer; \
+	apt-get -y purge git mailutils nullmailer; \
 	apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean; \
         rm -rf /var/lib/apt/lists/* ;\
 	cd ${INSTALLDIR} ;\
@@ -119,6 +119,16 @@ RUN set -x; \
         chown -R www-data:www-data ${INSTALLDIR}/temp ;\
         chmod +x /wait-for-it.sh; \
         chmod +x /bootstrap.sh
+
+RUN set -ex; \
+	curl -o roundcubemail.tar.gz -fSL https://github.com/roundcube/roundcubemail/releases/download/1.4.9/roundcubemail-1.4.9-complete.tar.gz; \
+	mkdir /usr/src/roundcubemail; \
+	tar -xf roundcubemail.tar.gz -C /usr/src/roundcubemail --strip-components=1; \
+	rm -rf ${INSTALLDIR}/skins/elastic ;\
+	cp -rp /usr/src/roundcubemail/skins/elastic ${INSTALLDIR}/skins/elastic ;\
+	rm -rf /usr/src/roundcubemail; \
+	apt-get -y purge curl
+
 
 COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
