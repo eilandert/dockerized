@@ -38,6 +38,7 @@ RUN set -x; \
         bin/install-jsdeps.sh ;\
 	composer -n require texxasrulez/advanced_search ;\
 	composer -n require texxasrulez/persistent_login ;\
+	composer -n require roundcube/elastic4mobile ;\
 # Get plugin
 	# support for larry mobile theme
 	mkdir -p plugins/jquery_mobile ;\
@@ -123,12 +124,12 @@ RUN set -x; \
 RUN set -ex; \
 	curl -o roundcubemail.tar.gz -fSL https://github.com/roundcube/roundcubemail/releases/download/1.4.9/roundcubemail-1.4.9-complete.tar.gz; \
 	mkdir /usr/src/roundcubemail; \
+	cd /tmp ;\
 	tar -xf roundcubemail.tar.gz -C /usr/src/roundcubemail --strip-components=1; \
 	rm -rf ${INSTALLDIR}/skins/elastic ;\
 	cp -rp /usr/src/roundcubemail/skins/elastic ${INSTALLDIR}/skins/elastic ;\
-	rm -rf /usr/src/roundcubemail; \
+	rm -rf /usr/src/roundcubemail /tmp/*; \
 	apt-get -y purge curl
-
 
 COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
