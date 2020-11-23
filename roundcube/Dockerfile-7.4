@@ -122,9 +122,9 @@ RUN set -x; \
         chmod +x /bootstrap.sh
 
 RUN set -ex; \
+        cd /tmp ;\
 	curl -o roundcubemail.tar.gz -fSL https://github.com/roundcube/roundcubemail/releases/download/1.4.9/roundcubemail-1.4.9-complete.tar.gz; \
 	mkdir /usr/src/roundcubemail; \
-	cd /tmp ;\
 	tar -xf roundcubemail.tar.gz -C /usr/src/roundcubemail --strip-components=1; \
 	rm -rf ${INSTALLDIR}/skins/elastic ;\
 	cp -rp /usr/src/roundcubemail/skins/elastic ${INSTALLDIR}/skins/elastic ;\

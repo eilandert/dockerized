@@ -134,7 +134,7 @@ if [ ! -z "${ROUNDCUBEMAIL_LOCALE}" ]; then
     /usr/sbin/locale-gen 1>/dev/null 2>&1
 fi
 
-if [ -z "${CLEAN_USERS_DAYS}" ]; then
+if [ -n "${CLEAN_USERS_DAYS}" ]; then
     echo "Clean userdatabase at ${CLEAN_USERS_DAYS} days"
     ${INSTALLDIR}/bin/deluser.sh --age=${CLEAN_USERS_DAYS}
 fi
