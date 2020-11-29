@@ -134,9 +134,9 @@ if [ ! -z "${ROUNDCUBEMAIL_LOCALE}" ]; then
     /usr/sbin/locale-gen 1>/dev/null 2>&1
 fi
 
-if [ -n "${CLEAN_USERS_DAYS}" ]; then
-    echo "Clean userdatabase at ${CLEAN_USERS_DAYS} days"
-    ${INSTALLDIR}/bin/deluser.sh --age=${CLEAN_USERS_DAYS}
+if [ -n "${CLEAN_INACTIVE_USERS_DAYS}" ]; then
+    echo "Cleaning inactive users at ${CLEAN_INACTIVE_USERS_DAYS} days when the docker restarts"
+    ${INSTALLDIR}/bin/deluser.sh --age=${CLEAN_INACTIVE_USERS_DAYS}
 fi
 
 # Trigger garbage collecting routines manually

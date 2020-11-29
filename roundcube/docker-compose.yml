@@ -24,4 +24,4 @@ services:
      - ROUNDCUBEMAIL_PLUGINS=archive,zipdownload,managesieve,newmail_notifier,password,new_user_dialog
      - ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE=10M
      - TZ=Europe/Amsterdam
-     - CLEAN_USERS_DAYS=365
+     - CLEAN_INACTIVE_USERS_DAYS=365

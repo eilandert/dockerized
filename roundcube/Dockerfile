@@ -38,7 +38,14 @@ RUN set -x; \
         bin/install-jsdeps.sh ;\
 	composer -n require texxasrulez/advanced_search ;\
 	composer -n require texxasrulez/persistent_login ;\
-	composer -n require roundcube/elastic4mobile ;\
+	cd plugins ;\
+	git clone \
+	  --depth=1 \
+	  -c advice.detachedHead=false \
+	  https://github.com/thomascube/roundcube-elastic4mobile.git \
+	  elastic4mobile ;\
+	rm -f elastic4mobile/.git* ;\
+        cd ${INSTALLDIR} ;\
 # Get plugin
 	# support for larry mobile theme
 #	mkdir -p plugins/jquery_mobile ;\
