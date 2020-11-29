@@ -31,7 +31,8 @@ RUN	. /etc/os-release \
         && dpkg-statoverride --update --add root adm 0000 /sbin/badblocks \
         && dpkg-statoverride --update --add root adm 0000 /bin/su \
         && dpkg-statoverride --add root adm 0000 /usr/bin/sudo \
-        && dpkg-statoverride --add root adm 0500 /usr/bin/ping 
+        && dpkg-statoverride --add root adm 0500 /usr/bin/ping \
+	&& echo 'man-db man-db/auto-update boolean false'|debconf-set-selections
 
 CMD     ["/bootstrap.sh"]
 

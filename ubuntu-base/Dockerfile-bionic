@@ -1,4 +1,4 @@
-FROM    ubuntu:latest
+FROM    ubuntu:bionic
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -7,7 +7,7 @@ COPY    bootstrap.sh /bootstrap.sh
 # install PPA for latest openssl from my ppa
 
 RUN	. /etc/os-release \
-        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/backports/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-backports-${UBUNTU_CODENAME}.list \
+        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/nginx/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-nginx-${UBUNTU_CODENAME}.list \
 	&& apt-get -y update && apt-get -y upgrade \
         && apt-get install -y --no-install-recommends ca-certificates tzdata openssl \
 	&& chmod +x /bootstrap.sh \
@@ -31,8 +31,7 @@ RUN	. /etc/os-release \
         && dpkg-statoverride --update --add root adm 0000 /sbin/badblocks \
         && dpkg-statoverride --update --add root adm 0000 /bin/su \
         && dpkg-statoverride --add root adm 0000 /usr/bin/sudo \
-        && dpkg-statoverride --add root adm 0500 /usr/bin/ping \
-	&& echo 'man-db man-db/auto-update boolean false'|debconf-set-selections
+        && dpkg-statoverride --add root adm 0500 /usr/bin/ping 
 
 CMD     ["/bootstrap.sh"]
 
