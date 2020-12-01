@@ -1,0 +1,9 @@
+version: '2.4'
+services:
+  psol:
+    container_name: psol
+    build:
+      context: /opt/packages/psol/
+    volumes:
+      - ./bootstrap.sh:/bootstrap.sh
+      - ./src:/usr/src
