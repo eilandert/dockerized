@@ -1,5 +1,9 @@
 #!/bin/sh
 
+apt-get update
+apt-get -y install git lsb-release libpcre3-dev zlib1g-dev build-essential unzip uuid-dev webp g++ libssl-dev wget curl sudo python-minimal
+
+
 mkdir -p ~/bin
 cd ~/bin
 git clone --depth=1 -c advice.detachedHead=false https://chromium.googlesource.com/chromium/tools/depot_tools.git
@@ -24,4 +28,6 @@ install/build_psol.sh
 rm -f /usr/src/psol.tar.gz
 tar czf /usr/src/psol.tar.gz psol/
 
+echo "Finished!"
+echo "Dumped psol.tar.gz in /usr/src/psol.tar.gz"
 
