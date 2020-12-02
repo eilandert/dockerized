@@ -21,6 +21,9 @@ Bind /etc/nginx and /etc/modsecurity (for php, /etc/nullmailer and /etc/php) to 
 
 See my github for an example of [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/nginx-proxy-modsecurity-pagespeed/docker-compose.yml)
 
+The PSOL Library for mod-pagespeed is build by myself to ensure maximum compatability. 
+I build PSOL with [this](https://hub.docker.com/r/eilandert/psol) docker.
+
 Features:
 
 - Latest Mainline. (and not stable).

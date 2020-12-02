@@ -1,6 +1,6 @@
 docker to build PSOL last-stable tag.
 
-mount /usr/src, start the docker and hang thight. This takes a very very very long time the first time, make sure not to delete/clean anything if you plan to build again later
+mount /usr/src, start the docker and hang thight. This takes a very very very long time.
 
 I'm using this to build nginx with pagespeed (see my other dockers)
 
