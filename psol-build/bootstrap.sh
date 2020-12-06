@@ -3,8 +3,7 @@
 TIME_STARTED="`date`"
 
 apt-get update
-apt-get -y install git lsb-release libpcre3-dev zlib1g-dev build-essential unzip uuid-dev webp g++ libssl-dev wget curl sudo python-minimal rsync
-
+apt-get -y install git lsb-release libpcre3-dev zlib1g-dev build-essential unzip uuid-dev webp g++ libssl-dev wget curl sudo python-minimal rsync gperf
 
 mkdir -p ~/bin
 cd ~/bin
