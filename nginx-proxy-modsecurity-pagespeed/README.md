@@ -6,12 +6,12 @@ Complete packages are on [Launchpad](https://launchpad.net/~eilander/+archive/ub
 
 Tags:
 
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:latest (without php, nullmailer or composer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:multi  (with all versions of php, nullmailer and composer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:php5.6 (with php5.6, nullmailer and composer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:php7.2 (with php7.2, nullmailer and composer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:php7.4 (with php7.4, nullmailer and composer)
-- eilandert/eilandert/nginx-modsecurity3-pagespeed:php8.0 (with php8.0, nullmailer and composer)
+- eilandert/nginx-modsecurity3-pagespeed:latest (without php, nullmailer or composer)
+- eilandert/nginx-modsecurity3-pagespeed:multi  (with all versions of php, nullmailer and composer)
+- eilandert/nginx-modsecurity3-pagespeed:php5.6 (with php5.6, nullmailer and composer)
+- eilandert/nginx-modsecurity3-pagespeed:php7.2 (with php7.2, nullmailer and composer)
+- eilandert/nginx-modsecurity3-pagespeed:php7.4 (with php7.4, nullmailer and composer)
+- /eilandert/nginx-modsecurity3-pagespeed:php8.0 (with php8.0, nullmailer and composer)
 
 For the tag with multi, you can enable different versions with PHP56=YES PHP72=YES PHP74=YES and PHP80=YES
 Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.
@@ -31,7 +31,7 @@ Features:
 - Optimized nginx.conf
 - Compiled with -O3 -flto to squeeze some extra % performance.
 - Build with file AIO support (better performance for eg ZFS)
-- Linked all builds against OpenSSL 1.1.1h so there is ALPN and TLS1.3 support
+- Linked all builds against OpenSSL 1.1.1i so there is ALPN and TLS1.3 support
 - Added /etc/nginx/snippets/ssl.conf.example, should give A+ on SSLLABS
 - Added https://ssl-config.mozilla.org/ffdhe4096.txt as dhparams.pem (ssl)
 - Added additional security in snippets/
