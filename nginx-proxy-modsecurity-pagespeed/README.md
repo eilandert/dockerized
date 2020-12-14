@@ -11,7 +11,7 @@ Tags:
 - eilandert/nginx-modsecurity3-pagespeed:php5.6 (with php5.6, nullmailer and composer)
 - eilandert/nginx-modsecurity3-pagespeed:php7.2 (with php7.2, nullmailer and composer)
 - eilandert/nginx-modsecurity3-pagespeed:php7.4 (with php7.4, nullmailer and composer)
-- /eilandert/nginx-modsecurity3-pagespeed:php8.0 (with php8.0, nullmailer and composer)
+- eilandert/nginx-modsecurity3-pagespeed:php8.0 (with php8.0, nullmailer and composer)
 
 For the tag with multi, you can enable different versions with PHP56=YES PHP72=YES PHP74=YES and PHP80=YES
 Socket will be made in /run/php/php7.4-fpm.sock or whatever version you enabled.
