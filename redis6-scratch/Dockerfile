@@ -20,7 +20,7 @@ RUN set -eux; \
 	;\
 	\
 	pip install lastversion ;\
-	LASTVERSION=$(lastversion --pre redis https://github.com/redis/redis) ;\
+#	LASTVERSION=$(lastversion --pre redis https://github.com/redis/redis) ;\
 	DOWNLOADURL=$(lastversion --source --pre redis https://github.com/redis/redis) ;\
 	mkdir -p /usr/src/redis ;\
 	cd /usr/src ;\
