@@ -1,8 +1,9 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
+
 FROM    eilandert/apache-phpfpm:7.4
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
-
 
 # include the wait-for-it.sh script
 ADD	https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
