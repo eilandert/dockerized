@@ -91,8 +91,7 @@ RUN set -x ;\
     mkdir -p skins/chameleon-blue ;\
     curl -L https://github.com/filhocf/roundcube-chameleon-blue/archive/master.tar.gz | \
       tar xz --strip-components=1 -C skins/chameleon-blue ;\
-    cd plugins ;\
-    for dir in `ls`; do cd $dir; echo $dir; composer -n update --no-dev ; cd ..; done ;\
+    for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;\
     composer clear-cache ;\
     echo "include=/var/roundcube/config/phpfpm.conf" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
     echo "include=/var/roundcube/config/phpfpm.conf.override" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
@@ -108,7 +107,7 @@ RUN set -x ;\
     cd ${INSTALLDIR} ;\
     rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
     rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ;\
-    rm -rf composer.json composer.lock jsdeps.json bin/install-jsdeps.sh *.orig vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/endroid/qrcode/tests temp/js_cache ;\
+#    rm -rf composer.json composer.lock jsdeps.json bin/install-jsdeps.sh *.orig vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/endroid/qrcode/tests temp/js_cache ;\
     rm -f /etc/apache2.orig/conf-enabled/other-vhosts-access-log.conf ;\
     rm -f ${INSTALLDIR}/index.html ;\
     chown -R www-data:www-data ${INSTALLDIR}/logs ;\
