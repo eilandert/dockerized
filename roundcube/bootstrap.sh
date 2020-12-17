@@ -116,7 +116,7 @@ done
 # initialize or update DB
 bin/initdb.sh --dir=$PWD/SQL --create 1>/dev/null 2>&1 || bin/updatedb.sh --dir=$PWD/SQL --package=roundcube || echo "Failed to initialize database. Please run $PWD/bin/initdb.sh and $PWD/bin/updatedb.sh manually."
 
-cp -rp ${INSTALLDIR}/plugins.orig/* ${INSTALLDIR}/plugins/
+cp -rp ${INSTALLDIR}/plugins.orig/* ${INSTALLDIR}/plugins/ &
 
 if [ ! -z "${ROUNDCUBEMAIL_TEMP_DIR}" ]; then
     mkdir -p ${ROUNDCUBEMAIL_TEMP_DIR} && chown www-data ${ROUNDCUBEMAIL_TEMP_DIR}
@@ -135,7 +135,7 @@ if [ ! -z "${ROUNDCUBEMAIL_LOCALE}" ]; then
 fi
 
 if [ -n "${CLEAN_INACTIVE_USERS_DAYS}" ]; then
-    echo "Cleaning inactive users at ${CLEAN_INACTIVE_USERS_DAYS} days when the docker restarts"
+    echo "Cleaning users from database... (inactive >${CLEAN_INACTIVE_USERS_DAYS} days)"
     ${INSTALLDIR}/bin/deluser.sh --age=${CLEAN_INACTIVE_USERS_DAYS}
 fi
 
