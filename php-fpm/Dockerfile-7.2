@@ -13,6 +13,7 @@ RUN     . /etc/os-release \
         && apt-get -y update \
 	&& apt-get install -y libpcre2-8-0 libpcre3 \
         && apt-get install -y nullmailer mailutils \
+	&& rm -rf /var/spool/nullmailer/trigger \
         && apt-get install -y --no-install-recommends \
 	php7.2 \
         php7.2-fpm \
