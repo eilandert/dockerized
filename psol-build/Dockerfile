@@ -7,8 +7,6 @@ COPY bootstrap.sh /bootstrap.sh
 
 RUN	chmod +x /bootstrap.sh
 
-RUN     dpkg-statoverride --remove /usr/bin/sudo
-
 CMD     ["/bootstrap.sh"]
 
 WORKDIR /usr/src

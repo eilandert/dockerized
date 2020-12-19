@@ -2,6 +2,8 @@
 
 TIME_STARTED="`date`"
 
+dpkg-statoverride --update --remove /usr/bin/sudo
+
 apt-get update
 apt-get -y install git lsb-release libpcre3-dev zlib1g-dev build-essential unzip uuid-dev webp g++ libssl-dev wget curl sudo python-minimal rsync gperf
 
