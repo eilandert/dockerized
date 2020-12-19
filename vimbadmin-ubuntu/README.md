@@ -1,4 +1,4 @@
-Dockerized vimbadmin image based on eilandert/apache-phpfpm (ubuntu:rolling), apache2 and php7.4.x
+Dockerized vimbadmin image based on eilandert/apache-phpfpm (ubuntu:rolling), apache2 and php8.x
 
 steps:
 
