@@ -40,6 +40,22 @@ RUN set -x ;\
     composer -n require mobiledetect/mobiledetectlib ;\
     composer -n require roundcube/elastic4mobile dev-master ;\
     cd ${INSTALLDIR} ;\
+   #show_folder_size
+   mkdir -p plugins/show_folder_size ;\
+   curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz | \
+     tar xz --strip-components=1 -C plugins/show_folder_size ;\
+   #quota
+   mkdir -p plugins/quota ;\
+   curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz | \
+     tar xz --strip-components=1 -C plugins/quota ;\
+   #account_details
+    mkdir -p plugins/account_details ;\
+    curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C plugins/account_details ;\ 
+   #responses
+    mkdir -p plugins/responses ;\
+    curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C plugins/responses ;\
     #fail2ban
     mkdir -p plugins/fail2ban ;\
     curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | \
@@ -70,7 +86,7 @@ RUN set -x ;\
       tar xz --strip-components=1 -C plugins/contextmenu_folder ;\
     # Message Highlight
     mkdir -p plugins/message_highlight ;\
-    curl -L https://github.com/corbosman/message_highlight/archive/master.tar.gz | \
+    curl -L https://github.com/texxasrulez/message_highlight/archive/master.tar.gz | \
       tar xz --strip-components=1 -C plugins/message_highlight ;\
     #Infinite Scroll
     mkdir -p plugins/infinitescroll ;\
@@ -119,7 +135,7 @@ RUN set -x ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\
     cd ${INSTALLDIR} ;\
     rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
-    rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ;\
+    rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ${INSTALLDIR}/plugins/*/.git* ;\
 #    rm -rf composer.json composer.lock jsdeps.json bin/install-jsdeps.sh *.orig vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/endroid/qrcode/tests temp/js_cache ;\
     rm -f /etc/apache2.orig/conf-enabled/other-vhosts-access-log.conf ;\
     rm -f ${INSTALLDIR}/index.html ;\

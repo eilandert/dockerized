@@ -34,6 +34,7 @@ Added plugins:<BR>
 - https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll<BR>
 - https://github.com/mike-kfed/rcmail-thunderbird-labels<BR>
 - https://github.com/random-cuber/contextmenu_folder<BR>
+- https://github.com/random-cuber/responses<BR>
 - https://github.com/texxasrulez/advanced_search<BR>
 - https://github.com/texxasrulez/persistent_login<BR>
 - https://github.com/texxasrulez/roundcube_fail2ban<BR>
