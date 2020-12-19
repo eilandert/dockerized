@@ -3,7 +3,7 @@ services:
 
   roundcube:
     container_name: roundcube
-    image: eilandert/roundcube:php7.4
+    image: eilandert/roundcube:latest
     restart: always
     depends_on:
     - "mariadb-mail"
@@ -11,6 +11,7 @@ services:
     volumes:
       - ./roundcube/config:/var/roundcube/config
       - ./roundcube/plugins:/var/www/html/plugins
+      - ./roundcube/logs:/var/www/html/logs
     environment:
      - ROUNDCUBEMAIL_DEFAULT_HOST=ssl://10.0.0.227
      - ROUNDCUBEMAIL_DEFAULT_PORT=993
