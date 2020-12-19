@@ -2,7 +2,6 @@
 
 echo "[VIMBADMIN] This docker image can be found on https://hub.docker.com/u/eilandert and https://github.com/eilandert/dockerized"
 
-
 if [ -n "${TZ}" ]; then
     rm /etc/timezone /etc/localtime
     echo "${TZ}" > /etc/timezone
@@ -32,29 +31,21 @@ fi
 
 service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
 
-
-WORKDIR="/opt/vimbadmin"
-FIRSTRUN="${WORKDIR}/application/configs/application.ini"
+FIRSTRUN="${INSTALL_PATH}/application/configs/application.ini"
 if [ ! -f ${FIRSTRUN} ]; then
-    echo "[VIMBADMIN] vimbadmin: application.ini not found, populating default configs to ${WORKDIR}/application/configs/"
-    cp -rp ${WORKDIR}/application/configs.orig/* ${WORKDIR}/application/configs/
-    cp ${WORKDIR}/application/configs/application.ini.dist ${WORKDIR}/application/configs/application.ini
-    sed -i 's/defaults.mailbox.password_scheme\ \= \"dovecot:BLF-CRYPT\"/defaults.mailbox.password_scheme\ \= \"crypt:sha512"/' ${WORKDIR}/application/configs/application.ini
-    chown -R www-data:www-data ${WORKDIR}/var
-    echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini
+    echo "[VIMBADMIN] vimbadmin: application.ini not found, populating default configs to ${INSTALL_PATH}/application/configs/"
+    cp -rp ${INSTALL_PATH}/application/configs.orig/* ${INSTALL_PATH}/application/configs/
+    cp ${INSTALL_PATH}/application/configs/application.ini.dist ${INSTALL_PATH}/application/configs/application.ini
+    chown -R www-data:www-data ${INSTALL_PATH}/var
+    echo "[docker : production]" >> ${INSTALL_PATH}/application/configs/application.ini*
 
 else
     # 4-6-2020, change existing application.ini after upgrade to 3.2.0, removal from this file far in future.
-    sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Resource"~"/../library/OSS/Resource"~' ${WORKDIR}/application/configs/application.ini
-    sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Smarty/functions"~"/../library/OSS/Smarty/functions"~' ${WORKDIR}/application/configs/application.ini
+    sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Resource"~"/../library/OSS/Resource"~' ${INSTALL_PATH}/application/configs/application.ini
+    sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Smarty/functions"~"/../library/OSS/Smarty/functions"~' ${INSTALL_PATH}/application/configs/application.ini
 
     # 17-11-2020 remove loadmodule in the sitesnippet (migrating from alpine to ubuntu)
     sed -i '/^LoadModule/d' /etc/apache2/sites-enabled/000-default.conf
-
-    #copy new .dist to configs
-    cp ${WORKDIR}/application/configs.orig/application.ini.dist ${WORKDIR}/application/configs/application.ini.dist
-    sed -i 's/defaults.mailbox.password_scheme\ \= \"dovecot:BLF-CRYPT\"/defaults.mailbox.password_scheme\ \= \"crypt:sha512"/' ${WORKDIR}/application/configs/application.ini.dist
-    echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini.dist
 fi
 
 if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
