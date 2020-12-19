@@ -17,8 +17,31 @@ Mount /etc/apache2 and /etc/php if you need more control.<BR>
 
 Extra environmentsetting (on top of the official image):
 - CLEAN_INACTIVE_USERS_DAYS=365   (clean inactive users after x days)
+- TZ  (example TZ=Europe/Amsterdam)
 
 See [docker-compose](https://github.com/eilandert/dockerized/blob/master/roundcube/docker-compose.yml) for examples
 
 I'll try to maintain compatibility with the official [roundcube](https://hub.docker.com/r/roundcube/roundcubemail) image so you can always switch back by changing the docker tag. 
 Let me know it something doesn't work!
+
+Added plugins:<BR>
+- https://github.com/corbosman/message_highlight<BR>
+- https://github.com/dsoares/roundcube-rcguard<BR>
+- https://github.com/filhocf/roundcube-attachment_position<BR>
+- https://github.com/filhocf/roundcube-html5_notifier<BR>
+- https://github.com/johndoh/roundcube-contextmenu<BR>
+- https://github.com/johndoh/roundcube-swipe<BR>
+- https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll<BR>
+- https://github.com/mike-kfed/rcmail-thunderbird-labels<BR>
+- https://github.com/random-cuber/contextmenu_folder<BR>
+- https://github.com/texxasrulez/advanced_search<BR>
+- https://github.com/texxasrulez/persistent_login<BR>
+- https://github.com/texxasrulez/roundcube_fail2ban<BR>
+- https://github.com/thomascube/roundcube-elastic4mobile<BR>
+
+Added skins:<BR>
+- https://github.com/EstudioNexos/mabola-blue<BR>
+- https://github.com/filhocf/mabola<BR>
+- https://github.com/filhocf/roundcube-chameleon<BR>
+- https://github.com/filhocf/roundcube-chameleon-blue<BR>
+
