@@ -30,6 +30,7 @@ RUN set -x ;\
       locales ;\
     rm -rf ${INSTALLDIR} ;\
     mkdir ${INSTALLDIR} ;\
+#    curl -fSL https://github.com/roundcube/roundcubemail/archive/master.tar.gz | \
     curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | \
       tar xz --strip-components=1 -C ${INSTALLDIR} ;\
     cd ${INSTALLDIR} ;\
@@ -143,6 +144,18 @@ RUN set -x ;\
     chown -R www-data:www-data ${INSTALLDIR}/temp ;\
     chmod +x /wait-for-it.sh ;\
     chmod +x /bootstrap.sh
+
+#RUN set -ex; \
+#    LASTVERSION=$(cat /tmp/lastversion) ;\
+#    cd /tmp ;\
+#    mkdir /usr/src/roundcubemail ;\
+#    curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz |\
+#      tar xz --strip-components=1 -C /usr/src/roundcubemail ;\
+#    rm -rf ${INSTALLDIR}/skins/elastic ;\
+#    cp -rp /usr/src/roundcubemail/skins/elastic ${INSTALLDIR}/skins/elastic ;\
+#    rm -rf /usr/src/roundcubemail /tmp/* ;\
+#    apt-get -y purge curl
+
 
 COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
