@@ -1,3 +1,5 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/vimbadmin for a recent one
+
 FROM	eilandert/apache-phpfpm:8.0
 LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
