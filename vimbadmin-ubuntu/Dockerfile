@@ -9,7 +9,7 @@ ENV	INSTALL_PATH=/opt/vimbadmin
 COPY	bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    apt-get update && apt-get -y install --no-install-recommends curl git unzip ;\
+    apt-get update && apt-get -y install --no-install-recommends curl unzip ;\
     mkdir -p ${INSTALL_PATH} ;\
     curl -fSL https://github.com/opensolutions/ViMbAdmin/archive/master.tar.gz | \
       tar xz --strip-components=1 -C ${INSTALL_PATH} ;\
@@ -19,21 +19,23 @@ RUN set -ex ;\
     composer config -g secure-http false ;\
     composer require doctrine/orm -W --prefer-dist ;\
     composer update --prefer-dist --no-dev ;\
-    chown -R www-data:www-data ${INSTALL_PATH}/var ;\
-    cp -r ${INSTALL_PATH}/application/configs ${INSTALL_PATH}/application/configs.orig ;\
+    composer clear-cache ;\
+    rm -rf /etc/php && mkdir -p /etc/php ;\
     echo "Include ${INSTALL_PATH}/application/configs/httpd.conf" > /etc/apache2.orig/sites-enabled/000-default.conf ;\
     echo "php_admin_flag[opcache.enable] = 1" >> /etc/php.orig/${PHPVERSION}/fpm/pool.d/www.conf ;\
     echo "php_admin_value[opcache.jit_buffer_size]=64M" >> /etc/php.orig/${PHPVERSION}/fpm/pool.d/www.conf ;\
     echo "php_admin_value[memory_limit]=64M" >> /etc/php.orig/${PHPVERSION}/fpm/pool.d/www.conf ;\
     echo "php_admin_flag[display_errors]=Off" >> /etc/php.orig/${PHPVERSION}/fpm/pool.d/www.conf ;\
-    composer clear-cache ;\
-    rm -rf /etc/php && mkdir -p /etc/php ;\
-    rm ${INSTALL_PATH}/application/configs.orig/application.ini.vagrant ;\
     apt-get -y purge curl git unzip mailutils nullmailer ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*  ;\
     rm -rf ${INSTALL_PATH}/.git /root/.composer /root/.cache /root/.local ;\
-    sed -i 's/defaults.mailbox.password_scheme\ \= \"dovecot:BLF-CRYPT\"/defaults.mailbox.password_scheme\ \= \"crypt:sha512"/' ${INSTALL_PATH}/application/configs.orig/application.ini.dist ;\
+    rm ${INSTALL_PATH}/application/configs/application.ini.vagrant ;\
+    chown -R www-data:www-data ${INSTALL_PATH}/var ;\
+    sed -i 's/defaults.mailbox.password_scheme\ \= \"dovecot:BLF-CRYPT\"/defaults.mailbox.password_scheme\ \= \"crypt:sha512"/' ${INSTALL_PATH}/application/configs/application.ini.dist ;\
+    echo "[docker : production]" >> ${INSTALL_PATH}/application/configs/application.ini ;\
+    cp ${INSTALL_PATH}/application/configs/application.ini.dist ${INSTALL_PATH}/application/configs/application.ini ;\
+    cp -rp ${INSTALL_PATH}/application/configs ${INSTALL_PATH}/application/configs.orig ;\
     chmod +x /bootstrap.sh
 
 COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/
