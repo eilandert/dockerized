@@ -1,4 +1,4 @@
-Dockerized vimbadmin image based on Alpine:latest, apache2 and php7.x (whatever Alpine's latest version of php is)
+Dockerized vimbadmin image based on ubuntu:rolling, apache2 and php8.0
 
 steps:
 
