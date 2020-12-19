@@ -8,37 +8,50 @@ ENV     INSTALLDIR="/var/www/html"
 # include the wait-for-it.sh script
 ADD	https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
 
-# fetch the lastversion, generated in the docker build script
-ADD     .lastversionurl /tmp/lastversionurl
+# fetch the last version, generated in the docker build script
+ADD     .lastversion /tmp/lastversion
 
 COPY	bootstrap.sh /
 
 RUN set -x ;\
-    DOWNLOADURL=$(cat /tmp/lastversionurl) ;\
+    LASTVERSION=$(cat /tmp/lastversion) ;\
     apt-get -y update ;\
     rm -rf /etc/php && mv /etc/php.orig /etc/php ;\
     apt-get install -y --no-install-recommends \
       php${PHPVERSION}-exif \
       php${PHPVERSION}-gd \
       php${PHPVERSION}-intl \
-      php${PHPVERSION}-imap \
-      php${PHPVERSION}-ldap \
-      php${PHPVERSION}-sqlite \
+#      php${PHPVERSION}-imap \
+#      php${PHPVERSION}-ldap \
+#      php${PHPVERSION}-sqlite \
       git \
       unzip \
       curl \
       locales ;\
     rm -rf ${INSTALLDIR} ;\
     mkdir ${INSTALLDIR} ;\
-    curl -L ${DOWNLOADURL} | tar xz --strip-components=1 -C ${INSTALLDIR} ;\
+    curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | \
+      tar xz --strip-components=1 -C ${INSTALLDIR} ;\
     cd ${INSTALLDIR} ;\
     mv composer.json-dist composer.json ;\
     composer config -g secure-http false ;\
     composer -n update --no-dev;\
-    bin/install-jsdeps.sh ;\
+#    bin/install-jsdeps.sh ;\
     composer -n require mobiledetect/mobiledetectlib ;\
     composer -n require roundcube/elastic4mobile dev-master ;\
     cd ${INSTALLDIR} ;\
+    #fail2ban
+    mkdir -p plugins/fail2ban ;\
+    curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C plugins/fail2ban ;\
+    #RCGuard
+    mkdir -p plugins/rcguard ;\
+    curl -L https://github.com/dsoares/roundcube-rcguard/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C plugins/rcguard ;\
+    #swipe
+    mkdir -p plugins/swipe ;\
+    curl -L https://github.com/johndoh/roundcube-swipe/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C plugins/swipe ;\
     #advanced_search
     mkdir -p plugins/advanced_search ;\
     curl -L https://github.com/texxasrulez/advanced_search/archive/master.tar.gz | \
@@ -103,7 +116,7 @@ RUN set -x ;\
     cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;\
     apt-get -y purge git mailutils nullmailer curl ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/* ;\
+    rm -rf /var/lib/apt/lists/* /tmp/* ;\
     cd ${INSTALLDIR} ;\
     rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
     rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ;\
@@ -119,7 +132,6 @@ COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
 
 WORKDIR ${INSTALLDIR}
-
 ENTRYPOINT ["/bootstrap.sh"]
 
 # expose these volumes
