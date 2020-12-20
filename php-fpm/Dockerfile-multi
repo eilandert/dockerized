@@ -8,137 +8,146 @@ ENV	MODE=MULTI
 COPY    bootstrap.sh /bootstrap.sh
 ADD	https://getcomposer.org/installer /tmp/composer-setup.php
 
-RUN     . /etc/os-release \
-        && echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-${UBUNTU_CODENAME}.list \
-        && apt-get -y update \
-	&& apt-get install -y libpcre2-8-0 libpcre3 \
-        && apt-get install -y nullmailer mailutils \
-	&& rm -rf /var/spool/nullmailer/trigger \
-        && apt-get install -y --no-install-recommends \
-	php5.6 \
-        php5.6-fpm \
-        php5.6-apcu \
-        php5.6-bcmath \
-        php5.6-cli \
-        php5.6-curl \
-        php5.6-dom \
-        php5.6-exif \
-        php5.6-gd \
-        php5.6-igbinary \
-        php5.6-imagick \
-        php5.6-imap \
-        php5.6-intl \
-        php5.6-json \
-        php5.6-ldap \
-	php5.6-mcrypt \
-	php5.6-memcache \
-        php5.6-memcached \
-        php5.6-mbstring \
-        php5.6-mysql \
-        php5.6-opcache \
-        php5.6-pspell \
-        php5.6-pgsql \
-        php5.6-readline \
-        php5.6-recode \
-        php5.6-redis \
-        php5.6-soap \
-        php5.6-sqlite \
-        php5.6-tidy \
-        php5.6-xml \
-        php5.6-zip \
-	php7.2 \
-        php7.2-fpm \
-        php7.2-apcu \
-        php7.2-bcmath \
-        php7.2-cli \
-        php7.2-curl \
-        php7.2-dom \
-        php7.2-exif \
-        php7.2-gd \
-        php7.2-igbinary \
-        php7.2-imagick \
-        php7.2-imap \
-        php7.2-intl \
-        php7.2-json \
-        php7.2-ldap \
-	php7.2-memcache \
-        php7.2-memcached \
-        php7.2-mbstring \
-        php7.2-mysql \
-        php7.2-opcache \
-        php7.2-pspell \
-        php7.2-pgsql \
-        php7.2-readline \
-        php7.2-recode \
-        php7.2-redis \
-        php7.2-soap \
-        php7.2-sqlite \
-        php7.2-tidy \
-        php7.2-xml \
-        php7.2-zip \
-	php7.4 \
-        php7.4-fpm \
-        php7.4-apcu \
-        php7.4-bcmath \
-        php7.4-cli \
-        php7.4-curl \
-        php7.4-dom \
-        php7.4-exif \
-        php7.4-gd \
-        php7.4-igbinary \
-        php7.4-imagick \
-        php7.4-imap \
-        php7.4-intl \
-        php7.4-json \
-        php7.4-ldap \
-	php7.4-memcache \
-        php7.4-memcached \
-        php7.4-mbstring \
-        php7.4-mysql \
-        php7.4-opcache \
-        php7.4-pspell \
-        php7.4-pgsql \
-        php7.4-readline \
-        php7.4-redis \
-        php7.4-soap \
-        php7.4-sqlite \
-        php7.4-tidy \
-        php7.4-xml \
-        php7.4-zip \
-	php8.0 \
-        php8.0-fpm \
-        php8.0-apcu \
-        php8.0-bcmath \
-        php8.0-cli \
-        php8.0-curl \
-        php8.0-dom \
-        php8.0-exif \
-        php8.0-gd \
-        php8.0-igbinary \
-        php8.0-imagick \
-        php8.0-imap \
-        php8.0-intl \
-        php8.0-ldap \
-	php8.0-memcache \
-        php8.0-memcached \
-        php8.0-mbstring \
-        php8.0-mysql \
-        php8.0-opcache \
-        php8.0-pspell \
-        php8.0-pgsql \
-        php8.0-readline \
-        php8.0-redis \
-        php8.0-soap \
-        php8.0-sqlite \
-        php8.0-tidy \
-        php8.0-xml \
-        php8.0-zip \
-	&& apt-get -y autoremove && apt-get -y autoclean \
-	&& cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin \
-        && rm -rf /var/lib/apt/lists/* \
-        && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
-        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-        && chmod 755 /bootstrap.sh
+RUN set -ex ;\
+    . /etc/os-release ;\
+    echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-${UBUNTU_CODENAME}.list ;\
+    apt-get -y update ;\
+    apt-get install -y libpcre2-8-0 libpcre3 ;\
+    apt-get install -y nullmailer mailutils ;\
+    rm -rf /var/spool/nullmailer/trigger ;\
+    apt-get install -y --no-install-recommends \
+      php5.6 \
+      php5.6-fpm \
+      php5.6-apcu \
+      php5.6-bcmath \
+      php5.6-cli \
+      php5.6-curl \
+      php5.6-dom \
+      php5.6-exif \
+      php5.6-gd \
+      php5.6-igbinary \
+      php5.6-imagick \
+      php5.6-imap \
+      php5.6-intl \
+      php5.6-json \
+      php5.6-ldap \
+      php5.6-mcrypt \
+      php5.6-memcache \
+      php5.6-memcached \
+      php5.6-mbstring \
+      php5.6-mysql \
+      php5.6-opcache \
+      php5.6-pspell \
+      php5.6-pgsql \
+      php5.6-readline \
+      php5.6-recode \
+      php5.6-redis \
+      php5.6-soap \
+      php5.6-sqlite \
+      php5.6-tidy \
+      php5.6-xml \
+      php5.6-zip \
+      php7.2 \
+      php7.2-fpm \
+      php7.2-apcu \
+      php7.2-bcmath \
+      php7.2-cli \
+      php7.2-curl \
+      php7.2-dom \
+      php7.2-exif \
+      php7.2-gd \
+      php7.2-igbinary \
+      php7.2-imagick \
+      php7.2-imap \
+      php7.2-intl \
+      php7.2-json \
+      php7.2-ldap \
+      php7.2-memcache \
+      php7.2-memcached \
+      php7.2-mbstring \
+      php7.2-mysql \
+      php7.2-opcache \
+      php7.2-pspell \
+      php7.2-pgsql \
+      php7.2-readline \
+      php7.2-recode \
+      php7.2-redis \
+      php7.2-soap \
+      php7.2-sqlite \
+      php7.2-tidy \
+      php7.2-xml \
+      php7.2-zip \
+      php7.4 \
+      php7.4-fpm \
+      php7.4-apcu \
+      php7.4-bcmath \
+      php7.4-cli \
+      php7.4-curl \
+      php7.4-dom \
+      php7.4-exif \
+      php7.4-gd \
+      php7.4-igbinary \
+      php7.4-imagick \
+      php7.4-imap \
+      php7.4-intl \
+      php7.4-json \
+      php7.4-ldap \
+      php7.4-memcache \
+      php7.4-memcached \
+      php7.4-mbstring \
+      php7.4-mysql \
+      php7.4-opcache \
+      php7.4-pspell \
+      php7.4-pgsql \
+      php7.4-readline \
+      php7.4-redis \
+      php7.4-soap \
+      php7.4-sqlite \
+      php7.4-tidy \
+      php7.4-xml \
+      php7.4-zip \
+      php8.0 \
+      php8.0-fpm \
+      php8.0-apcu \
+      php8.0-bcmath \
+      php8.0-cli \
+      php8.0-curl \
+      php8.0-dom \
+      php8.0-exif \
+      php8.0-gd \
+      php8.0-igbinary \
+      php8.0-imagick \
+      php8.0-imap \
+      php8.0-intl \
+      php8.0-ldap \
+      php8.0-memcache \
+      php8.0-memcached \
+      php8.0-mbstring \
+      php8.0-mysql \
+      php8.0-opcache \
+      php8.0-pspell \
+      php8.0-pgsql \
+      php8.0-readline \
+      php8.0-redis \
+      php8.0-soap \
+      php8.0-sqlite \
+      php8.0-tidy \
+      php8.0-xml \
+      php8.0-zip \
+    ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
+    rm -rf /var/lib/apt/lists/* ;\
+    #rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
+    rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
+    rm -rf /etc/php/7.1 /usr/lib/php/20160303 ;\
+    #rm -rf /etc/php/7.2 /usr/lib/php/20170718 ;\
+    rm -rf /etc/php/7.3 /usr/lib/php/20180731 ;\
+    #rm -rf /etc/php/7.4 /usr/lib/php/20190902 ;\
+    #rm -rf /etc/php/8.0 /usr/lib/php/20200930 ;\
+    mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
+    mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
+    chmod 755 /bootstrap.sh
 
 CMD     ["/bootstrap.sh"]
 
