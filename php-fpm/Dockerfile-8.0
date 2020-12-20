@@ -22,9 +22,13 @@ RUN     . /etc/os-release \
         php8.0-cli \
         php8.0-curl \
         php8.0-dom \
+        php8.0-exif \
         php8.0-gd \
         php8.0-igbinary \
         php8.0-imagick \
+        php8.0-imap \
+        php8.0-intl \
+        php8.0-ldap \
 	php8.0-memcache \
         php8.0-memcached \
         php8.0-mbstring \
@@ -35,6 +39,7 @@ RUN     . /etc/os-release \
         php8.0-readline \
         php8.0-redis \
         php8.0-soap \
+        php8.0-sqlite \
         php8.0-tidy \
         php8.0-xml \
         php8.0-zip \
