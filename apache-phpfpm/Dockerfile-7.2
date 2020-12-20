@@ -1,3 +1,5 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/apache-phpfpm for a recent one
+
 FROM    eilandert/php-fpm:7.2
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
@@ -5,21 +7,22 @@ ENV     TZ=Europe/Amsterdam
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     . /etc/os-release \
-        && chmod +x /bootstrap.sh \
-        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/apache2/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-apache2-${UBUNTU_CODENAME}.list \
-        && apt-get -y update \
-        && apt-get install -y --no-install-recommends apache2 apache2-utils \
-        && apt-get install -y --no-install-recommends libapache2-mod-php${PHPVERSION} \
-	&& a2dismod php${PHPVERSION} \
-        && a2dismod status mpm_prefork \
-        && a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip \
-        && a2enconf php${PHPVERSION}-fpm \
-        && mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 \
-        && mv /etc/php /etc/php.orig && mkdir -p /etc/php \
-        && mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer \
-        && apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean \
-        && rm -rf /var/lib/apt/lists/*
+RUN set -ex ;\
+    . /etc/os-release ;\
+    chmod +x /bootstrap.sh ;\
+    echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/apache2/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-apache2-${UBUNTU_CODENAME}.list ;\
+    apt-get -y update ;\
+    apt-get install -y --no-install-recommends apache2 apache2-utils ;\
+    apt-get install -y --no-install-recommends libapache2-mod-php${PHPVERSION} ;\
+    a2dismod php${PHPVERSION} ;\
+    a2dismod status mpm_prefork ;\
+    a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
+    a2enconf php${PHPVERSION}-fpm ;\
+    mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 ;\
+    mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
+    mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
+    apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80
