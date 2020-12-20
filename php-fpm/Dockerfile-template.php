@@ -5,10 +5,14 @@
         php#PHPVERSION#-cli \
         php#PHPVERSION#-curl \
         php#PHPVERSION#-dom \
+        php#PHPVERSION#-exif \
         php#PHPVERSION#-gd \
         php#PHPVERSION#-igbinary \
         php#PHPVERSION#-imagick \
+        php#PHPVERSION#-imap \
+        php#PHPVERSION#-intl \
         #removedinphp80#php#PHPVERSION#-json \
+        php#PHPVERSION#-ldap \
 	#removedinphp72#php#PHPVERSION#-mcrypt \
 	php#PHPVERSION#-memcache \
         php#PHPVERSION#-memcached \
@@ -21,6 +25,7 @@
         #removedinphp74#php#PHPVERSION#-recode \
         php#PHPVERSION#-redis \
         php#PHPVERSION#-soap \
+        php#PHPVERSION#-sqlite \
         php#PHPVERSION#-tidy \
         php#PHPVERSION#-xml \
         php#PHPVERSION#-zip \
