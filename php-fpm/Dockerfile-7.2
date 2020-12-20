@@ -1,3 +1,4 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/php-fpm for a recent one
 FROM    eilandert/ubuntu-base:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
@@ -49,7 +50,7 @@ RUN set -ex ;\
     ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
-    rm -rf /var/lib/apt/lists/* ;\
+    rm -rf /var/lib/apt/lists/* /tmp/* ;\
     rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
     rm -rf /etc/php/7.1 /usr/lib/php/20160303 ;\
