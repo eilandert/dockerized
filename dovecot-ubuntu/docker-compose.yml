@@ -1,7 +1,7 @@
 services:
   dovecot:
     container_name: dovecot
-    image: eilandert/roundcube:latest
+    image: eilandert/dovecot-ubuntu:latest
     ports:
       - 24:24/tcp
       - 110:110/tcp
@@ -15,5 +15,10 @@ services:
     environment:
       - TZ=Europe/Amsterdam
 #     - SYSLOG_HOST=10.0.0.118
-
+      - DB_DRIVER=mysql
+      - DB_DATABASE=vimbadmin
+      - DB_HOST=localhost
+      - DB_PORT=3306
+      - DB_USERNAME=vimbadmin
+      - DB_PASSWORD=secret
 version: "3.7"

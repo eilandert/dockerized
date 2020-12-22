@@ -4,7 +4,7 @@ echo "[DOVECOT] This docker image can be found on https://hub.docker.com/u/eilan
 
 FIRSTRUN="/etc/dovecot/dovecot.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-    echo "[DOVECOT] no configs found, copying..."
+    echo "[DOVECOT] no configs found, copying default configs to /etc/dovecot"
     mkdir -p /etc/dovecot && cp -r /etc/dovecot.orig/* /etc/dovecot/
 fi
 
@@ -22,6 +22,11 @@ if [ -n "${SYSLOG_HOST}" ]; then
     echo "[DOVECOT] Output is set to remote syslog at ${SYSLOG_HOST}"
 else
     rm -f /etc/syslog-ng/conf.d/remote.conf
+fi
+
+if [ -n "${DB_DRIVER}" ]; then
+    sed -i s/"driver = .*"/"driver = ${DB_DRIVER}"/ /etc/dovecot/dovecot-sql.conf.ext
+    sed -i s/"connect = host=localhost user=vimbadmin password=password dbname=vimbadmin"/"connect = host=${DB_HOST} user=${DB_USERNAME} password=${DB_PASSWORD} dbname=${DB_DATABASE}"/ /etc/dovecot/dovecot-sql.conf.ext
 fi
 
 chmod 777 /dev/stdout

@@ -1,8 +1,10 @@
-dockerized dovecot+sieve image based on alpine:edge, with rspamc client
+dockerized dovecot+sieve image based on ubuntu:rolling
 
-On first run, there will be checked if /etc/dovecot/dovecot.conf exists and if needed, the dovecot configs will be copied. Bind /etc/dovecot to a local dir for your configs. If you use your own configs, make sure the logging goes to /dev/stdout for console output.
+Mount /etc/dovecot for configfiles, if dovecot.conf does not exist all default configfiles will be copied/
 
-The docker-compose file is on my github.
+Build with dovecot packages on https://launchpad.net/~eilander/+archive/ubuntu/backports
+
+The docker-compose file is on my github https://github.com/eilandert/dockerized/blob/master/dovecot-ubuntu/docker-compose.yml
 
 Environment variable(s):
 SYSLOG_HOST

@@ -1,31 +1,36 @@
-FROM    eilandert/ubuntu-base:rolling
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV     DEBIAN_FRONTEND="noninteractive"
+# This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
+FROM eilandert/ubuntu-base:devel 
+LABEL maintainer="Thijs Eilander <eilander@myguard.nl>" 
+ENV DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-RUN     . /etc/os-release \
-        && echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/backports/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-backports-${UBUNTU_CODENAME}.list \
-        && apt-get update && apt-get -y upgrade \
-        && apt-get -y --no-install-recommends install \
-		dovecot-core \
-		dovecot-imapd \
-		dovecot-lmtpd \
-		dovecot-managesieved \
-		dovecot-mysql \
-		dovecot-pgsql \
-		dovecot-pop3d \
-		dovecot-sieve \
-		dovecot-submissiond \
-		syslog-ng-core \
-        && apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* \
-        && mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot \
-        && chmod +x /bootstrap.sh
+RUN set -ex ;\
+    . /etc/os-release ;\
+    echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/backports/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-backports-${UBUNTU_CODENAME}.list ;\
+    apt-get update ;\
+    apt-get -y --no-install-recommends install \
+      dovecot-core \
+      dovecot-imapd \
+      dovecot-lmtpd \
+      dovecot-managesieved \
+      dovecot-mysql \
+      dovecot-pgsql \
+      dovecot-pop3d \
+      dovecot-sieve \
+      dovecot-submissiond \
+      syslog-ng-core \
+    apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot ;\
+    addgroup --gid 5000 vmail ;\
+    useradd -u 5000 -g 5000 -s /sbin/nologin vmail ;\
+    chmod +x /bootstrap.sh 
 
-COPY syslog-ng.conf /etc/syslog-ng
+ADD https://raw.githubusercontent.com/eilandert/dockerized/master/vimbadmin-ubuntu/EXAMPLES/dovecot-sql.conf.ext /etc/dovecot.orig
+ADD syslog-ng.conf /etc/syslog-ng
 
+WORKDIR /etc/dovecot
 
 EXPOSE 24 143 110 993 995 4190
 
 CMD [ "/bootstrap.sh" ]
-
