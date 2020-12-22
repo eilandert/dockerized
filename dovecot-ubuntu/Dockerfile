@@ -19,7 +19,7 @@ RUN set -ex ;\
       dovecot-pop3d \
       dovecot-sieve \
       dovecot-submissiond \
-      syslog-ng-core \
+      syslog-ng-core ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot ;\
     addgroup --gid 5000 vmail ;\
