@@ -1,7 +1,7 @@
 services:
   dovecot:
     container_name: dovecot
-    image: eilandert/dovecot-ubuntu:latest
+    image: eilandert/dovecot:latest
     ports:
       - 24:24/tcp
       - 110:110/tcp
