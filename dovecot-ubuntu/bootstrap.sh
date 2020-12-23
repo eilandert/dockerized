@@ -37,6 +37,7 @@ if [ -n "${USE_VIMBADMIN}" ]; then
     sed -i s/"my \$port .*"/"my \$port = \"${DB_PORT}\";"/ /opt/scripts/vimbadmin/*
     sed -i s/"my \$username .*"/"my \$username = \"${DB_USERNAME}\";"/ /opt/scripts/vimbadmin/*
     sed -i s/"my \$password .*"/"my \$password = \"${DB_PASSWORD}\";"/ /opt/scripts/vimbadmin/*
+    /opt/scripts/vimbadmin/update_mailbox_size.pl
 fi &
 
 
