@@ -19,14 +19,29 @@ RUN set -ex ;\
       dovecot-pop3d \
       dovecot-sieve \
       dovecot-submissiond \
-      syslog-ng-core ;\
+      syslog-ng-core \
+      libfilesys-diskspace-perl \
+      libdbd-mariadb-perl \
+      libdbd-pgsql \
+      libdbd-mysql-perl \
+      libdbd-mysql \
+      pyzor \
+      razor \
+      rspamd \
+      spamc \
+      curl ;\
+    mkdir -p /opt/scripts/vimbadmin.orig ;\
+    curl -fSL https://github.com/gibzer/vimbadmin-perl/archive/master.tar.gz |\
+      tar xz --strip-components=1 -C /opt/scripts/vimbadmin.orig ;\
+    rm /opt/scripts/vimbadmin.orig/*.deb ;\
+    apt-get -y purge curl ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot ;\
     addgroup --gid 5000 vmail ;\
     useradd -u 5000 -g 5000 -s /sbin/nologin vmail ;\
     chmod +x /bootstrap.sh 
 
-ADD https://raw.githubusercontent.com/eilandert/dockerized/master/vimbadmin-ubuntu/EXAMPLES/dovecot-sql.conf.ext /etc/dovecot.orig
+#ADD https://raw.githubusercontent.com/eilandert/dockerized/master/vimbadmin-ubuntu/EXAMPLES/dovecot-sql.conf.ext /etc/dovecot.orig
 ADD syslog-ng.conf /etc/syslog-ng
 
 WORKDIR /etc/dovecot
