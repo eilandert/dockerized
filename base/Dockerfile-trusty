@@ -1,0 +1,40 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/ubuntu-base for a recent one
+FROM    ubuntu:trusty
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+
+COPY    bootstrap.sh /bootstrap.sh
+
+# install PPA for latest openssl from my own ppa
+
+RUN . /etc/os-release ;\
+    echo "deb [trusted=yes] http://deb.paranoid.nl trusty main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
+    apt-get -y update && apt-get -y upgrade ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
+    chmod +x /bootstrap.sh ;\
+    apt-get -y clean ;\
+    apt-get -y autoremove ;\
+    apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/* ;\
+    sh -x ;\
+    for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
+        if [ $user != "root" ]; then \
+            usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
+        fi ;\
+    done ;\
+    #	  for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+    #	  for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+    #     for file in `ls /usr/bin/dpkg*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+    for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    for file in `ls /usr/sbin/fsck*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    dpkg-statoverride --update --add root adm 0000 /bin/dmesg ;\
+    dpkg-statoverride --update --add root adm 0000 /sbin/badblocks ;\
+    dpkg-statoverride --update --add root adm 0000 /bin/su ;\
+    dpkg-statoverride --add root adm 0000 /usr/bin/sudo ;\
+    dpkg-statoverride --add root adm 0500 /usr/bin/ping ;\
+    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections
+
+CMD     ["/bootstrap.sh"]
+

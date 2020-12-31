@@ -1,5 +1,5 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/ubuntu-base for a recent one
-FROM    ubuntu:devel
+FROM    debian:bullseye-slim
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -8,10 +8,11 @@ COPY    bootstrap.sh /bootstrap.sh
 # install PPA for latest openssl from my own ppa
 
 RUN . /etc/os-release ;\
-    echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/backports/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-backports-${UBUNTU_CODENAME}.list ;\
+    echo "deb [trusted=yes] http://deb.paranoid.nl bullseye main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     apt-get -y update && apt-get -y upgrade ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
     chmod +x /bootstrap.sh ;\
+    apt-get -y clean ;\
     apt-get -y autoremove ;\
     apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/* ;\

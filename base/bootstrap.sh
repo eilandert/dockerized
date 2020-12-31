@@ -2,4 +2,4 @@
 
 echo "dummy bootstrap"
 
-sleep 100d;
+sleep 1d;
