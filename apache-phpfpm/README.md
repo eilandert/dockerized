@@ -2,11 +2,11 @@
 
 A docker I created for serving wordpress, opencart and magento behind a reverse nginx proxy, but all functionality is there so you should be able to use it any way you want
 
-An Ubuntu-rolling docker with PHP packages from [Ondrej](https://launchpad.net/~ondrej/+archive/ubuntu/php)
+An Ubuntu:rolling (or debian:stable) docker with PHP packages from [Ondrej](https://launchpad.net/~ondrej/+archive/ubuntu/php)
 
 This docker can be found on [Github](https://github.com/eilandert/dockerized/tree/master/apache-phpfpm) and [Dockerhub](https://hub.docker.com/r/eilandert/apache-phpfpm)
 
-Complete Apache packages are on my [Launchpad](https://launchpad.net/~eilander/+archive/ubuntu/apache2)
+Complete Apache packages are on my own [repo](https://launchpad.net/~eilander/+archive/ubuntu/apache2)
 
 Bind /etc/php and /etc/apache2 for configfiles, those dirs will be populated if they are empty
 
@@ -36,13 +36,21 @@ ENVIRONMENT:
 See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
 
 TAGS:
-
+Ubuntu:
 - eilandert/apache-phpfpm:latest defaults to 7.4 at this time
 - eilandert/apache-phpfpm:multi for all php versions
 - eilandert/apache-phpfpm:5.6
 - eilandert/apache-phpfpm:7.2
 - eilandert/apache-phpfpm:7.4
 - eilandert/apache-phpfpm:8.0
+Debian:
+- eilandert/apache-phpfpm:deblatest defaults to 7.4 at this time
+- eilandert/apache-phpfpm:debmulti for all php versions
+- eilandert/apache-phpfpm:deb5.6
+- eilandert/apache-phpfpm:deb7.2
+- eilandert/apache-phpfpm:deb7.4
+- eilandert/apache-phpfpm:deb8.0
+
 
 TODO
 
