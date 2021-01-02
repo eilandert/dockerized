@@ -18,12 +18,6 @@ RUN set -x ;\
     apt-get -y update ;\
     rm -rf /etc/php && mv /etc/php.orig /etc/php ;\
     apt-get install -y --no-install-recommends \
-      php${PHPVERSION}-exif \
-      php${PHPVERSION}-gd \
-      php${PHPVERSION}-intl \
-#      php${PHPVERSION}-imap \
-#      php${PHPVERSION}-ldap \
-#      php${PHPVERSION}-sqlite \
       git \
       unzip \
       curl \

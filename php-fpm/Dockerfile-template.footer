@@ -16,4 +16,3 @@
 CMD     ["/bootstrap.sh"]
 
 EXPOSE  9000
-
