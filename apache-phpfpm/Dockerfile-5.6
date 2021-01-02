@@ -8,9 +8,7 @@ ENV     TZ=Europe/Amsterdam
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    . /etc/os-release ;\
     chmod +x /bootstrap.sh ;\
-    echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/apache2/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-apache2-${UBUNTU_CODENAME}.list ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends apache2 apache2-utils ;\
     apt-get install -y --no-install-recommends libapache2-mod-php${PHPVERSION} ;\
