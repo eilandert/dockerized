@@ -1,13 +1,14 @@
-# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/ubuntu-base for a recent one
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
 FROM    ubuntu:bionic
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
-# install PPA for latest openssl from my own ppa
+# install latest openssl from my own repository on http://deb.paranoid.nl
 
-RUN . /etc/os-release ;\
+RUN set -x ;\
+    . /etc/os-release ;\
     echo "deb [trusted=yes] http://deb.paranoid.nl ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     apt-get -y update && apt-get -y upgrade ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
@@ -17,6 +18,7 @@ RUN . /etc/os-release ;\
     apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/* ;\
     sh -x ;\
+    for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
     for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
         if [ $user != "root" ]; then \
             usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
@@ -37,4 +39,3 @@ RUN . /etc/os-release ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections
 
 CMD     ["/bootstrap.sh"]
-
