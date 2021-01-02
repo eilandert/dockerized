@@ -33,7 +33,7 @@ RUN set -ex ;\
       libnginx-mod-mail \
       libnginx-mod-nchan \
       libnginx-mod-rtmp \
-      libnginx-mod-stream Stream \
+      libnginx-mod-stream \
       libnginx-mod-stream-geoip \
       libnginx-mod-stream-geoip2 \
       modsecurity-crs \
