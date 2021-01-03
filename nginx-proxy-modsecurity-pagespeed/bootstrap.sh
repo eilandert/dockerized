@@ -95,7 +95,8 @@ if [ -n "${PHPVERSION}" ]; then
 fi
 
 #download new pagespeed libraries on docker startup
-/etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf
+chmod +x /etc/nginx/scripts/pagespeed_libraries_generator.sh 1>/dev/null 2>&1
+/etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 2>/dev/null
 
 nginx -V 2>&1 | grep -v configure
 nginx -t
