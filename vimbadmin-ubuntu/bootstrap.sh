@@ -19,14 +19,14 @@ fi
 FIRSTRUN="/etc/apache2/apache2.conf"
 if [ ! -f ${FIRSTRUN} ]; then
     #    echo "[VIMBADMIN] apache: no configs found, populating default configs to /etc/apache2"
-    cp -r /etc/apache2.orig/* /etc/apache2/ &
+    cp -r /etc/apache2.orig/* /etc/apache2/
 fi
 
 FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
 if [ ! -f ${FIRSTRUN} ]; then
     #    echo "[VIMBADMIN] php: no configs found, populating default configs to /etc/php/${PHPVERSION}"
     mkdir -p /etc/php/${PHPVERSION}
-    cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION} &
+    cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION}
 fi
 
 FIRSTRUN="${INSTALL_PATH}/application/configs/application.ini"

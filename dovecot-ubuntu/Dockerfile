@@ -1,13 +1,11 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
-FROM eilandert/ubuntu-base:devel 
+FROM eilandert/ubuntu-base:rolling
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>" 
 ENV DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    . /etc/os-release ;\
-    echo "deb [trusted=yes] http://ppa.launchpad.net/eilander/backports/ubuntu ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/eilander-ubuntu-backports-${UBUNTU_CODENAME}.list ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
       dovecot-core \

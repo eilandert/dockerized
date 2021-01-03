@@ -1,6 +1,6 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/vimbadmin-ubuntu for a recent one
 
-FROM	eilandert/apache-phpfpm:8.0
+FROM	eilandert/apache-phpfpm:7.4
 LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -15,9 +15,9 @@ RUN set -ex ;\
       tar xz --strip-components=1 -C ${INSTALL_PATH} ;\
     cd ${INSTALL_PATH} ;\
     rm -rf /etc/php && cp -r /etc/php.orig /etc/php ;\
-    rm composer.lock ;\
+#    rm composer.lock ;\
     composer config -g secure-http false ;\
-    composer require doctrine/orm -W --prefer-dist ;\
+#    composer require doctrine/orm -W --prefer-dist ;\
     composer update --prefer-dist --no-dev ;\
     composer clear-cache ;\
     rm -rf /etc/php && mkdir -p /etc/php ;\
@@ -40,6 +40,7 @@ RUN set -ex ;\
 
 COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/
 
+WORKDIR /opt/vimbadmin
 CMD "/bootstrap.sh"
 
 EXPOSE 80/TCP

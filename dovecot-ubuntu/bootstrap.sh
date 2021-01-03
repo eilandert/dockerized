@@ -37,10 +37,19 @@ if [ -n "${USE_VIMBADMIN}" ]; then
     sed -i s/"my \$port .*"/"my \$port = \"${DB_PORT}\";"/ /opt/scripts/vimbadmin/*
     sed -i s/"my \$username .*"/"my \$username = \"${DB_USERNAME}\";"/ /opt/scripts/vimbadmin/*
     sed -i s/"my \$password .*"/"my \$password = \"${DB_PASSWORD}\";"/ /opt/scripts/vimbadmin/*
-    /opt/scripts/vimbadmin/update_mailbox_size.pl
-fi &
+    /opt/scripts/vimbadmin/update_mailbox_size.pl &
+fi
 
+#echo "Automaticly reloading configs everyday to pick up new ssl certificates"
+while [ 1 ]; do
+    sleep 1d;
+    dovecot reload;
+    if [ -n "${USE_VIMBADMIN}" ]; then
+        /opt/scripts/vimbadmin/update_mailbox_size.pl 
+    fi
+done &
 
 chmod 777 /dev/stdout
 
 exec /usr/sbin/dovecot -F
+
