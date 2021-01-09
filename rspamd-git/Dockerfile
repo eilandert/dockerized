@@ -31,18 +31,42 @@ RUN	apt-get -y update \
 	&& cd /opt/src \
 	&& git clone --recursive https://github.com/rspamd/rspamd.git \
 	&& cd /opt/src/rspamd \
-	&& cmake . \
+	&& cmake \
+	     -DCONFDIR=/etc/rspamd \
+             -DMANDIR=/usr/share/man \
+             -DRUNDIR=/run/rspamd \
+             -DDBDIR=/var/lib/rspamd \
+             -DLOGDIR=/var/log/rspamd \
+             -DSHAREDIR=/usr/share/rspamd \
+             -DLIBDIR=/usr/lib/rspamd \
+             -DINCLUDEDIR=/usr/include \
+             -DSYSTEMDDIR=/lib/systemd/system \
+             -DCMAKE_BUILD_TYPE=RELEASE \
+             -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \ 
+             -DENABLE_LTO=ON \
+             -DDEBIAN_BUILD=1 \
+             -DCMAKE_C_COMPILER=gcc \
+             -DCMAKE_CXX_COMPILER=g++ \
+             -DENABLE_JEMALLOC=ON \
+             -DENABLE_PCRE2=ON \
+             -DENABLE_LUAJIT=ON \
+             -DENABLE_LIBUNWIND=ON \
+             -DWANT_SYSTEMD_UNITS=ON \
+             -DENABLE_HYPERSCAN=ON \ 
+             -DLUA_ROOT=/luajit \
+             -DCMAKE_INSTALL_PREFIX=/usr \
+             . \
+             \
 	&& make \
 	&& make install \
-	&& mkdir -p /usr/local/etc/rspamd/override.d/ \
-        && echo 'type = "console";' > /usr/local/etc/rspamd/override.d/logging.inc \
-	&& echo 'bind_socket = "*:11334";' > /usr/local/etc/rspamd/override.d/worker-controller.inc \
-        && echo 'pidfile = false;' > /usr/local/etc/rspamd/override.d/options.inc \
-	&& mv /usr/local/etc/rspamd /usr/local/etc/rspamd.orig \
+	&& mkdir -p /etc/rspamd/override.d/ \
+        && echo 'type = "console";' > /etc/rspamd/override.d/logging.inc \
+	&& echo 'bind_socket = "*:11334";' > /etc/rspamd/override.d/worker-controller.inc \
+        && echo 'pidfile = false;' > /etc/rspamd/override.d/options.inc \
+	&& mv /etc/rspamd /etc/rspamd.orig \
 	&& mkdir -p /var/log/rspamd \
 	&& mkdir -p /var/lib/rspamd \
 	&& mkdir -p /var/run/rspamd \
-	&& mkdir -p /usr/local/var \
 	&& rm -rf /usr/local/share/man /usr/local/share/games /usr/local/share/include /usr/local/share/src /usr/local/lib/python3.8 /usr/local/sbin \
 	&& cd /tmp \
 	&& rm -rf /opt \
