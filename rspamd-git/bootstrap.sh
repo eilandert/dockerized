@@ -4,10 +4,10 @@ echo "[RSPAMD] This docker image can be found on https://hub.docker.com/u/eiland
 
 CHECK="/usr/local/etc/rspamd/rspamd.conf"
 if [ -f ${CHECK} ]; then
-
-	echo "YOU HAVE MOUNTED CONFIGS TO /USR/LOCAL/ETC. THIS HAS CHANGED TO /ETC"
-	echo "PLEASE CHANGE YOUR MOUNTS INSIDE THE CONTAINER ACCORDINGLY"
-	exit
+    echo "YOU HAVE MOUNTED CONFIGS TO /USR/LOCAL/ETC. THIS HAS CHANGED TO /ETC"
+    echo "PLEASE CHANGE YOUR MOUNTS INSIDE THE CONTAINER ACCORDINGLY"
+    echo "Trying to set a symlink for the time being...."
+    ln -s /usr/local/etc/rspamd /etc/rspamd
 fi
 
 FIRSTRUN="/etc/rspamd/rspamd.conf"
@@ -42,5 +42,6 @@ if [ -n "${SYSLOG_HOST}" ]; then
 else
     echo "type = \"console\";" > /etc/rspamd/override.d/logging.inc
 fi
+    chown _rspamd:_rspamd -R /var/lib/rspamd
 
-exec	/usr/local/bin/rspamd -f -u _rspamd -g _rspamd;
+exec	/usr/bin/rspamd -f -u _rspamd -g _rspamd;
