@@ -91,11 +91,8 @@ RUN	apt-get -y update \
                 zlib1g-dev \ 
                 libluajit-5.1-dev \
 	&& apt-get  --no-install-recommends -y install \
-	        libluajit-5.1 \
-		libsqlite3-0 \
-		libsodium23 \
-		libicu67 \
 		syslog-ng-core \
+                libglib2.0-0 libhyperscan5 libicu67 libluajit-5.1-2 libluajit-5.1-common libsodium23 libsqlite3-0 libunwind8 \
         && apt-get -y autoremove \
         && apt-get -y clean autoclean \
         && rm -rf /var/lib/apt/lists/* \
