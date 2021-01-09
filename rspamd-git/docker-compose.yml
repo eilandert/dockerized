@@ -8,7 +8,7 @@ services:
       - 11333:11333
       - 11334:11334
     volumes:
-      - ./config/rspamd:/usr/local/etc/rspamd:rw
+      - ./config/rspamd:/etc/rspamd:rw
       - ./data/rspamd:/var/lib/rspamd
     #    - /coreland:/coreland:rw
     environment:
