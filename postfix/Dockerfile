@@ -1,19 +1,29 @@
-FROM alpine:latest
-LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
+FROM    eilandert/ubuntu-base:rolling
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
 
-COPY bootstrap.sh /bootstrap.sh
-RUN apk update && apk upgrade && apk add --no-cache postfix postfix-pcre postfix-mysql ca-certificates tzdata dcron openssl syslog-ng
+COPY    bootstrap.sh /bootstrap.sh
 
-RUN     rm -rf /var/cache/apk/* /usr/src/* && chmod +x /bootstrap.sh \
-        && mkdir -p /etc/postfix/cron.d/hourly && mkdir -p /etc/postfix/cron.d/daily \
-        && echo "#!/bin/sh" > /etc/postfix/cron.d/daily/reload.sh && chmod +x /etc/postfix/cron.d/daily/reload.sh \
-        && echo "postfix reload" >> /etc/postfix/cron.d/daily/reload.sh \
-        && mv /etc/postfix /etc/postfix.orig
-
-COPY syslog-ng.conf /etc/syslog-ng
+RUN set -ex ;\
+    apt-get update ;\
+    apt-get -y --no-install-recommends install \
+      ca-certificates tzdata openssl syslog-ng \
+      postfix-cdb \
+      postfix-ldap \
+      postfix-lmdb \
+      postfix-mysql \
+      postfix-pcre \
+      postfix-pgsql \
+      postfix-sqlite \
+      postfix \
+      ;\
+    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    mv /etc/postfix /etc/postfix.orig ;\
+    chmod +x /bootstrap.sh
 
 CMD [ "/bootstrap.sh" ]
 
+COPY syslog-ng.conf /etc/syslog-ng
 EXPOSE 25 587
 
 VOLUME [ "/var/lib/postfix" ]
