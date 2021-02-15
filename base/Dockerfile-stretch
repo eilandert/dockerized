@@ -1,5 +1,5 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
-FROM    #TEMPLATE1#
+FROM    debian:stretch-slim
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -9,7 +9,7 @@ COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
 # install latest openssl from my own repository on http://deb.paranoid.nl
 RUN set -x ;\
     . /etc/os-release ;\
-    #TEMPLATE2# ;\
+    echo "deb [arch=amd64] http://deb.paranoid.nl ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     apt-get -y update && apt-get -y upgrade ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
     chmod +x /bootstrap.sh ;\

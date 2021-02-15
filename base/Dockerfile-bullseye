@@ -4,12 +4,12 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
+COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
 
 # install latest openssl from my own repository on http://deb.paranoid.nl
-
 RUN set -x ;\
     . /etc/os-release ;\
-    echo "deb [trusted=yes] http://deb.paranoid.nl bullseye main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
+    echo "deb [arch=amd64] http://deb.paranoid.nl bullseye main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     apt-get -y update && apt-get -y upgrade ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
     chmod +x /bootstrap.sh ;\

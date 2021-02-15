@@ -31,8 +31,7 @@ chown postfix:postfix -R /var/lib/postfix
 
 #echo "Automaticly reloading configs everyday to pick up new ssl certificates"
 while [ 1 ]; do sleep 1d; postfix reload; done &
-sleep 60 && postfix flush &
 
-echo -n "Postfix "; postconf mail_version | cut -d" " -f3
+echo -n "Starting Postfix "; postconf mail_version | cut -d" " -f3
 
 exec postfix start-fg

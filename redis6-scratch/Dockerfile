@@ -1,4 +1,4 @@
-FROM alpine:edge as build
+FROM alpine:latest as build
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN apk update && apk upgrade && addgroup -S -g 1000 redis && adduser -S -G redis -u 999 redis 

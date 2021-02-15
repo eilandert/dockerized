@@ -15,7 +15,7 @@ export PATH=$PATH:~/bin/depot_tools
 cd /usr/src
 if [ ! -d "incubator-pagespeed-mod" ]; then
     echo "cloning.."
-    git clone -b latest-stable --depth=1 -c advice.detachedHead=false --jobs 10 --recursive https://github.com/apache/incubator-pagespeed-mod.git
+    git clone -b latest-stable --depth=1 -c advice.detachedHead=false --recursive https://github.com/apache/incubator-pagespeed-mod.git
     cd incubator-pagespeed-mod
 else
     echo "pulling.."

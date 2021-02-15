@@ -1,4 +1,4 @@
-FROM    #FROM#
+FROM    eilandert/php-fpm:7.4
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 

@@ -8,6 +8,21 @@ if [ ! -f ${FIRSTRUN} ]; then
     mkdir -p /etc/dovecot && cp -r /etc/dovecot.orig/* /etc/dovecot/
 fi
 
+FIRSTRUN="/etc/nullmailer/defaultdomain"
+if [ ! -f ${FIRSTRUN} ]; then
+    echo "[APACHE-PHPFPM] no configs found, populating default configs to /etc/nullmailer"
+    cp -r /etc/nullmailer.orig /etc/nullmailer
+fi
+
+#fix some weird issue with nullmailer
+rm -f /var/spool/nullmailer/trigger
+mkdir -p /var/spool/nullmailer/
+/usr/bin/mkfifo /var/spool/nullmailer/trigger
+/bin/chmod 0622 /var/spool/nullmailer/trigger
+/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
+runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+
+
 if [ -n "${TZ}" ]; then
     rm -f /etc/timezone /etc/localtime
     echo "${TZ}" > /etc/timezone
