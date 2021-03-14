@@ -12,7 +12,7 @@ fi
 
 FIRSTRUN="/etc/rspamd/rspamd.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-    echo "[RSPAMD] no configs found, populating default configs to /usr/local/etc/rspamd"
+    echo "[RSPAMD] no configs found, populating default configs to /etc/rspamd"
     mkdir -p /etc/rspamd
     cp -r /etc/rspamd.orig/* /etc/rspamd/
 
