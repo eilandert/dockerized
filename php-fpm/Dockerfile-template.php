@@ -7,6 +7,7 @@
       php#PHPVERSION#-dom \
       php#PHPVERSION#-exif \
       php#PHPVERSION#-gd \
+      php#PHPVERSION#-gmp \
       php#PHPVERSION#-igbinary \
       php#PHPVERSION#-imagick \
       php#PHPVERSION#-imap \
