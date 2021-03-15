@@ -1,5 +1,5 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
-FROM    ubuntu:xenial
+FROM    debian:stretch-slim
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -10,7 +10,7 @@ COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
 RUN set -x ;\
     . /etc/os-release ;\
     echo "deb [arch=amd64] http://deb.paranoid.nl ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
-    #TEMPLATE3# ;\
+    echo "deb [trusted=yes] http://packages.sury.org/php/ ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update && apt-get -y upgrade ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
     chmod +x /bootstrap.sh ;\
