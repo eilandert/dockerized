@@ -26,6 +26,7 @@ RUN set -ex ;\
       php8.0-dom \
       php8.0-exif \
       php8.0-gd \
+      php8.0-gmp \
       php8.0-igbinary \
       php8.0-imagick \
       php8.0-imap \

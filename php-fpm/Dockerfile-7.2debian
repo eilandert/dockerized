@@ -26,6 +26,7 @@ RUN set -ex ;\
       php7.2-dom \
       php7.2-exif \
       php7.2-gd \
+      php7.2-gmp \
       php7.2-igbinary \
       php7.2-imagick \
       php7.2-imap \
