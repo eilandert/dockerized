@@ -15,18 +15,21 @@ export PATH=$PATH:~/bin/depot_tools
 cd /usr/src
 if [ ! -d "incubator-pagespeed-mod" ]; then
     echo "cloning.."
-    git clone -b latest-stable --depth=1 -c advice.detachedHead=false --jobs 10 --recursive https://github.com/apache/incubator-pagespeed-mod.git
+    git clone -b latest-stable --depth=1 -c advice.detachedHead=false --recursive https://github.com/apache/incubator-pagespeed-mod.git
     cd incubator-pagespeed-mod
 else
     echo "pulling.."
     cd incubator-pagespeed-mod
-    git pull --jobs 10 --recurse-submodules
+    git pull --recurse-submodules
 fi
 
 rm -rf /usr/src/incubator-pagespeed-mod/psol
 
+NUMCORE=$(cat /proc/cpuinfo | grep -c core)
+echo "NUMBER OF CORES: ${NUMCORE}"
+
 python build/gyp_chromium --depth=.
-make BUILDTYPE=Release mod_pagespeed_test pagespeed_automatic_test
+make -j${NUMCORE} BUILDTYPE=Release mod_pagespeed_test pagespeed_automatic_test
 install/build_psol.sh --skip_tests
 rm -f /usr/src/psol.tar.gz
 tar czf /usr/src/psol.tar.gz psol/

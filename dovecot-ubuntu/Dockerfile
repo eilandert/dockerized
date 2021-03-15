@@ -7,6 +7,7 @@ COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
     apt-get update ;\
+    apt-get install -y nullmailer mailutils ;\
     apt-get -y --no-install-recommends install \
       dovecot-core \
       dovecot-imapd \
