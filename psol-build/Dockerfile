@@ -1,4 +1,4 @@
-FROM    eilandert/ubuntu-base:xenial
+FROM    eilandert/ubuntu-base:bionic
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
