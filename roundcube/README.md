@@ -4,9 +4,9 @@ Daily rebuild of roundcube based on [eilandert/apache-phpfpm:8.0](https://hub.do
 Designed to be behind a [(nginx) reverse proxy](https://hub.docker.com/r/eilandert/nginx-modsecurity3-pagespeed), but all functionality is there to do what you want.
 
 Tags:<BR>
-eilandert/roundcube:php7.4 (roundcube stable + php7.4)<BR>
-eilandert/roundcube:php8.0 (roundcube git + php8.0 (unstable))<BR>
-eilandert/roundcube:latest -> defaults to php7.4<BR>
+eilandert/roundcube:ubuntu (roundcube stable + php7.4 on Ubuntu)<BR>
+eilandert/roundcube:debian (roundcube stable + php7.4 on Debian)<BR>
+eilandert/roundcube:latest -> defaults to Ubuntu<BR>
 
 Extra plugins and skins provided.
 
@@ -25,24 +25,30 @@ I'll try to maintain compatibility with the official [roundcube](https://hub.doc
 Let me know it something doesn't work!
 
 Added plugins:<BR>
-- https://github.com/corbosman/message_highlight<BR>
-- https://github.com/dsoares/roundcube-rcguard<BR>
-- https://github.com/filhocf/roundcube-attachment_position<BR>
-- https://github.com/filhocf/roundcube-html5_notifier<BR>
-- https://github.com/johndoh/roundcube-contextmenu<BR>
-- https://github.com/johndoh/roundcube-swipe<BR>
-- https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll<BR>
-- https://github.com/mike-kfed/rcmail-thunderbird-labels<BR>
-- https://github.com/random-cuber/contextmenu_folder<BR>
-- https://github.com/random-cuber/responses<BR>
-- https://github.com/texxasrulez/advanced_search<BR>
-- https://github.com/texxasrulez/persistent_login<BR>
-- https://github.com/texxasrulez/roundcube_fail2ban<BR>
-- https://github.com/thomascube/roundcube-elastic4mobile<BR>
+- https://github.com/dsoares/roundcube-rcguard
+- https://github.com/EstudioNexos/mabola-blue
+- https://github.com/filhocf/mabola
+- https://github.com/filhocf/roundcube-attachment_position
+- https://github.com/filhocf/roundcube-chameleon
+- https://github.com/filhocf/roundcube-chameleon-blue
+- https://github.com/filhocf/roundcube-html5_notifier
+- https://github.com/jfcherng-roundcube/plugin-quota
+- https://github.com/jfcherng-roundcube/plugin-show-folder-size
+- https://github.com/johndoh/roundcube-contextmenu
+- https://github.com/johndoh/roundcube-swipe
+- https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll
+- https://github.com/mike-kfed/rcmail-thunderbird-labels
+- https://github.com/random-cuber/contextmenu_folder
+- https://github.com/random-cuber/responses
+- https://github.com/texxasrulez/account_details
+- https://github.com/texxasrulez/advanced_search
+- https://github.com/texxasrulez/message_highlight
+- https://github.com/texxasrulez/persistent_login
+- https://github.com/texxasrulez/roundcube_fail2ban
+- https://github.com/thomascube/roundcube-plugin-kolab-2fa
 
 Added skins:<BR>
 - https://github.com/EstudioNexos/mabola-blue<BR>
 - https://github.com/filhocf/mabola<BR>
 - https://github.com/filhocf/roundcube-chameleon<BR>
 - https://github.com/filhocf/roundcube-chameleon-blue<BR>
-
