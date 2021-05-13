@@ -14,8 +14,14 @@ RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tz
   && chown clamav:clamav -R /var/lib/clamav \
   && mkdir -p /usr/local/sbin/ \
   && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/clamav-unofficial-sigs.sh -o /usr/local/sbin/clamav-unofficial-sigs \
+#  && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/user.conf -o /config.orig/clamav-unofficial-sigs/user.conf \
+  && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/master.conf -o /config.orig/clamav-unofficial-sigs/master.conf \
+  && sed -i s/"if \[ -r "/"if \[ -f "/g /usr/local/sbin/clamav-unofficial-sigs \
+  && sed -i s/"if \[ ! -w "/"if \[ -z "/g /usr/local/sbin/clamav-unofficial-sigs \
   && chmod +x /usr/local/sbin/clamav-unofficial-sigs \
   && chmod +x /bootstrap.sh && chmod +x /check.sh 
+#  && freshclam --user=clamav --no-warnings --foreground
+
 
 CMD ["/bootstrap.sh"]
 EXPOSE 3310/tcp
