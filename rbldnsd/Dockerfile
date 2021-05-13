@@ -1,4 +1,4 @@
-FROM alpine:latest as build
+FROM alpine:3.12.7 as build
 
 RUN apk update && apk upgrade  && apk add git gcc musl-dev pkgconfig zlib-dev zlib-static libev-dev libevent-static make cmake wget
 

@@ -24,7 +24,6 @@ RUN set -x ;\
       locales ;\
     rm -rf ${INSTALLDIR} ;\
     mkdir ${INSTALLDIR} ;\
-#    curl -fSL https://github.com/roundcube/roundcubemail/archive/master.tar.gz | \
     curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | \
       tar xz --strip-components=1 -C ${INSTALLDIR} ;\
     cd ${INSTALLDIR} ;\
@@ -34,6 +33,11 @@ RUN set -x ;\
 #    bin/install-jsdeps.sh ;\
     composer -n require mobiledetect/mobiledetectlib ;\
     composer -n require roundcube/elastic4mobile dev-master ;\
+    #2fa
+    composer -n require kolab/kolab_2fa ;\
+    composer require "endroid/qrcode" "~1.5.0" --no-update ;\
+    composer require "spomky-labs/otphp" "~5.0.0" --no-update ;\
+    composer require "enygma/yubikey" "~3.2" ;\
     cd ${INSTALLDIR} ;\
    #show_folder_size
    mkdir -p plugins/show_folder_size ;\

@@ -2,6 +2,12 @@
 
 echo "[DOVECOT] This docker image can be found on https://hub.docker.com/u/eilandert and https://github.com/eilandert/dockerized"
 
+if [ -n "${TZ}" ]; then
+    rm -f /etc/timezone /etc/localtime
+    echo "${TZ}" > /etc/timezone
+    ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
+fi
+
 FIRSTRUN="/etc/dovecot/dovecot.conf"
 if [ ! -f ${FIRSTRUN} ]; then
     echo "[DOVECOT] no configs found, copying default configs to /etc/dovecot"
@@ -21,13 +27,6 @@ mkdir -p /var/spool/nullmailer/
 /bin/chmod 0622 /var/spool/nullmailer/trigger
 /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
 runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
-
-
-if [ -n "${TZ}" ]; then
-    rm -f /etc/timezone /etc/localtime
-    echo "${TZ}" > /etc/timezone
-    ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
-fi
 
 if [ -n "${SYSLOG_HOST}" ]; then
     mkdir -p /etc/syslog-ng/conf.d
@@ -63,6 +62,10 @@ while [ 1 ]; do
         /opt/scripts/vimbadmin/update_mailbox_size.pl 
     fi
 done &
+
+echo "[DOVECOT] Pinging pyzor servers..."
+/usr/bin/pyzor ping
+
 
 chmod 777 /dev/stdout
 
