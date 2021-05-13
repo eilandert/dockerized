@@ -11,8 +11,8 @@ RUN set -ex ;\
     chmod +x /bootstrap.sh ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends apache2 apache2-utils ;\
-    apt-get install -y --no-install-recommends libapache2-mod-php${PHPVERSION} ;\
-    a2dismod php${PHPVERSION} ;\
+#    apt-get install -y --no-install-recommends libapache2-mod-php${PHPVERSION} ;\
+#    a2dismod php${PHPVERSION} ;\
     a2dismod status mpm_prefork ;\
     a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
     a2enconf php${PHPVERSION}-fpm ;\

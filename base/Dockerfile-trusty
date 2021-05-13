@@ -10,12 +10,10 @@ COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
 RUN set -x ;\
     . /etc/os-release ;\
     echo "deb [arch=amd64] http://deb.paranoid.nl trusty main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
-<<<<<<< HEAD
     #TEMPLATE3# ;\
-=======
->>>>>>> 778a6e1bf87904a0d8a7ab52ec1150d21fa756d5
-    apt-get -y update && apt-get -y upgrade ;\
-    apt-get install -y --no-install-recommends ca-certificates tzdata openssl ;\
+    apt-get -y update ;\
+    apt-get -y upgrade ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev ;\
     chmod +x /bootstrap.sh ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
@@ -40,6 +38,7 @@ RUN set -x ;\
     dpkg-statoverride --update --add root adm 0000 /bin/su ;\
     dpkg-statoverride --add root adm 0000 /usr/bin/sudo ;\
     dpkg-statoverride --add root adm 0500 /usr/bin/ping ;\
-    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections
+    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
+    rm -rf /usr/share/lintian /usr/share/man /usr/share/doc 
 
 CMD     ["/bootstrap.sh"]
