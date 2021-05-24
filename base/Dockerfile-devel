@@ -6,6 +6,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
 COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
+COPY    packages.sury.org.gpg /etc/apt/trusted.gpg.d/packages.sury.org.gpg
 
 # install latest openssl from my own repository on http://deb.paranoid.nl
 RUN set -x ;\
