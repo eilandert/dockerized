@@ -2,6 +2,7 @@ FROM    eilandert/php-fpm:deb7.2
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
+
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
