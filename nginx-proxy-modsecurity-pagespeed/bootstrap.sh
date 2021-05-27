@@ -3,7 +3,7 @@
 chmod 777 /dev/stdout
 
 echo "[NGINX] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
-echo "[NGINX] The NGINX packages can be found on https://launchpad.net/~eilander/+archive/ubuntu/nginx"
+echo "[NGINX] The NGINX packages (and detailed description of this NGINX stack can be found on https://deb.paranoid.nl"
 
 if [ -n "${TZ}" ]; then
     rm -f /etc/timezone /etc/localtime
