@@ -4,6 +4,7 @@ FROM    eilandert/php-fpm:7.2
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
+ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY    bootstrap.sh /bootstrap.sh
 
@@ -20,7 +21,8 @@ RUN set -ex ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* ;\
+    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80
