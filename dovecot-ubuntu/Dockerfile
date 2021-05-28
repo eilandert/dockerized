@@ -2,6 +2,7 @@
 FROM eilandert/ubuntu-base:rolling
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>" 
 ENV DEBIAN_FRONTEND="noninteractive"
+ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY    bootstrap.sh /bootstrap.sh
 
@@ -39,7 +40,8 @@ RUN set -ex ;\
     mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot ;\
     addgroup --gid 5000 vmail ;\
     useradd -u 5000 -g 5000 -s /sbin/nologin vmail ;\
-    chmod +x /bootstrap.sh 
+    chmod +x /bootstrap.sh ;\
+    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
 
 #ADD https://raw.githubusercontent.com/eilandert/dockerized/master/vimbadmin-ubuntu/EXAMPLES/dovecot-sql.conf.ext /etc/dovecot.orig
 ADD syslog-ng.conf /etc/syslog-ng

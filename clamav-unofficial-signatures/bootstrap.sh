@@ -23,8 +23,8 @@ if [ -n "${TZ}" ]; then
     echo "${TZ}" > /etc/timezone
 fi
 
-echo "[CLAMAV] Updating the unofficial signatures updater from https://github.com/extremeshok/clamav-unofficial-sigs"
-clamav-unofficial-sigs.sh --upgrade 1>/dev/null 2>&1
+#echo "[CLAMAV] Updating the unofficial signatures updater from https://github.com/extremeshok/clamav-unofficial-sigs"
+#clamav-unofficial-sigs.sh --upgrade 1>/dev/null 2>&1
 
 # make stdout wordwriteable for docker console output
 chmod 777 /dev/stdout
@@ -36,16 +36,16 @@ chown clamav:clamav -R /var/lib/clamav
 CVD_FILE="/var/lib/clamav/main.cvd"
 if [ ! -f ${CVD_FILE} ]; then
     echo "[CLAMAV] main.cvd not found, assuming there are no signatures..."
-    echo "[CLAMAV] Running updaters in foreground to get signatures. This can take a while."
-    freshclam --user=clamav --no-warnings --foreground
 fi
 
 echo "[CLAMAV] Starting ClamAV-milter"
 clamav-milter
 
+freshclam --user=clamav --no-warnings --foreground
+
 #poor mans cron
 echo "[CLAMAV] Starting updaters in the background"
-while [ 1 ]; do 
+while [ 1 ]; do
   /usr/local/sbin/clamav-unofficial-sigs.sh -s 1>/dev/null
   sleep 3600
 done &
@@ -53,4 +53,4 @@ freshclam -d
 
 echo "[CLAMAV] Starting clamd... Please wait while loading databases"
 
-exec   /usr/sbin/clamd --foreground
+exec /usr/sbin/clamd --foreground=true
