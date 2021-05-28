@@ -15,7 +15,7 @@ RUN set -x ;\
     apt-get -y update ;\
     apt-get -y upgrade ;\
     apt-get -y -t ${VERSION_CODENAME}-backports upgrade ;\
-    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 ;\
     chmod +x /bootstrap.sh ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
