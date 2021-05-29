@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM eilandert/ubuntu-base:hirsute
+FROM eilandert/ubuntu-base:rolling
 ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
