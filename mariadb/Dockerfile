@@ -1,6 +1,5 @@
 # vim:set ft=dockerfile:
-FROM eilandert/ubuntu-base:rolling
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+FROM ubuntu:hirsute
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
