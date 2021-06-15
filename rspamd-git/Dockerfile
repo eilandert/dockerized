@@ -3,6 +3,7 @@ LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY bootstrap.sh /bootstrap.sh
+COPY wait-for-it.sh /wait-for-it
 
 RUN	apt-get -y update \
 	&& apt-get --no-install-recommends -y install \
@@ -98,7 +99,8 @@ RUN	apt-get -y update \
         && rm -rf /var/lib/apt/lists/* \
 	&& addgroup --force-badname --gid 1000 _rspamd \
 	&& useradd --badnames -M -u 1000 -g 1000 -s /sbin/nologin _rspamd \
-	&& chmod +x /bootstrap.sh
+	&& chmod +x /bootstrap.sh \
+        && chmod +x /wait-for-it.sh
 
 COPY syslog-ng.conf /etc/syslog-ng
 

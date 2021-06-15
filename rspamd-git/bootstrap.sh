@@ -42,6 +42,21 @@ if [ -n "${SYSLOG_HOST}" ]; then
 else
     echo "type = \"console\";" > /etc/rspamd/override.d/logging.inc
 fi
-    chown _rspamd:_rspamd -R /var/lib/rspamd
+chown _rspamd:_rspamd -R /var/lib/rspamd
+
+sleep 1;
+
+# test services
+i=0
+while [ 1 ]
+do
+    i=$(($i+1))
+    HOST=$(eval echo \$WAIT_FOR_$i)
+    if [ ! -n "${HOST}" ]; then
+        break;
+    fi
+    /wait-for-it.sh ${HOST} -t 10
+done
+
 
 exec	/usr/bin/rspamd -f -u _rspamd -g _rspamd;
