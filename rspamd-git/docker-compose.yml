@@ -19,5 +19,5 @@ services:
       - WAIT_FOR_3=redis3:6379
       - WAIT_FOR_4=redis4:6379
       - WAIT_FOR_5=redis5:6379
-
+      - SLEEP=10
 version: "3.8"

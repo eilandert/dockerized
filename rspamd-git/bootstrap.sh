@@ -44,11 +44,14 @@ else
 fi
 chown _rspamd:_rspamd -R /var/lib/rspamd
 
-sleep 1;
+#sleep to avoid race conditions with other dockers like redis
+if [ -n "${SLEEP}" ]; then
+    sleep ${SLEEP};
+fi
 
 # test services
 i=0
-x=10
+x=25
 while [ 1 ]; do
     i=$(($i+1))
     HOST=$(eval echo \$WAIT_FOR_$i)
