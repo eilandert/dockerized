@@ -20,7 +20,7 @@ RUN set -ex; \
 
 # add gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.12
+ENV GOSU_VERSION 1.13
 RUN set -eux; \
 	apt-get update; \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates; \
@@ -78,7 +78,7 @@ RUN set -ex; \
 	done; \
 	gpg --batch --export $GPG_KEYS $REPOSITORY_KEY > /etc/apt/trusted.gpg.d/mariadb.gpg; \
 	command -v gpgconf > /dev/null && gpgconf --kill all || :; \
-	rm -r "$GNUPGHOME"; \
+	rm -fr "$GNUPGHOME"; \
 	apt-key list
 
 # bashbrew-architectures: amd64 arm64v8 ppc64le
