@@ -10,11 +10,14 @@ RUN set -ex ;\
     apt-get -y --no-install-recommends install \
       nginx-full \
       libmodsecurity3 \
+      libnginx-mod-http-lua \
+      libnginx-mod-http-headers-more-filter \
       libnginx-mod-modsecurity \
       libnginx-mod-pagespeed \
       libnginx-mod-security-headers \
       libnginx-mod-brotli \
       libnginx-mod-ssl-ct \
+      libnginx-mod-vts \
       libnginx-mod-http-auth-pam \
       libnginx-mod-http-cache-purge \
       libnginx-mod-http-dav-ext \
@@ -22,9 +25,7 @@ RUN set -ex ;\
       libnginx-mod-http-fancyindex \
       libnginx-mod-http-geoip \
       libnginx-mod-http-geoip2 \
-      libnginx-mod-http-headers-more-filter \
       libnginx-mod-http-image-filter \
-      libnginx-mod-http-lua \
       libnginx-mod-http-ndk \
       libnginx-mod-http-perl \
       libnginx-mod-http-subs-filter \

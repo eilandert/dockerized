@@ -9,13 +9,15 @@ COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
 # install latest openssl from my own repository on http://deb.paranoid.nl
 RUN set -x ;\
+    apt-get -y update ;\
+    apt-get install -y --no-install-recommends ca-certificates ;\
     . /etc/os-release ;\
     echo "deb [arch=amd64] http://deb.paranoid.nl trusty main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     #TEMPLATE3# ;\
     apt-get -y update ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 ;\
     apt-get -y upgrade ;\
     apt-get -y -t ${VERSION_CODENAME}-backports upgrade ;\
-    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 ;\
     chmod +x /bootstrap.sh ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
