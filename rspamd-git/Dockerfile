@@ -3,7 +3,7 @@ LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY bootstrap.sh /bootstrap.sh
-COPY wait-for-it.sh /wait-for-it
+COPY wait-for-it.sh /wait-for-it.sh
 
 RUN	apt-get -y update \
 	&& apt-get --no-install-recommends -y install \

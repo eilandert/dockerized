@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.12
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 RUN  apk update && apk upgrade \

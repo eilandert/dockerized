@@ -23,6 +23,6 @@ services:
 
     environment:
       - TZ=Europe/Amsterdam
-#      - SYSLOG_HOST = 10.0.0.198
+      - SYSLOG_HOST = 10.0.0.198
 
 version: "3.8"

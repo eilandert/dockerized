@@ -38,10 +38,10 @@ if [ ! -f ${CVD_FILE} ]; then
     echo "[CLAMAV] main.cvd not found, assuming there are no signatures..."
 fi
 
+freshclam --user=clamav --no-warnings --foreground
+
 echo "[CLAMAV] Starting ClamAV-milter"
 clamav-milter
-
-freshclam --user=clamav --no-warnings --foreground
 
 #poor mans cron
 echo "[CLAMAV] Starting updaters in the background"
