@@ -1,0 +1,25 @@
+# =======================================================
+# This is the sshd server system-wide configuration file.
+#
+# See sshd_config(5) for more information.
+# =======================================================
+
+HostKey /repo/ssh/ssh_host_rsa_key
+HostKey /repo/ssh/ssh_host_ecdsa_key
+HostKey /repo/ssh/ssh_host_ed25519_key
+
+LogLevel INFO
+
+PermitRootLogin prohibit-password
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM no
+
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no
+
+PrintMotd no
+PermitTunnel no
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server

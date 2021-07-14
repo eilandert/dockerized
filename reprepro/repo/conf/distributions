@@ -1,0 +1,14 @@
+# This is a simple example of a repository
+Origin: My Company
+Label: My Repository
+Description: My Company debian package repository.
+Codename: YOUR_REPO_NAME
+Suite: stable
+Architectures: i386 amd64 armhf source
+Components: main
+SignWith: YOUR_GPG_KEY_ID
+Update: atom skype-stable yarn-stable
+DebIndices: Packages Release . .gz .bz2
+UDebIndices: Packages . .gz .bz2
+DscIndices: Sources Release .gz .bz2
+Contents: . .gz .bz2

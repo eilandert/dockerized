@@ -1,0 +1,6 @@
+# This is a simple incoming directory that handle
+# all packages in all repositories
+Name: YOUR_REPO_NAME
+IncomingDir: /repo/incoming
+TempDir: /tmp/reprepro
+Default: YOUR_REPO_NAME

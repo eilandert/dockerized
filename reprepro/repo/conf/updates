@@ -1,0 +1,25 @@
+# Here you can configure remote mirrorized packages
+
+# Atom
+Name: atom
+Method: https://packagecloud.io/AtomEditor/atom/any
+Suite: any
+Components: main
+Architectures: i386 amd64
+VerifyRelease: blindtrust
+
+# Skype
+Name: skype-stable
+Method: https://repo.skype.com/deb
+Suite: stable
+Components: main
+Architectures: i386 amd64
+VerifyRelease: blindtrust
+
+# Yarn
+Name: yarn-stable
+Method: https://dl.yarnpkg.com/debian
+Suite: stable
+Components: main
+Architectures: i386 amd64 armhf
+VerifyRelease: blindtrust

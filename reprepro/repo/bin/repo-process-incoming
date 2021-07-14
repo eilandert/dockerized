@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Reprepro basedir absolute path
+REPO_BASEDIR="/repo"
+
+# Incoming folder absolute path
+INCOMING_DIR="/repo/incoming"
+
+# GPG sign key id check and parsing
+SIGN_KEY_FILE=$REPO_BASEDIR/gnupg/gpg_sign_key_id
+if [ ! -f $SIGN_KEY_FILE ]; then
+  echo "$SIGN_KEY_FILE not found on path"
+  exit 1
+fi
+SIGN_KEY_ID=$(cat $SIGN_KEY_FILE)
+
+# Command line arguments check and parsing
+if [ -z $1 ]; then
+  echo "Usage: $(basename $0) repo-codename"
+  exit 2
+else
+  REPO_CODENAME=$1
+fi
+
+# Check if .changes file(s) are found and run processincoming command
+PACKAGES=$(/bin/ls $INCOMING_DIR | grep changes);
+if [[ "$PACKAGES" != "" ]]; then
+    echo -e "\n[$REPO_CODENAME] Incoming process started at `date`\n"
+
+    # Preparing packages and repository
+    for CHANGES_FILE in $PACKAGES; do
+
+        # GPG signing of package
+        debsign --re-sign -k $SIGN_KEY_ID $INCOMING_DIR/$CHANGES_FILE
+
+        # If a package already exists, remove it
+        IFS='_'
+        read -ra TOKEN <<< "$CHANGES_FILE";
+        reprepro -Vb $REPO_BASEDIR remove $REPO_CODENAME ${TOKEN[0]} 2>&1
+    done
+
+    # Adding uploaded packages
+    reprepro -Vb $REPO_BASEDIR processincoming $REPO_CODENAME 2>&1
+fi
+
+# =============================== #
+exit 0

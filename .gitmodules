@@ -1,3 +1,0 @@
-[submodule "reprepro"]
-	path = reprepro
-	url = https://github.com/wolfetti/docker-reprepro

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+REPO_BASEDIR="/repo"
+
+if [ -f $REPO_BASEDIR/conf/updates ]; then
+
+    # Update remote mirrorized packages
+    reprepro -Vb $REPO_BASEDIR update
+
+    # Update of Contents-*.gz and so...
+    reprepro -Vb $REPO_BASEDIR export
+fi

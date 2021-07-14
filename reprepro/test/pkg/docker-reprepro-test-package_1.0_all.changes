@@ -1,0 +1,20 @@
+Format: 1.8
+Date: Mon, 23 Mar 2020 13:09:36 +0100
+Source: docker-reprepro-test-package
+Binary: docker-reprepro-test-package
+Architecture: all
+Version: 1.0
+Distribution: unknown
+Urgency: low
+Maintainer: Test <test@example.com>
+Changed-By: Test <test@example.com>
+Description:
+ docker-reprepro-test-package - [[description]]
+Changes:
+ docker-reprepro-test-package (1.0) unknown; urgency=low
+Checksums-Sha1:
+ 6fe8253cdca75d00dbd7fabf37cd0dc557b7a681 726 docker-reprepro-test-package_1.0_all.deb
+Checksums-Sha256:
+ 44c5fb79330985a6760c13f513aad5d70352ea733aad172212253d589d760986 726 docker-reprepro-test-package_1.0_all.deb
+Files:
+ f68d2c0e7e2aa44411f8d3e7ae3b524d 726 main optional docker-reprepro-test-package_1.0_all.deb

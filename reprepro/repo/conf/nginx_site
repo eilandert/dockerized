@@ -1,0 +1,12 @@
+server {
+  listen 80;
+  server_name _;
+  root /repo/public;
+
+  index index.html;
+  autoindex on;
+  server_tokens off;
+
+  error_log /dev/stdout info;
+  access_log /dev/stdout;
+}

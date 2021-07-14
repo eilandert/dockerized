@@ -1,0 +1,3 @@
+#!/bin/sh
+mkdir -p /var/run/sshd
+exec /usr/sbin/sshd -D -f /repo/conf/sshd_config
