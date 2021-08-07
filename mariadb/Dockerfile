@@ -79,13 +79,13 @@ RUN set -ex; \
 # bashbrew-architectures: amd64 arm64v8 ppc64le
 ARG MARIADB_MAJOR=10.5
 ENV MARIADB_MAJOR $MARIADB_MAJOR
-ARG MARIADB_VERSION=1:10.5.11+maria~hirsute
+ARG MARIADB_VERSION=1:10.5.12+maria~hirsute
 ENV MARIADB_VERSION $MARIADB_VERSION
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
 
 # Allowing overriding of REPOSITORY, a URL that includes suite and component for testing and Enterprise Versions
-ARG REPOSITORY="http://archive.mariadb.org/mariadb-10.5.11/repo/ubuntu/ hirsute main"
+ARG REPOSITORY="http://archive.mariadb.org/mariadb-10.5.12/repo/ubuntu/ hirsute main"
 
 RUN set -e;\
 	echo "deb ${REPOSITORY}" > /etc/apt/sources.list.d/mariadb.list; \
