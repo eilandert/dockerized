@@ -10,13 +10,14 @@ COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
 # prefer install latest packages from my own repository on https://deb.paranoid.nl
 RUN set -x ;\
+    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends ca-certificates ;\
-    echo "deb [arch=amd64] http://deb.paranoid.nl ${DIST} main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
+    echo "deb [arch=amd64] http://deb.paranoid.nl hirsute main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     { \
 	echo 'Package: *'; \
-	echo 'Pin: release a=${DIST}-backports'; \
+	echo 'Pin: release a=hirsute-backports'; \
 	echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
     { \
@@ -51,8 +52,6 @@ RUN set -x ;\
     dpkg-statoverride --update --add root adm 0000 /bin/su ;\
     dpkg-statoverride --add root adm 0000 /usr/bin/sudo ;\
     dpkg-statoverride --add root adm 0500 /usr/bin/ping ;\
-    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     rm -rf /var/lib/apt/lists/* 
-
 
 CMD     ["/bootstrap.sh"]
