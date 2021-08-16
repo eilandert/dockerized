@@ -1,0 +1,47 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
+FROM    debian:bookworm-slim
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+
+COPY    bootstrap.sh /bootstrap.sh
+COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
+COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
+
+# install latest openssl from my own repository on http://deb.paranoid.nl
+RUN set -x ;\
+    apt-get -y update ;\
+    apt-get install -y --no-install-recommends ca-certificates ;\
+    . /etc/os-release ;\
+    echo "deb [arch=amd64] http://deb.paranoid.nl bookworm main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
+    echo "deb [trusted=yes] http://packages.sury.org/php/ ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    apt-get -y update ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 ;\
+    apt-get -y upgrade ;\
+    apt-get -y -t ${VERSION_CODENAME}-backports upgrade ;\
+    chmod +x /bootstrap.sh ;\
+    apt-get -y clean ;\
+    apt-get -y autoremove ;\
+    apt-get -y autoclean ;\
+    sh -x ;\
+    for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
+    for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
+        if [ $user != "root" ]; then \
+            usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
+        fi ;\
+    done ;\
+    #	  for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+    #	  for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+    #     for file in `ls /usr/bin/dpkg*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+    for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    for file in `ls /usr/sbin/fsck*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
+    dpkg-statoverride --update --add root adm 0000 /bin/dmesg ;\
+    dpkg-statoverride --update --add root adm 0000 /sbin/badblocks ;\
+    dpkg-statoverride --update --add root adm 0000 /bin/su ;\
+    dpkg-statoverride --add root adm 0000 /usr/bin/sudo ;\
+    dpkg-statoverride --add root adm 0500 /usr/bin/ping ;\
+    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
+    rm -rf /var/lib/apt/lists/* 
+
+CMD     ["/bootstrap.sh"]
