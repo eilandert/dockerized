@@ -70,6 +70,9 @@ while [ 1 ]; do
     fi
 done
 
+#this is set for coredumps
+ulimit -c unlimited
+
 echo "[RSPAMD] Starting rspamd..."
 
 exec	/usr/bin/rspamd -f -u _rspamd -g _rspamd;
