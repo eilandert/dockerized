@@ -2,6 +2,7 @@
 FROM    debian:bookworm-slim
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
+ENV	DIST=bookworm
 
 COPY    bootstrap.sh /bootstrap.sh
 COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
@@ -9,14 +10,13 @@ COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
 # prefer install latest packages from my own repository on https://deb.paranoid.nl
 RUN set -x ;\
-    . /etc/os-release ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends ca-certificates ;\
-    echo "deb [arch=amd64] http://deb.paranoid.nl bookworm main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
-    echo "deb [trusted=yes] http://packages.sury.org/php/ ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    echo "deb [arch=amd64] http://deb.paranoid.nl ${DIST} main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
+    echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     { \
 	echo 'Package: *'; \
-	echo 'Pin: release a=${VERSION_CODENAME}-backports'; \
+	echo 'Pin: release a=${DIST}-backports'; \
 	echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
     { \
