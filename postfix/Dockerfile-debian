@@ -1,5 +1,5 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
-FROM    eilandert/ubuntu-base:rolling
+FROM eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2

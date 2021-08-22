@@ -1,6 +1,6 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/vimbadmin-ubuntu for a recent one
 
-FROM	eilandert/apache-phpfpm:deb7.4
+FROM	eilandert/apache-phpfpm:deb-7.4
 LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 

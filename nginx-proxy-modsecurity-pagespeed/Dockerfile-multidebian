@@ -1,4 +1,4 @@
-FROM    eilandert/php-fpm:debmulti
+FROM    eilandert/php-fpm:deb-multi
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
