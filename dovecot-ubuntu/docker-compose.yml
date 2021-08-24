@@ -14,11 +14,18 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       - TZ=Europe/Amsterdam
-#     - SYSLOG_HOST=10.0.0.118
       - DB_DRIVER=mysql
       - DB_DATABASE=vimbadmin
       - DB_HOST=localhost
       - DB_PORT=3306
       - DB_USERNAME=vimbadmin
       - DB_PASSWORD=secret
+#      - SYSLOG_HOST=10.0.0.118
+#      - WAIT_FOR_1=mysql:3306
+#      - WAIT_FOR_2=example:12345
+#      - WAIT_FOR_3=example:12345
+#      - WAIT_FOR_4=example:12345
+#      - WAIT_FOR_5=example:12345
+#      - SLEEP=10  # sleep in seconds at startup to avoid race conditions
+
 version: "3.7"

@@ -54,6 +54,34 @@ if [ -n "${USE_VIMBADMIN}" ]; then
     /opt/scripts/vimbadmin/update_mailbox_size.pl &
 fi
 
+#sleep to avoid race conditions with other dockers like redis
+if [ -n "${SLEEP}" ]; then
+    sleep ${SLEEP};
+fi
+
+# test services
+i=0
+x=25
+while [ 1 ]; do
+    i=$(($i+1))
+    HOST=$(eval echo \$WAIT_FOR_$i)
+    if [ ! -n "${HOST}" ]; then
+        break;
+    fi
+    wait-for-it.sh ${HOST} -t 3
+    if [ "$?" -ne 0 ]; then
+        echo "... ${HOST} is not reachable, trying again"
+        i=$(($i-1))
+        x=$(($x-1))
+        if [ "${x}" -eq 0 ]; then
+            echo "[DOVECOT] Nevermind, this is not going to work out! Goodbye!"
+            exit 255;
+        fi
+    fi
+done
+
+
+
 #echo "Automaticly reloading configs everyday to pick up new ssl certificates"
 while [ 1 ]; do
     if [ -n "${USE_VIMBADMIN}" ]; then
