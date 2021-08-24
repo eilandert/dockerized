@@ -56,11 +56,11 @@ fi
 
 #echo "Automaticly reloading configs everyday to pick up new ssl certificates"
 while [ 1 ]; do
-    sleep 1d;
-    dovecot reload;
     if [ -n "${USE_VIMBADMIN}" ]; then
         /opt/scripts/vimbadmin/update_mailbox_size.pl 
     fi
+    sleep 1d;
+    dovecot reload;
 done &
 
 echo "[DOVECOT] Pinging pyzor servers..."
