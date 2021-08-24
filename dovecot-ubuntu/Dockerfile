@@ -21,6 +21,7 @@ RUN set -ex ;\
       dovecot-submissiond \
       syslog-ng-core \
       libfilesys-diskspace-perl \
+      libfilesys-diskusage-perl \
       libdbd-mariadb-perl \
       libdbd-pgsql \
       libdbd-mysql-perl \
@@ -33,7 +34,7 @@ RUN set -ex ;\
     mkdir -p /opt/scripts/vimbadmin.orig ;\
     curl -fSL https://github.com/gibzer/vimbadmin-perl/archive/master.tar.gz |\
       tar xz --strip-components=1 -C /opt/scripts/vimbadmin.orig ;\
-    dpkg -i /opt/scripts/vimbadmin.orig/libfilesys-diskusage-perl_0.09-1_all.deb ;\
+#    dpkg -i /opt/scripts/vimbadmin.orig/libfilesys-diskusage-perl_0.09-1_all.deb ;\
     rm /opt/scripts/vimbadmin.orig/*.deb ;\
     apt-get -y purge curl ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
