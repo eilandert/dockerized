@@ -22,6 +22,13 @@ Environment variable(s) and examples:<BR>
   DB_USERNAME=vimbadmin<BR>
   DB_PASSWORD=secret<BR>
   USE_VIMBADMIN=yes<BR>
+  WAIT_FOR_1=mysql:3306      #you can make the list as long (or short) as you want.<BR>
+  WAIT_FOR_2=example:12345<BR>
+  WAIT_FOR_3=example:12345<BR>
+  WAIT_FOR_4=example:12345<BR>
+  WAIT_FOR_5=example:12345<BR>
+  SLEEP=10  # sleep in seconds at startup to avoid race conditions<BR>
+
 
 This docker is loaded with:<BR>
   Dovecot and all modules (obviously)<BR>
