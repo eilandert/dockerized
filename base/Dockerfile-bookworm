@@ -14,7 +14,6 @@ RUN set -x ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends ca-certificates ;\
     echo "deb [arch=amd64] http://deb.paranoid.nl bookworm main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
-    echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     { \
 	echo 'Package: *'; \
 	echo 'Pin: release a=bookworm-backports'; \

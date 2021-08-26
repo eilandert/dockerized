@@ -10,10 +10,8 @@ COPY    bootstrap.sh /bootstrap.sh
 ADD	https://getcomposer.org/installer /tmp/composer-setup.php
 
 RUN set -ex ;\
-#    . /etc/os-release ;\
-#    echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/ondrej-php.list ;\
+    #TEMPLATE3# ;\
     apt-get -y update ;\
-#    apt-get install -y libpcre2-8-0 libpcre3 ;\
     apt-get install -y nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger ;\
     apt-get install -y --no-install-recommends \
