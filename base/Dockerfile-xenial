@@ -3,53 +3,64 @@ FROM    ubuntu:xenial
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	DIST=xenial
-
 COPY    bootstrap.sh /bootstrap.sh
 COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
 COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
-# prefer install latest packages from my own repository on https://deb.paranoid.nl
+# prefer install latest packages from my own repository at https://deb.paranoid.nl
 RUN set -x ;\
-    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
-    apt-get -y update ;\
-    apt-get install -y --no-install-recommends ca-certificates ;\
     echo "deb [arch=amd64] http://deb.paranoid.nl xenial main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     { \
-	echo 'Package: *'; \
-	echo 'Pin: release a=xenial-backports'; \
-	echo 'Pin-Priority: 900'; \
+        echo 'Package: *'; \
+        echo 'Pin: release a=xenial-backports'; \
+        echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: origin deb.paranoid.nl'; \
         echo 'Pin-Priority: 901'; \
     } > /etc/apt/preferences.d/99myguard ;\
+    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 wait-for-it ;\
     apt-get -y upgrade ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
     apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/* ;\
     chmod +x /bootstrap.sh ;\
     sh -x ;\
-    for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
+        for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
     for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
         if [ $user != "root" ]; then \
             usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
         fi ;\
     done ;\
-    #	  for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
-    #	  for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
-    #     for file in `ls /usr/bin/dpkg*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
-    for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
-    for file in `ls /usr/sbin/fsck*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
-    for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
-    for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
-    dpkg-statoverride --update --add root adm 0000 /bin/dmesg ;\
-    dpkg-statoverride --update --add root adm 0000 /sbin/badblocks ;\
-    dpkg-statoverride --update --add root adm 0000 /bin/su ;\
-    dpkg-statoverride --add root adm 0000 /usr/bin/sudo ;\
-    dpkg-statoverride --add root adm 0500 /usr/bin/ping ;\
-    rm -rf /var/lib/apt/lists/* 
+    # Don't need these files in a Docker. 
+    # Ubuntu symlinks /sbin to /usr/sbin and Debian does not, so we have to delete the same file twice
+    for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/fs*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; unlink $file; done ;\
+    for file in `ls /sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/fs*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/mk*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/swap*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    \
+    for file in backblocks dumpe2fs fstrim isosize resize2fs rtcwake sulogin tune2fs wipefs; \
+      do dpkg-statoverride --quiet --update --add root adm 0000 /sbin/$file; rm -f /sbin/$file; \
+         dpkg-statoverride --quiet --update --add root adm 0000 /usr/sbin/$file; rm -f /usr/sbin/$file; \
+      done ;\
+    \
+    # same applies for /bin -> /usr/bin
+    \
+    for file in dmesg su sudo; \
+      do dpkg-statoverride --quiet --update --add root adm 0000 /bin/$file; rm -f /bin/$file; \
+         dpkg-statoverride --quiet --update --add root adm 0000 /usr/bin/$file; rm -f /usr/bin/$file; \
+      done ;\ 
+    \
+    rm -rf /usr/share/doc* /usr/share/man
 
 CMD     ["/bootstrap.sh"]
