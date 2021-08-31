@@ -59,8 +59,7 @@ RUN set -x ;\
     for file in dmesg su sudo; \
       do dpkg-statoverride --quiet --update --add root adm 0000 /bin/$file; rm -f /bin/$file; \
          dpkg-statoverride --quiet --update --add root adm 0000 /usr/bin/$file; rm -f /usr/bin/$file; \
-      done ;\ 
-    \
-    rm -rf /usr/share/doc* /usr/share/man
+      done 
+    
 
 CMD     ["/bootstrap.sh"]
