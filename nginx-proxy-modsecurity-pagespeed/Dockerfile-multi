@@ -11,6 +11,7 @@ RUN set -ex ;\
       nginx-full \
       libmodsecurity3 \
       libnginx-mod-http-lua \
+      libnginx-mod-njs \
       libnginx-mod-http-headers-more-filter \
       libnginx-mod-modsecurity \
       libnginx-mod-pagespeed \
