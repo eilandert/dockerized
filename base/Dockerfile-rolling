@@ -4,22 +4,18 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	DIST=hirsute
 COPY    bootstrap.sh /bootstrap.sh
-COPY    deb.paranoid.nl.gpg /etc/apt/trusted.gpg.d/deb.paranoid.nl.gpg
+COPY    myguard.deb /tmp/myguard.deb
 COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
 # prefer install latest packages from my own repository at https://deb.paranoid.nl
 RUN set -x ;\
-    echo "deb [arch=amd64] http://deb.paranoid.nl hirsute main" > /etc/apt/sources.list.d/deb.paranoid.nl.list ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=hirsute-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
-    { \
-        echo 'Package: *'; \
-        echo 'Pin: origin deb.paranoid.nl'; \
-        echo 'Pin-Priority: 901'; \
-    } > /etc/apt/preferences.d/99myguard ;\
+    #cd /tmp && wget https://deb.paranoid.nl/pool/install-myguard.deb -o myguard.deb && dpkg -i myguard.deb ;\
+    cd tmp && dpkg -i myguard.deb ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 wait-for-it ;\
