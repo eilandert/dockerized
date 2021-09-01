@@ -7,18 +7,19 @@ COPY    bootstrap.sh /bootstrap.sh
 COPY    myguard.deb /tmp/myguard.deb
 COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
-# prefer install latest packages from my own repository at https://deb.paranoid.nl
+
+# Install https://deb.paranoid.nl/pool/myguard.deb to setup my own repository
+
 RUN set -x ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=trusty-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
-    #cd /tmp && wget https://deb.paranoid.nl/pool/install-myguard.deb -o myguard.deb && dpkg -i myguard.deb ;\
-    cd tmp && dpkg -i myguard.deb ;\
+    cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
-    apt-get install -y --no-install-recommends ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 wait-for-it ;\
+    apt-get install -y --no-install-recommends myguard ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 wait-for-it ;\
     apt-get -y upgrade ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
