@@ -21,6 +21,7 @@ RUN set -x ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends myguard ca-certificates tzdata openssl libssl1.1 libssl-dev libjemalloc2 wait-for-it ;\
     apt-get -y upgrade ;\
+    apt-get -y -t trusty-backports upgrade ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
     apt-get -y autoclean ;\
