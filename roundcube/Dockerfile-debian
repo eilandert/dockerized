@@ -1,11 +1,9 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
-FROM    eilandert/apache-phpfpm:deb7.4
+
+FROM    eilandert/apache-phpfpm:deb-7.4
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
-
-# include the wait-for-it.sh script
-ADD	https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
 
 # fetch the last version, generated in the docker build script
 ADD     .lastversion /tmp/lastversion
@@ -23,7 +21,6 @@ RUN set -x ;\
       locales ;\
     rm -rf ${INSTALLDIR} ;\
     mkdir ${INSTALLDIR} ;\
-#    curl -fSL https://github.com/roundcube/roundcubemail/archive/master.tar.gz | \
     curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | \
       tar xz --strip-components=1 -C ${INSTALLDIR} ;\
     cd ${INSTALLDIR} ;\
@@ -33,6 +30,11 @@ RUN set -x ;\
 #    bin/install-jsdeps.sh ;\
     composer -n require mobiledetect/mobiledetectlib ;\
     composer -n require roundcube/elastic4mobile dev-master ;\
+    #2fa
+    composer -n require kolab/kolab_2fa ;\
+    composer require "endroid/qrcode" "~1.5.0" --no-update ;\
+    composer require "spomky-labs/otphp" "~5.0.0" --no-update ;\
+    composer require "enygma/yubikey" "~3.2" ;\
     cd ${INSTALLDIR} ;\
    #show_folder_size
    mkdir -p plugins/show_folder_size ;\
