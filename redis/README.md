@@ -10,5 +10,5 @@ tag eilandert/redis:ubuntu or eilandert/redis:debian<BR>
 </P>
 The debian/ubuntu package has been recreated to use the internal dependencies (like jemalloc and lua) instead of the debian ones.
 </p>
-https://github.com/eilandert/dockerized/tree/master/redis
-
+github: https://github.com/eilandert/dockerized/tree/master/redis<BR>
+packages: https://deb.paranoid.nl<BR>
