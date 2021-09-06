@@ -10,6 +10,8 @@ RUN set -ex ;\
     apt-get -y --no-install-recommends install \
       ca-certificates tzdata openssl syslog-ng \
       redis ;\
+    # disable Redis protected mode and bind as it is unnecessary in context of Docker
+    # Also, run in foreground and write the errorlog to /dev/stdout
     sed -i s/"^bind\ "/#bind\ / /etc/redis/redis.conf ;\
     sed -i s/"protected-mode yes"/"protected-mode no"/ /etc/redis/redis.conf ;\
     sed -i s/"daemonize yes"/"daemonize no"/ /etc/redis/redis.conf ;\
