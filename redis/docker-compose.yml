@@ -1,0 +1,14 @@
+services:
+  redis:
+    container_name: redis
+    image: index.docker.io/eilandert/redis:debian
+    restart: always
+    stop_grace_period: 10s
+    volumes:
+    - ./redis:/etc/redis:rw
+    environment:
+      - TZ=Europe/Amsterdam
+      - SYSLOG_HOST=10.0.0.118
+
+version: '2.4'
+
