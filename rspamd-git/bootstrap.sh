@@ -58,7 +58,7 @@ while [ 1 ]; do
     if [ ! -n "${HOST}" ]; then
         break;
     fi
-    /wait-for-it.sh ${HOST} -t 3
+    wait-for-it.sh ${HOST} -t 3
     if [ "$?" -ne 0 ]; then
         echo "... ${HOST} is not reachable, trying again"
         i=$(($i-1))
