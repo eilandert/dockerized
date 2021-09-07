@@ -137,7 +137,6 @@ RUN set -x ;\
     rm -f ${INSTALLDIR}/index.html ;\
     chown -R www-data:www-data ${INSTALLDIR}/logs ;\
     chown -R www-data:www-data ${INSTALLDIR}/temp ;\
-    chmod +x /wait-for-it.sh ;\
     chmod +x /bootstrap.sh
 
 #RUN set -ex; \

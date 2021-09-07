@@ -5,9 +5,6 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
 
-# include the wait-for-it.sh script
-ADD	https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
-
 # fetch the last version, generated in the docker build script
 ADD     .lastversion /tmp/lastversion
 
@@ -140,7 +137,6 @@ RUN set -x ;\
     rm -f ${INSTALLDIR}/index.html ;\
     chown -R www-data:www-data ${INSTALLDIR}/logs ;\
     chown -R www-data:www-data ${INSTALLDIR}/temp ;\
-    chmod +x /wait-for-it.sh ;\
     chmod +x /bootstrap.sh
 
 #RUN set -ex; \
