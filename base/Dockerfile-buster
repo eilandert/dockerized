@@ -11,6 +11,7 @@ COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 # Install https://deb.paranoid.nl/pool/myguard.deb to setup my own repository
 
 RUN set -x ;\
+    apt-get update && apt-get install -y ssl-cert ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=buster-backports'; \
@@ -19,9 +20,9 @@ RUN set -x ;\
     cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
-    apt-get install -y --no-install-recommends myguard ca-certificates tzdata openssl libssl1.1 libjemalloc2 wait-for-it ;\
+    apt-get install -y --no-install-recommends myguard ca-certificates tzdata libssl1.1 libjemalloc2 wait-for-it ;\
     apt-get -y upgrade ;\
-    apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
+#    apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
     apt-get -y autoclean ;\
