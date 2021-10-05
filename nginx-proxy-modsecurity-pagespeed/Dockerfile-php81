@@ -1,0 +1,57 @@
+FROM    eilandert/php-fpm:8.1
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
+COPY    bootstrap.sh /bootstrap.sh
+
+RUN set -ex ;\
+    apt-get update ;\
+    apt-get -y --no-install-recommends install \
+      nginx-full \
+      libmodsecurity3 \
+      libnginx-mod-http-lua \
+      libnginx-mod-njs \
+      libnginx-mod-http-headers-more-filter \
+      libnginx-mod-modsecurity \
+      libnginx-mod-pagespeed \
+      libnginx-mod-security-headers \
+      libnginx-mod-brotli \
+      libnginx-mod-ssl-ct \
+      libnginx-mod-vts \
+      libnginx-mod-http-auth-pam \
+      libnginx-mod-http-cache-purge \
+      libnginx-mod-http-dav-ext \
+      libnginx-mod-http-echo \
+      libnginx-mod-http-fancyindex \
+      libnginx-mod-http-geoip \
+      libnginx-mod-http-geoip2 \
+      libnginx-mod-http-image-filter \
+      libnginx-mod-http-ndk \
+      libnginx-mod-http-perl \
+      libnginx-mod-http-subs-filter \
+      libnginx-mod-http-uploadprogress \
+      libnginx-mod-http-upstream-fair \
+      libnginx-mod-http-xslt-filter \
+      libnginx-mod-mail \
+      libnginx-mod-nchan \
+      libnginx-mod-rtmp \
+      libnginx-mod-stream \
+      libnginx-mod-stream-geoip \
+      libnginx-mod-stream-geoip2 \
+      modsecurity-crs \
+      curl \
+      libjemalloc2 \
+      ;\
+    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf ;\
+    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
+    mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
+    chmod +x /bootstrap.sh ;\
+    rm -f /var/spool/nullmailer/trigger ;\
+    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
+
+CMD     ["/bootstrap.sh"]
+EXPOSE  80 80
+EXPOSE  443 443
+
