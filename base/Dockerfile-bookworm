@@ -22,7 +22,7 @@ RUN set -x ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends myguard ca-certificates tzdata libssl1.1 libjemalloc2 wait-for-it ;\
     apt-get -y upgrade ;\
-#    apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
+    apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
     apt-get -y clean ;\
     apt-get -y autoremove ;\
     apt-get -y autoclean ;\
