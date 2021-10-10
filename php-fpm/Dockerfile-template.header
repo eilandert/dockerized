@@ -7,11 +7,13 @@ ENV	PHPVERSION=#PHPVERSION#
 ENV	MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
-ADD	https://getcomposer.org/installer /tmp/composer-setup.php
+ADD	composer-setup.php /tmp/composer-setup.php
 
 RUN set -ex ;\
     #TEMPLATE3# ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger ;\
-    apt-get install -y --no-install-recommends \
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
+

@@ -7,13 +7,18 @@ ENV	PHPVERSION=8.0
 ENV	MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
-ADD	https://getcomposer.org/installer /tmp/composer-setup.php
+ADD	composer-setup.php /tmp/composer-setup.php
 
 RUN set -ex ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
+
+RUN set -ex ;\
+    apt-get update ;\
     apt-get install -y --no-install-recommends \
       php8.0 \
       php8.0-fpm \
@@ -43,8 +48,11 @@ RUN set -ex ;\
       php8.0-sqlite \
       php8.0-tidy \
       php8.0-xml \
-      php8.0-zip \
-    ;\
+      php8.0-zip ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
+
+RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\
