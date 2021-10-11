@@ -43,7 +43,6 @@ RUN set -ex ;\
       curl \
       libjemalloc2 \
       ;\
-    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
     mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
