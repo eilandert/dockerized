@@ -3,7 +3,6 @@
 #set -x
 
 export UBUNTU_ROLLING="hirsute"
-export UBUNTU_DEVEL="impish"
 
 ####
 ## SCRIPTS DEBIAN/UBUNTU BASE IMAGES
@@ -23,7 +22,7 @@ cp base/Dockerfile-template base/Dockerfile-stretch
 cp base/Dockerfile-template base/Dockerfile-jessie
 
 sed -i 's/#TEMPLATE1#/ubuntu:devel/'   base/Dockerfile-devel
-sed -i 's/#TEMPLATE1#/ubuntu:${UBUNTU_ROLLING}/' base/Dockerfile-rolling
+sed -i 's/#TEMPLATE1#/ubuntu:hirsute/' base/Dockerfile-rolling
 sed -i 's/#TEMPLATE1#/ubuntu:focal/'   base/Dockerfile-focal
 sed -i 's/#TEMPLATE1#/ubuntu:bionic/'  base/Dockerfile-bionic
 sed -i 's/#TEMPLATE1#/ubuntu:xenial/'  base/Dockerfile-xenial
@@ -35,8 +34,8 @@ sed -i 's/#TEMPLATE1#/debian:bullseye-slim/' base/Dockerfile-bullseye
 sed -i 's/#TEMPLATE1#/debian:stretch-slim/'  base/Dockerfile-stretch
 sed -i 's/#TEMPLATE1#/debian:jessie-slim/'  base/Dockerfile-jessie
 
-sed -i 's/#TEMPLATE2#/${UBUNTU_DEVEL}/'   base/Dockerfile-devel
-sed -i 's/#TEMPLATE2#/${UBUNTU_ROLLING}/'  base/Dockerfile-rolling
+sed -i 's/#TEMPLATE2#/impush/'   base/Dockerfile-devel
+sed -i 's/#TEMPLATE2#/rolling/'  base/Dockerfile-rolling
 sed -i 's/#TEMPLATE2#/focal/'    base/Dockerfile-focal
 sed -i 's/#TEMPLATE2#/bionic/'   base/Dockerfile-bionic
 sed -i 's/#TEMPLATE2#/xenial/'   base/Dockerfile-xenial

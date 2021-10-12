@@ -85,7 +85,7 @@ group "mail" {
     ]
 }
 
-groub "db" {
+group "db" {
     targets = [
 	"ubuntu-mariadb",
 	"debian-mariadb",
