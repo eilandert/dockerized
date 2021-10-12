@@ -217,6 +217,19 @@ target "debian-phpfpm80" {
     dockerfile = "Dockerfile-8.0debian"
 }
 
+target "ubuntu-phpfpm81" {
+    tags = ["docker.io/eilandert/php-fpm:deb-8.1"]
+    context = "php-fpm"
+    dockerfile = "Dockerfile-8.1debian"
+}
+
+target "debian-phpfpm81" {
+    tags = ["docker.io/eilandert/php-fpm:deb-8.1"]
+    context = "php-fpm"
+    dockerfile = "Dockerfile-8.1debian"
+}
+
+
 target "ubuntu-multiphp" {
     tags = ["docker.io/eilandert/php-fpm:multi"]
     context = "php-fpm"
