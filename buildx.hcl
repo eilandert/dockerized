@@ -85,15 +85,22 @@ group "mail" {
     ]
 }
 
+groub "db" {
+    targets = [
+	"ubuntu-mariadb",
+	"debian-mariadb",
+        "alpine-redis",
+        "ubuntu-redis",
+        "debian-redis",
+    ]
+}
+
 group "misc" {
     targets = [
        "clamav",
        "alpine-letsencrypt",
        "alpine-pyzor",
        "rbldnsd",
-       "alpine-redis",
-       "ubuntu-redis",
-       "debian-redis",
        "ubuntu-reprepro",
        "debian-sitewarmup",
        "alpine:unbound",
