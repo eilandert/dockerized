@@ -9,7 +9,7 @@ ENV	MODE=MULTI
 COPY    bootstrap.sh /bootstrap.sh
 ADD	composer-setup.php /tmp/composer-setup.php
 
-RUN set -ex ;\
+RUN set -x ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
@@ -17,7 +17,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -ex ;\
+RUN set -x ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       php5.6 \
@@ -55,7 +55,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -ex ;\
+RUN set -x ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       php7.2 \
@@ -92,7 +92,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -ex ;\
+RUN set -x ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       php7.4 \
@@ -128,7 +128,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -ex ;\
+RUN set -x ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       php8.0 \
@@ -163,7 +163,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -ex ;\
+RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\

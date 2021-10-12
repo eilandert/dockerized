@@ -9,7 +9,7 @@ ENV	MODE=FPM
 COPY    bootstrap.sh /bootstrap.sh
 ADD	composer-setup.php /tmp/composer-setup.php
 
-RUN set -ex ;\
+RUN set -x ;\
     #TEMPLATE3# ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
