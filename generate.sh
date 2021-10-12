@@ -35,7 +35,7 @@ sed -i 's/#TEMPLATE1#/debian:stretch-slim/'  base/Dockerfile-stretch
 sed -i 's/#TEMPLATE1#/debian:jessie-slim/'  base/Dockerfile-jessie
 
 sed -i 's/#TEMPLATE2#/impush/'   base/Dockerfile-devel
-sed -i 's/#TEMPLATE2#/rolling/'  base/Dockerfile-rolling
+sed -i 's/#TEMPLATE2#/hirsute/'  base/Dockerfile-rolling
 sed -i 's/#TEMPLATE2#/focal/'    base/Dockerfile-focal
 sed -i 's/#TEMPLATE2#/bionic/'   base/Dockerfile-bionic
 sed -i 's/#TEMPLATE2#/xenial/'   base/Dockerfile-xenial
