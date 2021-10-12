@@ -3,6 +3,8 @@
 # Ensure the push is only initiated on my build machine
 if [ "$(uname -n)" == "build" ]; then PUSH="--push"; fi
 
+./generate.sh
+
 docker buildx create --use
 
 for BUILD in base-current misc db mail phpfpm nginx apache apache-misc
