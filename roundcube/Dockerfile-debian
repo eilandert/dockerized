@@ -6,7 +6,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
 
 # fetch the last version, generated in the docker build script
-ADD     .lastversion /tmp/lastversion
+COPY     .lastversion /tmp/lastversion
 
 COPY	bootstrap.sh /
 
@@ -139,27 +139,12 @@ RUN set -x ;\
     chown -R www-data:www-data ${INSTALLDIR}/temp ;\
     chmod +x /bootstrap.sh
 
-#RUN set -ex; \
-#    LASTVERSION=$(cat /tmp/lastversion) ;\
-#    cd /tmp ;\
-#    mkdir /usr/src/roundcubemail ;\
-#    curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz |\
-#      tar xz --strip-components=1 -C /usr/src/roundcubemail ;\
-#    rm -rf ${INSTALLDIR}/skins/elastic ;\
-#    cp -rp /usr/src/roundcubemail/skins/elastic ${INSTALLDIR}/skins/elastic ;\
-#    rm -rf /usr/src/roundcubemail /tmp/* ;\
-#    apt-get -y purge curl
-
-
 COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
 
 WORKDIR ${INSTALLDIR}
 ENTRYPOINT ["/bootstrap.sh"]
 
-# expose these volumes
 VOLUME /var/roundcube/config
 VOLUME /var/roundcube/db
-#VOLUME ${INSTALLDIR}
-#VOLUME /tmp/roundcube-temp
 
