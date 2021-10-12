@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# This script uses lastversion
+# To install lastversion:
+# apt install python3-pip
+# pip -q install --upgrade lastversion
+
+
 #set -x
 
 export UBUNTU_ROLLING="hirsute"
@@ -132,7 +138,6 @@ cp php-fpm/Dockerfile-7.2 php-fpm/Dockerfile-7.2debian
 cp php-fpm/Dockerfile-7.4 php-fpm/Dockerfile-7.4debian
 cp php-fpm/Dockerfile-8.0 php-fpm/Dockerfile-8.0debian
 cp php-fpm/Dockerfile-8.1 php-fpm/Dockerfile-8.1debian
-
 cp php-fpm/Dockerfile-multi php-fpm/Dockerfile-multidebian
 
 sed -i s/"eilandert\/ubuntu-base:rolling"/"eilandert\/debian-base:stable"/ php-fpm/*debian
