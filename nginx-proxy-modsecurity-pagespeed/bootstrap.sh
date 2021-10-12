@@ -64,9 +64,9 @@ if [ -n "${PHPVERSION}" ]; then
         mv composer.phar ${COMPOSERPATH}
     fi
 
-    if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ]; then
+    if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ] && [ ! "${PHP81}" = "YES" ]; then
         echo "[NGINX] You downloaded the MULTI-PHP edition of the docker"
-        echo "[NGINX] There is no PHP56 PHP72 PHP74 or PHP80 environment variable specified"
+        echo "[NGINX] There is no PHP56 PHP72 PHP74 PHP80 PHP81 environment variable specified"
         echo "[NGINX] exiting...."
         sleep 10
         exit
@@ -91,6 +91,11 @@ if [ -n "${PHPVERSION}" ]; then
     if [ "${MODE}" = "MULTI" ] && [ "${PHP80}" = "YES" ]; then
         startphp "8.0"
     fi
+
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
+        startphp "8.1"
+    fi
+
 
 fi
 
