@@ -496,7 +496,7 @@ target "ubuntu-reprepro" {
 target "ubuntu-roundcube" {
    tags = ["docker.io/eilandert/roundcube:ubuntu","docker.io/eilandert/roundcube:latest"]
    context = "roundcube"
-   dockerfile = "Dockerfile"
+   dockerfile = "Dockerfile-ubuntu"
 }
 
 target "debian-roundcube" {
