@@ -362,7 +362,7 @@ target "debian-apache-php74" {
 }
 
 target "debian-apache-php80" {
-    tags = ["docker.io/eilandert/apache-phpfpm:deb-8.0"]
+    tags = ["docker.io/eilandert/apache-phpfpm:deb-8.0","docker.io/eilandert/apache-phpfpm:deb-latest"]
     context = "apache-phpfpm"
     dockerfile= "Dockerfile-8.0debian"
 }
@@ -398,7 +398,7 @@ target "ubuntu-apache-php74" {
 }
 
 target "ubuntu-apache-php80" {
-    tags = ["docker.io/eilandert/apache-phpfpm:8.0"]
+    tags = ["docker.io/eilandert/apache-phpfpm:8.0","docker.io/eilandert/apache-phpfpm:latest"]
     context = "apache-phpfpm"
     dockerfile= "Dockerfile-8.0"
 }
