@@ -7,7 +7,7 @@ ENV	PHPVERSION=#PHPVERSION#
 ENV	MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
-ADD	composer-setup.php /tmp/composer-setup.php
+COPY	composer-setup.php /tmp/composer-setup.php
 
 RUN set -x ;\
     #TEMPLATE3# ;\

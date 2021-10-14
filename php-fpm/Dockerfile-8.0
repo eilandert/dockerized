@@ -7,7 +7,7 @@ ENV	PHPVERSION=8.0
 ENV	MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
-ADD	composer-setup.php /tmp/composer-setup.php
+COPY	composer-setup.php /tmp/composer-setup.php
 
 RUN set -x ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
