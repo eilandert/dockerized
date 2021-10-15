@@ -1,8 +1,8 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
-FROM    ubuntu:impish
+FROM    ubuntu:hirsute
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV	DIST=impish
+ENV	DIST=hirsute
 COPY    bootstrap.sh /bootstrap.sh
 COPY    myguard.deb /tmp/myguard.deb
 COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
@@ -14,7 +14,7 @@ RUN set -x ;\
     apt-get update && apt-get install -y ssl-cert ;\
     { \
         echo 'Package: *'; \
-        echo 'Pin: release a=impish-backports'; \
+        echo 'Pin: release a=hirsute-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
     cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\

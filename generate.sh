@@ -8,7 +8,7 @@
 
 set -x
 
-export UBUNTU_ROLLING="impish"
+export UBUNTU_ROLLING="hirsute"
 
 ####
 ## SCRIPTS DEBIAN/UBUNTU BASE IMAGES
@@ -143,10 +143,10 @@ cp php-fpm/Dockerfile-multi php-fpm/Dockerfile-multidebian
 sed -i s/"eilandert\/ubuntu-base:rolling"/"eilandert\/debian-base:stable"/ php-fpm/*debian
 
 #hack for ondrej/impish
-sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ hirsute main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ base/Dockerfile-rolling
+#sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ hirsute main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,multi}
 #normal operation
 sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/packages.sury.org\/php\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-*debian
-sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,multi}
+sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,multi}
 
 
 ####

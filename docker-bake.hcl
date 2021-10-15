@@ -26,6 +26,11 @@ group "phpfpm" {
         "debian-phpfpm80",
         "ubuntu-phpfpm81",
         "debian-phpfpm81",
+    ]
+}
+
+group "multiphp" {
+    targets = [
         "ubuntu-multiphp",
         "debian-multiphp",
     ]
@@ -36,6 +41,11 @@ group "nginx" {
        "debian-nginx",
        "ubuntu-nginx",
        "alpine-nginx",
+    ]
+}
+
+group "nginx-php" {
+    targets = [
        "ubuntu-nginx-php56",
        "debian-nginx-php56",
        "ubuntu-nginx-php72",
