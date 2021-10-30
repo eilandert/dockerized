@@ -67,11 +67,13 @@ group "apache" {
        "debian-apache-php72",
        "debian-apache-php74",
        "debian-apache-php80",
+       "debian-apache-php81",
        "debian-apache-multiphp",
        "ubuntu-apache-php56",
        "ubuntu-apache-php72",
        "ubuntu-apache-php74",
        "ubuntu-apache-php80",
+       "ubuntu-apache-php81",
        "ubuntu-apache-multiphp",
     ]
 }
@@ -119,6 +121,12 @@ group "misc" {
        "debian-sitewarmup",
        "alpine:unbound",
        "psol",
+    ]
+}
+
+group "openssh" {
+    targets = [
+        "debian-openssh",
     ]
 }
 
@@ -568,3 +576,8 @@ target "psol" {
    dockerfile = "Dockerfile"
 }
 
+target "debian-openssh" {
+   tags = ["docker.io/eilandert/openssh:debian"]
+   context = "openssh"
+   dockerfile = "Dockerfile-debian"
+}

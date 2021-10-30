@@ -236,8 +236,8 @@ git commit -m "Changes from upstream"
 #roundcube
 cp roundcube/Dockerfile-template roundcube/Dockerfile-debian
 cp roundcube/Dockerfile-template roundcube/Dockerfile-ubuntu
-sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:7\.4/"     roundcube/Dockerfile-ubuntu
-sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:deb-7\.4"/ roundcube/Dockerfile-debian
+sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:8\.0/"     roundcube/Dockerfile-ubuntu
+sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:deb-8\.0"/ roundcube/Dockerfile-debian
 
 LASTVERSION=$(lastversion roundcube https://github.com/roundcube/roundcubemail/)
 if [ "${LASTVERSION}" == "" ]; then
