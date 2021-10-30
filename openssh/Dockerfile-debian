@@ -1,0 +1,28 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
+FROM eilandert/debian-base:stable
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+
+COPY    bootstrap.sh /bootstrap.sh
+
+RUN set -ex ;\
+    apt-get update ;\
+    apt-get -y --no-install-recommends install \
+      ca-certificates tzdata openssl syslog-ng \
+      openssh-server \
+      openssh-client \
+      openssh-sftp-server \
+      libpam-google-authenticator \
+      rsync \
+      ;\
+    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    mv /etc/ssh /etc/ssh.orig ;\
+    chmod +x /bootstrap.sh ;\
+    mkdir /run/sshd && rm -f /etc/motd
+
+CMD [ "/bootstrap.sh" ]
+
+COPY syslog-ng.conf /etc/syslog-ng
+EXPOSE 22
+
+
