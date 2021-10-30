@@ -7,6 +7,7 @@ ENV     TZ=Europe/Amsterdam
 ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY    bootstrap.sh /bootstrap.sh
+COPY	conf-available /tmp/conf-available
 
 RUN set -ex ;\
     chmod +x /bootstrap.sh ;\
@@ -16,6 +17,7 @@ RUN set -ex ;\
 #    a2dismod php${PHPVERSION} ;\
     a2dismod status mpm_prefork ;\
     a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
+    cp /tmp/conf-available/php${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\
     a2enconf php${PHPVERSION}-fpm ;\
     mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
