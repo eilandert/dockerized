@@ -1,6 +1,6 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
 
-FROM    eilandert/apache-phpfpm:deb-7.4
+FROM    eilandert/apache-phpfpm:deb-8.0
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
