@@ -9,7 +9,7 @@ ENV	MODE=FPM
 COPY    bootstrap.sh /bootstrap.sh
 COPY	composer-setup.php /tmp/composer-setup.php
 
-RUN set -x ;\
+RUN set -ex ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
@@ -19,7 +19,7 @@ RUN set -x ;\
 
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php5.6 \
       php5.6-fpm \
       php5.6-apcu \
@@ -48,14 +48,14 @@ RUN set -x ;\
       php5.6-recode \
       php5.6-redis \
       php5.6-soap \
-      php5.6-sqlite \
+      php5.6-sqlite3 \
       php5.6-tidy \
       php5.6-xml \
       php5.6-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\

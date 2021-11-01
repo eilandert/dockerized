@@ -1,6 +1,6 @@
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php#PHPVERSION# \
       php#PHPVERSION#-fpm \
       php#PHPVERSION#-apcu \
@@ -29,7 +29,7 @@ RUN set -x ;\
       #removedinphp74#php#PHPVERSION#-recode \
       php#PHPVERSION#-redis \
       php#PHPVERSION#-soap \
-      php#PHPVERSION#-sqlite \
+      php#PHPVERSION#-sqlite3 \
       php#PHPVERSION#-tidy \
       php#PHPVERSION#-xml \
       php#PHPVERSION#-zip ;\

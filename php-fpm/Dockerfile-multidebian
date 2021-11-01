@@ -9,7 +9,7 @@ ENV	MODE=MULTI
 COPY    bootstrap.sh /bootstrap.sh
 COPY	composer-setup.php /tmp/composer-setup.php
 
-RUN set -x ;\
+RUN set -ex ;\
     echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
@@ -19,7 +19,7 @@ RUN set -x ;\
 
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php5.6 \
       php5.6-fpm \
       php5.6-apcu \
@@ -48,7 +48,7 @@ RUN set -x ;\
       php5.6-recode \
       php5.6-redis \
       php5.6-soap \
-      php5.6-sqlite \
+      php5.6-sqlite3 \
       php5.6-tidy \
       php5.6-xml \
       php5.6-zip ;\
@@ -57,7 +57,7 @@ RUN set -x ;\
 
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php7.2 \
       php7.2-fpm \
       php7.2-apcu \
@@ -85,7 +85,7 @@ RUN set -x ;\
       php7.2-recode \
       php7.2-redis \
       php7.2-soap \
-      php7.2-sqlite \
+      php7.2-sqlite3 \
       php7.2-tidy \
       php7.2-xml \
       php7.2-zip ;\
@@ -94,7 +94,7 @@ RUN set -x ;\
 
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php7.4 \
       php7.4-fpm \
       php7.4-apcu \
@@ -121,7 +121,7 @@ RUN set -x ;\
       php7.4-readline \
       php7.4-redis \
       php7.4-soap \
-      php7.4-sqlite \
+      php7.4-sqlite3 \
       php7.4-tidy \
       php7.4-xml \
       php7.4-zip ;\
@@ -130,7 +130,7 @@ RUN set -x ;\
 
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php8.0 \
       php8.0-fpm \
       php8.0-apcu \
@@ -156,49 +156,14 @@ RUN set -x ;\
       php8.0-readline \
       php8.0-redis \
       php8.0-soap \
-      php8.0-sqlite \
+      php8.0-sqlite3 \
       php8.0-tidy \
       php8.0-xml \
       php8.0-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
-    apt-get update ;\
-    apt-get install -y --no-install-recommends \
-      php8.1 \
-      php8.1-fpm \
-      php8.1-apcu \
-      php8.1-bcmath \
-      php8.1-cli \
-      php8.1-curl \
-      php8.1-dom \
-      php8.1-exif \
-      php8.1-gd \
-      php8.1-gmp \
-      php8.1-igbinary \
-      php8.1-imagick \
-      php8.1-imap \
-      php8.1-intl \
-      php8.1-ldap \
-      php8.1-memcache \
-      php8.1-memcached \
-      php8.1-mbstring \
-      php8.1-mysql \
-      php8.1-opcache \
-      php8.1-pspell \
-      php8.1-pgsql \
-      php8.1-readline \
-      php8.1-redis \
-      php8.1-soap \
-      php8.1-sqlite \
-      php8.1-tidy \
-      php8.1-xml \
-      php8.1-zip ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
-
-RUN set -x ;\
+RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\

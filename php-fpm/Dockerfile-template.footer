@@ -1,4 +1,4 @@
-RUN set -x ;\
+RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\

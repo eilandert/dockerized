@@ -9,7 +9,7 @@ ENV	MODE=FPM
 COPY    bootstrap.sh /bootstrap.sh
 COPY	composer-setup.php /tmp/composer-setup.php
 
-RUN set -x ;\
+RUN set -ex ;\
     echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
@@ -19,7 +19,7 @@ RUN set -x ;\
 
 RUN set -x ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends \
+    apt-get install -m -y --no-install-recommends \
       php7.2 \
       php7.2-fpm \
       php7.2-apcu \
@@ -47,14 +47,14 @@ RUN set -x ;\
       php7.2-recode \
       php7.2-redis \
       php7.2-soap \
-      php7.2-sqlite \
+      php7.2-sqlite3 \
       php7.2-tidy \
       php7.2-xml \
       php7.2-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\

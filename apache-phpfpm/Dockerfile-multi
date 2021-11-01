@@ -17,7 +17,7 @@ RUN set -ex ;\
     a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
     cp /tmp/conf-available/php${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\
     mv /etc/apache2 /etc/apache2.orig && mkdir -p /etc/apache2 ;\
-    mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
+#    mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/* ;\
