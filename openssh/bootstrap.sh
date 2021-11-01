@@ -3,11 +3,6 @@
 echo "[OPENSSH] This docker image can be found on https://hub.docker.com/u/eilandert and https://github.com/eilandert/dockerized"
 
 host_keys_required() {
-    rm -f /etc/ssh/ssh_host_rsa_key*
-    rm -f /etc/ssh/ssh_host_dsa_key*
-    rm -f /etc/ssh/ssh_host_ecdsa_key*
-    rm -f /etc/ssh/ssh_host_ed25519_key*
-
     echo /etc/ssh/ssh_host_rsa_key
     echo /etc/ssh/ssh_host_dsa_key
     echo /etc/ssh/ssh_host_ecdsa_key
@@ -59,10 +54,15 @@ if [ ! -f ${FIRSTRUN} ]; then
     mkdir -p /etc/ssh
     cp -r /etc/ssh.orig/* /etc/ssh/
     rm -rf /etc/ssh/sshd_config.d/20*
+
     sed -i s/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/ /etc/ssh/sshd_config
     echo "root:toor" | chpasswd
 
     echo "[OPENSSH] Creating new serverkeys"
+    rm -f /etc/ssh/ssh_host_rsa_key*
+    rm -f /etc/ssh/ssh_host_dsa_key*
+    rm -f /etc/ssh/ssh_host_ecdsa_key*
+    rm -f /etc/ssh/ssh_host_ed25519_key*
     create_keys
 fi
 
