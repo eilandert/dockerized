@@ -58,6 +58,7 @@ if [ ! -f ${FIRSTRUN} ]; then
     echo "[OPENSSH] sshd_config not found, populating default configs to /etc/ssh"
     mkdir -p /etc/ssh
     cp -r /etc/ssh.orig/* /etc/ssh/
+    rm -rf /etc/ssh/sshd_config.d/20*
     sed -i s/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/ /etc/ssh/sshd_config
     echo "root:toor" | chpasswd
 
@@ -74,7 +75,10 @@ if [ -n "${SYSLOG_HOST}" ]; then
 else
     rm -f /etc/syslog-ng/conf.d/remote.conf
 fi
+
 chmod 600 /etc/ssh/*key
-rm -rf /etc/ssh/sshd_config.d/20*
+
+VERSION=$(ssh -V 2>&1)
+echo "[OPENSSH] Starting ${VERSION}"
 
 exec /usr/sbin/sshd -D -o ListenAddress=0.0.0.0
