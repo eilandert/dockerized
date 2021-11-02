@@ -14,15 +14,21 @@ RUN set -ex ;\
       openssh-sftp-server \
       libpam-google-authenticator \
       rsync \
+      sudo \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/ssh /etc/ssh.orig ;\
     chmod +x /bootstrap.sh ;\
-    mkdir /run/sshd && rm -f /etc/motd
+    mkdir /run/sshd && rm -f /etc/motd ;\
+    dpkg-statoverride --remove /usr/bin/sudo ;\
+    dpkg-statoverride --remove /bin/sudo
 
 CMD [ "/bootstrap.sh" ]
 
 COPY syslog-ng.conf /etc/syslog-ng
 EXPOSE 22
+
+VOLUME /etc/ssh
+VOLUME /home
 
 
