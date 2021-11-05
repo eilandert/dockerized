@@ -2,7 +2,6 @@
 FROM eilandert/debian-base:stable
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>" 
 ENV DEBIAN_FRONTEND="noninteractive"
-ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY    bootstrap.sh /bootstrap.sh
 
@@ -34,7 +33,6 @@ RUN set -ex ;\
     mkdir -p /opt/scripts/vimbadmin.orig ;\
     curl -fSL https://github.com/gibzer/vimbadmin-perl/archive/master.tar.gz |\
       tar xz --strip-components=1 -C /opt/scripts/vimbadmin.orig ;\
-#    dpkg -i /opt/scripts/vimbadmin.orig/libfilesys-diskusage-perl_0.09-1_all.deb ;\
     rm /opt/scripts/vimbadmin.orig/*.deb ;\
     apt-get -y purge curl ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
@@ -44,7 +42,6 @@ RUN set -ex ;\
     chmod +x /bootstrap.sh ;\
     echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
 
-#ADD https://raw.githubusercontent.com/eilandert/dockerized/master/vimbadmin-ubuntu/EXAMPLES/dovecot-sql.conf.ext /etc/dovecot.orig
 ADD syslog-ng.conf /etc/syslog-ng
 
 WORKDIR /etc/dovecot

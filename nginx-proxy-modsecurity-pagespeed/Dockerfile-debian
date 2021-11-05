@@ -1,7 +1,6 @@
 FROM    eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY    bootstrap.sh /bootstrap.sh
 
@@ -41,7 +40,6 @@ RUN set -ex ;\
       libnginx-mod-stream-geoip2 \
       modsecurity-crs \
       curl \
-      libjemalloc2 \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\

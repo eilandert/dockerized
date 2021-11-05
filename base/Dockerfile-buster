@@ -20,7 +20,7 @@ RUN set -x ;\
     cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
-    apt-get install -y --no-install-recommends myguard ca-certificates tzdata libssl1.1 libjemalloc2 wait-for-it ;\
+    apt-get install -y --no-install-recommends myguard ca-certificates tzdata libssl1.1 libjemalloc2 mimalloc wait-for-it ;\
     apt-get -y upgrade ;\
     apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
     apt-get -y clean ;\

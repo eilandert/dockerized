@@ -19,6 +19,21 @@ if [ ! -f ${FIRSTRUN} ]; then
     cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
 
+case ${MALLOC} in
+    jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        ;;
+    mimalloc)
+        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
+        ;;
+    none)
+        unset LD_PRELOAD
+        ;;
+    *)
+        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
+        ;;
+esac
+
 
 #check if PHP is installed, else skip the whole block
 if [ -n "${PHPVERSION}" ]; then

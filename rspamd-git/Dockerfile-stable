@@ -1,6 +1,7 @@
 FROM eilandert/ubuntu-base:rolling
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
+ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY bootstrap.sh /bootstrap.sh
 

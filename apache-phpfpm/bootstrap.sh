@@ -23,6 +23,21 @@ if [ ! -f ${FIRSTRUN} ]; then
     cp -r /etc/nullmailer.orig/* /etc/nullmailer
 fi
 
+case ${MALLOC} in
+    jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        ;;
+    mimalloc)
+        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
+        ;;
+    none)
+        unset LD_PRELOAD
+        ;;
+    *)
+        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
+        ;;
+esac
+
 #fix some weird issue with nullmailer
 rm -f /var/spool/nullmailer/trigger
 /usr/bin/mkfifo /var/spool/nullmailer/trigger
