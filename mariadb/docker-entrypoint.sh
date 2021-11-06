@@ -1,4 +1,5 @@
 #!/bin/bash
+bash /bootstrap.sh
 set -eo pipefail
 shopt -s nullglob
 
