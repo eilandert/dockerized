@@ -218,12 +218,13 @@ curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/Docker
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/docker-entrypoint.sh -o mariadb/docker-entrypoint.sh
 cp mariadb/Dockerfile.ubuntu mariadb/Dockerfile.debian
 chmod +x mariadb/docker-entrypoint.sh
-sed -i s/"ubuntu:focal"/"eilandert\/ubuntu-base:rolling\nENV LD_PRELOAD=\/usr\/lib\/x86_64-linux-gnu\/libjemalloc.so.2"/ mariadb/Dockerfile.ubuntu
-sed -i s/"ubuntu:focal"/"eilandert\/debian-base:stable\nENV LD_PRELOAD=\/usr\/lib\/x86_64-linux-gnu\/libjemalloc.so.2"/ mariadb/Dockerfile.debian
+sed -i s/"ubuntu:focal"/"eilandert\/ubuntu-base:rolling\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.ubuntu
+sed -i s/"ubuntu:focal"/"eilandert\/debian-base:stable\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.debian
 sed -i s/"focal"/"${UBUNTU_ROLLING}"/g mariadb/Dockerfile.ubuntu
 sed -i s/"focal"/"bullseye"/g mariadb/Dockerfile.debian
 sed -i s/"repo\/ubuntu"/"repo\/debian"/g mariadb/Dockerfile.debian
 sed -i s/"ENTRYPOINT \[\"docker-entrypoint.sh\"\]"/"ENTRYPOINT \[\"\/usr\/local\/bin\/docker-entrypoint.sh\"\]"/ mariadb/Dockerfile.*
+sed -i s/"bin\/bash"/"bin\/bash\nbash \/bootstrap.sh"/ mariadb/docker-entrypoint.sh
 
 #commit upstream changes
 git add mariadb/Dockerfile.debian
@@ -238,7 +239,7 @@ cp roundcube/Dockerfile-template roundcube/Dockerfile-ubuntu
 sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:8\.0/"     roundcube/Dockerfile-ubuntu
 sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:deb-8\.0"/ roundcube/Dockerfile-debian
 
-LASTVERSION=$(lastversion roundcube https://github.com/roundcube/roundcubemail/)
+LASTVERSION=$(lastversion -b 1.5 roundcube https://github.com/roundcube/roundcubemail/)
 if [ "${LASTVERSION}" == "" ]; then
    echo "LASTVERSION EMPTY"
 else
