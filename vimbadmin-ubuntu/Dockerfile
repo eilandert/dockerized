@@ -3,7 +3,7 @@
 FROM	eilandert/apache-phpfpm:7.4
 LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-
+ENV	LD_PRELOAD=""
 ENV	INSTALL_PATH=/opt/vimbadmin
 
 COPY	bootstrap.sh /bootstrap.sh

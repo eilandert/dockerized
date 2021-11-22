@@ -4,7 +4,7 @@ FROM    eilandert/apache-phpfpm:8.0
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
-
+ENV	LD_PRELOAD=""
 # fetch the last version, generated in the docker build script
 COPY     .lastversion /tmp/lastversion
 

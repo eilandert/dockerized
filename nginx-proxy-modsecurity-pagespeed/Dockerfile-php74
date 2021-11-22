@@ -40,6 +40,8 @@ RUN set -ex ;\
       libnginx-mod-stream-geoip2 \
       modsecurity-crs \
       curl \
+      mimalloc \
+      libjemalloc2 \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\

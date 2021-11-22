@@ -4,7 +4,7 @@ FROM    eilandert/php-fpm:deb-8.0
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
-
+ENV     LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
 COPY    bootstrap.sh /bootstrap.sh
 COPY	conf-available /tmp/conf-available
 

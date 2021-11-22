@@ -8,6 +8,22 @@ if [ -n "${TZ}" ]; then
     ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
 fi
 
+case ${MALLOC} in
+    jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        ;;
+    mimalloc)
+        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
+        ;;
+    none)
+        unset LD_PRELOAD
+        ;;
+    *)
+        unset LD_PRELOAD
+        ;;
+esac
+
+
 #fix some weird issue with php-fpm
 if [ ! -x /run/php ]; then
     mkdir -p /run/php
