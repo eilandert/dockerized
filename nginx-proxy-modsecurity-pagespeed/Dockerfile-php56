@@ -39,6 +39,7 @@ RUN set -ex ;\
       libnginx-mod-stream \
       libnginx-mod-stream-geoip \
       libnginx-mod-stream-geoip2 \
+      libnginx-mod-stream-lua \
       modsecurity-crs \
       curl \
       mimalloc \
