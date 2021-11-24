@@ -19,6 +19,7 @@ RUN set -ex ;\
       libnginx-mod-ssl-ct \
       libnginx-mod-vts \
       libnginx-mod-http-auth-pam \
+      libnginx-mod-http-auth-spnego \
       libnginx-mod-http-cache-purge \
       libnginx-mod-http-dav-ext \
       libnginx-mod-http-echo \
