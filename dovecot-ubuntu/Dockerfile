@@ -29,7 +29,9 @@ RUN set -ex ;\
       razor \
       rspamd \
       spamc \
-      curl ;\
+      curl \
+      mimalloc \
+      libjemalloc2 ;\ 
     mkdir -p /opt/scripts/vimbadmin.orig ;\
     curl -fSL https://github.com/gibzer/vimbadmin-perl/archive/master.tar.gz |\
       tar xz --strip-components=1 -C /opt/scripts/vimbadmin.orig ;\
