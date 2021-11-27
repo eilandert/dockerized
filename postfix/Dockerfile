@@ -17,6 +17,8 @@ RUN set -ex ;\
       postfix-pgsql \
       postfix-sqlite \
       postfix \
+      mimalloc \
+      libjemalloc2 \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/postfix /etc/postfix.orig ;\
