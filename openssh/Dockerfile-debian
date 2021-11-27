@@ -15,6 +15,8 @@ RUN set -ex ;\
       libpam-google-authenticator \
       rsync \
       sudo \
+      libjemalloc2 \
+      mimalloc \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/ssh /etc/ssh.orig ;\
