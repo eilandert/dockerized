@@ -8,7 +8,7 @@
 
 set -x
 
-export UBUNTU_ROLLING="hirsute"
+export UBUNTU_ROLLING="impish"
 
 ####
 ## SCRIPTS DEBIAN/UBUNTU BASE IMAGES
@@ -113,6 +113,7 @@ cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.generated.php72 \
     php-fpm/Dockerfile-template.generated.php74 \
     php-fpm/Dockerfile-template.generated.php80 \
+    php-fpm/Dockerfile-template.generated.php81 \
     php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-multi
 
 rm -f php-fpm/Dockerfile-template.generated.*
