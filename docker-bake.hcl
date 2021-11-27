@@ -24,8 +24,8 @@ group "phpfpm" {
         "debian-phpfpm74",
         "ubuntu-phpfpm80",
         "debian-phpfpm80",
-#        "ubuntu-phpfpm81",
-#        "debian-phpfpm81",
+        "ubuntu-phpfpm81",
+        "debian-phpfpm81",
     ]
 }
 
@@ -54,8 +54,8 @@ group "nginx-php" {
        "debian-nginx-php74",
        "ubuntu-nginx-php80",
        "debian-nginx-php80",
-#       "ubuntu-nginx-php81",
-#       "debian-nginx-php81",
+       "ubuntu-nginx-php81",
+       "debian-nginx-php81",
        "ubuntu-nginx-multi",
        "debian-nginx-multi",
     ]
@@ -67,13 +67,13 @@ group "apache" {
        "debian-apache-php72",
        "debian-apache-php74",
        "debian-apache-php80",
-#       "debian-apache-php81",
+       "debian-apache-php81",
        "debian-apache-multiphp",
        "ubuntu-apache-php56",
        "ubuntu-apache-php72",
        "ubuntu-apache-php74",
        "ubuntu-apache-php80",
-#       "ubuntu-apache-php81",
+       "ubuntu-apache-php81",
        "ubuntu-apache-multiphp",
     ]
 }
@@ -105,7 +105,7 @@ group "db" {
     targets = [
 	"ubuntu-mariadb",
 	"debian-mariadb",
-        "alpine-redis",
+#        "alpine-redis",
         "ubuntu-redis",
         "debian-redis",
     ]
