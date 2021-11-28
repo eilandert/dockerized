@@ -7,43 +7,46 @@ COPY    bootstrap.sh /bootstrap.sh
 RUN set -ex ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
-      nginx-full \
+      nginx-extras \
+         libnginx-mod-brotli \
+         libnginx-mod-http-auth-pam \
+         libnginx-mod-http-auth-spnego \
+         libnginx-mod-http-cache-purge \
+         libnginx-mod-http-dav-ext \
+         libnginx-mod-http-doh \
+         libnginx-mod-http-echo \
+         libnginx-mod-http-fancyindex \
+         libnginx-mod-http-geoip \
+         libnginx-mod-http-geoip2 \
+         libnginx-mod-http-headers-more-filter \
+         libnginx-mod-http-image-filter \
+         libnginx-mod-http-ipset-blacklist \
+         libnginx-mod-http-lua \
+         libnginx-mod-http-ndk \
+         libnginx-mod-http-perl \
+         libnginx-mod-http-subs-filter \
+         libnginx-mod-http-uploadprogress \
+         libnginx-mod-http-upstream-fair \
+         libnginx-mod-http-xslt-filter \
+         libnginx-mod-mail \
+         libnginx-mod-modsecurity \
+         libnginx-mod-nchan \
+         libnginx-mod-njs \
+         libnginx-mod-pagespeed \
+         libnginx-mod-rtmp \
+         libnginx-mod-security-headers \
+         libnginx-mod-ssl-ct \
+         libnginx-mod-stream \
+         libnginx-mod-stream-geoip \
+         libnginx-mod-stream-geoip2 \
+         libnginx-mod-stream-lua \
+         libnginx-mod-vts \
       libmodsecurity3 \
-      libnginx-mod-http-lua \
-      libnginx-mod-njs \
-      libnginx-mod-http-headers-more-filter \
-      libnginx-mod-modsecurity \
-      libnginx-mod-pagespeed \
-      libnginx-mod-security-headers \
-      libnginx-mod-brotli \
-      libnginx-mod-ssl-ct \
-      libnginx-mod-vts \
-      libnginx-mod-http-auth-pam \
-      libnginx-mod-http-auth-spnego \
-      libnginx-mod-http-cache-purge \
-      libnginx-mod-http-dav-ext \
-      libnginx-mod-http-echo \
-      libnginx-mod-http-fancyindex \
-      libnginx-mod-http-geoip \
-      libnginx-mod-http-geoip2 \
-      libnginx-mod-http-image-filter \
-      libnginx-mod-http-ndk \
-      libnginx-mod-http-perl \
-      libnginx-mod-http-subs-filter \
-      libnginx-mod-http-uploadprogress \
-      libnginx-mod-http-upstream-fair \
-      libnginx-mod-http-xslt-filter \
-      libnginx-mod-mail \
-      libnginx-mod-nchan \
-      libnginx-mod-rtmp \
-      libnginx-mod-stream \
-      libnginx-mod-stream-geoip \
-      libnginx-mod-stream-geoip2 \
-      libnginx-mod-stream-lua \
       modsecurity-crs \
       curl \
       mimalloc \
       libjemalloc2 \
+      geoip-bin fcgiwrap ssl-cert \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
