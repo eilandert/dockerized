@@ -24,6 +24,19 @@ mkdir -p /etc/nginx/modules-available && \
     rm -f /etc/nginx/modules-available/* && \
     cp -rp /usr/share/nginx/modules-available/* /etc/nginx/modules-available
 
+# If exists, enable modules in NGX_MODULE environment variable and remove others.
+if [ -n "${NGX_MODULES}" ]; then
+    NGX_MODULES=`echo "${NGX_MODULES}" | sed -e s/"[, ]"/" "/g`
+    mkdir -p modules-enabled && \
+        rm -f modules-enabled/* && \
+        cd modules-enabled
+
+    for MODULE in $NGX_MODULES
+    do
+        ln -s ../modules-available/${MODULE} .
+    done
+fi
+
 case ${MALLOC} in
     *|jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
@@ -88,7 +101,7 @@ if [ -n "${PHPVERSION}" ]; then
     fi
     if [ "${MODE}" = "MULTI" ] && [ "${PHP56}" = "YES" ]; then
         startphp "5.6"
-	SETPHP=1
+        SETPHP=1
     fi
     if [ "${MODE}" = "MULTI" ] && [ "${PHP72}" = "YES" ]; then
         startphp "7.2"

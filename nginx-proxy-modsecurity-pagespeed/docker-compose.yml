@@ -2,7 +2,7 @@ version: "2.2"
 services:
   nginx:
     container_name: nginx
-    image: eilandert/nginx-modsecurity3-pagespeed:latest
+    image: eilandert/nginx-modsecurity3-pagespeed:deb-latest
     stop_grace_period: 3s
     ports:
       - 80:80
@@ -10,9 +10,9 @@ services:
     restart: always
     volumes:
       - ./config/nginx:/etc/nginx:rw
-      - ./config/modsecurity/:/etc/modsecurity:ro
-      - ./cache/pagespeed:/var/cache/pagespeed:rw
-      - ./cache/nginx:/var/cache/nginx:rw
+#      - ./config/modsecurity/:/etc/modsecurity:rw
+#      - ./cache/pagespeed:/var/cache/pagespeed:rw
+#      - ./cache/nginx:/var/cache/nginx:rw
 
     # if pulled with tag :php
     #    - ./config/php:/etc/php:rw
@@ -29,4 +29,41 @@ services:
 #      - PHP74=YES
 #      - PHP74=YES
 #      - PHP80=YES
+#      - PHP81=YES
+
+      - NGX_MODULES ="mod-security-headers.conf, mod-http-fancyindex.conf"
+
+# Currently you can enable the following modules:
+#	mod-brotli.conf
+#	mod-http-auth-pam.conf
+#	mod-http-auth-spnego.conf
+#	mod-http-cache-purge.conf
+#	mod-http-dav-ext.conf
+#	mod-http-doh.conf
+#	mod-http-echo.conf
+#	mod-http-fancyindex.conf
+#	mod-http-geoip.conf
+#	mod-http-geoip2.conf
+#	mod-http-headers-more-filter.conf
+#	mod-http-image-filter.conf
+#	mod-http-lua.conf
+#	mod-http-ndk.conf
+#	mod-http-njs.conf
+#	mod-http-perl.conf
+#	mod-http-subs-filter.conf
+#	mod-http-uploadprogress.conf
+#	mod-http-upstream-fair.conf
+#	mod-http-xslt-filter.conf
+#	mod-mail.conf
+#	mod-modsecurity.conf
+#	mod-nchan.conf
+#	mod-pagespeed.conf
+#	mod-rtmp.conf
+#	mod-security-headers.conf
+#	mod-ssl-ct.conf
+#	mod-stream-geoip.conf
+#	mod-stream-geoip2.conf
+#	mod-stream.conf
+#	mod-vts.conf
+
 
