@@ -47,6 +47,7 @@ RUN set -ex ;\
       geoip-bin fcgiwrap ssl-cert \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    rm -f /etc/nginx/modules-enabled/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
     mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
