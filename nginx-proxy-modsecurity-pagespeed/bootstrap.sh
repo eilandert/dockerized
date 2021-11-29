@@ -3,7 +3,7 @@
 chmod 777 /dev/stdout
 
 echo "[NGINX] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
-echo "[NGINX] The NGINX packages (and detailed description of this NGINX stack can be found on https://deb.paranoid.nl"
+echo "[NGINX] The NGINX packages (and detailed description of this NGINX stack) can be found on https://deb.paranoid.nl"
 
 if [ -n "${TZ}" ]; then
     rm -f /etc/timezone /etc/localtime
@@ -19,6 +19,11 @@ if [ ! -f ${FIRSTRUN} ]; then
     cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
 
+# Make sure all available modules are available outside of docker and remove modules which aren't there (anymore)
+mkdir -p /etc/nginx/modules-available && \
+    rm -f /etc/nginx/modules-available/* && \
+    cp -rp /usr/share/nginx/modules-available/* /etc/nginx/modules-available
+
 case ${MALLOC} in
     *|jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
@@ -31,8 +36,8 @@ case ${MALLOC} in
         ;;
 esac
 
-
 #check if PHP is installed, else skip the whole block
+# PHPBLOCK
 if [ -n "${PHPVERSION}" ]; then
 
     startphp()
@@ -76,44 +81,45 @@ if [ -n "${PHPVERSION}" ]; then
         mv composer.phar ${COMPOSERPATH}
     fi
 
-    if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ] && [ ! "${PHP81}" = "YES" ]; then
-        echo "[NGINX] You downloaded the MULTI-PHP edition of the docker"
-        echo "[NGINX] There is no PHP56 PHP72 PHP74 PHP80 PHP81 environment variable specified"
-        echo "[NGINX] exiting...."
-        sleep 10
+    SETPHP=0
+    if [ "${MODE}" = "FPM" ] && [ ! "${MODE}" = "MULTI" ]; then
+        startphp "${PHPVERSION}"
+        SETPHP=1
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP56}" = "YES" ]; then
+        startphp "5.6"
+	SETPHP=1
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP72}" = "YES" ]; then
+        startphp "7.2"
+        SETPHP=1
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP74}" = "YES" ]; then
+        startphp "7.4"
+        SETPHP=1
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP80}" = "YES" ]; then
+        startphp "8.0"
+        SETPHP=1
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
+        startphp "8.1"
+        SETPHP=1
+    fi
+
+    if [ "${PHPVERSION}" = "MULTI" ] && [ "${SETPHP}" = 0 ]; then
+        echo "[NGINX] You downloaded the MULTI-PHP edition of the docker but...."
+        echo "[NGINX] There is no PHP56 PHP72 PHP74 PHP80 or PHP81 environment variable specified"
+        echo "[NGINX] Don't know what to do now, exiting...."
         exit
     fi
 
-    if [ "${MODE}" = "FPM" ] && [ ! "${MODE}" = "MULTI" ]; then
-        startphp "${PHPVERSION}"
-    fi
-
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP56}" = "YES" ]; then
-        startphp "5.6"
-    fi
-
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP72}" = "YES" ]; then
-        startphp "7.2"
-    fi
-
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP74}" = "YES" ]; then
-        startphp "7.4"
-    fi
-
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP80}" = "YES" ]; then
-        startphp "8.0"
-    fi
-
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
-        startphp "8.1"
-    fi
-
-
 fi
+# /PHPBLOCK
 
 #download new pagespeed libraries on docker startup
 chmod +x /etc/nginx/scripts/pagespeed_libraries_generator.sh 1>/dev/null 2>&1
-/etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 2>/dev/null
+/etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 1>/dev/null 2>/dev/null &
 
 nginx -V 2>&1 | grep -v configure
 nginx -t
