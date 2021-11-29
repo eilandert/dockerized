@@ -35,7 +35,8 @@ Bind /etc/nginx and /etc/modsecurity (for php, /etc/nullmailer and /etc/php) to 
 
 See my github for an example of  **[docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/nginx-proxy-modsecurity-pagespeed/docker-compose.yml)**
 
-Environmentvariables:
+Environment variables:
+
 	- TZ=Europe/Amsterdam
         - PHP56=YES (if the multi-php docker is pulled)
         - PHP74=YES (if the multi-php docker is pulled)
