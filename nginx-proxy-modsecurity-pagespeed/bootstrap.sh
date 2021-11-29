@@ -27,9 +27,9 @@ mkdir -p /etc/nginx/modules-available && \
 # If exists, enable modules in NGX_MODULE environment variable and remove others.
 if [ -n "${NGX_MODULES}" ]; then
     NGX_MODULES=`echo "${NGX_MODULES}" | sed -e s/"[, ]"/" "/g`
-    mkdir -p modules-enabled && \
-        rm -f modules-enabled/* && \
-        cd modules-enabled
+    mkdir -p /etc/nginx/modules-enabled && \
+        rm -f /etc/nginx/modules-enabled/* && \
+        cd /etc/nginx/modules-enabled
 
     for MODULE in $NGX_MODULES
     do
