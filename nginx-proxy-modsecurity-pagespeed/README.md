@@ -44,7 +44,7 @@ Environment variables:
         - PHP80=YES (if the multi-php docker is pulled)
         - PHP80=YES (if the multi-php docker is pulled)
  
-        - NGX_MODULES="mod-security-headers, mod-http-fancyindex"
+        - NGX_MODULES=mod-security-headers,mod-http-fancyindex
 
         At the time of writing you can enable the following modules:
           mod-brotli

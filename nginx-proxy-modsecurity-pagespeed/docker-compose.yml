@@ -31,7 +31,7 @@ services:
 #      - PHP80=YES
 #      - PHP81=YES
 
-      - NGX_MODULES ="mod-security-headers, mod-http-fancyindex"
+      - NGX_MODULES=mod-security-headers,mod-http-fancyindex
 
 # Currently you can enable the following modules:
 #	mod-brotli
