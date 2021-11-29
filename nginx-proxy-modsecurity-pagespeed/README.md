@@ -44,39 +44,39 @@ Environment variables:
         - PHP80=YES (if the multi-php docker is pulled)
         - PHP80=YES (if the multi-php docker is pulled)
  
-        - NGX_MODULES="mod-security-headers.conf, mod-http-fancyindex.conf"
+        - NGX_MODULES="mod-security-headers, mod-http-fancyindex"
 
         At the time of writing you can enable the following modules:
-          mod-brotli.conf
-          mod-http-auth-pam.conf
-          mod-http-auth-spnego.conf
-          mod-http-cache-purge.conf
-          mod-http-dav-ext.conf
-          mod-http-doh.conf
-          mod-http-echo.conf
-          mod-http-fancyindex.conf
-          mod-http-geoip.conf
-          mod-http-geoip2.conf
-          mod-http-headers-more-filter.conf
-          mod-http-image-filter.conf
-          mod-http-lua.conf
-          mod-http-ndk.conf
-          mod-http-njs.conf
-          mod-http-perl.conf
-          mod-http-subs-filter.conf
-          mod-http-uploadprogress.conf
-          mod-http-upstream-fair.conf
-          mod-http-xslt-filter.conf
-          mod-mail.conf
-          mod-modsecurity.conf
-          mod-nchan.conf
-          mod-pagespeed.conf
-          mod-rtmp.conf
-          mod-security-headers.conf
-          mod-ssl-ct.conf
-          mod-stream-geoip.conf
-          mod-stream-geoip2.conf
-          mod-stream.conf
-          mod-vts.conf
+          mod-brotli
+          mod-http-auth-pam
+          mod-http-auth-spnego
+          mod-http-cache-purge
+          mod-http-dav-ext
+          mod-http-doh
+          mod-http-echo
+          mod-http-fancyindex
+          mod-http-geoip
+          mod-http-geoip2
+          mod-http-headers-more-filter
+          mod-http-image-filter
+          mod-http-lua
+          mod-http-ndk
+          mod-http-njs
+          mod-http-perl
+          mod-http-subs-filter
+          mod-http-uploadprogress
+          mod-http-upstream-fair
+          mod-http-xslt-filter
+          mod-mail
+          mod-modsecurity
+          mod-nchan
+          mod-pagespeed
+          mod-rtmp
+          mod-security-headers
+          mod-ssl-ct
+          mod-stream-geoip
+          mod-stream-geoip2
+          mod-stream
+          mod-vts
 
 I am open to suggestions!

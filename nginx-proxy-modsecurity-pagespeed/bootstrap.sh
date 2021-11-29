@@ -33,7 +33,7 @@ if [ -n "${NGX_MODULES}" ]; then
 
     for MODULE in $NGX_MODULES
     do
-        ln -s ../modules-available/${MODULE} .
+        ln -s ../modules-available/${MODULE}.conf .
     done
 fi
 
