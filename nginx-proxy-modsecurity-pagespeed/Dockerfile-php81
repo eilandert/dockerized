@@ -21,6 +21,7 @@ RUN set -ex ;\
          libnginx-mod-http-headers-more-filter \
          libnginx-mod-http-image-filter \
          libnginx-mod-http-lua \
+	 libnginx-mod-http-njs \
          libnginx-mod-http-ndk \
          libnginx-mod-http-perl \
          libnginx-mod-http-subs-filter \
@@ -30,7 +31,6 @@ RUN set -ex ;\
          libnginx-mod-mail \
          libnginx-mod-modsecurity \
          libnginx-mod-nchan \
-         libnginx-mod-njs \
          libnginx-mod-pagespeed \
          libnginx-mod-rtmp \
          libnginx-mod-security-headers \
