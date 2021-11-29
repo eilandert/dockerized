@@ -20,7 +20,6 @@ RUN set -ex ;\
          libnginx-mod-http-geoip2 \
          libnginx-mod-http-headers-more-filter \
          libnginx-mod-http-image-filter \
-         libnginx-mod-http-ipset-blacklist \
          libnginx-mod-http-lua \
          libnginx-mod-http-ndk \
          libnginx-mod-http-perl \
@@ -39,7 +38,6 @@ RUN set -ex ;\
          libnginx-mod-stream \
          libnginx-mod-stream-geoip \
          libnginx-mod-stream-geoip2 \
-         libnginx-mod-stream-lua \
          libnginx-mod-vts \
       libmodsecurity3 \
       modsecurity-crs \
