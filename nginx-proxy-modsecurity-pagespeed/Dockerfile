@@ -38,6 +38,7 @@ RUN set -ex ;\
          libnginx-mod-stream \
          libnginx-mod-stream-geoip \
          libnginx-mod-stream-geoip2 \
+	 libnginx-mod-stream-lua \
          libnginx-mod-vts \
       libmodsecurity3 \
       modsecurity-crs \
@@ -47,7 +48,6 @@ RUN set -ex ;\
       geoip-bin fcgiwrap ssl-cert \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
-    rm -f /etc/nginx/modules-enabled/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
     mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
