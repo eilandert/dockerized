@@ -33,10 +33,18 @@ if [ -n "${NGX_MODULES}" ]; then
 
     for MODULE in $NGX_MODULES
     do
-        ln -s ../modules-available/${MODULE}.conf .
+	# Make priorities as needed
+	PRIO="50-"
+        case ${MODULE} in
+            mod-http-ndk) echo PRIO="10-" ;;
+            mod-stream)   echo PRIO="10-" ;;
+            mod-stream-*) ln -sf ../modules-available/mod-stream.conf 10-mod-stream.conf; PRIO="50-" ;;
+        esac
+        ln -sf ../modules-available/${MODULE}.conf ${PRIO}${MODULE}.conf
     done
 fi
 
+# Setup the MALLOC of choise, with JEMALLOC as default
 case ${MALLOC} in
     *|jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
