@@ -105,7 +105,7 @@ group "db" {
     targets = [
 	"ubuntu-mariadb",
 	"debian-mariadb",
-#        "alpine-redis",
+        "alpine-redis",
         "ubuntu-redis",
         "debian-redis",
     ]
