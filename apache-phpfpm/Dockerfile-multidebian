@@ -11,7 +11,7 @@ COPY	conf-available /tmp/conf-available
 RUN set -ex ;\
     chmod +x /bootstrap.sh ;\
     apt-get -y update ;\
-    apt-get install -y --no-install-recommends apache2 apache2-utils ;\
+    apt-get install -y --no-install-recommends apache2 apache2-utils libjemalloc2 mimalloc ;\
     a2dismod status mpm_prefork ;\
     a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
     cp /tmp/conf-available/php${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\

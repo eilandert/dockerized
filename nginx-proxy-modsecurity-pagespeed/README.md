@@ -38,6 +38,7 @@ See my github for an example of  **[docker-compose.yml](https://github.com/eilan
 Environment variables:
 
 	- TZ=Europe/Amsterdam
+	- MALLOC=jemalloc or mimalloc or none (default: jemalloc)
         - PHP56=YES (if the multi-php docker is pulled)
         - PHP74=YES (if the multi-php docker is pulled)
         - PHP74=YES (if the multi-php docker is pulled)

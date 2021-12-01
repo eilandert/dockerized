@@ -28,6 +28,7 @@ ENVIRONMENT:
 
 - use CACHE=yes to enable apache caching
 - use TZ=Europe/Amsterdam (for example) to set timezone
+- MALLOC=jemalloc or mimalloc or none (default: jemalloc)
 - variables A2ENMOD A2DISMOD A2ENCONF A2DISCONF (changes are persistent if you mount /etc/apache2)
 - use MODE=MOD for using mod_php instead of php-fpm. Apache2 will be set to mpm_prefork.
 - in multimode (tag :multi) set PHP56=YES PHP72=YES PHP74=YES PHP80=YES to enable specific versions.

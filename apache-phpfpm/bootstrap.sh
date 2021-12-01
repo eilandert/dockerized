@@ -24,7 +24,7 @@ if [ ! -f ${FIRSTRUN} ]; then
 fi
 
 case ${MALLOC} in
-    jemalloc)
+    *|jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
         ;;
     mimalloc)
@@ -32,9 +32,6 @@ case ${MALLOC} in
         ;;
     none)
         unset LD_PRELOAD
-        ;;
-    *)
-        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
         ;;
 esac
 
