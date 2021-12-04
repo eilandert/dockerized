@@ -1,4 +1,4 @@
-FROM    eilandert/ubuntu-base:rolling
+FROM    eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY main.py /root/warmup_sitemaps/main.py
