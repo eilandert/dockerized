@@ -40,7 +40,7 @@ dot_total = 0
 failed_links = 0
 success_links = 0
 domain = ''
-headers = {'User-Agent': 'Googlebot/2.1 (+http://www.googlebot.com/bot.html)'}
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'}
 
 
 def get_links(mage_links):
