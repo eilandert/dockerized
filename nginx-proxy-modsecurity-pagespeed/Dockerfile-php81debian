@@ -21,6 +21,7 @@ RUN set -ex ;\
          libnginx-mod-http-headers-more-filter \
          libnginx-mod-http-image-filter \
          libnginx-mod-http-lua \
+	 libnginx-mod-http-lua-ssl \
 	 libnginx-mod-http-njs \
          libnginx-mod-http-ndk \
          libnginx-mod-http-perl \
@@ -41,6 +42,7 @@ RUN set -ex ;\
 	 libnginx-mod-stream-lua \
          libnginx-mod-vts \
       libmodsecurity3 \
+      lua-resty \
       modsecurity-crs \
       curl \
       mimalloc \
