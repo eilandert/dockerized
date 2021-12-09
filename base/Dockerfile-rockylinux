@@ -1,0 +1,9 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
+FROM    rockylinux/rockylinux:latest
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+COPY    bootstrap.sh /bootstrap.sh
+
+# Install https://deb.paranoid.nl/pool/myguard.deb to setup my own repository
+
+CMD     ["/bootstrap.sh"]

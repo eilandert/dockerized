@@ -2,7 +2,6 @@
 FROM eilandert/ubuntu-base:rolling
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>" 
 ENV DEBIAN_FRONTEND="noninteractive"
-ENV LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure-none.so.2.0
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\

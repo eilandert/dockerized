@@ -8,11 +8,12 @@ RUN \
   && apt-get install --no-install-recommends -y \
     s6 \
     cron \
-    nginx \
+    nginx-light \
     ca-certificates \
     reprepro \
     openssh-server \
     devscripts \
+    rsync \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
