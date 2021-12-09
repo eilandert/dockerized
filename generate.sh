@@ -15,8 +15,8 @@ export UBUNTU_ROLLING="impish"
 ####
 
 cp base/Dockerfile-template base/Dockerfile-devel
-cp base/Dockerfile-template base/Dockerfile-focal
 cp base/Dockerfile-template base/Dockerfile-rolling
+cp base/Dockerfile-template base/Dockerfile-jammy
 cp base/Dockerfile-template base/Dockerfile-focal
 cp base/Dockerfile-template base/Dockerfile-bionic
 cp base/Dockerfile-template base/Dockerfile-xenial
@@ -29,6 +29,7 @@ cp base/Dockerfile-template base/Dockerfile-jessie
 
 sed -i s/#TEMPLATE1#/ubuntu:devel/   base/Dockerfile-devel
 sed -i s/"#TEMPLATE1#"/"ubuntu:${UBUNTU_ROLLING}"/ base/Dockerfile-rolling
+sed -i s/#TEMPLATE1#/ubuntu:jammy/   base/Dockerfile-jammy
 sed -i s/#TEMPLATE1#/ubuntu:focal/   base/Dockerfile-focal
 sed -i s/#TEMPLATE1#/ubuntu:bionic/  base/Dockerfile-bionic
 sed -i s/#TEMPLATE1#/ubuntu:xenial/  base/Dockerfile-xenial
@@ -42,6 +43,7 @@ sed -i s/#TEMPLATE1#/debian:jessie-slim/   base/Dockerfile-jessie
 
 sed -i s/#TEMPLATE2#/"${UBUNTU_DEVEL}"/   base/Dockerfile-devel
 sed -i s/#TEMPLATE2#/"${UBUNTU_ROLLING}"/  base/Dockerfile-rolling
+sed -i s/#TEMPLATE2#/jammy/    base/Dockerfile-jammy
 sed -i s/#TEMPLATE2#/focal/    base/Dockerfile-focal
 sed -i s/#TEMPLATE2#/bionic/   base/Dockerfile-bionic
 sed -i s/#TEMPLATE2#/xenial/   base/Dockerfile-xenial
