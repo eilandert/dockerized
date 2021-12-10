@@ -11,7 +11,7 @@ group "base-current" {
 }
 
 group "base" {
-    targets = ["rolling", "devel","focal","bionic","xenial","trusty","bookworm","bullseye","buster","stretch"]
+    targets = ["rolling", "devel","jammy","focal","bionic","xenial","trusty","bookworm","bullseye","buster","stretch"]
 }
 
 group "phpfpm" {
@@ -140,6 +140,12 @@ target "devel" {
     dockerfile = "Dockerfile-devel"
     context = "base"
     tags = ["docker.io/eilandert/ubuntu-base:devel"]
+}
+
+target "jammy" {
+    dockerfile = "Dockerfile-jammy"
+    context = "base"
+    tags = ["docker.io/eilandert/ubuntu-base:jammy"]
 }
 
 target "focal" {
