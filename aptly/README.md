@@ -9,14 +9,13 @@ Quick start: (without snapshots)
 4) put your gpg keys in /aptly/gnupg
 5) put your public sshkey in /aptly/ssh
 6) gpg --output /aptly/repo/public/key.pub --armor --export <YOUR GPG ID HERE>
-7) ssh to the docker as aptly, like aptly@localhost
-8) create a repo, cmd: ssh aptly@localhost "aptly repo create -distribution=focal -component=main focal"
-9) publish the repo, cmd: ssh aptly@localhost "aptly publish update focal" 
-10) upload your debs and .changes files with scp (or rsync), cmd: scp *deb *changes aptly@localhost:incoming
-11) process the debs, cmd: ssh aptly@localhost "aptly repo include ~/incoming" 
-12) publish the repo, cmd: ssh aptly@localhost "aptly publish update focal" 
+7) create a repo, cmd: ssh aptly@localhost "aptly repo create -distribution=focal -component=main focal"
+8) publish the repo, cmd: ssh aptly@localhost "aptly publish update focal" 
+9) upload your debs and .changes files with scp (or rsync), cmd: scp *deb *changes aptly@localhost:incoming
+10) process the debs, cmd: ssh aptly@localhost "aptly repo include ~/incoming" 
+11) publish the repo, cmd: ssh aptly@localhost "aptly publish update focal" 
 
-You should automate steps 10-12 in your buildscripts
+You should automate steps 9-11 in your buildscripts
 
 Environment:
   - TZ=Europe/Amsterdam
