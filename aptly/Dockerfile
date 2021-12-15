@@ -50,6 +50,7 @@ CMD [ "/bootstrap.sh" ]
 
 COPY syslog-ng.conf /etc/syslog-ng
 COPY default-vhost.nginx /aptly/config/nginx/default
+COPY examples /aptly/examples
 
 EXPOSE 22 80
 WORKDIR /aptly
