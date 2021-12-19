@@ -33,12 +33,17 @@ if [ -n "${NGX_MODULES}" ]; then
 
     for MODULE in $NGX_MODULES
     do
+	MODULE=$(echo ${MODULE}|sed -e s/\.conf$//g)
 	# Make priorities as needed
-	PRIO="50-"
+	PRIO="50-"   #DEFAULT
         case ${MODULE} in
             mod-http-ndk) echo PRIO="10-" ;;
-            mod-stream)   echo PRIO="10-" ;;
-            mod-stream-*) ln -sf ../modules-available/mod-stream.conf 10-mod-stream.conf; PRIO="50-" ;;
+            mod-stream)   echo PRIO="15-" ;;
+            mod-stream-*) ln -sf ../modules-available/mod-stream.conf 15-mod-stream.conf; PRIO="50-" ;;
+            mod-http-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf; PRIO="50-" ;;
+	    mod-stream-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf; PRIO="50-" ;;
+	    mod-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf; PRIO="50-" ;;
+	    mod-*-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf; PRIO="50-" ;;
         esac
         ln -sf ../modules-available/${MODULE}.conf ${PRIO}${MODULE}.conf
     done
