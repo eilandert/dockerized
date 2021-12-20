@@ -3,7 +3,7 @@
 if [ -n "${TZ}" ]; then
     rm -f /etc/timezone /etc/localtime
     echo "${TZ}" > /etc/timezone
-    ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
+    ln -sfr /usr/share/zoneinfo/${TZ} /etc/localtime
 fi
 
 if [ -n "${SYSLOG_HOST}" ]; then
@@ -19,12 +19,13 @@ fi
 #create sshd keys if needed (absent on first run)
 bash /ssh-createkeys.sh 1>/dev/null
 
+mkdir -p /aptly
 chown aptly:aptly /aptly
 
 if [ ! -f /aptly/config/aptly.conf ]; then
     mkdir -p /aptly/config
     sudo -u aptly aptly config show 1>/dev/null
-    ln -s /aptly/.aptly.conf /aptly/config/aptly.conf
+    ln -sfr /aptly/.aptly.conf /aptly/config/aptly.conf
     sed -i s/"\.aptly"/repo/ /aptly/.aptly.conf
 fi
 
@@ -34,15 +35,29 @@ if [ ! -d /aptly/.gnupg ]; then
 fi
 
 if [ ! -d /aptly/config/gnupg ]; then
-    ln -s /aptly/.gnupg /aptly/config/gnupg
-fi
-
-if [ ! -d /aptly/config/ssh ]; then
-    ln -s /aptly/.ssh /aptly/config/ssh
+    ln -sfr /aptly/.gnupg /aptly/config/gnupg
 fi
 
 if [ ! -d /aptly/.ssh ]; then
     sudo -u aptly mkdir -p /aptly/.ssh
+fi
+
+if [ ! -d /aptly/config/ssh ]; then
+    ln -sfr /aptly/.ssh /aptly/config/ssh
+fi
+
+#if [ ! -d /aptly/config/sshd ]; then
+#    cp -rp /aptly.orig/config/sshd /aptly/config
+#fi
+#ln -sfr /aptly/config/sshd /etc/ssh
+
+#if [ ! -f /aptly/config/nginx/default ]; then
+#   cp -rp /aptly.orig/config/nginx /aptly/config
+#fi
+#ln -sfr /aptly/config/nginx/default /etc/nginx/sites-enabled/default
+
+if [ ! -d aptly/examples ]; then
+    cp -rp /aptly.orig/examples /aptly/examples
 fi
 
 if [ ! -d /aptly/repo ]; then
@@ -51,20 +66,22 @@ fi
 
 if [ ! -d /aptly/incoming ]; then
     sudo -u aptly mkdir -p /aptly/incoming
-  else
+else
     rm -f /aptly/incoming/*
 fi
 
-echo "[APTLY] Setting permissions"
-chown aptly:aptly -R /aptly && chown root:root -R /aptly/config
 
-if [ ! "${CLEANDBONSTART}" = "NO" ]; 
+echo "[APTLY] Setting permissions"
+chown aptly:aptly -R /aptly 
+#&& chown root:root -R /aptly/config
+
+if [ ! "${CLEANDBONSTART}" = "NO" ];
 then
-echo "[APTLY] Cleaning DB"
-sudo -u aptly aptly db cleanup
+    echo "[APTLY] Cleaning DB"
+    sudo -u aptly aptly db cleanup
 fi
 
-if [ ! "${NGINX}" = "NO" ];
+if [ ! "${STARTNGINX}" = "NO" ];
 then
     nginx -t
     service nginx restart 1>/dev/null
@@ -72,4 +89,6 @@ fi
 
 dockerid=$(hostname)
 echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
+
 exec /usr/sbin/sshd -D -o ListenAddress=0.0.0.0
+

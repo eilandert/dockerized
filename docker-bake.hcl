@@ -120,12 +120,7 @@ group "misc" {
        "ubuntu-reprepro",
        "debian-sitewarmup",
        "alpine:unbound",
-       "psol",
-    ]
-}
-
-group "openssh" {
-    targets = [
+       "aptly",
         "debian-openssh",
     ]
 }
@@ -271,7 +266,7 @@ target "debian-multiphp" {
 }
 
 target "debian-mariadb" {
-    tags = ["docker.io/eilandert/mariadb:debian"]
+    tags = ["docker.io/eilandert/mariadb:debian","docker.io/eilandert/mariadb:latest"]
     context = "mariadb"
     dockerfile = "Dockerfile.debian"
 }
@@ -587,3 +582,10 @@ target "debian-openssh" {
    context = "openssh"
    dockerfile = "Dockerfile-debian"
 }
+
+target "aptly" {
+   tags = ["docker.io/eilandert/aptly"]
+   context = "aptly"
+   dockerfile = "Dockerfile"
+}
+
