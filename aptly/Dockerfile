@@ -6,8 +6,6 @@ COPY    bootstrap.sh /bootstrap.sh
 COPY	ssh-createkeys.sh /ssh-createkeys.sh
 
 RUN set -ex ;\
-    dpkg-statoverride --remove /usr/bin/sudo ;\
-    dpkg-statoverride --remove /bin/sudo ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
     aptly \
@@ -16,7 +14,6 @@ RUN set -ex ;\
     libnginx-mod-http-fancyindex \
     openssh-server \
     rsync \
-    sudo \
     syslog-ng-core \
     tzdata
 
@@ -37,7 +34,9 @@ RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
     rm -f /etc/ssh/ssh_host_dsa_key* ;\
     rm -f /etc/ssh/ssh_host_ecdsa_key* ;\ 
     rm -f /etc/ssh/ssh_host_ed25519_key* ;\
-    rm -f /etc/nginx/modules-enabled/50-mod-http-echo.conf
+    rm -f /etc/nginx/modules-enabled/50-mod-http-echo.conf ;\
+    sed -i /^Banner/d /etc/ssh/sshd_config.d/20-security.conf ;\
+    sed -i s/"^#Password"/"Password"/ /etc/ssh/sshd_config.d/20-security.conf
 
 CMD [ "/bootstrap.sh" ]
 

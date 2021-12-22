@@ -1,6 +1,6 @@
 map $http_user_agent $bad_bot {
     default 0;
-  ~*(AhrefsBot|PetalBot) 1;
+  ~*(AhrefsBot|PetalBot|seostar) 1;
 }
 
 server {

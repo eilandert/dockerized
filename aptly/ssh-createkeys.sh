@@ -29,15 +29,22 @@ create_key() {
 
 create_keys() {
     hostkeys="$(host_keys_required)"
-    create_key "Creating SSH2 RSA key; this may take some time ..." \
-        "$hostkeys" /etc/ssh/ssh_host_rsa_key -t rsa
-    create_key "Creating SSH2 DSA key; this may take some time ..." \
-        "$hostkeys" /etc/ssh/ssh_host_dsa_key -t dsa
-    create_key "Creating SSH2 ECDSA key; this may take some time ..." \
-        "$hostkeys" /etc/ssh/ssh_host_ecdsa_key -t ecdsa
-    create_key "Creating SSH2 ED25519 key; this may take some time ..." \
-        "$hostkeys" /etc/ssh/ssh_host_ed25519_key -t ed25519
+    if [ ! -f "/etc/ssh/ssh_host_rsa_key" ]; then
+        create_key "Creating SSH2 RSA key; this may take some time ..." \
+            "$hostkeys" /etc/ssh/ssh_host_rsa_key -t rsa
+    fi
+    if [ ! -f "/etc/ssh/ssh_host_dsa_key" ]; then
+        create_key "Creating SSH2 DSA key; this may take some time ..." \
+            "$hostkeys" /etc/ssh/ssh_host_dsa_key -t dsa
+    fi
+    if [ ! -f "/etc/ssh/ssh_host_ecdsa_key" ]; then
+        create_key "Creating SSH2 ECDSA key; this may take some time ..." \
+            "$hostkeys" /etc/ssh/ssh_host_ecdsa_key -t ecdsa
+    fi
+    if [ ! -f "/etc/ssh/ssh_host_ed25519_key" ]; then
+        create_key "Creating SSH2 ED25519 key; this may take some time ..." \
+            "$hostkeys" /etc/ssh/ssh_host_ed25519_key -t ed25519
+    fi
 }
 
 create_keys
-

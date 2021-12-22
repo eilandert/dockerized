@@ -70,6 +70,10 @@ else
     rm -f /aptly/incoming/*
 fi
 
+if [ ! -f /aptly/scripts/process-incoming.sh ]; then
+    mkdir -p /aptly/scripts
+    cp -rp /aptly/examples/process-incoming.sh /aptly/scripts/
+fi
 
 echo "[APTLY] Setting permissions"
 chown aptly:aptly -R /aptly 

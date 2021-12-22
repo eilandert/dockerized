@@ -10,13 +10,12 @@ Quick start: (without snapshots)
 5) put your gpg keys in /aptly/gnupg
 6) create a public key, cmd: ssh aptly@localhost "gpg --output /aptly/repo/public/key.pub --armor --export <YOUR GPG ID HERE>"
 7) create a repo, cmd: ssh aptly@localhost "aptly repo create -distribution=focal -component=main focal"
-8) publish the repo, cmd: ssh aptly@localhost "aptly publish update focal" 
 -
-9) upload your debs and .changes files with scp (or rsync), cmd: scp *deb *changes aptly@localhost:incoming
-10) process the debs, cmd: ssh aptly@localhost "aptly repo include ~/incoming" 
-11) publish the repo, cmd: ssh aptly@localhost "aptly publish update focal" 
+8) upload your debs and .changes files with scp (or rsync), cmd: scp *deb *changes *buildinfo aptly@localhost:incoming
+9) process the debs, cmd: ssh aptly@localhost "aptly repo include /aptly/incoming" 
+10) publish the repo, cmd: ssh aptly@localhost "aptly publish repo focal" 
 
-You should automate steps 9-11 in your buildscripts
+You should automate steps 8-10 in your buildscripts
 
 On docker restart aptly will cleanup the database, the accessrights will be set to user aptly and nginx will start for webaccess.
 
