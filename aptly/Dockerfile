@@ -6,14 +6,17 @@ COPY    bootstrap.sh /bootstrap.sh
 COPY	ssh-createkeys.sh /ssh-createkeys.sh
 
 RUN set -ex ;\
+    dpkg-statoverride --remove /usr/bin/sudo ;\
+    dpkg-statoverride --remove /bin/sudo ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
     aptly \
     ca-certificates \
-    nginx-light \
     libnginx-mod-http-fancyindex \
+    nginx-light \
     openssh-server \
     rsync \
+    sudo \
     syslog-ng-core \
     tzdata
 
@@ -29,7 +32,6 @@ RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
     mkdir /run/sshd && rm -f /etc/motd ;\
     groupadd -g 1010 aptly ;\
     useradd -u 1010 -g 1010 aptly -s /bin/bash -d /aptly ;\
-    mkdir -p /aptly.orig/config ;\
     rm -f /etc/ssh/ssh_host_rsa_key* ;\
     rm -f /etc/ssh/ssh_host_dsa_key* ;\
     rm -f /etc/ssh/ssh_host_ecdsa_key* ;\ 

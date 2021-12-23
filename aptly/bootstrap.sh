@@ -22,50 +22,35 @@ bash /ssh-createkeys.sh 1>/dev/null
 mkdir -p /aptly
 chown aptly:aptly /aptly
 
-if [ ! -f /aptly/config/aptly.conf ]; then
-    mkdir -p /aptly/config
-    sudo -u aptly aptly config show 1>/dev/null
-    ln -sfr /aptly/.aptly.conf /aptly/config/aptly.conf
+if [ ! -f /aptly/.aptly.conf ]; then
+    aptly config show 1>/dev/null 2>&1
+    mv ~/.aptly.conf /aptly/.aptly.conf
     sed -i s/"\.aptly"/repo/ /aptly/.aptly.conf
+    chmod aptly:aptly /aptly/.aptly.conf
 fi
 
 if [ ! -d /aptly/.gnupg ]; then
-    sudo -u aptly mkdir -p /aptly/.gnupg
+    mkdir -p /aptly/.gnupg
     chmod 600 /aptly/.gnupg
-fi
-
-if [ ! -d /aptly/config/gnupg ]; then
-    ln -sfr /aptly/.gnupg /aptly/config/gnupg
+    chown aptly:aptly /aptly/.gnupg
 fi
 
 if [ ! -d /aptly/.ssh ]; then
-    sudo -u aptly mkdir -p /aptly/.ssh
+    mkdir -p /aptly/.ssh
+    chmod 600 /aptly/.ssh
+    chown aptly:aptly /aptly.ssh
 fi
-
-if [ ! -d /aptly/config/ssh ]; then
-    ln -sfr /aptly/.ssh /aptly/config/ssh
-fi
-
-#if [ ! -d /aptly/config/sshd ]; then
-#    cp -rp /aptly.orig/config/sshd /aptly/config
-#fi
-#ln -sfr /aptly/config/sshd /etc/ssh
-
-#if [ ! -f /aptly/config/nginx/default ]; then
-#   cp -rp /aptly.orig/config/nginx /aptly/config
-#fi
-#ln -sfr /aptly/config/nginx/default /etc/nginx/sites-enabled/default
 
 if [ ! -d aptly/examples ]; then
     cp -rp /aptly.orig/examples /aptly/examples
 fi
 
 if [ ! -d /aptly/repo ]; then
-    sudo -u aptly mkdir -p /aptly/repo
+    mkdir -p /aptly/repo
 fi
 
 if [ ! -d /aptly/incoming ]; then
-    sudo -u aptly mkdir -p /aptly/incoming
+    mkdir -p /aptly/incoming
 else
     rm -f /aptly/incoming/*
 fi
@@ -74,10 +59,9 @@ if [ ! -f /aptly/scripts/process-incoming.sh ]; then
     mkdir -p /aptly/scripts
     cp -rp /aptly/examples/process-incoming.sh /aptly/scripts/
 fi
+chmod +x /aptly/scripts/process-incoming.sh
 
-echo "[APTLY] Setting permissions"
-chown aptly:aptly -R /aptly 
-#&& chown root:root -R /aptly/config
+chown aptly:aptly -R /aptly
 
 if [ ! "${CLEANDBONSTART}" = "NO" ];
 then
@@ -95,4 +79,3 @@ dockerid=$(hostname)
 echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
 
 exec /usr/sbin/sshd -D -o ListenAddress=0.0.0.0
-
