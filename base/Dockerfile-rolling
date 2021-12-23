@@ -18,6 +18,7 @@ RUN set -x ;\
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
     cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\
+    sed -i s/#//g /etc/apt/sources.list.d/edge.deb.myguard.nl.list ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends myguard ca-certificates tzdata libssl1.1 libjemalloc2 mimalloc wait-for-it ;\
