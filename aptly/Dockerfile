@@ -12,6 +12,7 @@ RUN set -ex ;\
     apt-get -y --no-install-recommends install \
     aptly \
     ca-certificates \
+    libjemalloc2 \
     libnginx-mod-http-fancyindex \
     nginx-light \
     openssh-server \
@@ -38,7 +39,10 @@ RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
     rm -f /etc/ssh/ssh_host_ed25519_key* ;\
     rm -f /etc/nginx/modules-enabled/50-mod-http-echo.conf ;\
     sed -i /^Banner/d /etc/ssh/sshd_config.d/20-security.conf ;\
-    sed -i s/"^#Password"/"Password"/ /etc/ssh/sshd_config.d/20-security.conf
+    sed -i s/"^#Password"/"Password"/ /etc/ssh/sshd_config.d/20-security.conf ;\
+    sed -i s/"#AllowGroups"/"AllowGroups"/ /etc/ssh/sshd_config.d/20-security.conf \;
+    addgroup ssh-users && usermod -L -a -G ssh-users aptly
+   
 
 CMD [ "/bootstrap.sh" ]
 
