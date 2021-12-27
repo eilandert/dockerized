@@ -20,7 +20,7 @@ DIST=$1
 REPO=$2
 ARG3=$3
 
-if [ -n "${ARG3}" = "CREATE" ]; then
+if [ "${ARG3}" = "CREATE" ]; then
     CREATE="YES"
 fi
 
@@ -49,3 +49,10 @@ aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${R
 # to be sure, empty incoming dir
 rm -f /aptly/incoming/*
 
+if [ -f "/aptly/scripts/dbcleanupcounter.sh" ];
+then
+    /aptly/scripts/dbcleanupcounter.sh
+elif [ -f "/aptly/examples/dbcleanupcounter.sh" ];
+then
+    /aptly/examples/dbcleanupcounter.sh
+fi

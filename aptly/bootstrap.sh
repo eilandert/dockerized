@@ -16,8 +16,16 @@ else
     rm -f /etc/syslog-ng/conf.d/remote.conf
 fi
 
+# If you bind /etc/ssh the dir will be empty, so place a new copy
+if [ ! -f "/etc/ssh/sshd_config" ];
+then
+	rm -rf /etc/ssh/*
+	cp -rp /etc/ssh.orig/* /etc/ssh
+fi
 #create sshd keys if needed (absent on first run)
 bash /ssh-createkeys.sh 1>/dev/null
+chmod 600 /etc/ssh/*key
+chown root:root -R /etc/ssh
 
 mkdir -p /aptly
 chown aptly:aptly /aptly
@@ -41,9 +49,8 @@ if [ ! -d /aptly/.ssh ]; then
     chown aptly:aptly /aptly.ssh
 fi
 
-if [ ! -d aptly/examples ]; then
-    cp -rp /aptly.orig/examples /aptly/examples
-fi
+mkdir -p /aptly/examples
+cp -rp /aptly.orig/examples/* /aptly/examples/
 
 if [ ! -d /aptly/repo ]; then
     mkdir -p /aptly/repo

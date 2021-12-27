@@ -6,7 +6,9 @@ COPY    bootstrap.sh /bootstrap.sh
 COPY	ssh-createkeys.sh /ssh-createkeys.sh
 
 RUN set -ex ;\
+    # Debian:
     dpkg-statoverride --remove /usr/bin/sudo ;\
+    # Ubuntu:
     dpkg-statoverride --remove /bin/sudo ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
@@ -21,13 +23,6 @@ RUN set -ex ;\
     syslog-ng-core \
     tzdata
 
-RUN apt-get install -y cis-hardening ;\
-    cd /opt/cis-hardening ;\
-    bin/hardening.sh --set-hardening-level 4 --allow-unsupported-distribution --audit ;\
-    bin/hardening.sh --allow-unsupported-distribution --apply ;\
-    apt-get purge -y patch cis-hardening ;\
-    rm -rf /opt/cis-hardening
-
 RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     chmod +x /bootstrap.sh ;\
     mkdir /run/sshd && rm -f /etc/motd ;\
@@ -41,8 +36,20 @@ RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
     sed -i /^Banner/d /etc/ssh/sshd_config.d/20-security.conf ;\
     sed -i s/"^#Password"/"Password"/ /etc/ssh/sshd_config.d/20-security.conf ;\
     sed -i s/"#AllowGroups"/"AllowGroups"/ /etc/ssh/sshd_config.d/20-security.conf ;\
-    addgroup ssh-users && usermod -L -a -G ssh-users aptly
-   
+    addgroup ssh-users && usermod -L -a -G ssh-users aptly ;\
+    cp -rp /etc/ssh /etc/ssh.orig
+
+RUN apt-get install -y cis-hardening ;\
+    cd /opt/cis-hardening ;\
+    bin/hardening.sh --set-hardening-level 4 --allow-unsupported-distribution --audit ;\
+    bin/hardening.sh --allow-unsupported-distribution --apply ;\
+    apt-get purge -y patch cis-hardening ;\
+    rm -rf /opt/cis-hardening
+
+# RUNNING SOME TESTS
+RUN \
+	chmod 644 /etc/syslog-ng/syslog-ng.conf ;\
+	chmod 666 /etc/syslog-ng/conf.d/
 
 CMD [ "/bootstrap.sh" ]
 
