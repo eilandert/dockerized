@@ -29,13 +29,18 @@ RUN set -x ;\
     apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/* ;\
     chmod +x /bootstrap.sh ;\
+
+    # Delete users we don't need
     sh -x ;\
         for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
+    # Put users with userid <1000 except root on invalid shell and lock them out
     for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
         if [ $user != "root" ]; then \
-            usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
-        fi ;\
+            usermod -L -s /usr/sbin/nologin $user ;\
+         fi ;\
     done ;\
+    
+
     # Don't need these files in a Docker. 
     # Ubuntu symlinks /sbin to /usr/sbin and Debian does not, so we have to delete the same file twice
     for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
