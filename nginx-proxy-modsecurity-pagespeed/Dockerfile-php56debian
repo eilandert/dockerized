@@ -15,6 +15,7 @@ RUN set -ex ;\
          libnginx-mod-http-dav-ext \
          libnginx-mod-http-doh \
          libnginx-mod-http-echo \
+	 libnginx-mod-http-encrypted-session \
          libnginx-mod-http-fancyindex \
          libnginx-mod-http-geoip \
          libnginx-mod-http-geoip2 \
@@ -25,7 +26,9 @@ RUN set -ex ;\
 	 libnginx-mod-http-njs \
          libnginx-mod-http-ndk \
          libnginx-mod-http-perl \
+	 libnginx-mod-http-redis2 \
          libnginx-mod-http-subs-filter \
+	 libnginx-mod-http-trim-filter \
          libnginx-mod-http-uploadprogress \
          libnginx-mod-http-upstream-fair \
          libnginx-mod-http-xslt-filter \

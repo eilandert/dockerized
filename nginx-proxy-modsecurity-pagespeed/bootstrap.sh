@@ -39,17 +39,22 @@ if [ -n "${NGX_MODULES}" ]; then
         case ${MODULE} in
             mod-http-ndk) echo PRIO="10-" ;;
             mod-stream)   echo PRIO="15-" ;;
-            mod-stream-*) ln -sf ../modules-available/mod-stream.conf 15-mod-stream.conf; PRIO="50-" ;;
-            mod-http-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf; PRIO="50-" ;;
-	    mod-stream-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf; PRIO="50-" ;;
-	    mod-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf; PRIO="50-" ;;
-	    mod-*-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf; PRIO="50-" ;;
+            mod-stream-*) ln -sf ../modules-available/mod-stream.conf 15-mod-stream.conf ;;
+            mod-http-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf ;;
+	    mod-stream-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf ;;
+	    mod-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf ;;
+	    mod-*-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf ;;
+	    mod-security-headers) MODULE="mod-http-security-headers" ;;
+	    mod-modsecurity) MODULE="mod-http-modsecurity" ;;
+	    mod-brotli) MODULE="mod-http-brotli" ;;
+            mod-naxsi) MODULE="mod-http-naxsi" ;;
+	    mod-vts) MODULE="mod-http-vhost-traffic-status" ;;
         esac
         ln -sf ../modules-available/${MODULE}.conf ${PRIO}${MODULE}.conf
     done
 fi
 
-# Setup the MALLOC of choise, with JEMALLOC as default
+# Setup the MALLOC of choice, with JEMALLOC as default
 case ${MALLOC} in
     *|jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
