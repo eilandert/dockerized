@@ -62,11 +62,11 @@ else
     rm -f /aptly/incoming/*
 fi
 
-if [ ! -f /aptly/scripts/process-incoming.sh ]; then
-    mkdir -p /aptly/scripts
-    cp -rp /aptly/examples/process-incoming.sh /aptly/scripts/
+if [ ! -f /aptly/bin/process-incoming.sh ]; then
+    mkdir -p /aptly/bin
+    cp -rp /aptly/examples/process-incoming.sh /aptly/bin/
 fi
-chmod +x /aptly/scripts/process-incoming.sh
+chmod +x /aptly/bin/process-incoming.sh
 
 chown aptly:aptly -R /aptly
 

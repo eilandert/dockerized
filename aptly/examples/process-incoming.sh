@@ -8,8 +8,8 @@
 # You should put the files in /aptly/incoming and call this script
 #
 # Example:
-# scp *.deb *.changes *buildinfo aptly@192.168.178.2:/aptly/incoming
-# ssh aptly@192.168.178.2 "/aptly/scripts/process-incoming.sh bullseye bullseye-myownupdates CREATE"
+# rsync -av -e "ssh -p 10022" *deb *.changes *buildinfo aptly@192.168.178.2:/repo/incoming/${RANDOM_DIR}
+# ssh aptly@192.168.178.2 "DIR=${RANDOM_DIR} CREATE=YES ~/bin/process-incoming.sh bullseye bullseye-myownupdate"
 #
 # With the CREATE command the bullseye-myownupdates repo will automaticly be created and published if it does not exist yet
 #
@@ -18,11 +18,8 @@
 
 DIST=$1
 REPO=$2
-ARG3=$3
 
-if [ "${ARG3}" = "CREATE" ]; then
-    CREATE="YES"
-fi
+cd /aptly/incoming/${DIR}
 
 # When create flag is given: if repo doesn't exist, create it silently
 if [ -n "${CREATE}" ]; then
@@ -30,7 +27,6 @@ if [ -n "${CREATE}" ]; then
 fi
 
 # Remove all existing packages first before adding new
-cd /aptly/incoming
 DEB=$(ls *.deb | sed 's/_\S*//g')
 aptly repo remove ${REPO} ${DEB}
 aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
@@ -46,12 +42,11 @@ fi
 # Update repo
 aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
 
-# to be sure, empty incoming dir
-rm -f /aptly/incoming/*
+rm -rf /aptly/incoming/${DIR}
 
-if [ -f "/aptly/scripts/dbcleanupcounter.sh" ];
+if [ -f "/aptly/bin/dbcleanupcounter.sh" ];
 then
-    /aptly/scripts/dbcleanupcounter.sh
+    /aptly/bin/dbcleanupcounter.sh
 elif [ -f "/aptly/examples/dbcleanupcounter.sh" ];
 then
     /aptly/examples/dbcleanupcounter.sh
