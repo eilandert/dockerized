@@ -19,40 +19,18 @@ if [ ! -f ${FIRSTRUN} ]; then
     cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
 
+cp -p /etc/nginx.orig/mime.types /etc/nginx/mime.types
+cp -p /etc/nginx.orig/nginx.conf-packaged /etc/nginx/nginx.conf-packaged
+cp -rp /etc/nginx.orig/scripts/reorder-modules.sh /etc/nginx/scripts
+
 # Make sure all available modules are available outside of docker and remove modules which aren't there (anymore)
 mkdir -p /etc/nginx/modules-available && \
     rm -f /etc/nginx/modules-available/* && \
     cp -rp /usr/share/nginx/modules-available/* /etc/nginx/modules-available
 
-# If exists, enable modules in NGX_MODULE environment variable and remove others.
-if [ -n "${NGX_MODULES}" ]; then
-    NGX_MODULES=`echo "${NGX_MODULES}" | sed -e s/"[, ]"/" "/g`
-    mkdir -p /etc/nginx/modules-enabled && \
-        rm -f /etc/nginx/modules-enabled/* && \
-        cd /etc/nginx/modules-enabled
-
-    for MODULE in $NGX_MODULES
-    do
-	MODULE=$(echo ${MODULE}|sed -e s/\.conf$//g)
-	# Make priorities as needed
-	PRIO="50-"   #DEFAULT
-        case ${MODULE} in
-            mod-http-ndk) echo PRIO="10-" ;;
-            mod-stream)   echo PRIO="15-" ;;
-            mod-stream-*) ln -sf ../modules-available/mod-stream.conf 15-mod-stream.conf ;;
-            mod-http-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf ;;
-	    mod-stream-lua) ln -sf ../modules-available/mod-http-ndk.conf 10-mod-http-ndk.conf ;;
-	    mod-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf ;;
-	    mod-*-ssl-ct) ln -sf ../modules-available/mod-ssl-ct.conf 10-mod-ssl-ct.conf ;;
-	    mod-security-headers) MODULE="mod-http-security-headers" ;;
-	    mod-modsecurity) MODULE="mod-http-modsecurity" ;;
-	    mod-brotli) MODULE="mod-http-brotli" ;;
-            mod-naxsi) MODULE="mod-http-naxsi" ;;
-	    mod-vts) MODULE="mod-http-vhost-traffic-status" ;;
-        esac
-        ln -sf ../modules-available/${MODULE}.conf ${PRIO}${MODULE}.conf
-    done
-fi
+#reorder modules and symlink them to /usr/share/nginx/modules-enabled
+chmod +x /etc/nginx/scripts/reorder-modules.sh
+/etc/nginx/scripts/reorder-modules.sh
 
 # Setup the MALLOC of choice, with JEMALLOC as default
 case ${MALLOC} in
@@ -149,8 +127,10 @@ fi
 # /PHPBLOCK
 
 #download new pagespeed libraries on docker startup
+if [ -f /etc/nginx/scripts/pagespeed_libraries_generator.sh ]; then
 chmod +x /etc/nginx/scripts/pagespeed_libraries_generator.sh 1>/dev/null 2>&1
 /etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 1>/dev/null 2>/dev/null &
+fi
 
 nginx -V 2>&1 | grep -v configure
 nginx -t
