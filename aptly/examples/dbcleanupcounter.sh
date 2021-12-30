@@ -30,7 +30,7 @@ let COUNTER=${COUNTER}+1
 
 if [ "${COUNTER}" -ge "${COUNTERMAX}" ];
 then
-    aptly db cleanup
+    ~/examples/maintainance.sh
     COUNTER=0
 fi
 

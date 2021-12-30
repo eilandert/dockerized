@@ -3,7 +3,7 @@
 chmod 777 /dev/stdout
 
 echo "[NGINX] This docker image can be found on https://hub.docker.com/u/eilandert or https://github.com/eilandert/dockerized"
-echo "[NGINX] The NGINX packages (and detailed description of this NGINX stack) can be found on https://deb.paranoid.nl"
+echo "[NGINX] The NGINX packages (and detailed description of this NGINX stack) can be found on https://deb.myguard.nl"
 
 if [ -n "${TZ}" ]; then
     rm -f /etc/timezone /etc/localtime
@@ -128,8 +128,8 @@ fi
 
 #download new pagespeed libraries on docker startup
 if [ -f /etc/nginx/scripts/pagespeed_libraries_generator.sh ]; then
-chmod +x /etc/nginx/scripts/pagespeed_libraries_generator.sh 1>/dev/null 2>&1
-/etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 1>/dev/null 2>/dev/null &
+    chmod +x /etc/nginx/scripts/pagespeed_libraries_generator.sh 1>/dev/null 2>&1
+    /etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 1>/dev/null 2>/dev/null &
 fi
 
 nginx -V 2>&1 | grep -v configure

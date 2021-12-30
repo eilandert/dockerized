@@ -12,16 +12,15 @@ RUN set -ex ;\
     dpkg-statoverride --remove /bin/sudo ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
-    aptly \
-    ca-certificates \
-    libjemalloc2 \
-    libnginx-mod-http-fancyindex \
-    nginx-light \
-    openssh-server \
-    rsync \
-    sudo \
-    syslog-ng-core \
-    tzdata
+      aptly \
+      ca-certificates \
+      libnginx-mod-http-fancyindex \
+      nginx-light \
+      openssh-server \
+      rsync \
+      sudo \
+      syslog-ng-core \
+      tzdata
 
 RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     chmod +x /bootstrap.sh ;\

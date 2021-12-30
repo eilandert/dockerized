@@ -8,7 +8,7 @@
 # You should put the files in /aptly/incoming and call this script
 #
 # Example:
-# rsync -av -e "ssh -p 10022" *deb *.changes *buildinfo aptly@192.168.178.2:/~/incoming/${RANDOM_DIR}
+# rsync -v -e "ssh -p 10022" *deb *.changes *buildinfo aptly@192.168.178.2:/~/incoming/${RANDOM_DIR}
 # ssh aptly@192.168.178.2 "DIR=${RANDOM_DIR} CREATE=YES ~/bin/process-incoming.sh bullseye bullseye-myownupdate"
 #
 # With the CREATE command the bullseye-myownupdates repo will automaticly be created and published if it does not exist yet

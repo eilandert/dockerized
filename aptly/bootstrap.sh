@@ -12,8 +12,6 @@ if [ -n "${SYSLOG_HOST}" ]; then
     echo "log { source(s_sys); destination(dst); };" >> /etc/syslog-ng/conf.d/remote.conf
     syslog-ng --no-caps
     echo "[APTLY] Output is set to remote syslog at ${SYSLOG_HOST}"
-else
-    rm -f /etc/syslog-ng/conf.d/remote.conf
 fi
 
 # If you bind /etc/ssh the dir will be empty, so place a new copy
@@ -49,9 +47,6 @@ if [ ! -d /aptly/.ssh ]; then
     chown aptly:aptly /aptly.ssh
 fi
 
-mkdir -p /aptly/examples
-cp -rp /aptly.orig/examples/* /aptly/examples/
-
 if [ ! -d /aptly/repo ]; then
     mkdir -p /aptly/repo
 fi
@@ -67,6 +62,9 @@ if [ ! -f /aptly/bin/process-incoming.sh ]; then
     cp -rp /aptly/examples/process-incoming.sh /aptly/bin/
 fi
 chmod +x /aptly/bin/process-incoming.sh
+
+mkdir -p /aptly/examples
+cp -rp /aptly.orig/examples/* /aptly/examples/
 
 chown aptly:aptly -R /aptly
 

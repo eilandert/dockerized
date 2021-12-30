@@ -4,23 +4,18 @@ Aptly is a swiss army knife for Debian repository management: it allows you to m
 Quick start: (without snapshots)
 
 1) pull the docker
-2) bind a local dir to /aptly
+2) bind a local dir to /aptly  (and a dir to /etc/ssh or your serverkey will change on each pull)
 3) start docker
-4) put your public sshkey in /aptly/ssh
-5) put your gpg keys in /aptly/gnupg
+4) put your public sshkey in /aptly/.ssh
+5) put your gpg keys in /aptly/.gnupg
 6) create a public key, cmd: ssh aptly@localhost "gpg --output /aptly/repo/public/key.pub --armor --export <YOUR GPG ID HERE>"
-7) create a repo, cmd: ssh aptly@localhost "aptly repo create -distribution=focal -component=main focal"
 -
-8) upload your debs and .changes files with scp (or rsync), cmd: scp *deb *changes *buildinfo aptly@localhost:incoming
-9) process the debs, cmd: ssh aptly@localhost "aptly repo include /aptly/incoming" 
-10) publish the repo, cmd: ssh aptly@localhost "aptly publish repo focal" 
+7) upload your debs and .changes files with scp (or rsync), process the debs and publish the snapshot or repo
 
-You should automate steps 8-10 in your buildscripts
-
-On docker restart aptly will cleanup the database, the accessrights will be set to user aptly and nginx will start for webaccess.
+You should automate step 7 in your buildscripts. See the scripts in examples for more automation
 
 Environment:
   - TZ=Europe/Amsterdam
   - SYSLOG_HOST=10.0.0.1
-  - CLEANDBONSTART=YES
-  - NGINX=YES
+  - CLEANDBONSTART=YES      # aptly db cleanup
+  - STARTNGINX=YES          # start a webserver on port 80
