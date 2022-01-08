@@ -29,10 +29,9 @@ mkdir -p /aptly
 chown aptly:aptly /aptly
 
 if [ ! -f /aptly/.aptly.conf ]; then
-    aptly config show 1>/dev/null 2>&1
-    mv ~/.aptly.conf /aptly/.aptly.conf
+    sudo -u aptly aptly config show 1>/dev/null 2>&1
     sed -i s/"\.aptly"/repo/ /aptly/.aptly.conf
-    chmod aptly:aptly /aptly/.aptly.conf
+    chown aptly:aptly /aptly/.aptly.conf
 fi
 
 if [ ! -d /aptly/.gnupg ]; then
@@ -83,4 +82,4 @@ fi
 dockerid=$(hostname)
 echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
 
-exec /usr/sbin/sshd -D -o ListenAddress=0.0.0.0
+exec /usr/sbin/sshd -D

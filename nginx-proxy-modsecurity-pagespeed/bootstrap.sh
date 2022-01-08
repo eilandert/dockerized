@@ -75,7 +75,9 @@ if [ -n "${PHPVERSION}" ]; then
     /usr/bin/mkfifo /var/spool/nullmailer/trigger
     /bin/chmod 0622 /var/spool/nullmailer/trigger
     /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
-    runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+#    runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+    service nullmailer stop
+    service nullmailer start
 
     if [ ! -x /run/php ]; then
         mkdir -p /run/php

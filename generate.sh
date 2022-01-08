@@ -242,11 +242,11 @@ cp roundcube/Dockerfile-template roundcube/Dockerfile-ubuntu
 sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:8\.0/"     roundcube/Dockerfile-ubuntu
 sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:deb-8\.0"/ roundcube/Dockerfile-debian
 
-LASTVERSION=$(lastversion -b 1.5 roundcube https://github.com/roundcube/roundcubemail/)
-if [ "${LASTVERSION}" == "" ]; then
-   echo "LASTVERSION EMPTY"
-else
-   echo ${LASTVERSION} > roundcube/.lastversion
-fi
+#LASTVERSION=$(lastversion -b 1.5 roundcube https://github.com/roundcube/roundcubemail/)
+#if [ "${LASTVERSION}" == "" ]; then
+#   echo "LASTVERSION EMPTY"
+#else
+#   echo ${LASTVERSION} > roundcube/.lastversion
+#fi
 
 

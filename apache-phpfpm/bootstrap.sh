@@ -40,7 +40,9 @@ rm -f /var/spool/nullmailer/trigger
 /usr/bin/mkfifo /var/spool/nullmailer/trigger
 /bin/chmod 0622 /var/spool/nullmailer/trigger
 /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
-runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+#runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
+rm -f /var/spool/nullermailer/queue/core
+service nullmailer start
 
 #fix some weird issue with php-fpm
 if [ ! -x /run/php ]; then

@@ -32,7 +32,7 @@ aptly repo remove ${REPO} ${DEB}
 aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
 
 # Add everything from the .changes file
-aptly -architectures=amd64,i386,source,all -repo="${REPO}" repo include /aptly/incoming
+aptly -architectures=amd64,i386,source,all -repo="${REPO}" repo include /aptly/incoming/${DIR}
 
 # When create flag is given: if repo is not published at all, publish it
 if [ -n "${CREATE}" ]; then
