@@ -48,7 +48,8 @@ RUN set -x ;\
       php8.1-sqlite3 \
       php8.1-tidy \
       php8.1-xml \
-      php8.1-zip ;\
+      php8.1-zip \
+      php8.1-zstd ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 

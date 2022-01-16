@@ -50,7 +50,8 @@ RUN set -x ;\
       php7.2-sqlite3 \
       php7.2-tidy \
       php7.2-xml \
-      php7.2-zip ;\
+      php7.2-zip \
+      php7.2-zstd ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 

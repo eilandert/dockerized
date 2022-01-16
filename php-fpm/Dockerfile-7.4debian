@@ -49,7 +49,8 @@ RUN set -x ;\
       php7.4-sqlite3 \
       php7.4-tidy \
       php7.4-xml \
-      php7.4-zip ;\
+      php7.4-zip \
+      php7.4-zstd ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 

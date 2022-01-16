@@ -51,7 +51,8 @@ RUN set -x ;\
       php5.6-sqlite3 \
       php5.6-tidy \
       php5.6-xml \
-      php5.6-zip ;\
+      php5.6-zip \
+      php5.6-zstd ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
