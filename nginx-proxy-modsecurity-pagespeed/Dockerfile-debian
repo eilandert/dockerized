@@ -17,6 +17,7 @@ RUN set -ex ;\
       modsecurity-crs \
       nginx-full \
       ssl-cert \
+      zstd \
     ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
