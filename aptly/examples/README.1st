@@ -1,0 +1,15 @@
+
+Hello,
+
+This dir contains some examples I am personally using. If you want to use them, please
+change them and put them in ~/bin.
+If you leave the scripts in ~/examples they probably will be overwritten on docker update.
+
+If you have useful scripts, additions or suggestions please contact me ;-)
+
+With kind regards,
+Thijs Eilander
+
+
+
+
