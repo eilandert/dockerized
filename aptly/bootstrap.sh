@@ -11,14 +11,13 @@ if [ -n "${SYSLOG_HOST}" ]; then
     echo "destination dst { syslog(\"${SYSLOG_HOST}\" transport(\"udp\")); };" > /etc/syslog-ng/conf.d/remote.conf
     echo "log { source(s_sys); destination(dst); };" >> /etc/syslog-ng/conf.d/remote.conf
     syslog-ng --no-caps
-    echo "[APTLY] Output is set to remote syslog at ${SYSLOG_HOST}"
 fi
 
 # If you bind /etc/ssh the dir will be empty, so place a new copy
 if [ ! -f "/etc/ssh/sshd_config" ];
 then
-	rm -rf /etc/ssh/*
-	cp -rp /etc/ssh.orig/* /etc/ssh
+    rm -rf /etc/ssh/*
+    cp -rp /etc/ssh.orig/* /etc/ssh
 fi
 #create sshd keys if needed (absent on first run)
 bash /ssh-createkeys.sh 1>/dev/null
@@ -53,8 +52,13 @@ fi
 if [ ! -d /aptly/incoming ]; then
     mkdir -p /aptly/incoming
 else
-    rm -f /aptly/incoming/*
+    rm -rf /aptly/incoming/*
 fi
+
+if [ ! -d /aptly/examples ]; then
+    mkdir -p /aptly/examples
+fi
+cp -rp /aptly.orig/examples/* /aptly/examples/
 
 if [ ! -f /aptly/bin/process-incoming.sh ]; then
     mkdir -p /aptly/bin
@@ -62,10 +66,7 @@ if [ ! -f /aptly/bin/process-incoming.sh ]; then
 fi
 chmod +x /aptly/bin/process-incoming.sh
 
-mkdir -p /aptly/examples
-cp -rp /aptly.orig/examples/* /aptly/examples/
-
-chown aptly:aptly -R /aptly
+chown aptly:aptly -R /aptly &
 
 if [ ! "${CLEANDBONSTART}" = "NO" ];
 then
@@ -79,7 +80,7 @@ then
     service nginx restart 1>/dev/null
 fi
 
-dockerid=$(hostname)
-echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
+#dockerid=$(hostname)
+#echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
 
 exec /usr/sbin/sshd -D

@@ -45,7 +45,6 @@ RUN apt-get install -y cis-hardening ;\
     apt-get purge -y patch cis-hardening ;\
     rm -rf /opt/cis-hardening
 
-# RUNNING SOME TESTS
 RUN \
 	chmod 644 /etc/syslog-ng/syslog-ng.conf ;\
 	chmod 666 /etc/syslog-ng/conf.d/
@@ -58,3 +57,5 @@ COPY examples /aptly.orig/examples
 
 EXPOSE 22 80
 WORKDIR /aptly
+VOLUME /etc/ssh  #otherwise ssh serverkeys will change on each pull
+

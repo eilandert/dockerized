@@ -4,7 +4,7 @@ Aptly is a swiss army knife for Debian repository management: it allows you to m
 Quick start: (without snapshots)
 
 1) pull the docker
-2) bind a local dir to /aptly  (and a dir to /etc/ssh or your serverkey will change on each pull)
+2) bind a local dir to /aptly
 3) start docker
 4) put your public sshkey in /aptly/.ssh
 5) put your gpg keys in /aptly/.gnupg

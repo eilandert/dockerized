@@ -5,10 +5,12 @@
 # 20211224 Thijs Eilander <eilander@myguard.nl>
 #
 
-# You should put the files in /aptly/incoming and call this script
+#
+# You should upload the packages to /aptly/incoming/${RANDOM_DIR} and call this script via ssh on the buildhost
 #
 # Example:
-# rsync -v -e "ssh -p 10022" *deb *.changes *buildinfo aptly@192.168.178.2:/~/incoming/${RANDOM_DIR}
+# RANDOM_DIR=$(mktemp -u | sed 's/\/tmp\/tmp\.//g')
+# rsync -v -e "ssh -p 10022" *deb *.changes *buildinfo aptly@192.168.178.2:~/incoming/${RANDOM_DIR}
 # ssh aptly@192.168.178.2 "DIR=${RANDOM_DIR} CREATE=YES ~/bin/process-incoming.sh bullseye bullseye-myownupdate"
 #
 # With the CREATE command the bullseye-myownupdates repo will automaticly be created and published if it does not exist yet
@@ -16,26 +18,31 @@
 # Remove (or replace) the filesystem:${REPO}:. parts if you don't use filesystem endpoints in your .aptly.conf
 #
 
-DIST=$1
-REPO=$2
+if [ -z "${DIST}" ]; then
+    DIST="$1"
+fi
+
+if [ -z "${REPO}" ]; then
+    REPO="$2"
+fi
 
 cd /aptly/incoming/${DIR}
 
-# When create flag is given: if repo doesn't exist, create it silently
-if [ -n "${CREATE}" ]; then
+# When create flag is given: try to create the repo silently.
+if [ "${CREATE}" == "YES" ]; then
     aptly repo create -distribution=${DIST} -component=main ${REPO} 1>/dev/null 2>&1
 fi
 
-# Remove all existing packages first before adding new
+# Remove the existing package first before adding the new one
 DEB=$(ls *.deb | sed 's/_\S*//g')
 aptly repo remove ${REPO} ${DEB}
 aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
 
 # Add everything from the .changes file
-aptly -architectures=amd64,i386,source,all -repo="${REPO}" repo include /aptly/incoming/${DIR}
+aptly -architectures=amd64,i386,source,all -repo="${REPO}" -force-replace repo include /aptly/incoming/${DIR}
 
 # When create flag is given: if repo is not published at all, publish it
-if [ -n "${CREATE}" ]; then
+if [ "${CREATE}" == "YES" ]; then
     aptly -architectures=amd64,i386,source,all publish repo ${REPO} filesystem:${REPO}:. 1>/dev/null 2>&1
 fi
 

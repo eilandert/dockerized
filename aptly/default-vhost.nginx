@@ -1,19 +1,16 @@
 map $http_user_agent $bad_bot {
     default 0;
-  ~*(AhrefsBot|PetalBot|seostar) 1;
+  ~*(AhrefsBot|PetalBot|seostar|MJ120bot|BLEXbot) 1;
 }
 
 server {
     listen 80 default_server backlog=2048 reuseport fastopen=256;
     listen [::]:80 default_server backlog=2048 reuseport fastopen=256;
 
-    if ($bad_bot) { return 410; }
+    if ($bad_bot) { return 444; }
 
     fancyindex on;              # Enable fancy indexes.
     fancyindex_exact_size off;  # Output human-readable file sizes.
-    #fancyindex_ignore pages;
-    #fancyindex_header /pages/header.html;
-    #fancyindex_footer /pages/footer.html;
 
     root /aptly/repo/public;
 }
