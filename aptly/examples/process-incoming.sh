@@ -27,8 +27,8 @@ CREATE=YES
 # Sanitize variables..
 if [ -z "${DIST}" ]; then DIST="$1"; fi
 if [ -z "${REPO}" ]; then REPO="$2"; fi
-if [ ! "${CREATE}" == "YES"]; then unset CREATE; fi
-if [ ! "${DELETE}" == "YES"]; then unset DELETE; fi
+if [ ! "${CREATE}" == "YES" ]; then unset CREATE; fi
+if [ ! "${DELETE}" == "YES" ]; then unset DELETE; fi
 
 # if DIR is given and starts with /tmp, honor that, else append it to /aptly/incoming
 if [[ ! ${DIR} =~ ^\/tmp/ ]]; then
@@ -42,7 +42,7 @@ if [ "${CREATE}" == "YES" ]; then
     aptly repo create -distribution=${DIST} -component=main ${REPO} 1>/dev/null 2>&1
 fi
 
-if [ "${DELETE}" == "YES"]; then
+if [ "${DELETE}" == "YES" ]; then
     # The following block might be overkill and not needed...
     # I created it because there were some leftovers after disabling a subpackage
     # Also, I couldn't be "creative" with version numbers on my testing instance of aptly
