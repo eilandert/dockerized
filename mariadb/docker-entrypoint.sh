@@ -173,16 +173,29 @@ docker_create_db_directories() {
 	fi
 }
 
+_mariadb_version() {
+        local mariaVersion="${MARIADB_VERSION##*:}"
+        mariaVersion="${mariaVersion%%[-+~]*}"
+	echo -n "${mariaVersion}-MariaDB"
+}
+
+_mariadb_fake_upgrade_info() {
+	if [ ! -f "${DATADIR}"/mysql/mysql_upgrade_info ]; then
+		_mariadb_version > "${DATADIR}"/mysql_upgrade_info
+	fi
+}
+
 # initializes the database directory
 docker_init_database_dir() {
 	mysql_note "Initializing database files"
 	installArgs=( --datadir="$DATADIR" --rpm --auth-root-authentication-method=normal )
-	if { mysql_install_db --help || :; } | grep -q -- '--skip-test-db'; then
+	if { mariadb-install-db --help || :; } | grep -q -- '--skip-test-db'; then
 		# 10.3+
 		installArgs+=( --skip-test-db )
 	fi
 	# "Other options are passed to mariadbd." (so we pass all "mysqld" arguments directly here)
-	mysql_install_db "${installArgs[@]}" "${@:2}" --default-time-zone=SYSTEM --enforce-storage-engine= --skip-log-bin
+	mariadb-install-db "${installArgs[@]}" "${@:2}" --default-time-zone=SYSTEM --enforce-storage-engine= --skip-log-bin
+	_mariadb_fake_upgrade_info
 	mysql_note "Database files initialized"
 }
 
@@ -321,6 +334,78 @@ docker_setup_db() {
 	fi
 }
 
+# backup the mysql database
+docker_mariadb_backup_system()
+{
+	if [ -n "$MARIADB_DISABLE_UPGRADE_BACKUP" ] \
+		&& [ "$MARIADB_DISABLE_UPGRADE_BACKUP" = 1 ]; then
+		mysql_note "MariaDB upgrade backup disabled due to \$MARIADB_DISABLE_UPGRADE_BACKUP=1 setting"
+		return
+	fi
+	local backup_db="system_mysql_backup_unknown_version.sql.zst"
+	local oldfullversion="unknown_version"
+	if [ -r "$DATADIR"/mysql_upgrade_info ]; then
+		read -r -d '' oldfullversion < "$DATADIR"/mysql_upgrade_info || true
+		if [ -n "$oldfullversion" ]; then
+			backup_db="system_mysql_backup_${oldfullversion}.sql.zst"
+		fi
+	fi
+
+	mysql_note "Backing up system database to $backup_db"
+	if ! mariadb-dump --skip-lock-tables --replace --databases mysql --socket="${SOCKET}" | zstd > "${DATADIR}/${backup_db}"; then
+		mysql_error "Unable backup system database for upgrade from $oldfullversion."
+	fi
+	mysql_note "Backing up complete"
+}
+
+# perform mariadb-upgrade
+# backup the mysql database if this is a major upgrade
+docker_mariadb_upgrade() {
+	if [ -z "$MARIADB_AUTO_UPGRADE" ] \
+		|| [ "$MARIADB_AUTO_UPGRADE" = 0 ]; then
+		mysql_note "MariaDB upgrade (mariadb-upgrade) required, but skipped due to \$MARIADB_AUTO_UPGRADE setting"
+		return
+	fi
+	mysql_note "Starting temporary server"
+	docker_temp_server_start "$@" --skip-grant-tables
+	mysql_note "Temporary server started."
+
+	docker_mariadb_backup_system
+
+	mysql_note "Starting mariadb-upgrade"
+	mariadb-upgrade --upgrade-system-tables || true # permission denied fixed in Jan 2022 release?
+	# _mariadb_fake_upgrade_info Possibly fixed by MDEV-27068
+        _mariadb_fake_upgrade_info
+	mysql_note "Finished mariadb-upgrade"
+
+	# docker_temp_server_stop needs authentication since
+	# upgrade ended in FLUSH PRIVILEGES
+	mysql_note "Stopping temporary server"
+	killall "$0"
+	while killall -0 "$0" ; do sleep 1; done
+	mysql_note "Temporary server stopped"
+}
+
+
+_check_if_upgrade_is_needed() {
+	if [ ! -f "$DATADIR"/mysql_upgrade_info ]; then
+		mysql_note "MariaDB upgrade information missing, assuming required"
+		return 0
+	fi
+	local mariadbVersion
+	mariadbVersion="$(_mariadb_version)"
+	IFS='.-' read -ra newversion <<<"$mariadbVersion"
+	IFS='.-' read -ra oldversion < "$DATADIR"/mysql_upgrade_info || true
+
+	if [[ ${#newversion[@]} -lt 2 ]] || [[ ${#oldversion[@]} -lt 2 ]] \
+		|| [[ ${oldversion[0]} -lt ${newversion[0]} ]] \
+		|| [[ ${oldversion[0]} -eq ${newversion[0]} && ${oldversion[1]} -lt ${newversion[1]} ]]; then
+		return 0
+	fi
+	mysql_note "MariaDB upgrade not required"
+	return 1
+}
+
 # check arguments for an option that would cause mariadbd to stop
 # return true if there is one
 _mysql_want_help() {
@@ -336,12 +421,13 @@ _mysql_want_help() {
 }
 
 _main() {
-	# if command starts with an option, prepend mysqld
+	# if command starts with an option, prepend mariadbd
 	if [ "${1:0:1}" = '-' ]; then
 		set -- mariadbd "$@"
 	fi
 
-	# skip setup if they aren't running mariadbd or want an option that stops mysqld
+	#ENDOFSUBSTITIONS
+	# skip setup if they aren't running mysqld or want an option that stops mysqld
 	if [ "$1" = 'mariadbd' ] || [ "$1" = 'mysqld' ] && ! _mysql_want_help "$@"; then
 		mysql_note "Entrypoint script for MariaDB Server ${MARIADB_VERSION} started."
 
@@ -379,6 +465,10 @@ _main() {
 			echo
 			mysql_note "MariaDB init process done. Ready for start up."
 			echo
+		# MDEV-27636 mariadb_upgrade --check-if-upgrade-is-needed cannot be run offline
+		#elif mariadb-upgrade --check-if-upgrade-is-needed; then
+		elif _check_if_upgrade_is_needed; then
+			docker_mariadb_upgrade "$@"
 		fi
 	fi
 	exec "$@"
