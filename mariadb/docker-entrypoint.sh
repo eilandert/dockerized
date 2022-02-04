@@ -121,7 +121,8 @@ mysql_get_config() {
 
 # Do a temporary startup of the MariaDB server, for init purposes
 docker_temp_server_start() {
-	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" --wsrep_on=OFF --skip-log-bin &
+	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" --wsrep_on=OFF --skip-log-bin \
+		--loose-innodb_buffer_pool_load_at_startup=0 --loose-innodb_buffer_pool_dump_at_shutdown=0 &
 	mysql_note "Waiting for server startup"
 	# only use the root password if the database has already been initializaed
 	# so that it won't try to fill in a password file when it hasn't been set yet
@@ -167,9 +168,9 @@ docker_create_db_directories() {
 
 	if [ "$user" = "0" ]; then
 		# this will cause less disk access than `chown -R`
-		find "$DATADIR" \! -user mysql -exec chown mysql '{}' +
+		find "$DATADIR" \! -user mysql -exec chown mysql: '{}' +
 		# See https://github.com/MariaDB/mariadb-docker/issues/363
-		find "${SOCKET%/*}" -maxdepth 0 \! -user mysql -exec chown mysql '{}' \;
+		find "${SOCKET%/*}" -maxdepth 0 \! -user mysql -exec chown mysql: '{}' \;
 	fi
 }
 
@@ -303,7 +304,7 @@ docker_setup_db() {
 		SET @@SESSION.SQL_MODE=REPLACE(@@SESSION.SQL_MODE, 'NO_BACKSLASH_ESCAPES', '');
 
 		DROP USER IF EXISTS root@'127.0.0.1', root@'::1';
-		EXECUTE IMMEDIATE CONCAT('drop user root@\'', @@hostname,'\'');
+		EXECUTE IMMEDIATE CONCAT('DROP USER IF EXISTS root@\'', @@hostname,'\'');
 
 		SET PASSWORD FOR 'root'@'localhost'=PASSWORD('${rootPasswordEscaped}') ;
 		${rootCreate}
