@@ -219,6 +219,7 @@ sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx-proxy-modsecurity-pagespeed/
 #SCRIPTS MARIADB
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/Dockerfile -o mariadb/Dockerfile.ubuntu
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/docker-entrypoint.sh -o mariadb/docker-entrypoint.sh
+curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/healthcheck.sh -o mariadb/healthcheck.sh
 cp mariadb/Dockerfile.ubuntu mariadb/Dockerfile.debian
 chmod +x mariadb/docker-entrypoint.sh
 sed -i s/"ubuntu:focal"/"eilandert\/ubuntu-base:rolling\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.ubuntu
@@ -233,6 +234,7 @@ sed -i s/"bin\/bash"/"bin\/bash\nbash \/bootstrap.sh"/ mariadb/docker-entrypoint
 git add mariadb/Dockerfile.debian
 git add mariadb/Dockerfile.ubuntu
 git add mariadb/docker-entrypoint.sh
+git add mariadb/healthcheck.sh
 git commit -m "Changes from upstream"
 
 

@@ -4,6 +4,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
 COPY    bootstrap.sh /bootstrap.sh
 COPY	ssh-createkeys.sh /ssh-createkeys.sh
+COPY    syslog-ng.conf /etc/syslog-ng
 
 RUN set -ex ;\
     # Debian:
@@ -14,13 +15,15 @@ RUN set -ex ;\
     apt-get -y --no-install-recommends install \
       aptly \
       ca-certificates \
+      less \
       libnginx-mod-http-fancyindex \
       nginx-light \
       openssh-server \
       rsync \
       sudo \
       syslog-ng-core \
-      tzdata
+      tzdata \
+      vim
 
 RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     chmod +x /bootstrap.sh ;\
@@ -51,7 +54,6 @@ RUN \
 
 CMD [ "/bootstrap.sh" ]
 
-COPY syslog-ng.conf /etc/syslog-ng
 COPY default-vhost.nginx /etc/nginx/sites-enabled/default
 COPY examples /aptly.orig/examples
 

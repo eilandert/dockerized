@@ -35,6 +35,15 @@ if [[ ! ${DIR} =~ ^\/tmp/ ]]; then
     DIR="/aptly/incoming/${DIR}"
 fi
 
+echo "------------------------------------"
+echo "Processing: ${SPKG}"
+echo "DIST=${DIST}"
+echo "REPO=${REPO}"
+echo "DELETE=${DELETE}"
+echo "CREATE=${CREATE}"
+echo "DIR=${DIR}"
+echo "------------------------------------"
+
 cd ${DIR}
 
 # When create flag is given: try to create the repo silently.
@@ -63,7 +72,7 @@ fi
 # Add everything from the .changes file
 aptly -architectures=amd64,i386,source,all -repo="${REPO}" -force-replace repo include ${DIR}
 
-# When create flag is given: if repo is not published at all, publish it
+# When create flag is given: if repo is not published yet, publish it
 if [ "${CREATE}" == "YES" ]; then
     aptly -architectures=amd64,i386,source,all publish repo ${REPO} filesystem:${REPO}:. 1>/dev/null 2>&1
 fi
@@ -71,8 +80,9 @@ fi
 # Update repo
 aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
 
-cd /tmp
+cd ~
 rm -rf ${DIR}
+
 if [ ! -d /aptly/incoming ]; then
     mkdir -p /aptly/incoming
 fi
