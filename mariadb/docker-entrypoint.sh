@@ -123,6 +123,8 @@ mysql_get_config() {
 docker_temp_server_start() {
 	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" --wsrep_on=OFF --skip-log-bin \
 		--loose-innodb_buffer_pool_load_at_startup=0 &
+	declare -g MARIADB_PID
+	MARIADB_PID=$!
 	mysql_note "Waiting for server startup"
 	# only use the root password if the database has already been initializaed
 	# so that it won't try to fill in a password file when it hasn't been set yet
@@ -391,7 +393,6 @@ docker_mariadb_upgrade() {
 	mysql_note "Starting temporary server"
 	docker_temp_server_start "$@" --skip-grant-tables \
 		--loose-innodb_buffer_pool_dump_at_shutdown=0
-	local pid=$!
 	mysql_note "Temporary server started."
 
 	docker_mariadb_backup_system
@@ -403,20 +404,9 @@ docker_mariadb_upgrade() {
 	# docker_temp_server_stop needs authentication since
 	# upgrade ended in FLUSH PRIVILEGES
 	mysql_note "Stopping temporary server"
-	kill "$pid"
-	while killall -0 "$pid" ; do
-		sleep 1
-	done > /dev/null
+	kill "$MARIADB_PID"
+	wait "$MARIADB_PID"
 	mysql_note "Temporary server stopped"
-
-	local aria_control="$DATADIR"/aria_log_control
-	if [ -f "$aria_control" ]; then
-		mysql_note "Ensuring temporary server process really gone by locking $aria_control"
-		until flock --exclusive --wait 2 -n 9 9<"$aria_control"; do
-			mysql_note "Waiting 2 more seconds ..."
-		done
-		sleep 2
-	fi
 }
 
 
