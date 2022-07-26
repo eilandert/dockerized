@@ -50,13 +50,13 @@ function process($argv)
     // Determine ANSI output from --ansi and --no-ansi flags
     setUseAnsi($argv);
 
-    if (in_array('--help', $argv)) {
+    $help = in_array('--help', $argv) || in_array('-h', $argv);
+    if ($help) {
         displayHelp();
         exit(0);
     }
 
     $check      = in_array('--check', $argv);
-    $help       = in_array('--help', $argv);
     $force      = in_array('--force', $argv);
     $quiet      = in_array('--quiet', $argv);
     $channel    = 'stable';
@@ -68,6 +68,8 @@ function process($argv)
         $channel = '1';
     } elseif (in_array('--2', $argv)) {
         $channel = '2';
+    } elseif (in_array('--2.2', $argv)) {
+        $channel = '2.2';
     }
     $disableTls = in_array('--disable-tls', $argv);
     $installDir = getOptValue('--install-dir', $argv, false);
@@ -91,6 +93,10 @@ function process($argv)
     }
 
     if ($ok || $force) {
+        if ($channel === '1' && !$quiet) {
+            out('Warning: You forced the install of Composer 1.x via --1, but Composer 2.x is the latest stable version. Updating to it via composer self-update --stable is recommended.', 'error');
+        }
+
         $installer = new Installer($quiet, $disableTls, $cafile);
         if ($installer->run($version, $installDir, $filename, $channel)) {
             showWarnings($warnings);
@@ -120,8 +126,9 @@ Options
 --install-dir="..."  accepts a target installation directory
 --preview            install the latest version from the preview (alpha/beta/rc) channel instead of stable
 --snapshot           install the latest version from the snapshot (dev builds) channel instead of stable
---1                  install the latest stable Composer 1.x version
+--1                  install the latest stable Composer 1.x (EOL) version
 --2                  install the latest stable Composer 2.x version
+--2.2                install the latest stable Composer 2.2.x (LTS) version
 --version="..."      accepts a specific version to install instead of the latest
 --filename="..."     accepts a target filename (default: composer.phar)
 --disable-tls        disable SSL/TLS security for file downloads
@@ -701,7 +708,7 @@ class Installer
             $result = $this->install($version, $channel);
 
             // in case --1 or --2 is passed, we leave the default channel for next self-update to stable
-            if (is_numeric($channel)) {
+            if (1 === preg_match('{^\d+$}D', $channel)) {
                 $channel = 'stable';
             }
 
