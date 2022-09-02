@@ -7,7 +7,6 @@ ENV	PHPVERSION=5.6
 ENV	MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
-COPY	composer-setup.php /tmp/composer-setup.php
 
 RUN set -ex ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
@@ -58,7 +57,10 @@ RUN set -x ;\
 
 RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
+    cd /tmp ;\
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
+    php -r "unlink('composer-setup.php');" ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\
     #rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\

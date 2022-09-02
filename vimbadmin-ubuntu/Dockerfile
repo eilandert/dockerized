@@ -9,7 +9,7 @@ ENV	INSTALL_PATH=/opt/vimbadmin
 COPY	bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    apt-get update && apt-get -y install --no-install-recommends curl unzip ;\
+    apt-get update && apt-get -y install --no-install-recommends curl unzip ca-certificates ;\
     mkdir -p ${INSTALL_PATH} ;\
     curl -fSL https://github.com/opensolutions/ViMbAdmin/archive/master.tar.gz | \
       tar xz --strip-components=1 -C ${INSTALL_PATH} ;\

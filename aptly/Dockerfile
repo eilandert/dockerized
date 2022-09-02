@@ -1,4 +1,4 @@
-FROM    eilandert/debian-base:stable
+FROM    eilandert/ubuntu-base:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam

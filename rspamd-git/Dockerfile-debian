@@ -1,7 +1,7 @@
 FROM eilandert/debian-base:stable
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure.so
+ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
 
 COPY bootstrap.sh /bootstrap.sh
 

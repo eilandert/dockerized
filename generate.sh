@@ -8,7 +8,7 @@
 
 set -x
 
-export UBUNTU_ROLLING="impish"
+export UBUNTU_ROLLING="jammy"
 
 ####
 ## SCRIPTS DEBIAN/UBUNTU BASE IMAGES
@@ -216,6 +216,9 @@ sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.4/' nginx-proxy-modsecurity-pagespeed/
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.0/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php80debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php81debian
 
+
+export UBUNTU_ROLLING="jammy"
+
 #SCRIPTS MARIADB
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/Dockerfile -o mariadb/Dockerfile.ubuntu
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/docker-entrypoint.sh -o mariadb/docker-entrypoint.sh
@@ -229,6 +232,9 @@ sed -i s/"focal"/"bullseye"/g mariadb/Dockerfile.debian
 sed -i s/"repo\/ubuntu"/"repo\/debian"/g mariadb/Dockerfile.debian
 sed -i s/"ENTRYPOINT \[\"docker-entrypoint.sh\"\]"/"ENTRYPOINT \[\"\/usr\/local\/bin\/docker-entrypoint.sh\"\]"/ mariadb/Dockerfile.*
 sed -i s/"bin\/bash"/"bin\/bash\nbash \/bootstrap.sh"/ mariadb/docker-entrypoint.sh
+
+sed -i s/"ubu2004"/"ubu2204"/g  mariadb/Dockerfile.ubuntu
+sed -i s/"ubu2004"/"deb11"/g  mariadb/Dockerfile.debian
 
 #commit upstream changes
 git add mariadb/Dockerfile.debian

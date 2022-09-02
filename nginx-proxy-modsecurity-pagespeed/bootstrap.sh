@@ -34,13 +34,13 @@ chmod +x /etc/nginx/scripts/reorder-modules.sh
 
 # Setup the MALLOC of choice, with JEMALLOC as default
 case ${MALLOC} in
-    *|jemalloc)
+    jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
         ;;
     mimalloc)
-        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure.so
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
         ;;
-    none)
+    *|none)
         unset LD_PRELOAD
         ;;
 esac

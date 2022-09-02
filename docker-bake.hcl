@@ -82,7 +82,7 @@ group "apache-misc" {
     targets = [
        "ubuntu-roundcube",
        "debian-roundcube",
-       "alpine-vimbadmin",
+#       "alpine-vimbadmin",
        "debian-vimbadmin",
        "ubuntu-vimbadmin",
     ]
@@ -103,17 +103,17 @@ group "mail" {
 
 group "db" {
     targets = [
-	"ubuntu-mariadb",
-	"debian-mariadb",
         "alpine-redis",
         "ubuntu-redis",
         "debian-redis",
+	"ubuntu-mariadb",
+	"debian-mariadb",
     ]
 }
 
 group "misc" {
     targets = [
-       "clamav",
+ #      "clamav",
        "alpine-letsencrypt",
        "alpine-pyzor",
        "rbldnsd",
@@ -190,7 +190,6 @@ target "stretch" {
     context = "base"
     tags = ["docker.io/eilandert/debian-base:stretch"]
 }
-
 
 target "ubuntu-phpfpm56" {
     tags = ["docker.io/eilandert/php-fpm:5.6"]

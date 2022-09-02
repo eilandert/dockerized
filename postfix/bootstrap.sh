@@ -7,7 +7,7 @@ case ${MALLOC} in
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
         ;;
     *|mimalloc)
-        export LD_PRELOAD=/usr/lib/mimalloc-2.0/libmimalloc-secure.so
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
         ;;
     none)
         unset LD_PRELOAD
