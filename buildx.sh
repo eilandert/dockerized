@@ -21,3 +21,4 @@ do
 done
 
 docker buildx rm
+docker system prune -f -a

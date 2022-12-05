@@ -225,8 +225,8 @@ curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/docker
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.6/healthcheck.sh -o mariadb/healthcheck.sh
 cp mariadb/Dockerfile.ubuntu mariadb/Dockerfile.debian
 chmod +x mariadb/docker-entrypoint.sh
-sed -i s/"ubuntu:focal"/"eilandert\/ubuntu-base:rolling\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.ubuntu
-sed -i s/"ubuntu:focal"/"eilandert\/debian-base:stable\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.debian
+sed -i s/"FROM\ ubuntu:focal"/"FROM\ eilandert\/ubuntu-base:rolling\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.ubuntu
+sed -i s/"FROM\ ubuntu:focal"/"FROM\ eilandert\/debian-base:stable\nCOPY bootstrap.sh \/"/ mariadb/Dockerfile.debian
 sed -i s/"focal"/"${UBUNTU_ROLLING}"/g mariadb/Dockerfile.ubuntu
 sed -i s/"focal"/"bullseye"/g mariadb/Dockerfile.debian
 sed -i s/"repo\/ubuntu"/"repo\/debian"/g mariadb/Dockerfile.debian
@@ -242,7 +242,7 @@ git add mariadb/Dockerfile.ubuntu
 git add mariadb/docker-entrypoint.sh
 git add mariadb/healthcheck.sh
 git commit -m "Changes from upstream"
-
+git push
 
 #roundcube
 cp roundcube/Dockerfile-template roundcube/Dockerfile-debian

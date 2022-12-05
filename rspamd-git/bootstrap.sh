@@ -4,16 +4,20 @@ echo "[RSPAMD] This docker image can be found on https://hub.docker.com/u/eiland
 
 case ${MALLOC} in
     jemalloc)
+        if [ -f /usr/lib/x86_64-linux-gnu/libjemalloc.so.2 ]; then
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        fi
         ;;
     mimalloc)
+        if [ -f /usr/lib/x86_64-linux-gnu/libmimalloc-secure.so ]; then
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
+        fi
         ;;
     none)
         unset LD_PRELOAD
         ;;
     *)
-        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+	unset LD_PRELOAD
         ;;
 esac
 

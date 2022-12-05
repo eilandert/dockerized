@@ -95,6 +95,7 @@ group "mail" {
        "alpine-rspamd",
        "debian-rspamd-git",
        "debian-rspamd",
+       "debian-rspamd-official",
        "ubuntu-rspamd",
        "ubuntu-dovecot",
        "debian-dovecot",
@@ -530,9 +531,14 @@ target "alpine-rspamd" {
 }
 
 target "debian-rspamd-git" {
-   tags = ["docker.io/eilandert/rspamd"]
+   tags = ["docker.io/eilandert/rspamd-git:latest"]
    context = "rspamd-git"
    dockerfile = "Dockerfile"
+}
+target "debian-rspamd-official" {
+   tags = ["docker.io/eilandert/rspamd-git:official"]
+   context = "rspamd-git"
+   dockerfile = "Dockerfile-official"
 }
 
 target "debian-rspamd" {
