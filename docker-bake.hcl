@@ -44,6 +44,13 @@ group "nginx" {
     ]
 }
 
+group "nginx-quic" {
+    targets = [
+       "debian-nginx-quic",
+       "ubuntu-nginx-quic",
+    ]
+}
+
 group "nginx-php" {
     targets = [
        "ubuntu-nginx-php56",
@@ -60,6 +67,24 @@ group "nginx-php" {
        "debian-nginx-multi",
     ]
 }
+
+group "nginx-php-quic" {
+    targets = [
+       "ubuntu-nginx-quic-php56",
+       "debian-nginx-quic-php56",
+       "ubuntu-nginx-quic-php72",
+       "debian-nginx-quic-php72",
+       "ubuntu-nginx-quic-php74",
+       "debian-nginx-quic-php74",
+       "ubuntu-nginx-quic-php80",
+       "debian-nginx-quic-php80",
+       "ubuntu-nginx-quic-php81",
+       "debian-nginx-quic-php81",
+       "ubuntu-nginx-quic-multi",
+       "debian-nginx-quic-multi",
+    ]
+}
+
 
 group "apache" {
     targets = [
@@ -592,5 +617,90 @@ target "aptly" {
    tags = ["docker.io/eilandert/aptly"]
    context = "aptly"
    dockerfile = "Dockerfile"
+}
+
+target "debian-nginx-quic" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-latest"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-debian"
+}
+
+target "ubuntu-nginx-quic" {
+    tags = ["docker.io/eilandert/nginx-quic:latest"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile"
+}
+
+target "ubuntu-nginx-quic-php56" {
+    tags = ["docker.io/eilandert/nginx-quic:php5.6"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php56"
+}
+
+target "debian-nginx-quic-php56" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-php5.6"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php56debian"
+}
+
+target "ubuntu-nginx-quic-php72" {
+    tags = ["docker.io/eilandert/nginx-quic:php7.2"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php72"
+}
+
+target "debian-nginx-quic-php72" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-php7.2"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php72debian"
+}
+
+target "ubuntu-nginx-quic-php74" {
+    tags = ["docker.io/eilandert/nginx-quic:php7.4"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php74"
+}
+
+target "debian-nginx-quic-php74" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-php7.4"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php74debian"
+}
+
+target "ubuntu-nginx-quic-php80" {
+    tags = ["docker.io/eilandert/nginx-quic:php8.0"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php80"
+}
+
+target "debian-nginx-quic-php80" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-php8.0"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php80debian"
+}
+
+target "ubuntu-nginx-quic-php81" {
+    tags = ["docker.io/eilandert/nginx-quic:php8.1"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php81"
+}
+
+target "debian-nginx-quic-php81" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-php8.1"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-php81debian"
+}
+
+
+target "ubuntu-nginx-quic-multi" {
+    tags = ["docker.io/eilandert/nginx-quic:multi"]
+    context = "nginx-quic"
+    dockerfile = "Dockerfile-multi"
+}
+
+target "debian-nginx-quic-multi" {
+    tags = ["docker.io/eilandert/nginx-quic:deb-multi"]
+    context = "nginx-quic"
+    dockerfile= "Dockerfile-multidebian"
 }
 

@@ -144,11 +144,9 @@ cp php-fpm/Dockerfile-multi php-fpm/Dockerfile-multidebian
 
 sed -i s/"eilandert\/ubuntu-base:rolling"/"eilandert\/debian-base:stable"/ php-fpm/*debian
 
-#hack for ondrej/impish
-#sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ hirsute main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,multi}
-#normal operation
 sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/packages.sury.org\/php\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-*debian
 sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,multi}
+
 
 
 ####
@@ -216,6 +214,10 @@ sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.4/' nginx-proxy-modsecurity-pagespeed/
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.0/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php80debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php81debian
 
+rm -rf nginx-quic/*
+cp -rp nginx-proxy-modsecurity-pagespeed/* nginx-quic
+sed -i s/"\#TEMPLATE4\#"/"echo \"deb \[trusted=yes\] http:\/\/deb.myguard.nl\/quic\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/quic.list"/ nginx-quic/Dockerfile*
+sed -i s/"\#TEMPLATE5\#"/"echo \"deb \[trusted=yes\] http:\/\/edge.deb.myguard.nl:8888\/quic\/ \${DIST} main\" >> \/etc\/apt\/sources.list.d\/quic.list"/ nginx-quic/Dockerfile*
 
 export UBUNTU_ROLLING="jammy"
 

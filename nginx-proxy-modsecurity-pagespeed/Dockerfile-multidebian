@@ -5,7 +5,10 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
+    #TEMPLATE4# ;\
+    #TEMPLATE5# ;\
     apt-get update ;\
+    apt-get -y upgrade ;\
     apt-get -y --no-install-recommends install \
       brotli \
       curl \
