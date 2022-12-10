@@ -143,7 +143,7 @@ sed -i 's/rm -rf \/etc\/php\/7.2/#rm -rf \/etc\/php\/7.2/' php-fpm/Dockerfile-7.
 sed -i 's/rm -rf \/etc\/php\/7.4/#rm -rf \/etc\/php\/7.4/' php-fpm/Dockerfile-7.4
 sed -i 's/rm -rf \/etc\/php\/8.0/#rm -rf \/etc\/php\/8.0/' php-fpm/Dockerfile-8.0
 sed -i 's/rm -rf \/etc\/php\/8.1/#rm -rf \/etc\/php\/8.1/' php-fpm/Dockerfile-8.1
-sed -i 's/rm -rf \/etc\/php\/8.1/#rm -rf \/etc\/php\/8.2/' php-fpm/Dockerfile-8.2
+sed -i 's/rm -rf \/etc\/php\/8.2/#rm -rf \/etc\/php\/8.2/' php-fpm/Dockerfile-8.2
 sed -i 's/rm -rf \/etc\/php/#rm -rf \/etc\/php/' php-fpm/Dockerfile-multi
 
 cp php-fpm/Dockerfile-5.6 php-fpm/Dockerfile-5.6debian
