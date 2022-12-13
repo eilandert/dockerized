@@ -238,7 +238,7 @@ sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.2/' nginx-proxy-modsecurity-pagespeed/
 rm -rf nginx-quic/*
 cp -rp nginx-proxy-modsecurity-pagespeed/* nginx-quic
 sed -i s/"\#TEMPLATE4\#"/"echo \"deb \[trusted=yes\] http:\/\/deb.myguard.nl\/quic\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/quic.list"/ nginx-quic/Dockerfile*
-sed -i s/"\#TEMPLATE5\#"/"echo \"deb \[trusted=yes\] http:\/\/edge.deb.myguard.nl:8888\/quic\/ \${DIST} main\" >> \/etc\/apt\/sources.list.d\/quic.list"/ nginx-quic/Dockerfile*
+sed -i s/"\#TEMPLATE5\#"/"echo \"deb \[trusted=yes\] http:\/\/edge.deb.myguard.nl:8888\/apt\/nginx-quic\/ \${DIST} main\" >> \/etc\/apt\/sources.list.d\/quic.list"/ nginx-quic/Dockerfile*
 
 export UBUNTU_ROLLING="jammy"
 
