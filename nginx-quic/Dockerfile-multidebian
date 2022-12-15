@@ -21,6 +21,9 @@ RUN set -ex ;\
       nginx-full \
       ssl-cert \
       zstd \
+      libnginx-mod-ssl-ct \
+      libnginx-mod-http-ssl-ct \
+      libnginx-mod-stream-ssl-ct \
     ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
