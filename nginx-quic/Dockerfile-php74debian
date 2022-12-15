@@ -5,8 +5,8 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    echo "deb [trusted=yes] http://deb.myguard.nl/quic/ ${DIST} main" > /etc/apt/sources.list.d/quic.list
-    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/apt/nginx-quic/ ${DIST} main" >> /etc/apt/sources.list.d/quic.list
+    echo "deb [trusted=yes] http://deb.myguard.nl/quic/ ${DIST} main" > /etc/apt/sources.list.d/quic.list;
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/apt/nginx-quic/ ${DIST} main" >> /etc/apt/sources.list.d/quic.list;
     apt-get update ;\
     apt-get -y upgrade ;\
     apt-get -y --no-install-recommends install \
