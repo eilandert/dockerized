@@ -5,8 +5,8 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    #TEMPLATE4# ;\
-    #TEMPLATE5# ;\
+    #TEMPLATE4#;\
+    #TEMPLATE5#;\
     apt-get update ;\
     apt-get -y upgrade ;\
     apt-get -y --no-install-recommends install \
@@ -21,6 +21,9 @@ RUN set -ex ;\
       nginx-full \
       ssl-cert \
       zstd \
+      libnginx-mod-ssl-ct \
+      libnginx-mod-http-ssl-ct \
+      libnginx-mod-stream-ssl-ct \
     ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
