@@ -58,7 +58,7 @@ if [ "${MODE}" = "MOD" ]&&[ "${PHPVERSION}" = "MULTI" ]; then
     export MODE="MULTI"
 fi
 
-if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ]; then
+if [ "${PHPVERSION}" = "MULTI" ] && [ ! "${PHP56}" = "YES" ] && [ ! "${PHP72}" = "YES" ] && [ ! "${PHP74}" = "YES" ] && [ ! "${PHP80}" = "YES" ] && [ ! "${PHP81}" = "YES" ] && [ ! "${PHP82}" = "YES" ]; then
     echo "[APACHE-PHPFPM] You downloaded the MULTI-PHP edition of the docker"
     echo "[APACHE-PHPFPM] There is no PHP56 PHP72 PHP74 or PHP80 environment variable specified"
     echo "[APACHE-PHPFPM] exiting...."
@@ -120,6 +120,15 @@ fi
 if [ "${MODE}" = "MULTI" ] && [ "${PHP80}" = "YES" ]; then
     startphp "8.0"
 fi
+
+if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
+    startphp "8.1"
+fi
+
+if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
+    startphp "8.2"
+fi
+
 
 if [ -n "${A2ENMOD}" ]; then
     a2enmod ${A2ENMOD} 1>/dev/null 2>&1
