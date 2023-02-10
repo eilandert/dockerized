@@ -4,6 +4,11 @@
 # To use/update buildx
 # git clone https://github.com/docker/buildx && cd buildx && make install
 
+ssh -p 8889 aptly@192.168.178.11 "~/bin/daily.sh"
+
+docker buildx rm
+docker system prune -f -a
+
 
 # Ensure the push is only initiated on my build machine
 if [ "$(uname -n)" == "build" ]; then PUSH="--push"; fi

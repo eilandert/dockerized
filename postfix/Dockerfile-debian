@@ -9,7 +9,6 @@ RUN set -ex ;\
     apt-get -y --no-install-recommends install \
       ca-certificates tzdata openssl syslog-ng \
       postfix-cdb \
-      postfix-ldap \
       postfix-lmdb \
       postfix-mysql \
       postfix-pcre \

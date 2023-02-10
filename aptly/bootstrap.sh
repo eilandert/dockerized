@@ -13,6 +13,13 @@ if [ -n "${SYSLOG_HOST}" ]; then
     syslog-ng --no-caps
 fi
 
+# If there are no configfiles, copy them
+FIRSTRUN="/etc/nginx/nginx.conf"
+if [ ! -f ${FIRSTRUN} ]; then
+    echo "[NGINX] no configs found, populating default configs to /etc/nginx"
+    cp -r /etc/nginx.orig/* /etc/nginx/
+fi
+
 # If you bind /etc/ssh the dir will be empty, so place a new copy
 if [ ! -f "/etc/ssh/sshd_config" ];
 then

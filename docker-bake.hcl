@@ -149,7 +149,6 @@ group "misc" {
     targets = [
  #      "clamav",
        "alpine-letsencrypt",
-       "alpine-pyzor",
        "rbldnsd",
        "ubuntu-reprepro",
        "debian-sitewarmup",
@@ -545,12 +544,6 @@ target "debian-postfix" {
    tags = ["docker.io/eilandert/postfix:debian"]
    context = "postfix"
    dockerfile = "Dockerfile-debian"
-}
-
-target "alpine-pyzor" {
-   tags = ["docker.io/eilandert/pyzor"]
-   context = "pyzor"
-   dockerfile = "Dockerfile"
 }
 
 target "rbldnsd" {

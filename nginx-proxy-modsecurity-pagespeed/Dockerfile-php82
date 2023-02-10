@@ -30,7 +30,7 @@ RUN set -ex ;\
     mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
     rm -f /var/spool/nullmailer/trigger ;\
-    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
+    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf 
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80

@@ -17,6 +17,7 @@ RUN set -ex ;\
       ca-certificates \
       less \
       libnginx-mod-http-fancyindex \
+      libnginx-mod-http-brotli \
       nginx-light \
       openssh-server \
       rsync \
@@ -25,8 +26,7 @@ RUN set -ex ;\
       tzdata \
       vim
 
-RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
-    chmod +x /bootstrap.sh ;\
+RUN chmod +x /bootstrap.sh ;\
     mkdir /run/sshd && rm -f /etc/motd ;\
     groupadd -g 1010 aptly ;\
     useradd -u 1010 -g 1010 aptly -s /bin/bash -d /aptly ;\
@@ -41,21 +41,16 @@ RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
     addgroup ssh-users && usermod -L -a -G ssh-users aptly ;\
     cp -rp /etc/ssh /etc/ssh.orig
 
-RUN apt-get install -y cis-hardening ;\
-    cd /opt/cis-hardening ;\
-    bin/hardening.sh --set-hardening-level 4 --allow-unsupported-distribution --audit ;\
-    bin/hardening.sh --allow-unsupported-distribution --apply ;\
-    apt-get purge -y patch cis-hardening ;\
-    rm -rf /opt/cis-hardening
-
-RUN \
-	chmod 644 /etc/syslog-ng/syslog-ng.conf ;\
-	chmod 666 /etc/syslog-ng/conf.d/
+RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
 
 CMD [ "/bootstrap.sh" ]
 
-COPY default-vhost.nginx /etc/nginx/sites-enabled/default
+COPY default-vhost.nginx /etc/nginx/sites-available/default
 COPY examples /aptly.orig/examples
+
+RUN cp -rp /etc/nginx /etc/nginx.orig ;\
+	chmod 644 /etc/syslog-ng/syslog-ng.conf ;\
+	chmod 666 /etc/syslog-ng/conf.d/
 
 EXPOSE 22 80
 WORKDIR /aptly
