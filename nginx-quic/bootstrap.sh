@@ -134,20 +134,6 @@ if [ -f /etc/nginx/scripts/pagespeed_libraries_generator.sh ]; then
     /etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 1>/dev/null 2>/dev/null &
 fi
 
-    # check for OpenSSL-quictls
-    if [ -f "/usr/lib/x86_64-linux-gnu/libssl.so.81.3" ]; then
-        if [ ! -f "/usr/lib/x86_64-linux-gnu/libssl.so.3" ]; then
-                ln -s /usr/lib/x86_64-linux-gnu/libssl.so.81.3 /usr/lib/x86_64-linux-gnu/libssl.so.3
-        fi
-    fi
-
-    if [ -f "/usr/lib/x86_64-linux-gnu/libcrypto.so.81.3" ]; then
-        if [ ! -f "/usr/lib/x86_64-linux-gnu/libcrypto.so.3" ]; then
-                ln -s /usr/lib/x86_64-linux-gnu/libcrypto.so.81.3 /usr/lib/x86_64-linux-gnu/libcrypto.so.3
-        fi
-    fi
-
-
 nginx -V 2>&1 | grep -v configure
 nginx -t
 
