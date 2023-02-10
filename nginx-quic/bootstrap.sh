@@ -34,13 +34,13 @@ chmod +x /etc/nginx/scripts/reorder-modules.sh
 
 # Setup the MALLOC of choice, with JEMALLOC as default
 case ${MALLOC} in
-    jemalloc)
+    *|jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
         ;;
     mimalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
         ;;
-    *|none)
+    none)
         unset LD_PRELOAD
         ;;
 esac
@@ -117,22 +117,20 @@ if [ -n "${PHPVERSION}" ]; then
         startphp "8.1"
         SETPHP=1
     fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP82}" = "YES" ]; then
+        startphp "8.2"
+        SETPHP=1
+    fi
+
 
     if [ "${PHPVERSION}" = "MULTI" ] && [ "${SETPHP}" = 0 ]; then
         echo "[NGINX] You downloaded the MULTI-PHP edition of the docker but...."
-        echo "[NGINX] There is no PHP56 PHP72 PHP74 PHP80 or PHP81 environment variable specified"
+        echo "[NGINX] There is no PHP56 PHP72 PHP74 PHP80 PHP81 or PHP82 environment variable specified"
         echo "[NGINX] Don't know what to do now, exiting...."
         exit
     fi
-
 fi
 # /PHPBLOCK
-
-#download new pagespeed libraries on docker startup
-if [ -f /etc/nginx/scripts/pagespeed_libraries_generator.sh ]; then
-    chmod +x /etc/nginx/scripts/pagespeed_libraries_generator.sh 1>/dev/null 2>&1
-    /etc/nginx/scripts/pagespeed_libraries_generator.sh > /etc/nginx/snippets/pagespeed_libraries.conf 1>/dev/null 2>/dev/null &
-fi
 
 nginx -V 2>&1 | grep -v configure
 nginx -t
