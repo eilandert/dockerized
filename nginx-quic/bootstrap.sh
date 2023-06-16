@@ -117,11 +117,10 @@ if [ -n "${PHPVERSION}" ]; then
         startphp "8.1"
         SETPHP=1
     fi
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP82}" = "YES" ]; then
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
         startphp "8.2"
         SETPHP=1
     fi
-
 
     if [ "${PHPVERSION}" = "MULTI" ] && [ "${SETPHP}" = 0 ]; then
         echo "[NGINX] You downloaded the MULTI-PHP edition of the docker but...."
@@ -129,6 +128,7 @@ if [ -n "${PHPVERSION}" ]; then
         echo "[NGINX] Don't know what to do now, exiting...."
         exit
     fi
+
 fi
 # /PHPBLOCK
 
