@@ -55,6 +55,8 @@ _process_sql()
 connect()
 {
 	set +e +o pipefail
+	# (on second extra_file)
+	# shellcheck disable=SC2086
 	mariadb ${nodefaults:+--no-defaults} \
 		${def['file']:+--defaults-file=${def['file']}} \
 		${def['extra_file']:+--defaults-extra-file=${def['extra_file']}}  \
@@ -129,7 +131,7 @@ replication()
 	# SHOW REPLICA available 10.5+
 	# https://github.com/koalaman/shellcheck/issues/2383
 	# shellcheck disable=SC2016,SC2026
-	_process_sql -e "show ${repl['all']:+all} slave${repl['all']:+s} ${repl['name']:+'${repl['name']}'} status\G" | \
+	_process_sql -e "SHOW ${repl['all']:+all} REPLICA${repl['all']:+S} ${repl['name']:+'${repl['name']}'} STATUS\G" | \
 		{
 		# required for trim of leading space.
 		shopt -s extglob
@@ -210,6 +212,9 @@ declare -A repl
 declare -A def
 nodefaults=
 datadir=/var/lib/mysql
+if [ -f $datadir/.my-healthcheck.cnf ]; then
+	def['extra_file']=$datadir/.my-healthcheck.cnf
+fi
 
 _repl_param_check()
 {
