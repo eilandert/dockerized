@@ -2,7 +2,7 @@
 
 . /etc/os-release
 VERSION=$(redis-server -v)
-TEXT="Redis image from https://hub.docker.com/u/eilandert with packages from https://deb.paranoid.nl"
+TEXT="Redis image from https://hub.docker.com/u/eilandert with packages from https://deb.myguard.nl"
 
 if [ -n "${TZ}" ]; then
     rm -f /etc/timezone /etc/localtime

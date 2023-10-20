@@ -20,10 +20,10 @@ RUN set -ex ;\
       syslog-ng-core \
       libfilesys-diskspace-perl \
       libfilesys-diskusage-perl \
-      libdbd-mariadb-perl \
       libdbd-pgsql \
       libdbd-mysql-perl \
       libdbd-mysql \
+      libdbd-mariadb-perl \
       pyzor \
       razor \
       rspamd \

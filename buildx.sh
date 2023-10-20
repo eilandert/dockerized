@@ -18,7 +18,8 @@ if [ "$(uname -n)" == "build" ]; then PUSH="--push"; fi
 
 docker buildx create --use
 
-for BUILD in base-current misc phpfpm multiphp nginx-quic nginx-php-quic openssh mail db nginx nginx-php apache apache-misc
+#for BUILD in base-current phpfpm multiphp nginx-quic nginx-php-quic openssh mail db nginx nginx-php apache apache-misc misc
+for BUILD in base-current phpfpm multiphp mail db nginx nginx-php apache apache-misc misc
 do
     echo "-----------------------------------"
     echo "BUILDING TARGET ${BUILD}"

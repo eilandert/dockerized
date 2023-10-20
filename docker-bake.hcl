@@ -2,12 +2,12 @@ group "default" {
     targets = [
 	"rolling",
 	"devel",
-	"bullseye",
+	"bookworm",
 	]
 }
 
 group "base-current" {
-    targets = ["rolling", "bullseye"]
+    targets = ["jammy", "bookworm"]
 }
 
 group "base" {
@@ -203,13 +203,13 @@ target "trusty" {
 target "bookworm" {
     dockerfile = "Dockerfile-bookworm"
     context = "base"
-    tags = ["docker.io/eilandert/debian-base:bookworm"]
+    tags = ["docker.io/eilandert/debian-base:bookworm","docker.io/eilandert/debian-base:stable"]
 }
 
 target "bullseye" {
     dockerfile = "Dockerfile-bullseye"
     context = "base"
-    tags = ["docker.io/eilandert/debian-base:bullseye","docker.io/eilandert/debian-base:stable"]
+    tags = ["docker.io/eilandert/debian-base:bullseye"]
 }
 
 target "buster" {
