@@ -17,7 +17,7 @@ group "base" {
 group "phpfpm" {
     targets = [
         "ubuntu-phpfpm56",
-        "debian-phpfpm56",
+ #       "debian-phpfpm56",
         "ubuntu-phpfpm72",
         "debian-phpfpm72",
         "ubuntu-phpfpm74",
