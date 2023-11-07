@@ -43,7 +43,8 @@ Environment variables:
         - PHP74=YES (if the multi-php docker is pulled)
         - PHP74=YES (if the multi-php docker is pulled)
         - PHP80=YES (if the multi-php docker is pulled)
-        - PHP80=YES (if the multi-php docker is pulled)
+        - PHP81=YES (if the multi-php docker is pulled)
+        - PHP82=YES (if the multi-php docker is pulled)
  
         - NGX_MODULES=mod-security-headers,mod-http-fancyindex
 
@@ -80,6 +81,6 @@ Environment variables:
           mod-stream
           mod-vts
 
-But you can do it with all modules available, ofcourse.
+But you can do it with all modules available listed on https://deb.myguard.nl/nginx-modules/, ofcourse.
 
 I am open to suggestions!

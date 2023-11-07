@@ -66,4 +66,5 @@ services:
 #	mod-stream
 #	mod-vts
 
+#But you can do it with all modules available listed on https://deb.myguard.nl/nginx-modules/, ofcourse.
 
