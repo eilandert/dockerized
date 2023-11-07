@@ -21,7 +21,7 @@ fi
 
 cp -p /etc/nginx.orig/mime.types /etc/nginx/mime.types
 cp -p /etc/nginx.orig/nginx.conf-packaged /etc/nginx/nginx.conf-packaged
-cp -rp /etc/nginx.orig/scripts/reorder-modules.sh /etc/nginx/scripts
+cp -p /etc/nginx.orig/scripts/reorder-modules.sh /etc/nginx/scripts
 
 # Make sure all available modules are available outside of docker and remove modules which aren't there (anymore)
 mkdir -p /etc/nginx/modules-available && \

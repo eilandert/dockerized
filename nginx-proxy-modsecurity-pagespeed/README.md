@@ -48,9 +48,9 @@ Environment variables:
         - NGX_MODULES=mod-security-headers,mod-http-fancyindex
 
         At the time of writing you can enable the following modules:
-          mod-brotli
           mod-http-auth-pam
           mod-http-auth-spnego
+          mod-http-brotli
           mod-http-cache-purge
           mod-http-dav-ext
           mod-http-doh
@@ -79,5 +79,7 @@ Environment variables:
           mod-stream-geoip2
           mod-stream
           mod-vts
+
+But you can do it with all modules available, ofcourse.
 
 I am open to suggestions!
