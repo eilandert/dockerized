@@ -34,9 +34,9 @@ services:
       - NGX_MODULES=mod-security-headers,mod-http-fancyindex
 
 # Currently you can enable the following modules:
-#	mod-brotli
 #	mod-http-auth-pam
 #	mod-http-auth-spnego
+#       mod-http-brotli
 #	mod-http-cache-purge
 #	mod-http-dav-ext
 #	mod-http-doh
