@@ -153,6 +153,14 @@ docker_temp_server_stop() {
 
 # Verify that the minimally required password settings are set for new databases.
 docker_verify_minimum_env() {
+	# Restoring from backup requires no environment variables
+	declare -g DATABASE_INIT_FROM_BACKUP
+	for file in /docker-entrypoint-initdb.d/*.tar{.gz,.xz,.zst}; do
+		if [ -f "${file}" ]; then
+			DATABASE_INIT_FROM_BACKUP='true'
+			return
+		fi
+	done
 	if [ -z "$MARIADB_ROOT_PASSWORD" ] && [ -z "$MARIADB_ROOT_PASSWORD_HASH" ] && [ -z "$MARIADB_ALLOW_EMPTY_ROOT_PASSWORD" ] && [ -z "$MARIADB_RANDOM_ROOT_PASSWORD" ]; then
 		mysql_error $'Database is uninitialized and password option is not specified\n\tYou need to specify one of MARIADB_ROOT_PASSWORD, MARIADB_ROOT_PASSWORD_HASH, MARIADB_ALLOW_EMPTY_ROOT_PASSWORD and MARIADB_RANDOM_ROOT_PASSWORD'
 	fi
@@ -211,7 +219,7 @@ _mariadb_version() {
 docker_init_database_dir() {
 	mysql_note "Initializing database files"
 	installArgs=( --datadir="$DATADIR" --rpm --auth-root-authentication-method=normal )
-	# "Other options are passed to mariadbd." (so we pass all "mysqld" arguments directly here)
+	# "Other options are passed to mariadbd." (so we pass all "mariadbd" arguments directly here)
 	mariadb-install-db "${installArgs[@]}" "${@:2}" \
 		--skip-test-db \
 		--old-mode='UTF8_IS_UTF8MB3' \
@@ -342,11 +350,13 @@ docker_setup_db() {
 			read -r -d '' rootCreate <<-EOSQL || true
 				CREATE USER 'root'@'${MARIADB_ROOT_HOST}' IDENTIFIED BY PASSWORD '${MARIADB_ROOT_PASSWORD_HASH}' ;
 				GRANT ALL ON *.* TO 'root'@'${MARIADB_ROOT_HOST}' WITH GRANT OPTION ;
+				GRANT PROXY ON ''@'%' TO 'root'@'${MARIADB_ROOT_HOST}' WITH GRANT OPTION;
 			EOSQL
 		else
 			read -r -d '' rootCreate <<-EOSQL || true
 				CREATE USER 'root'@'${MARIADB_ROOT_HOST}' IDENTIFIED BY '${rootPasswordEscaped}' ;
 				GRANT ALL ON *.* TO 'root'@'${MARIADB_ROOT_HOST}' WITH GRANT OPTION ;
+				GRANT PROXY ON ''@'%' TO 'root'@'${MARIADB_ROOT_HOST}' WITH GRANT OPTION;
 			EOSQL
 		fi
 	fi
@@ -472,6 +482,64 @@ docker_setup_db() {
 	EOSQL
 }
 
+# create a new installation
+docker_mariadb_init()
+{
+
+	# check dir permissions to reduce likelihood of half-initialized database
+	ls /docker-entrypoint-initdb.d/ > /dev/null
+
+	if [ -n "$DATABASE_INIT_FROM_BACKUP" ]; then
+		shopt -s dotglob
+		for file in /docker-entrypoint-initdb.d/*.tar{.gz,.xz,.zst}; do
+			mkdir -p "$DATADIR"/.init
+			tar --auto-compress --extract --file "$file" --directory="$DATADIR"/.init
+			mariadb-backup --target-dir="$DATADIR"/.init --datadir="$DATADIR"/.restore --move-back
+
+			mv "$DATADIR"/.restore/** "$DATADIR"/
+			if [ -f "$DATADIR/.init/backup-my.cnf" ]; then
+				mv "$DATADIR/.init/backup-my.cnf" "$DATADIR/.my.cnf"
+				mysql_note "Adding startup configuration:"
+				my_print_defaults --defaults-file="$DATADIR/.my.cnf" --mariadbd
+			fi
+			rm -rf "$DATADIR"/.init "$DATADIR"/.restore
+			if [ "$(id -u)" = "0" ]; then
+				# this will cause less disk access than `chown -R`
+				find "$DATADIR" \! -user mysql -exec chown mysql: '{}' +
+			fi
+		done
+		if _check_if_upgrade_is_needed; then
+			docker_mariadb_upgrade "$@"
+		fi
+		return
+	fi
+	docker_init_database_dir "$@"
+
+	mysql_note "Starting temporary server"
+	docker_temp_server_start "$@"
+	mysql_note "Temporary server started."
+
+	docker_setup_db
+	docker_process_init_files /docker-entrypoint-initdb.d/*
+	# Wait until after /docker-entrypoint-initdb.d is performed before setting
+	# root@localhost password to a hash we don't know the password for.
+	if [ -n "${MARIADB_ROOT_PASSWORD_HASH}" ]; then
+		mysql_note "Setting root@localhost password hash"
+		docker_process_sql --dont-use-mysql-root-password --binary-mode <<-EOSQL
+			SET @@SESSION.SQL_LOG_BIN=0;
+			SET PASSWORD FOR 'root'@'localhost'= '${MARIADB_ROOT_PASSWORD_HASH}';
+		EOSQL
+	fi
+
+	mysql_note "Stopping temporary server"
+	docker_temp_server_stop
+	mysql_note "Temporary server stopped"
+
+	echo
+	mysql_note "MariaDB init process done. Ready for start up."
+	echo
+}
+
 # backup the mysql database
 docker_mariadb_backup_system()
 {
@@ -581,34 +649,7 @@ _main() {
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
 
-			# check dir permissions to reduce likelihood of half-initialized database
-			ls /docker-entrypoint-initdb.d/ > /dev/null
-
-			docker_init_database_dir "$@"
-
-			mysql_note "Starting temporary server"
-			docker_temp_server_start "$@"
-			mysql_note "Temporary server started."
-
-			docker_setup_db
-			docker_process_init_files /docker-entrypoint-initdb.d/*
-			# Wait until after /docker-entrypoint-initdb.d is performed before setting
-			# root@localhost password to a hash we don't know the password for.
-			if [ -n "${MARIADB_ROOT_PASSWORD_HASH}" ]; then
-				mysql_note "Setting root@localhost password hash"
-				docker_process_sql --dont-use-mysql-root-password --binary-mode <<-EOSQL
-					SET @@SESSION.SQL_LOG_BIN=0;
-					SET PASSWORD FOR 'root'@'localhost'= '${MARIADB_ROOT_PASSWORD_HASH}';
-				EOSQL
-			fi
-
-			mysql_note "Stopping temporary server"
-			docker_temp_server_stop
-			mysql_note "Temporary server stopped"
-
-			echo
-			mysql_note "MariaDB init process done. Ready for start up."
-			echo
+			docker_mariadb_init "$@"
 		# MDEV-27636 mariadb_upgrade --check-if-upgrade-is-needed cannot be run offline
 		#elif mariadb-upgrade --check-if-upgrade-is-needed; then
 		elif _check_if_upgrade_is_needed; then
