@@ -1,0 +1,77 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/php-fpm for a recent one
+FROM    eilandert/debian-base:bullseye
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+ENV     TZ=Europe/Amsterdam
+ENV	PHPVERSION=8.1
+ENV	MODE=FPM
+
+COPY    bootstrap.sh /bootstrap.sh
+
+RUN set -ex ;\
+    echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    apt-get -y update ;\
+    apt-get install -y nullmailer mailutils ;\
+    rm -rf /var/spool/nullmailer/trigger ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
+
+RUN set -x ;\
+    apt-get update ;\
+    apt-get install -m -y --no-install-recommends \
+      php8.1 \
+      php8.1-fpm \
+      php8.1-apcu \
+      php8.1-bcmath \
+      php8.1-cli \
+      php8.1-curl \
+      php8.1-dom \
+      php8.1-exif \
+      php8.1-gd \
+      php8.1-gmp \
+      php8.1-igbinary \
+      php8.1-imagick \
+      php8.1-imap \
+      php8.1-intl \
+      php8.1-ldap \
+      php8.1-memcache \
+      php8.1-memcached \
+      php8.1-mbstring \
+      php8.1-mysql \
+      php8.1-opcache \
+      php8.1-pspell \
+      php8.1-pgsql \
+      php8.1-readline \
+      php8.1-redis \
+      php8.1-soap \
+      php8.1-sqlite3 \
+      php8.1-tidy \
+      php8.1-xml \
+      php8.1-zip \
+      php8.1-zstd ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
+
+RUN set -ex ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    cd /tmp ;\
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
+    cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
+    php -r "unlink('composer-setup.php');" ;\
+    rm -rf /var/lib/apt/lists/* /tmp/* ;\
+    rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
+    rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
+    rm -rf /etc/php/7.1 /usr/lib/php/20160303 ;\
+    rm -rf /etc/php/7.2 /usr/lib/php/20170718 ;\
+    rm -rf /etc/php/7.3 /usr/lib/php/20180731 ;\
+    rm -rf /etc/php/7.4 /usr/lib/php/20190902 ;\
+    rm -rf /etc/php/8.0 /usr/lib/php/20200930 ;\
+    #rm -rf /etc/php/8.1 /usr/lib/php/20210902 ;\
+    rm -rf /etc/php/8.2 /usr/lib/php/20220829 ;\
+    mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
+    mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
+    chmod 755 /bootstrap.sh
+
+CMD     ["/bootstrap.sh"]
+
+EXPOSE  9000

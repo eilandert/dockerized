@@ -24,25 +24,24 @@ if [ ! -f ${FIRSTRUN} ]; then
 fi
 
 case ${MALLOC} in
-    *|jemalloc)
+    jemalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
         ;;
     mimalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
         ;;
-    none)
+    *|none)
         unset LD_PRELOAD
         ;;
 esac
 
 #fix some weird issue with nullmailer
 rm -f /var/spool/nullmailer/trigger
+rm -f /var/spool/nullermailer/queue/core
 /usr/bin/mkfifo /var/spool/nullmailer/trigger
 /bin/chmod 0622 /var/spool/nullmailer/trigger
 /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
-#runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
-rm -f /var/spool/nullermailer/queue/core
-service nullmailer start
+runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
 #fix some weird issue with php-fpm
 if [ ! -x /run/php ]; then
@@ -125,7 +124,7 @@ if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
     startphp "8.1"
 fi
 
-if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
+if [ "${MODE}" = "MULTI" ] && [ "${PHP82}" = "YES" ]; then
     startphp "8.2"
 fi
 
@@ -169,5 +168,6 @@ if [ -f /run/apache2/apache2.pid ]; then
     rm /run/apache2/apache2.pid
 fi
 
+echo "Starting Apache..."
 exec /usr/sbin/apache2ctl -DFOREGROUND
 

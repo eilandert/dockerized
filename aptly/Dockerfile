@@ -1,4 +1,4 @@
-FROM    eilandert/ubuntu-base:rolling
+FROM    eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
@@ -18,6 +18,7 @@ RUN set -ex ;\
       less \
       libnginx-mod-http-fancyindex \
       libnginx-mod-http-brotli \
+      libnginx-mod-http-zstd \
       nginx-light \
       openssh-server \
       rsync \

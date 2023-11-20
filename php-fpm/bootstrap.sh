@@ -24,6 +24,7 @@ fi
 
 #fix some weird issue with nullmailer
 rm -f /var/spool/nullmailer/trigger
+rm -f /var/spool/nullermailer/queue/core
 /usr/bin/mkfifo /var/spool/nullmailer/trigger
 /bin/chmod 0622 /var/spool/nullmailer/trigger
 /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer

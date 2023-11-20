@@ -5,6 +5,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
+    echo "deb http://edge.deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
     #TEMPLATE4#;\
     #TEMPLATE5#;\
     apt-get update ;\
@@ -21,16 +22,12 @@ RUN set -ex ;\
       nginx-full \
       ssl-cert \
       zstd \
-      libnginx-mod-ssl-ct \
-      libnginx-mod-http-ssl-ct \
-      libnginx-mod-stream-ssl-ct \
     ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     mv /etc/nginx /etc/nginx.orig && mkdir -p /etc/nginx ;\
     mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
-    rm -f /var/spool/nullmailer/trigger ;\
-    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf 
+    rm -f /var/spool/nullmailer/trigger
 
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80

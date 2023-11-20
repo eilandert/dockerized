@@ -11,7 +11,7 @@ group "base-current" {
 }
 
 group "base" {
-    targets = ["rolling", "devel","jammy","focal","bionic","xenial","trusty","bookworm","bullseye","buster","stretch"]
+    targets = ["rolling", "devel","jammy","focal","bionic","bookworm","bullseye","buster"]
 }
 
 group "phpfpm" {
@@ -295,8 +295,6 @@ target "debian-phpfpm82" {
     context = "php-fpm"
     dockerfile = "Dockerfile-8.2debian"
 }
-
-
 
 target "ubuntu-multiphp" {
     tags = ["docker.io/eilandert/php-fpm:multi"]
@@ -753,5 +751,19 @@ target "debian-nginx-quic-multi" {
     tags = ["docker.io/eilandert/nginx-quic:deb-multi"]
     context = "nginx-quic"
     dockerfile= "Dockerfile-multidebian"
+}
+
+
+# on request... no bookworm but bullseye. remove after 1-1-2025
+target "debian-phpfpm81bullseye" {
+    tags = ["docker.io/eilandert/php-fpm:8.1bullseye"]
+    context = "php-fpm"
+    dockerfile = "Dockerfile-8.1bullseye"
+}
+# same
+target "debian-apache-php81bullseye" {
+    tags = ["docker.io/eilandert/apache-phpfpm:8.1bullseye"]
+    context = "apache-phpfpm"
+    dockerfile= "Dockerfile-8.1bullseye"
 }
 

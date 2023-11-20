@@ -32,16 +32,16 @@ mkdir -p /etc/nginx/modules-available && \
 chmod +x /etc/nginx/scripts/reorder-modules.sh
 /etc/nginx/scripts/reorder-modules.sh
 
-# Setup the MALLOC of choice, with JEMALLOC as default
+# Setup the MALLOC of choice.
 case ${MALLOC} in
-    *|jemalloc)
-        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+    jemalloc)
+        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2"
         ;;
     mimalloc)
-        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
+        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so"
         ;;
-    none)
-        unset LD_PRELOAD
+    *|none)
+        unset NGINX_PRELOAD
         ;;
 esac
 
@@ -72,12 +72,11 @@ if [ -n "${PHPVERSION}" ]; then
 
     #fix some weird issue with nullmailer
     rm -f /var/spool/nullmailer/trigger
+    rm -f /var/spool/nullermailer/queue/core
     /usr/bin/mkfifo /var/spool/nullmailer/trigger
     /bin/chmod 0622 /var/spool/nullmailer/trigger
     /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
-#    runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
-    service nullmailer stop
-    service nullmailer start
+    runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
     if [ ! -x /run/php ]; then
         mkdir -p /run/php
@@ -117,7 +116,7 @@ if [ -n "${PHPVERSION}" ]; then
         startphp "8.1"
         SETPHP=1
     fi
-    if [ "${MODE}" = "MULTI" ] && [ "${PHP81}" = "YES" ]; then
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP82}" = "YES" ]; then
         startphp "8.2"
         SETPHP=1
     fi

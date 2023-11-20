@@ -4,7 +4,7 @@
 # To use/update buildx
 # git clone https://github.com/docker/buildx && cd buildx && make install
 
-ssh -p 8889 aptly@192.168.178.11 "~/bin/daily.sh"
+#ssh -p 8889 aptly@192.168.178.11 "~/bin/daily.sh"
 
 docker buildx rm
 docker system prune -f -a
@@ -25,6 +25,9 @@ do
     echo "BUILDING TARGET ${BUILD}"
     docker buildx bake ${PUSH} ${BUILD}
 done
+
+docker buildx bake --push debian-phpfpm81bullseye
+docker buildx bake --push debian-apache-php81bullseye
 
 docker buildx rm
 docker system prune -f -a
