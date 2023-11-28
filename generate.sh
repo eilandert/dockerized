@@ -70,6 +70,7 @@ cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php74
 cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php80
 cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php81
 cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php82
+cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php83
 
 sed -i 's/#PHPVERSION#/5.6/' php-fpm/Dockerfile-template.generated.php56
 sed -i 's/#PHPVERSION#/7.2/' php-fpm/Dockerfile-template.generated.php72
@@ -77,6 +78,7 @@ sed -i 's/#PHPVERSION#/7.4/' php-fpm/Dockerfile-template.generated.php74
 sed -i 's/#PHPVERSION#/8.0/' php-fpm/Dockerfile-template.generated.php80
 sed -i 's/#PHPVERSION#/8.1/' php-fpm/Dockerfile-template.generated.php81
 sed -i 's/#PHPVERSION#/8.2/' php-fpm/Dockerfile-template.generated.php82
+sed -i 's/#PHPVERSION#/8.3/' php-fpm/Dockerfile-template.generated.php83
 
 sed -i 's/#removedinphp72#//' php-fpm/Dockerfile-template.generated.php56 #mcrypt
 sed -i 's/#removedinphp74#//' php-fpm/Dockerfile-template.generated.php56 #recode
@@ -91,6 +93,7 @@ sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php74
 sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php80
 sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php81
 sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php82
+sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php83
 
 cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.generated.php56 \
@@ -117,12 +120,17 @@ cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-8.2
 
 cat php-fpm/Dockerfile-template.header \
+    php-fpm/Dockerfile-template.generated.php83 \
+    php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-8.3
+
+cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.generated.php56 \
     php-fpm/Dockerfile-template.generated.php72 \
     php-fpm/Dockerfile-template.generated.php74 \
     php-fpm/Dockerfile-template.generated.php80 \
     php-fpm/Dockerfile-template.generated.php81 \
     php-fpm/Dockerfile-template.generated.php82 \
+    php-fpm/Dockerfile-template.generated.php83 \
     php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-multi
 
 rm -f php-fpm/Dockerfile-template.generated.*
@@ -133,6 +141,7 @@ sed -i 's/#PHPVERSION#/7.4/' php-fpm/Dockerfile-7.4
 sed -i 's/#PHPVERSION#/8.0/' php-fpm/Dockerfile-8.0
 sed -i 's/#PHPVERSION#/8.1/' php-fpm/Dockerfile-8.1
 sed -i 's/#PHPVERSION#/8.2/' php-fpm/Dockerfile-8.2
+sed -i 's/#PHPVERSION#/8.3/' php-fpm/Dockerfile-8.3
 
 sed -i 's/#PHPVERSION#/MULTI/' php-fpm/Dockerfile-multi
 sed -i 's/MODE=FPM/MODE=MULTI/' php-fpm/Dockerfile-multi
@@ -143,6 +152,7 @@ sed -i 's/rm -rf \/etc\/php\/7.4/#rm -rf \/etc\/php\/7.4/' php-fpm/Dockerfile-7.
 sed -i 's/rm -rf \/etc\/php\/8.0/#rm -rf \/etc\/php\/8.0/' php-fpm/Dockerfile-8.0
 sed -i 's/rm -rf \/etc\/php\/8.1/#rm -rf \/etc\/php\/8.1/' php-fpm/Dockerfile-8.1
 sed -i 's/rm -rf \/etc\/php\/8.2/#rm -rf \/etc\/php\/8.2/' php-fpm/Dockerfile-8.2
+sed -i 's/rm -rf \/etc\/php\/8.3/#rm -rf \/etc\/php\/8.3/' php-fpm/Dockerfile-8.3
 sed -i 's/rm -rf \/etc\/php/#rm -rf \/etc\/php/' php-fpm/Dockerfile-multi
 
 cp php-fpm/Dockerfile-5.6 php-fpm/Dockerfile-5.6debian
@@ -151,12 +161,13 @@ cp php-fpm/Dockerfile-7.4 php-fpm/Dockerfile-7.4debian
 cp php-fpm/Dockerfile-8.0 php-fpm/Dockerfile-8.0debian
 cp php-fpm/Dockerfile-8.1 php-fpm/Dockerfile-8.1debian
 cp php-fpm/Dockerfile-8.2 php-fpm/Dockerfile-8.2debian
+cp php-fpm/Dockerfile-8.3 php-fpm/Dockerfile-8.3debian
 cp php-fpm/Dockerfile-multi php-fpm/Dockerfile-multidebian
 
 sed -i s/"eilandert\/ubuntu-base:rolling"/"eilandert\/debian-base:stable"/ php-fpm/*debian
 
 sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/packages.sury.org\/php\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-*debian
-sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,8.2,multi}
+sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,8.2,8.3,multi}
 
 
 
@@ -169,6 +180,7 @@ cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-7.4
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.0
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.1
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.2
+cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.3
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-multi
 
 sed -i 's/#PHPVERSION#/5.6/' apache-phpfpm/Dockerfile-5.6
@@ -177,7 +189,7 @@ sed -i 's/#PHPVERSION#/7.4/' apache-phpfpm/Dockerfile-7.4
 sed -i 's/#PHPVERSION#/8.0/' apache-phpfpm/Dockerfile-8.0
 sed -i 's/#PHPVERSION#/8.1/' apache-phpfpm/Dockerfile-8.1
 sed -i 's/#PHPVERSION#/8.2/' apache-phpfpm/Dockerfile-8.2
-
+sed -i 's/#PHPVERSION#/8.3/' apache-phpfpm/Dockerfile-8.3
 sed -i 's/#PHPVERSION#/multi/' apache-phpfpm/Dockerfile-multi
 
 sed -i '/libapache2-mod-php/d'   apache-phpfpm/Dockerfile-multi
@@ -190,6 +202,7 @@ cp apache-phpfpm/Dockerfile-7.4 apache-phpfpm/Dockerfile-7.4debian
 cp apache-phpfpm/Dockerfile-8.0 apache-phpfpm/Dockerfile-8.0debian
 cp apache-phpfpm/Dockerfile-8.1 apache-phpfpm/Dockerfile-8.1debian
 cp apache-phpfpm/Dockerfile-8.2 apache-phpfpm/Dockerfile-8.2debian
+cp apache-phpfpm/Dockerfile-8.3 apache-phpfpm/Dockerfile-8.3debian
 cp apache-phpfpm/Dockerfile-multi apache-phpfpm/Dockerfile-multidebian
 sed -i s/"eilandert\/php-fpm:"/"eilandert\/php-fpm:deb-"/ apache-phpfpm/*debian
 
@@ -204,6 +217,7 @@ cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php80
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php81
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php82
+cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php83
 
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-multi
 
@@ -214,6 +228,7 @@ cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php80debian
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php81debian
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php82debian
+cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php83debian
 cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-multidebian
 
 sed -i 's/#FROM#/eilandert\/ubuntu-base:rolling/' nginx-proxy-modsecurity-pagespeed/Dockerfile
@@ -224,6 +239,7 @@ sed -i 's/#FROM#/eilandert\/php-fpm:7.4/' nginx-proxy-modsecurity-pagespeed/Dock
 sed -i 's/#FROM#/eilandert\/php-fpm:8.0/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php80
 sed -i 's/#FROM#/eilandert\/php-fpm:8.1/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php81
 sed -i 's/#FROM#/eilandert\/php-fpm:8.2/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php82
+sed -i 's/#FROM#/eilandert\/php-fpm:8.3/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php83
 
 sed -i 's/#FROM#/eilandert\/debian-base:stable/' nginx-proxy-modsecurity-pagespeed/Dockerfile-debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-multi/' nginx-proxy-modsecurity-pagespeed/Dockerfile-multidebian
@@ -233,6 +249,8 @@ sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.4/' nginx-proxy-modsecurity-pagespeed/
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.0/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php80debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php81debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.2/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php82debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.3/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php83debian
+
 
 export UBUNTU_ROLLING="jammy"
 

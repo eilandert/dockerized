@@ -1,5 +1,5 @@
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php#PHPVERSION# \
       php#PHPVERSION#-fpm \
@@ -19,7 +19,7 @@ RUN set -x ;\
       php#PHPVERSION#-ldap \
       #removedinphp72#php#PHPVERSION#-mcrypt \
       php#PHPVERSION#-memcache \
-      php#PHPVERSION#-memcached \
+      #removedinphp83#php#PHPVERSION#-memcached \
       php#PHPVERSION#-mbstring \
       php#PHPVERSION#-mysql \
       php#PHPVERSION#-opcache \
@@ -33,7 +33,7 @@ RUN set -x ;\
       php#PHPVERSION#-tidy \
       php#PHPVERSION#-xml \
       php#PHPVERSION#-zip \
-      php#PHPVERSION#-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php#PHPVERSION#-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
