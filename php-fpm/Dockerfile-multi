@@ -12,12 +12,12 @@ RUN set -ex ;\
     echo "deb [trusted=yes] http://ppa.launchpad.net/ondrej/php/ubuntu/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
-    rm -rf /var/spool/nullmailer/trigger ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/spool/nullmailer/trigger
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php5.6 \
       php5.6-fpm \
@@ -37,7 +37,6 @@ RUN set -x ;\
       php5.6-ldap \
       php5.6-mcrypt \
       php5.6-memcache \
-      php5.6-memcached \
       php5.6-mbstring \
       php5.6-mysql \
       php5.6-opcache \
@@ -51,12 +50,12 @@ RUN set -x ;\
       php5.6-tidy \
       php5.6-xml \
       php5.6-zip \
-      php5.6-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php5.6-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php7.2 \
       php7.2-fpm \
@@ -75,7 +74,6 @@ RUN set -x ;\
       php7.2-json \
       php7.2-ldap \
       php7.2-memcache \
-      php7.2-memcached \
       php7.2-mbstring \
       php7.2-mysql \
       php7.2-opcache \
@@ -89,12 +87,12 @@ RUN set -x ;\
       php7.2-tidy \
       php7.2-xml \
       php7.2-zip \
-      php7.2-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php7.2-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php7.4 \
       php7.4-fpm \
@@ -113,7 +111,6 @@ RUN set -x ;\
       php7.4-json \
       php7.4-ldap \
       php7.4-memcache \
-      php7.4-memcached \
       php7.4-mbstring \
       php7.4-mysql \
       php7.4-opcache \
@@ -126,12 +123,12 @@ RUN set -x ;\
       php7.4-tidy \
       php7.4-xml \
       php7.4-zip \
-      php7.4-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php7.4-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.0 \
       php8.0-fpm \
@@ -149,7 +146,6 @@ RUN set -x ;\
       php8.0-intl \
       php8.0-ldap \
       php8.0-memcache \
-      php8.0-memcached \
       php8.0-mbstring \
       php8.0-mysql \
       php8.0-opcache \
@@ -162,12 +158,12 @@ RUN set -x ;\
       php8.0-tidy \
       php8.0-xml \
       php8.0-zip \
-      php8.0-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php8.0-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.1 \
       php8.1-fpm \
@@ -185,7 +181,6 @@ RUN set -x ;\
       php8.1-intl \
       php8.1-ldap \
       php8.1-memcache \
-      php8.1-memcached \
       php8.1-mbstring \
       php8.1-mysql \
       php8.1-opcache \
@@ -198,12 +193,12 @@ RUN set -x ;\
       php8.1-tidy \
       php8.1-xml \
       php8.1-zip \
-      php8.1-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php8.1-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-    apt-get update ;\
+#    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.2 \
       php8.2-fpm \
@@ -221,7 +216,6 @@ RUN set -x ;\
       php8.2-intl \
       php8.2-ldap \
       php8.2-memcache \
-      php8.2-memcached \
       php8.2-mbstring \
       php8.2-mysql \
       php8.2-opcache \
@@ -234,9 +228,44 @@ RUN set -x ;\
       php8.2-tidy \
       php8.2-xml \
       php8.2-zip \
-      php8.2-zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php8.2-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
+
+RUN set -x ;\
+#    apt-get update ;\
+    apt-get install -m -y --no-install-recommends \
+      php8.3 \
+      php8.3-fpm \
+      php8.3-apcu \
+      php8.3-bcmath \
+      php8.3-cli \
+      php8.3-curl \
+      php8.3-dom \
+      php8.3-exif \
+      php8.3-gd \
+      php8.3-gmp \
+      php8.3-igbinary \
+      php8.3-imagick \
+      php8.3-imap \
+      php8.3-intl \
+      php8.3-ldap \
+      php8.3-memcache \
+      php8.3-mbstring \
+      php8.3-mysql \
+      php8.3-opcache \
+      php8.3-pspell \
+      php8.3-pgsql \
+      php8.3-readline \
+      php8.3-redis \
+      php8.3-soap \
+      php8.3-sqlite3 \
+      php8.3-tidy \
+      php8.3-xml \
+      php8.3-zip \
+      php8.3-zstd
+#    apt-get -y autoremove && apt-get -y autoclean ;\
+#    rm -rf /var/lib/apt/lists/*
 
 RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
@@ -254,6 +283,7 @@ RUN set -ex ;\
     #rm -rf /etc/php/8.0 /usr/lib/php/20200930 ;\
     #rm -rf /etc/php/8.1 /usr/lib/php/20210902 ;\
     #rm -rf /etc/php/8.2 /usr/lib/php/20220829 ;\
+    #rm -rf /etc/php/8.3 /usr/lib/php/20230831 ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     chmod 755 /bootstrap.sh

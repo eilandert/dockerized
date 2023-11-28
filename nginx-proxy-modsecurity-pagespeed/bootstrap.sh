@@ -32,19 +32,6 @@ mkdir -p /etc/nginx/modules-available && \
 chmod +x /etc/nginx/scripts/reorder-modules.sh
 /etc/nginx/scripts/reorder-modules.sh
 
-# Setup the MALLOC of choice.
-case ${MALLOC} in
-    jemalloc)
-        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2"
-        ;;
-    mimalloc)
-        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so"
-        ;;
-    *|none)
-        unset NGINX_PRELOAD
-        ;;
-esac
-
 #check if PHP is installed, else skip the whole block
 # PHPBLOCK
 if [ -n "${PHPVERSION}" ]; then
@@ -130,6 +117,20 @@ if [ -n "${PHPVERSION}" ]; then
 
 fi
 # /PHPBLOCK
+
+# Setup the MALLOC of choice.
+case ${MALLOC} in
+    jemalloc)
+        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2"
+        ;;
+    mimalloc)
+        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so"
+        ;;
+    *|none)
+        unset NGINX_PRELOAD
+        ;;
+esac
+
 
 nginx -V 2>&1 | grep -v configure
 nginx -t

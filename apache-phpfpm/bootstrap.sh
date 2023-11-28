@@ -23,18 +23,6 @@ if [ ! -f ${FIRSTRUN} ]; then
     cp -r /etc/nullmailer.orig/* /etc/nullmailer
 fi
 
-case ${MALLOC} in
-    jemalloc)
-        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
-        ;;
-    mimalloc)
-        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
-        ;;
-    *|none)
-        unset LD_PRELOAD
-        ;;
-esac
-
 #fix some weird issue with nullmailer
 rm -f /var/spool/nullmailer/trigger
 rm -f /var/spool/nullermailer/queue/core
@@ -167,6 +155,18 @@ fi
 if [ -f /run/apache2/apache2.pid ]; then
     rm /run/apache2/apache2.pid
 fi
+
+case ${MALLOC} in
+    jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        ;;
+    mimalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
+        ;;
+    *|none)
+        unset LD_PRELOAD
+        ;;
+esac
 
 echo "Starting Apache..."
 exec /usr/sbin/apache2ctl -DFOREGROUND

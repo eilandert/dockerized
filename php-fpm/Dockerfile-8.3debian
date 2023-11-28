@@ -3,7 +3,7 @@ FROM    eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
-ENV	PHPVERSION=7.2
+ENV	PHPVERSION=8.3
 ENV	MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
@@ -19,37 +19,35 @@ RUN set -ex ;\
 RUN set -x ;\
 #    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
-      php7.2 \
-      php7.2-fpm \
-      php7.2-apcu \
-      php7.2-bcmath \
-      php7.2-cli \
-      php7.2-curl \
-      php7.2-dom \
-      php7.2-exif \
-      php7.2-gd \
-      php7.2-gmp \
-      php7.2-igbinary \
-      php7.2-imagick \
-      php7.2-imap \
-      php7.2-intl \
-      php7.2-json \
-      php7.2-ldap \
-      php7.2-memcache \
-      php7.2-mbstring \
-      php7.2-mysql \
-      php7.2-opcache \
-      php7.2-pspell \
-      php7.2-pgsql \
-      php7.2-readline \
-      php7.2-recode \
-      php7.2-redis \
-      php7.2-soap \
-      php7.2-sqlite3 \
-      php7.2-tidy \
-      php7.2-xml \
-      php7.2-zip \
-      php7.2-zstd
+      php8.3 \
+      php8.3-fpm \
+      php8.3-apcu \
+      php8.3-bcmath \
+      php8.3-cli \
+      php8.3-curl \
+      php8.3-dom \
+      php8.3-exif \
+      php8.3-gd \
+      php8.3-gmp \
+      php8.3-igbinary \
+      php8.3-imagick \
+      php8.3-imap \
+      php8.3-intl \
+      php8.3-ldap \
+      php8.3-memcache \
+      php8.3-mbstring \
+      php8.3-mysql \
+      php8.3-opcache \
+      php8.3-pspell \
+      php8.3-pgsql \
+      php8.3-readline \
+      php8.3-redis \
+      php8.3-soap \
+      php8.3-sqlite3 \
+      php8.3-tidy \
+      php8.3-xml \
+      php8.3-zip \
+      php8.3-zstd
 #    apt-get -y autoremove && apt-get -y autoclean ;\
 #    rm -rf /var/lib/apt/lists/*
 
@@ -63,13 +61,13 @@ RUN set -ex ;\
     rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
     rm -rf /etc/php/7.1 /usr/lib/php/20160303 ;\
-    #rm -rf /etc/php/7.2 /usr/lib/php/20170718 ;\
+    rm -rf /etc/php/7.2 /usr/lib/php/20170718 ;\
     rm -rf /etc/php/7.3 /usr/lib/php/20180731 ;\
     rm -rf /etc/php/7.4 /usr/lib/php/20190902 ;\
     rm -rf /etc/php/8.0 /usr/lib/php/20200930 ;\
     rm -rf /etc/php/8.1 /usr/lib/php/20210902 ;\
     rm -rf /etc/php/8.2 /usr/lib/php/20220829 ;\
-    rm -rf /etc/php/8.3 /usr/lib/php/20230831 ;\
+    #rm -rf /etc/php/8.3 /usr/lib/php/20230831 ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     chmod 755 /bootstrap.sh
