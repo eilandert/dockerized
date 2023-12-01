@@ -32,5 +32,6 @@ RUN set -ex ;\
 CMD     ["/bootstrap.sh"]
 EXPOSE  80 80
 EXPOSE  443 443
+EXPOSE  443/udp
 
 WORKDIR /etc/nginx
