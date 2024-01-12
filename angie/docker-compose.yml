@@ -1,0 +1,70 @@
+version: "2.2"
+services:
+  nginx:
+    container_name: angie
+    image: eilandert/angie:deb-latest
+    stop_grace_period: 3s
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./config/angie:/etc/angie:rw
+#      - ./config/modsecurity/:/etc/modsecurity:rw
+#      - ./cache/pagespeed:/var/cache/pagespeed:rw
+#      - ./cache/angie:/var/cache/angie:rw
+
+    # if pulled with tag :php
+    #    - ./config/php:/etc/php:rw
+    #    - ./config/nullmailer:/etc/nullmailer:rw
+
+    # for use with my letsencrypt docker
+    #    - ./letsencrypt/certs:/etc/letsencrypt:ro
+    #    - ./letsencrypt/html:/var/www/html:ro
+
+    environment:
+      - TZ=Europe/Amsterdam
+# if pulled with tag :multi
+#      - PHP56=YES
+#      - PHP74=YES
+#      - PHP74=YES
+#      - PHP80=YES
+#      - PHP81=YES
+
+      - NGX_MODULES=mod-security-headers,mod-http-fancyindex
+
+# Currently you can enable the following modules:
+#	mod-http-auth-pam
+#	mod-http-auth-spnego
+#       mod-http-brotli
+#	mod-http-cache-purge
+#	mod-http-dav-ext
+#	mod-http-doh
+#	mod-http-echo
+#	mod-http-fancyindex
+#	mod-http-geoip
+#	mod-http-geoip2
+#	mod-http-headers-more-filter
+#	mod-http-image-filter
+#	mod-http-lua
+#	mod-http-ndk
+#	mod-http-njs
+#	mod-http-perl
+#	mod-http-subs-filter
+#	mod-http-uploadprogress
+#	mod-http-upstream-fair
+#	mod-http-xslt-filter
+#	mod-mail
+#	mod-modsecurity
+#	mod-nchan
+#	mod-pagespeed
+#	mod-rtmp
+#	mod-security-headers
+#	mod-ssl-ct
+#	mod-stream-geoip
+#	mod-stream-geoip2
+#	mod-stream
+#	mod-vts
+
+#But you can do it with all modules available listed on https://deb.myguard.nl/nginx-modules/, ofcourse.
+

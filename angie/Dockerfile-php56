@@ -1,0 +1,37 @@
+FROM    eilandert/php-fpm:5.6
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+
+COPY    bootstrap.sh /bootstrap.sh
+
+RUN set -ex ;\
+    echo "deb http://edge.deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
+    #TEMPLATE4#;\
+    #TEMPLATE5#;\
+    apt-get update ;\
+    apt-get -y upgrade ;\
+    apt-get -y --no-install-recommends install \
+      brotli \
+      curl \
+      fcgiwrap \
+      geoip-bin \
+      libjemalloc2 \
+      lua-resty \
+      mimalloc \
+      modsecurity-crs \
+      angie-full \
+      ssl-cert \
+      zstd \
+    ;\
+    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    mv /etc/angie /etc/angie.orig && mkdir -p /etc/angie ;\
+    mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
+    chmod +x /bootstrap.sh ;\
+    rm -f /var/spool/nullmailer/trigger
+
+CMD     ["/bootstrap.sh"]
+EXPOSE  80 80
+EXPOSE  443 443
+EXPOSE  443/udp
+
+WORKDIR /etc/angie
