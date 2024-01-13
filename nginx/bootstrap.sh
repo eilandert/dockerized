@@ -124,19 +124,6 @@ if [ -n "${PHPVERSION}" ]; then
 fi
 # /PHPBLOCK
 
-# Setup the MALLOC of choice.
-case ${MALLOC} in
-    *|jemalloc)
-        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2"
-        ;;
-    mimalloc)
-        export NGINX_PRELOAD="LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so"
-        ;;
-    none)
-        unset NGINX_PRELOAD
-        ;;
-esac
-
 if [ ! -n "${NGX_MODULES}" ]; then
     if [ ! -e "/etc/nginx/modules/enabled/.quiet" ]; then
         echo "[NGINX] --->"
@@ -156,6 +143,19 @@ echo "[NGINX] Verifying configurations using the command nginx -t"
 nginx -t
 
 echo "[NGINX] This docker is set to reload every 24 hours to pick up new SSL certificates."
-while [ 1 ]; do sleep 1d; nginx -s reload; done &
+while [ 1 ]; do sleep 1d; /usr/sbin/nginx -s reload; done &
 
-exec nginx -g 'daemon off;'
+# Setup the MALLOC of choice.
+case ${MALLOC} in
+    *|jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        ;;
+    mimalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
+        ;;
+    none)
+        unset LD_PRELOAD
+        ;;
+esac
+
+exec /usr/sbin/nginx -g 'daemon off;'

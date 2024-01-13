@@ -1,0 +1,14 @@
+version: "2.2"
+services:
+  php-fpm74:
+    container_name: php-fpm74
+    image: eilandert/php-fpm:7.4
+    restart: always
+    stop_grace_period: 10s
+    volumes:
+      - ./config/php:/etc/php:rw
+      - ./config/nullmailer:/etc/nullmailer:rw
+    environment:
+      - TZ=Europe/Amsterdam
+#    ports:
+#    - 9000:9000
