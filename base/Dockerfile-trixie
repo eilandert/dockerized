@@ -1,0 +1,71 @@
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
+FROM    #TEMPLATE1#
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+ENV	DIST=#TEMPLATE2#
+COPY    bootstrap.sh /bootstrap.sh
+COPY    myguard.deb /tmp/myguard.deb
+COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
+
+
+# Install https://deb.myguard.nl/pool/myguard.deb to setup my own repository
+
+RUN set -x ;\
+    apt-get update && apt-get install -y ssl-cert ;\
+    { \
+        echo 'Package: *'; \
+        echo 'Pin: release a=#TEMPLATE2#-backports'; \
+        echo 'Pin-Priority: 900'; \
+    } > /etc/apt/preferences.d/99backports ;\
+    cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\
+    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
+    apt-get -y update ;\
+    apt-get install -y --no-install-recommends myguard ca-certificates tzdata libjemalloc2 mimalloc wait-for-it ;\
+    apt-get -y upgrade ;\
+    apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
+    apt-get -y clean ;\
+    apt-get -y autoremove ;\
+    apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/* ;\
+    chmod +x /bootstrap.sh ;\
+
+    # Delete users we don't need
+    sh -x ;\
+        for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
+    # Put users with userid <1000 except root on invalid shell and lock them out
+    for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
+        if [ $user != "root" ]; then \
+            usermod -L -s /usr/sbin/nologin $user ;\
+         fi ;\
+    done ;\
+    
+
+    # Don't need these files in a Docker. 
+    # Ubuntu symlinks /sbin to /usr/sbin and Debian does not, so we have to delete the same file twice
+    for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/fs*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; unlink $file; done ;\
+    for file in `ls /sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/fs*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/mk*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    for file in `ls /sbin/swap*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
+    \
+    for file in backblocks dumpe2fs fstrim isosize resize2fs rtcwake sulogin tune2fs wipefs; \
+      do dpkg-statoverride --quiet --update --add root adm 0000 /sbin/$file; rm -f /sbin/$file; \
+         dpkg-statoverride --quiet --update --add root adm 0000 /usr/sbin/$file; rm -f /usr/sbin/$file; \
+      done ;\
+    \
+    # same applies for /bin -> /usr/bin
+    \
+    for file in dmesg su sudo; \
+      do dpkg-statoverride --quiet --update --add root adm 0000 /bin/$file; rm -f /bin/$file; \
+         dpkg-statoverride --quiet --update --add root adm 0000 /usr/bin/$file; rm -f /usr/bin/$file; \
+      done ;\
+
+    echo "alias ls='ls --color=auto'" > /root/.bashrc
+
+        
+CMD     ["/bootstrap.sh"]
