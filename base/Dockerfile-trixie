@@ -1,5 +1,5 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
-FROM    #TEMPLATE1#
+FROM    debian:trixie-slim
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	DIST=#TEMPLATE2#
