@@ -24,11 +24,13 @@ VOLUME /repo
 COPY ./repo /tpl-repo
 COPY ./services /services
 ADD ./sh/start.sh /
+ADD ./sh/ssh-createkeys.sh /
 
 ## Finishing installation
 RUN \
   # Scripts
   chmod +x /start.sh \
+  && chmod +x /ssh-createkeys.sh \
   && echo "export PATH=/repo/bin:${PATH}" >> /root/.bashrc \
   # Services
   && chmod +x /services/cron/* \

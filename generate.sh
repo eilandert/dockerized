@@ -16,11 +16,13 @@ export UBUNTU_ROLLING="jammy"
 
 cp base/Dockerfile-template base/Dockerfile-devel
 cp base/Dockerfile-template base/Dockerfile-rolling
+cp base/Dockerfile-template base/Dockerfile-noble
 cp base/Dockerfile-template base/Dockerfile-jammy
 cp base/Dockerfile-template base/Dockerfile-focal
 cp base/Dockerfile-template base/Dockerfile-bionic
 cp base/Dockerfile-template base/Dockerfile-xenial
 cp base/Dockerfile-template base/Dockerfile-trusty
+cp base/Dockerfile-template base/Dockerfile-trixie
 cp base/Dockerfile-template base/Dockerfile-bookworm
 cp base/Dockerfile-template base/Dockerfile-bullseye
 cp base/Dockerfile-template base/Dockerfile-buster
@@ -29,12 +31,14 @@ cp base/Dockerfile-template base/Dockerfile-jessie
 
 sed -i s/#TEMPLATE1#/ubuntu:devel/   base/Dockerfile-devel
 sed -i s/"#TEMPLATE1#"/"ubuntu:${UBUNTU_ROLLING}"/ base/Dockerfile-rolling
+sed -i s/#TEMPLATE1#/ubuntu:noble/   base/Dockerfile-noble
 sed -i s/#TEMPLATE1#/ubuntu:jammy/   base/Dockerfile-jammy
 sed -i s/#TEMPLATE1#/ubuntu:focal/   base/Dockerfile-focal
 sed -i s/#TEMPLATE1#/ubuntu:bionic/  base/Dockerfile-bionic
 sed -i s/#TEMPLATE1#/ubuntu:xenial/  base/Dockerfile-xenial
 sed -i s/#TEMPLATE1#/ubuntu:trusty/  base/Dockerfile-trusty
 
+sed -i s/#TEMPLATE1#/debian:trixie-slim/ base/Dockerfile-trixie
 sed -i s/#TEMPLATE1#/debian:bookworm-slim/ base/Dockerfile-bookworm
 sed -i s/#TEMPLATE1#/debian:buster-slim/   base/Dockerfile-buster
 sed -i s/#TEMPLATE1#/debian:bullseye-slim/ base/Dockerfile-bullseye
@@ -155,6 +159,9 @@ sed -i 's/rm -rf \/etc\/php\/8.2/#rm -rf \/etc\/php\/8.2/' php-fpm/Dockerfile-8.
 sed -i 's/rm -rf \/etc\/php\/8.3/#rm -rf \/etc\/php\/8.3/' php-fpm/Dockerfile-8.3
 sed -i 's/rm -rf \/etc\/php/#rm -rf \/etc\/php/' php-fpm/Dockerfile-multi
 
+sed -i /zstd/d php-fpm/Dockerfile-5.6
+sed -i /snuffleupagus/d php-fpm/Dockerfile-5.6
+
 cp php-fpm/Dockerfile-5.6 php-fpm/Dockerfile-5.6debian
 cp php-fpm/Dockerfile-7.2 php-fpm/Dockerfile-7.2debian
 cp php-fpm/Dockerfile-7.4 php-fpm/Dockerfile-7.4debian
@@ -166,10 +173,8 @@ cp php-fpm/Dockerfile-multi php-fpm/Dockerfile-multidebian
 
 sed -i s/"eilandert\/ubuntu-base:rolling"/"eilandert\/debian-base:stable"/ php-fpm/*debian
 
-sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/packages.sury.org\/php\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-*debian
-sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,8.2,8.3,multi}
-
-
+#sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/packages.sury.org\/php\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-*debian
+#sed -i s/"\#TEMPLATE3\#"/"echo \"deb \[trusted=yes\] http:\/\/ppa.launchpad.net\/ondrej\/php\/ubuntu\/ \${DIST} main\" > \/etc\/apt\/sources.list.d\/ondrej-ppa.list"/ php-fpm/Dockerfile-{5.6,7.2,7.4,8.0,8.1,8.2,8.3,multi}
 
 ####
 ## SCRIPTS Apache PHP-FPM
@@ -210,47 +215,56 @@ sed -i s/"eilandert\/php-fpm:"/"eilandert\/php-fpm:deb-"/ apache-phpfpm/*debian
 ## SCRIPT NGINX PROXY
 ###
 
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php56
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php72
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php74
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php80
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php81
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php82
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php83
+cp nginx/Dockerfile.template nginx/Dockerfile
+cp nginx/Dockerfile.template nginx/Dockerfile-php56
+cp nginx/Dockerfile.template nginx/Dockerfile-php72
+cp nginx/Dockerfile.template nginx/Dockerfile-php74
+cp nginx/Dockerfile.template nginx/Dockerfile-php80
+cp nginx/Dockerfile.template nginx/Dockerfile-php81
+cp nginx/Dockerfile.template nginx/Dockerfile-php82
+cp nginx/Dockerfile.template nginx/Dockerfile-php83
 
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-multi
+cp nginx/Dockerfile.template nginx/Dockerfile-multi
 
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php56debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php72debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php74debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php80debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php81debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php82debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-php83debian
-cp nginx-proxy-modsecurity-pagespeed/Dockerfile.template nginx-proxy-modsecurity-pagespeed/Dockerfile-multidebian
+cp nginx/Dockerfile.template nginx/Dockerfile-debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php56debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php72debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php74debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php80debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php81debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php82debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php83debian
+cp nginx/Dockerfile.template nginx/Dockerfile-multidebian
 
-sed -i 's/#FROM#/eilandert\/ubuntu-base:rolling/' nginx-proxy-modsecurity-pagespeed/Dockerfile
-sed -i 's/#FROM#/eilandert\/php-fpm:multi/' nginx-proxy-modsecurity-pagespeed/Dockerfile-multi
-sed -i 's/#FROM#/eilandert\/php-fpm:5.6/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php56
-sed -i 's/#FROM#/eilandert\/php-fpm:7.2/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php72
-sed -i 's/#FROM#/eilandert\/php-fpm:7.4/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php74
-sed -i 's/#FROM#/eilandert\/php-fpm:8.0/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php80
-sed -i 's/#FROM#/eilandert\/php-fpm:8.1/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php81
-sed -i 's/#FROM#/eilandert\/php-fpm:8.2/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php82
-sed -i 's/#FROM#/eilandert\/php-fpm:8.3/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php83
+sed -i 's/#FROM#/eilandert\/ubuntu-base:rolling/' nginx/Dockerfile
+sed -i 's/#FROM#/eilandert\/php-fpm:multi/' nginx/Dockerfile-multi
+sed -i 's/#FROM#/eilandert\/php-fpm:5.6/' nginx/Dockerfile-php56
+sed -i 's/#FROM#/eilandert\/php-fpm:7.2/' nginx/Dockerfile-php72
+sed -i 's/#FROM#/eilandert\/php-fpm:7.4/' nginx/Dockerfile-php74
+sed -i 's/#FROM#/eilandert\/php-fpm:8.0/' nginx/Dockerfile-php80
+sed -i 's/#FROM#/eilandert\/php-fpm:8.1/' nginx/Dockerfile-php81
+sed -i 's/#FROM#/eilandert\/php-fpm:8.2/' nginx/Dockerfile-php82
+sed -i 's/#FROM#/eilandert\/php-fpm:8.3/' nginx/Dockerfile-php83
 
-sed -i 's/#FROM#/eilandert\/debian-base:stable/' nginx-proxy-modsecurity-pagespeed/Dockerfile-debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-multi/' nginx-proxy-modsecurity-pagespeed/Dockerfile-multidebian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-5.6/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php56debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.2/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php72debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.4/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php74debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.0/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php80debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php81debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.2/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php82debian
-sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.3/' nginx-proxy-modsecurity-pagespeed/Dockerfile-php83debian
+sed -i 's/#FROM#/eilandert\/debian-base:stable/' nginx/Dockerfile-debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-multi/' nginx/Dockerfile-multidebian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-5.6/' nginx/Dockerfile-php56debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.2/' nginx/Dockerfile-php72debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-7.4/' nginx/Dockerfile-php74debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.0/' nginx/Dockerfile-php80debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx/Dockerfile-php81debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.2/' nginx/Dockerfile-php82debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.3/' nginx/Dockerfile-php83debian
 
+####
+## SCRIPT ANGIE 
+###
+
+cp nginx/Dockerfile* angie
+cp nginx/bootstrap.sh angie
+sed -i s/nginx/angie/g angie/Dockerfile*
+sed -i s/nginx/angie/g angie/bootstrap.sh
+sed -i s/NGINX/ANGIE/g angie/bootstrap.sh
 
 export UBUNTU_ROLLING="jammy"
 

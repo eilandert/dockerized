@@ -19,15 +19,13 @@ if [ "$(uname -n)" == "build" ]; then PUSH="--push"; fi
 docker buildx create --use
 
 #for BUILD in base-current phpfpm multiphp nginx-quic nginx-php-quic openssh mail db nginx nginx-php apache apache-misc misc
-for BUILD in base-current phpfpm multiphp mail db nginx nginx-php apache apache-misc misc
+for BUILD in base-current phpfpm multiphp mail db nginx nginx-php apache apache-misc misc angie angie-php
 do
     echo "-----------------------------------"
     echo "BUILDING TARGET ${BUILD}"
     docker buildx bake ${PUSH} ${BUILD}
 done
 
-docker buildx bake --push debian-phpfpm81bullseye
-docker buildx bake --push debian-apache-php81bullseye
 
 docker buildx rm
 docker system prune -f -a

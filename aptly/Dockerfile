@@ -15,11 +15,13 @@ RUN set -ex ;\
     apt-get -y --no-install-recommends install \
       aptly \
       ca-certificates \
+      cron \
       less \
       libnginx-mod-http-fancyindex \
       libnginx-mod-http-brotli \
       libnginx-mod-http-zstd \
-      nginx-light \
+      nano \
+      nginx-minimal \
       openssh-server \
       rsync \
       sudo \

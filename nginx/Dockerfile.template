@@ -27,8 +27,9 @@ RUN apt-get -y --no-install-recommends install \
     rm -rf /var/lib/apt/lists/
 
 RUN mv /etc/nginx /etc/nginx.orig ;\
+    mv /etc/modsecurity /etc/modsecurity.orig ;\
     mkdir -p /etc/nginx ;\
-    mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
+    mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
     rm -f /var/spool/nullmailer/trigger
 

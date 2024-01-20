@@ -13,11 +13,15 @@ if [ -n "${SYSLOG_HOST}" ]; then
     syslog-ng --no-caps
 fi
 
+
+if [ ! "${STARTNGINX}" = "NO" ];
+then
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/nginx/nginx.conf"
 if [ ! -f ${FIRSTRUN} ]; then
     echo "[NGINX] no configs found, populating default configs to /etc/nginx"
     cp -r /etc/nginx.orig/* /etc/nginx/
+fi
 fi
 
 # If you bind /etc/ssh the dir will be empty, so place a new copy
@@ -87,7 +91,7 @@ then
     service nginx restart 1>/dev/null
 fi
 
-#dockerid=$(hostname)
-#echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
+dockerid=$(hostname)
+echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
 
 exec /usr/sbin/sshd -D

@@ -2,8 +2,8 @@
 
 chmod 777 /dev/stdout
 
-echo "[angie] Find documentation for this Docker image at https://deb.myguard.nl/angie-dockerized/"
-echo "[angie] For information about the angie packages, please visit https://deb.myguard.nl/angie-modules/"
+echo "[ANGIE] Find documentation for this Docker image at https://deb.myguard.nl/angie-dockerized/"
+echo "[ANGIE] For information about the ANGIE packages, please visit https://deb.myguard.nl/angie-modules/"
 
 # Set timezone
 if [ -n "${TZ}" ]; then
@@ -15,7 +15,7 @@ fi
 # If there are no configfiles, copy them
 FIRSTRUN="/etc/angie/angie.conf"
 if [ ! -f ${FIRSTRUN} ]; then
-    echo "[angie] Default configurations are being copied to /etc/angie and /etc/modsecurity as no existing configs were found."
+    echo "[ANGIE] Default configurations are being copied to /etc/angie and /etc/modsecurity as no existing configs were found."
     cp -r /etc/angie.orig/* /etc/angie/
     cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
@@ -25,7 +25,7 @@ if [ -n "${PHPVERSION}" ]; then
 
     FIRSTRUN="/etc/nullmailer/defaultdomain"
     if [ ! -f ${FIRSTRUN} ]; then
-    echo "[angie] Default configurations are being copied to /etc/nullmailer as no existing configs were found."
+    echo "[ANGIE] Default configurations are being copied to /etc/nullmailer as no existing configs were found."
         cp -r /etc/nullmailer.orig/* /etc/nullmailer
     fi
 
@@ -77,7 +77,7 @@ if [ -n "${PHPVERSION}" ]; then
         PHPVERSION="$1"
         FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
         if [ ! -f ${FIRSTRUN} ]; then
-            echo "[angie] Default PHP configurations are being copied to /etc/php/${PHPVERSION} as no existing PHP configs were found."
+            echo "[ANGIE] Default PHP configurations are being copied to /etc/php/${PHPVERSION} as no existing PHP configs were found."
             mkdir -p /etc/php/${PHPVERSION}
             cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION}
         fi
@@ -86,6 +86,8 @@ if [ -n "${PHPVERSION}" ]; then
         service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
         SETPHP=1
     }
+
+    cp -rn /etc/php.orig/* /etc/php
 
     #SINGLE PHP IMAGES
     if [ "${MODE}" = "FPM" ] && [ ! "${MODE}" = "MULTI" ]; then
@@ -114,36 +116,40 @@ if [ -n "${PHPVERSION}" ]; then
         startphp "8.3"
     fi
     if [ "${PHPVERSION}" = "MULTI" ] && [ "${SETPHP}" = 0 ]; then
-        echo "[angie] --->"
-        echo "[angie] ---> You have obtained the MULTI-PHP version of the Docker, however..."
-        echo "[angie] ---> No environment variable for PHP56, PHP74, PHP80, PHP81, PHP82, or PHP83 has been set"
-        echo "[angie] ---> Uncertain of the next steps, the process will now exit..."
-	echo "[angie] --->"
+        echo "[ANGIE] --->"
+        echo "[ANGIE] ---> You have obtained the MULTI-PHP version of the Docker, however..."
+        echo "[ANGIE] ---> No environment variable for PHP56, PHP74, PHP80, PHP81, PHP82, or PHP83 has been set"
+        echo "[ANGIE] ---> Uncertain of the next steps, the process will now exit..."
+	echo "[ANGIE] --->"
         exit
     fi
 fi
 # /PHPBLOCK
 
+if [ -n "${MODULES}" ]; then
+    $NGX_MODULES = ${MODULES};
+fi
+
 if [ ! -n "${NGX_MODULES}" ]; then
     if [ ! -e "/etc/angie/modules/enabled/.quiet" ]; then
-        echo "[angie] --->"
-	echo "[angie] ---> Without NGX_MODULES defined in the environment, all modules will be initialized"
-        echo "[angie] ---> This may lead to issues, reduced performance, or failure to start"
-        echo "[angie] ---> It's advised to define NGX_MODULES or manually remove entries from /etc/angie/modules-enabled"
-	echo "[angie] ---> Removing mod-http-lua.conf and mod-stream-lua.conf, as those requires additional configuration to start"
-        echo "[angie] ---> To suppress this message and behaviour please touch /etc/angie/modules-enabled/.quiet"
-        echo "[angie] --->"
+        echo "[ANGIE] --->"
+	echo "[ANGIE] ---> Without NGX_MODULES defined in the environment, all modules will be initialized"
+        echo "[ANGIE] ---> This may lead to issues, reduced performance, or failure to start"
+        echo "[ANGIE] ---> It's advised to define NGX_MODULES or manually remove entries from /etc/angie/modules-enabled"
+	echo "[ANGIE] ---> Removing mod-http-lua.conf and mod-stream-lua.conf, as those requires additional configuration to start"
+        echo "[ANGIE] ---> To suppress this message and behaviour please touch /etc/angie/modules-enabled/.quiet"
+        echo "[ANGIE] --->"
         rm /etc/angie/modules-enabled/50-mod-http-lua.conf
         rm /etc/angie/modules-enabled/50-mod-stream-lua.conf
     fi
 fi
 
 angie -V 2>&1 | grep -v configure | grep -v SNI
-echo "[angie] Verifying configurations using the command angie -t"
+echo "[ANGIE] Verifying configurations using the command angie -t"
 angie -t
 
-echo "[angie] This docker is set to reload every 24 hours to pick up new SSL certificates."
-while [ 1 ]; do sleep 1d; angie -s reload; done &
+echo "[ANGIE] This docker is set to reload every 24 hours to pick up new SSL certificates."
+while [ 1 ]; do sleep 1d; /usr/sbin/angie -s reload; done &
 
 # Setup the MALLOC of choice.
 case ${MALLOC} in
@@ -158,4 +164,4 @@ case ${MALLOC} in
         ;;
 esac
 
-exec angie -g 'daemon off;'
+exec /usr/sbin/angie -g 'daemon off;'

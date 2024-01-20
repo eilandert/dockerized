@@ -7,17 +7,17 @@ group "default" {
 }
 
 group "base-current" {
-    targets = ["jammy", "bookworm"]
+    targets = ["jammy", "bookworm","noble","trixie"]
 }
 
 group "base" {
-    targets = ["rolling", "devel","jammy","focal","bionic","bookworm","bullseye","buster"]
+    targets = ["rolling", "devel","noble","jammy","focal","bionic","trixie","bookworm","bullseye","buster"]
 }
 
 group "phpfpm" {
     targets = [
-        "ubuntu-phpfpm56",
- #       "debian-phpfpm56",
+       "ubuntu-phpfpm56",
+       "debian-phpfpm56",
         "ubuntu-phpfpm72",
         "debian-phpfpm72",
         "ubuntu-phpfpm74",
@@ -44,14 +44,26 @@ group "nginx" {
     targets = [
        "debian-nginx",
        "ubuntu-nginx",
-       "alpine-nginx",
     ]
 }
 
-group "nginx-quic" {
+group "angie" {
     targets = [
-       "debian-nginx-quic",
-       "ubuntu-nginx-quic",
+       "debian-angie",
+       "ubuntu-angie",
+    ]
+}
+
+group "angie-php" {
+    targets = [
+       "debian-angie-php56",
+       "debian-angie-php72",
+       "debian-angie-php74",
+       "debian-angie-php80",
+       "debian-angie-php81",
+       "debian-angie-php82",
+       "debian-angie-php83",
+       "debian-angie-multi",
     ]
 }
 
@@ -123,7 +135,6 @@ group "mail" {
 
 group "db" {
     targets = [
-        "alpine-redis",
         "ubuntu-redis",
         "debian-redis",
 	"ubuntu-mariadb",
@@ -133,15 +144,21 @@ group "db" {
 
 group "misc" {
     targets = [
- #      "clamav",
+       "clamav",
        "alpine-letsencrypt",
        "rbldnsd",
        "ubuntu-reprepro",
        "debian-sitewarmup",
        "alpine:unbound",
        "aptly",
-        "debian-openssh",
+       "debian-openssh",
     ]
+}
+
+target "cms" {
+	dockerfile = "Dockerfile-8.3debian"
+	context = "docker-cms"
+	tags = ["docker.io/eilandert/docker-cms:latest"]
 }
 
 target "rolling" {
@@ -154,6 +171,12 @@ target "devel" {
     dockerfile = "Dockerfile-devel"
     context = "base"
     tags = ["docker.io/eilandert/ubuntu-base:devel"]
+}
+
+target "noble" {
+    dockerfile = "Dockerfile-noble"
+    context = "base"
+    tags = ["docker.io/eilandert/ubuntu-base:noble"]
 }
 
 target "jammy" {
@@ -184,6 +207,12 @@ target "trusty" {
     dockerfile = "Dockerfile-trusty"
     context = "base"
     tags = ["docker.io/eilandert/ubuntu-base:trusty"]
+}
+
+target "trixie" {
+    dockerfile = "Dockerfile-trixie"
+    context = "base"
+    tags = ["docker.io/eilandert/debian-base:trixie"]
 }
 
 target "bookworm" {
@@ -319,110 +348,110 @@ target "ubuntu-mariadb" {
 }
 
 target "debian-nginx" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-latest"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-latest","docker.io/eilandert/nginx:deb-latest"]
+    context = "nginx"
     dockerfile = "Dockerfile-debian"
 }
 
 target "ubuntu-nginx" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:latest"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile"
 }
 
 target "ubuntu-nginx-php56" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php5.6"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php56"
 }
 
 target "debian-nginx-php56" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php5.6"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php5.6","docker.io/eilandert/nginx:deb-php5.6"]
+    context = "nginx"
     dockerfile = "Dockerfile-php56debian"
 }
 
 target "ubuntu-nginx-php72" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php7.2"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php72"
 }
 
 target "debian-nginx-php72" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php7.2"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php7.2","docker.io/eilandert/nginx:deb-php7.2"]
+    context = "nginx"
     dockerfile = "Dockerfile-php72debian"
 }
 
 target "ubuntu-nginx-php74" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php7.4"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php74"
 }
 
 target "debian-nginx-php74" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php7.4"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php7.4","docker.io/eilandert/nginx:deb-php7.2"]
+    context = "nginx"
     dockerfile = "Dockerfile-php74debian"
 }
 
 target "ubuntu-nginx-php80" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.0"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php80"
 }
 
 target "debian-nginx-php80" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.0"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.0","docker.io/eilandert/nginx:deb-php8.0"]
+    context = "nginx"
     dockerfile = "Dockerfile-php80debian"
 }
 
 target "ubuntu-nginx-php81" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.1"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php81"
 }
 
 target "ubuntu-nginx-php82" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.2"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php82"
 }
 
 target "ubuntu-nginx-php83" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.3"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-php83"
 }
 
 target "debian-nginx-php81" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.1"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.1","docker.io/eilandert/nginx:deb-php8.1"]
+    context = "nginx"
     dockerfile = "Dockerfile-php81debian"
 }
 
 target "debian-nginx-php82" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.2"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.2","docker.io/eilandert/nginx:deb-php8.2"]
+    context = "nginx"
     dockerfile = "Dockerfile-php82debian"
 }
 
 target "debian-nginx-php83" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.3"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.3","docker.io/eilandert/nginx:deb-php8.3"]
+    context = "nginx"
     dockerfile = "Dockerfile-php83debian"
 }
 
 target "ubuntu-nginx-multi" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:multi"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    context = "nginx"
     dockerfile = "Dockerfile-multi"
 }
 
 target "debian-nginx-multi" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-multi"]
-    context = "nginx-proxy-modsecurity-pagespeed"
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-multi","docker.io/eilandert/nginx:deb-multi"]
+    context = "nginx"
     dockerfile= "Dockerfile-multidebian"
 }
 
@@ -548,11 +577,6 @@ target "alpine-letsencrypt" {
    dockerfile = "Dockerfile"
 }
 
-target "alpine-nginx" {
-   tags = ["docker.io/eilandert/nginx-alpine"]
-   context = "nginx-alpine"
-   dockerfile = "Dockerfile"
-}
 
 target "ubuntu-postfix" {
    tags = ["docker.io/eilandert/postfix:ubuntu","docker.io/eilandert/postfix:latest"]
@@ -678,114 +702,110 @@ target "aptly" {
    dockerfile = "Dockerfile"
 }
 
-target "debian-nginx-quic" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-latest"]
-    context = "nginx-quic"
+target "debian-angie" {
+    tags = ["docker.io/eilandert/angie:deb-latest"]
+    context = "angie"
     dockerfile = "Dockerfile-debian"
 }
 
-target "ubuntu-nginx-quic" {
-    tags = ["docker.io/eilandert/nginx-quic:latest"]
-    context = "nginx-quic"
+target "ubuntu-angie" {
+    tags = ["docker.io/eilandert/angie:latest"]
+    context = "angie"
     dockerfile = "Dockerfile"
 }
 
-target "ubuntu-nginx-quic-php56" {
-    tags = ["docker.io/eilandert/nginx-quic:php5.6"]
-    context = "nginx-quic"
+target "ubuntu-angie-php56" {
+    tags = ["docker.io/eilandert/angie:php5.6"]
+    context = "angie"
     dockerfile = "Dockerfile-php56"
 }
 
-target "debian-nginx-quic-php56" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-php5.6"]
-    context = "nginx-quic"
+target "debian-angie-php56" {
+    tags = ["docker.io/eilandert/angie:deb-php5.6"]
+    context = "angie"
     dockerfile = "Dockerfile-php56debian"
 }
 
-target "ubuntu-nginx-quic-php72" {
-    tags = ["docker.io/eilandert/nginx-quic:php7.2"]
-    context = "nginx-quic"
+target "ubuntu-angie-php72" {
+    tags = ["docker.io/eilandert/angie:php7.2"]
+    context = "angie"
     dockerfile = "Dockerfile-php72"
 }
 
-target "debian-nginx-quic-php72" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-php7.2"]
-    context = "nginx-quic"
+target "debian-angie-php72" {
+    tags = ["docker.io/eilandert/angie:deb-php7.2"]
+    context = "angie"
     dockerfile = "Dockerfile-php72debian"
 }
 
-target "ubuntu-nginx-quic-php74" {
-    tags = ["docker.io/eilandert/nginx-quic:php7.4"]
-    context = "nginx-quic"
+target "ubuntu-angie-php74" {
+    tags = ["docker.io/eilandert/angie:php7.4"]
+    context = "angie"
     dockerfile = "Dockerfile-php74"
 }
 
-target "debian-nginx-quic-php74" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-php7.4"]
-    context = "nginx-quic"
+target "debian-angie-php74" {
+    tags = ["docker.io/eilandert/angie:deb-php7.4"]
+    context = "angie"
     dockerfile = "Dockerfile-php74debian"
 }
 
-target "ubuntu-nginx-quic-php80" {
-    tags = ["docker.io/eilandert/nginx-quic:php8.0"]
-    context = "nginx-quic"
+target "ubuntu-angie-php80" {
+    tags = ["docker.io/eilandert/angie:php8.0"]
+    context = "angie"
     dockerfile = "Dockerfile-php80"
 }
 
-target "debian-nginx-quic-php80" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-php8.0"]
-    context = "nginx-quic"
+target "debian-angie-php80" {
+    tags = ["docker.io/eilandert/angie:deb-php8.0"]
+    context = "angie"
     dockerfile = "Dockerfile-php80debian"
 }
 
-target "ubuntu-nginx-quic-php81" {
-    tags = ["docker.io/eilandert/nginx-quic:php8.1"]
-    context = "nginx-quic"
+target "ubuntu-angie-php81" {
+    tags = ["docker.io/eilandert/angie:php8.1"]
+    context = "angie"
     dockerfile = "Dockerfile-php81"
 }
 
-target "ubuntu-nginx-quic-php82" {
-    tags = ["docker.io/eilandert/nginx-quic:php8.2"]
-    context = "nginx-quic"
+target "ubuntu-angie-php82" {
+    tags = ["docker.io/eilandert/angie:php8.2"]
+    context = "angie"
     dockerfile = "Dockerfile-php82"
 }
 
-target "debian-nginx-quic-php81" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-php8.1"]
-    context = "nginx-quic"
+target "ubuntu-angie-php83" {
+    tags = ["docker.io/eilandert/angie:php8.3"]
+    context = "angie"
+    dockerfile = "Dockerfile-php83"
+}
+
+target "debian-angie-php81" {
+    tags = ["docker.io/eilandert/angie:deb-php8.1"]
+    context = "angie"
     dockerfile = "Dockerfile-php81debian"
 }
 
-target "debian-nginx-quic-php82" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-php8.2"]
-    context = "nginx-quic"
-    dockerfile= "Dockerfile-php82debian"
+target "debian-angie-php82" {
+    tags = ["docker.io/eilandert/angie:deb-php8.2"]
+    context = "angie"
+    dockerfile = "Dockerfile-php82debian"
+}
+target "debian-angie-php83" {
+    tags = ["docker.io/eilandert/angie:deb-php8.3"]
+    context = "angie"
+    dockerfile = "Dockerfile-php83debian"
 }
 
-
-target "ubuntu-nginx-quic-multi" {
-    tags = ["docker.io/eilandert/nginx-quic:multi"]
-    context = "nginx-quic"
+target "ubuntu-angie-multi" {
+    tags = ["docker.io/eilandert/angie:multi"]
+    context = "angie"
     dockerfile = "Dockerfile-multi"
 }
 
-target "debian-nginx-quic-multi" {
-    tags = ["docker.io/eilandert/nginx-quic:deb-multi"]
-    context = "nginx-quic"
+target "debian-angie-multi" {
+    tags = ["docker.io/eilandert/angie:deb-multi"]
+    context = "angie"
     dockerfile= "Dockerfile-multidebian"
-}
-
-
-# on request... no bookworm but bullseye. remove after 1-1-2025
-target "debian-phpfpm81bullseye" {
-    tags = ["docker.io/eilandert/php-fpm:8.1bullseye"]
-    context = "php-fpm"
-    dockerfile = "Dockerfile-8.1bullseye"
-}
-# same
-target "debian-apache-php81bullseye" {
-    tags = ["docker.io/eilandert/apache-phpfpm:8.1bullseye"]
-    context = "apache-phpfpm"
-    dockerfile= "Dockerfile-8.1bullseye"
 }
 

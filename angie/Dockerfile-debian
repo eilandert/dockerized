@@ -27,8 +27,9 @@ RUN apt-get -y --no-install-recommends install \
     rm -rf /var/lib/apt/lists/
 
 RUN mv /etc/angie /etc/angie.orig ;\
+    mv /etc/modsecurity /etc/modsecurity.orig ;\
     mkdir -p /etc/angie ;\
-    mv /etc/modsecurity /etc/modsecurity.orig && mkdir -p /etc/modsecurity ;\
+    mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
     rm -f /var/spool/nullmailer/trigger
 

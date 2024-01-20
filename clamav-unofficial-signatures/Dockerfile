@@ -1,7 +1,6 @@
-FROM    eilandert/ubuntu-base:rolling
+FROM    eilandert/debian-base:trixie
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 COPY    bootstrap.sh /bootstrap.sh
 
@@ -11,8 +10,8 @@ COPY check.sh /check.sh
 
 RUN set -ex ;\
   apt-get update ;\
-  apt-get -y --no-install-recommends install bash wget curl curl rsync tzdata bind9-host bind9-dnsutils ;\  
-  apt-get -y --no-install-recommends install clamav clamav-daemon clamav-freshclam libclamunrar clamav-milter clamdscan ;\ 
+  apt-get -y --no-install-recommends install bash wget curl rsync tzdata bind9-host bind9-dnsutils ;\  
+  apt-get -y --no-install-recommends install clamav clamav-daemon clamav-freshclam clamav-milter clamdscan ;\ 
   mkdir -p /usr/local/sbin/ ;\
   mkdir -p /config.orig/clamav-unofficial-sigs ;\
   mv /etc/clamav /config.orig ;\

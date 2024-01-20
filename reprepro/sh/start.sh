@@ -62,9 +62,12 @@ if [ -f /repo/gnupg/S.gpg-agent ]; then
 fi
 
 # SSH
-chmod 600 /repo/ssh/*key
+#create sshd keys if needed (absent on first run)
+bash /ssh-createkeys.sh 1>/dev/null
+hmod 600 /repo/ssh/*key
 chmod 644 /repo/ssh/*.pub
 chmod 600 /repo/ssh/authorized_keys
+chown root:root -R /repo/ssh
 
 # Public site
 chmod 755 /repo/public

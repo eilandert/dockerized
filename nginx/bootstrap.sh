@@ -87,6 +87,8 @@ if [ -n "${PHPVERSION}" ]; then
         SETPHP=1
     }
 
+    cp -rn /etc/php.orig/* /etc/php
+
     #SINGLE PHP IMAGES
     if [ "${MODE}" = "FPM" ] && [ ! "${MODE}" = "MULTI" ]; then
         startphp "${PHPVERSION}"
@@ -123,6 +125,10 @@ if [ -n "${PHPVERSION}" ]; then
     fi
 fi
 # /PHPBLOCK
+
+if [ -n "${MODULES}" ]; then
+    $NGX_MODULES = ${MODULES};
+fi
 
 if [ ! -n "${NGX_MODULES}" ]; then
     if [ ! -e "/etc/nginx/modules/enabled/.quiet" ]; then

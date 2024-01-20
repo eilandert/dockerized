@@ -9,10 +9,10 @@ ENV	MODE=FPM
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    #TEMPLATE3# ;\
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
-    rm -rf /var/spool/nullmailer/trigger
-#    apt-get -y autoremove && apt-get -y autoclean ;\
-#    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/spool/nullmailer/trigger ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
 

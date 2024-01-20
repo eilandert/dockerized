@@ -9,15 +9,15 @@ ENV	MODE=FPM
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
-    rm -rf /var/spool/nullmailer/trigger
-#    apt-get -y autoremove && apt-get -y autoclean ;\
-#    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/spool/nullmailer/trigger ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
 
 RUN set -x ;\
-#    apt-get update ;\
+    apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.1 \
       php8.1-fpm \
@@ -46,18 +46,21 @@ RUN set -x ;\
       php8.1-sqlite3 \
       php8.1-tidy \
       php8.1-xml \
-      php8.1-zip \
-      php8.1-zstd
-#    apt-get -y autoremove && apt-get -y autoclean ;\
-#    rm -rf /var/lib/apt/lists/*
+      php8.1-zstd \
+      php8.1-snuffleupagus ;\
+      php8.1-zip ;\
+    apt-get -y autoremove && apt-get -y autoclean ;\
+    rm -rf /var/lib/apt/lists/*
 
 RUN set -ex ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
     cd /tmp ;\
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
-    cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
-    php -r "unlink('composer-setup.php');" ;\
-    rm -rf /var/lib/apt/lists/* /tmp/* ;\
+    /usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
+    cat /tmp/composer-setup.php | /usr/bin/php -- --filename=composer --install-dir=/usr/bin ;\
+    /usr/bin/php -r "unlink('composer-setup.php');" ;\
+    /usr/bin/php -r "copy('https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar', '/usr/bin/wp');" ;\
+    chmod +x /usr/bin/wp 
+
+RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
     rm -rf /etc/php/7.1 /usr/lib/php/20160303 ;\
