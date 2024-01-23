@@ -19,7 +19,7 @@ RUN set -x ;\
       php#PHPVERSION#-ldap \
       #removedinphp72#php#PHPVERSION#-mcrypt \
       php#PHPVERSION#-memcache \
-      #removedinphp83#php#PHPVERSION#-memcached \
+      php#PHPVERSION#-memcached \
       php#PHPVERSION#-mbstring \
       php#PHPVERSION#-mysql \
       php#PHPVERSION#-opcache \
@@ -33,7 +33,7 @@ RUN set -x ;\
       php#PHPVERSION#-tidy \
       php#PHPVERSION#-xml \
       php#PHPVERSION#-zstd \
-      php#PHPVERSION#-snuffleupagus ;\
+      php#PHPVERSION#-snuffleupagus \
       php#PHPVERSION#-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*

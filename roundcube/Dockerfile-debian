@@ -13,7 +13,7 @@ COPY	bootstrap.sh /
 RUN set -x ;\
     LASTVERSION=$(cat /tmp/lastversion) ;\
     apt-get -y update ;\
-    rm -rf /etc/php && mv /etc/php.orig /etc/php ;\
+    rm -rf /etc/php && cp -rp /etc/php.orig /etc/php ;\
     apt-get install -y --no-install-recommends \
       git \
       unzip \
@@ -32,9 +32,13 @@ RUN set -x ;\
     composer -n require roundcube/elastic4mobile dev-master ;\
     #2fa
     composer -n require kolab/kolab_2fa ;\
-    composer require "endroid/qrcode" "~1.5.0" --no-update ;\
-    composer require "spomky-labs/otphp" "~5.0.0" --no-update ;\
-    composer require "enygma/yubikey" "~3.2" ;\
+    composer require endroid/qrcode ;\
+    composer require spomky-labs/otphp --no-update ;\
+    composer require enygma/yubikey ;\
+
+    #misc
+    composer require ss88/easy_unsubscribe ;\
+    
     cd ${INSTALLDIR} ;\
    #show_folder_size
    mkdir -p plugins/show_folder_size ;\
@@ -100,28 +104,34 @@ RUN set -x ;\
     mkdir -p plugins/html5_notifier ;\
     curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | \
       tar xz --strip-components=1 -C plugins/html5_notifier ;\
+ #   mkdir -p skins/mabola ;\
+ #   curl -L https://github.com/EstudioNexos/mabola/archive/master.tar.gz | \
+ #     tar xz --strip-components=1 -C skins/mabola ;\
     # Mabola theme
-    mkdir -p skins/mabola ;\
-    curl -L https://github.com/filhocf/mabola/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C skins/mabola ;\
-    # Mabola theme
-    mkdir -p skins/mabola-blue ;\
-    curl -L https://github.com/EstudioNexos/mabola-blue/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C skins/mabola-blue ;\
+ #   mkdir -p skins/mabola-blue ;\
+ #   curl -L https://github.com/EstudioNexos/mabola-blue/archive/master.tar.gz | \
+ #     tar xz --strip-components=1 -C skins/mabola-blue ;\
     # Chameleon theme
-    mkdir -p skins/chameleon ;\
-    curl -L https://github.com/filhocf/roundcube-chameleon/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C skins/chameleon ;\
+ #   mkdir -p skins/chameleon ;\
+ #   curl -L https://github.com/daniele-athome/roundcubemail-skin-chameleon/archive/master.tar.gz | \
+ #     tar xz --strip-components=1 -C skins/chameleon ;\
     # Chameleon Blue theme
-    mkdir -p skins/chameleon-blue ;\
-    curl -L https://github.com/filhocf/roundcube-chameleon-blue/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C skins/chameleon-blue ;\
+ #   mkdir -p skins/chameleon-blue ;\
+ #   curl -L https://github.com/Anisotropic/Chameleon-blue/archive/master.tar.gz | \
+ #     tar xz --strip-components=1 -C skins/chameleon-blue ;\
+    # Classic
+    mkdir -p skins/larry ;\
+    curl -L https://github.com/roundcube/larry/archive/master.tar.gz | \
+	tar xz --strip-components=1 -C skins/larry ;\
+    mkdir -p skins/classic ;\
+    curl -L https://github.com/roundcube/classic/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C skins/classic ;\
     for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;\
     composer clear-cache ;\
     echo "include=/var/roundcube/config/phpfpm.conf" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
     echo "include=/var/roundcube/config/phpfpm.conf.override" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
     echo "Include /var/roundcube/config/httpd.conf" > /etc/apache2.orig/sites-enabled/000-default.conf ;\
-    mv /etc/php /etc/php.orig && mkdir /etc/php ;\
+    rm -rf /etc/php && mkdir -p /etc/php ;\
     mkdir -p /var/roundcube/config.orig ;\
     cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;\
     touch /var/roundcube/config.orig/phpfpm.conf.override ;\

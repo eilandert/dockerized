@@ -36,6 +36,7 @@ RUN set -x ;\
       php7.4-json \
       php7.4-ldap \
       php7.4-memcache \
+      php7.4-memcached \
       php7.4-mbstring \
       php7.4-mysql \
       php7.4-opcache \
@@ -48,7 +49,7 @@ RUN set -x ;\
       php7.4-tidy \
       php7.4-xml \
       php7.4-zstd \
-      php7.4-snuffleupagus ;\
+      php7.4-snuffleupagus \
       php7.4-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*

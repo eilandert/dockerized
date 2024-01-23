@@ -20,8 +20,7 @@ RUN a2dismod status mpm_prefork ;\
     a2enconf php${PHPVERSION}-fpm
 
 RUN mv /etc/apache2 /etc/apache2.orig ;\
-    mv /etc/php /etc/php.orig ;\
-    mv /etc/nullmailer /etc/nullmailer.orig 
+    mv /etc/nullmailer /etc/nullmailer.orig ;\
     mkdir -p /etc/apache2 ;\
     mkdir -p /etc/php ;\
     mkdir -p /etc/nullmailer ;\

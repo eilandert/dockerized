@@ -98,7 +98,7 @@ fi
 : "${ROUNDCUBEMAIL_SMTP_SERVER:=localhost}"
 : "${ROUNDCUBEMAIL_SMTP_PORT:=587}"
 : "${ROUNDCUBEMAIL_PLUGINS:=archive,zipdownload}"
-: "${ROUNDCUBEMAIL_SKIN:=larry}"
+: "${ROUNDCUBEMAIL_SKIN:=elastic}"
 : "${ROUNDCUBEMAIL_TEMP_DIR:=/tmp/roundcube-temp}"
 
 ROUNDCUBEMAIL_PLUGINS_PHP=`echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g"`

@@ -36,6 +36,7 @@ RUN set -x ;\
       php7.2-json \
       php7.2-ldap \
       php7.2-memcache \
+      php7.2-memcached \
       php7.2-mbstring \
       php7.2-mysql \
       php7.2-opcache \
@@ -49,7 +50,7 @@ RUN set -x ;\
       php7.2-tidy \
       php7.2-xml \
       php7.2-zstd \
-      php7.2-snuffleupagus ;\
+      php7.2-snuffleupagus \
       php7.2-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*

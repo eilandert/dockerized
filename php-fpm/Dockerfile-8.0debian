@@ -35,6 +35,7 @@ RUN set -x ;\
       php8.0-intl \
       php8.0-ldap \
       php8.0-memcache \
+      php8.0-memcached \
       php8.0-mbstring \
       php8.0-mysql \
       php8.0-opcache \
@@ -47,7 +48,7 @@ RUN set -x ;\
       php8.0-tidy \
       php8.0-xml \
       php8.0-zstd \
-      php8.0-snuffleupagus ;\
+      php8.0-snuffleupagus \
       php8.0-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*

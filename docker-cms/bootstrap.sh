@@ -22,11 +22,7 @@ rm -f /var/spool/nullermailer/queue/core
 /bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
 runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 
-#fix some weird issue with php-fpm
-if [ ! -x /run/php ]; then
-    mkdir -p /run/php
-    chown www-data:www-data /run/php
-    chmod 755 /run/php
-fi
+dockerid=$(hostname)
+echo "[DOCKER-CMS] For breaking into this docker: docker exec -it $dockerid bash"
 
-exec sleep 864000
+exec while(1) { sleep 3600; }
