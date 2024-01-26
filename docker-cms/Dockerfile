@@ -12,7 +12,7 @@ RUN set -ex ;\
 RUN apt-get install -y nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger
 
-RUN apt-get install -y nano less imagemagick mariadb-client wget curl sudo mc
+RUN apt-get install -y nano less imagemagick mariadb-client wget curl sudo mc libvips42 php-vips
 
 RUN set -x ;\
     apt-get update ;\
