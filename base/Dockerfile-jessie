@@ -5,10 +5,9 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	DIST=jessie
 COPY    bootstrap.sh /bootstrap.sh
 COPY    myguard.deb /tmp/myguard.deb
-COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
 
-# Install https://deb.myguard.nl/pool/myguard.deb to setup my own repository
+# Install https://deb.myguard.nl/pool/myguard.deb to setup our own repository
 
 RUN set -x ;\
     apt-get update && apt-get install -y ssl-cert ;\
