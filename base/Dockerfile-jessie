@@ -16,7 +16,7 @@ RUN set -x ;\
         echo 'Pin: release a=jessie-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
-    cd /tmp && dpkg -i myguard.deb && rm -f myguard.deb ;\
+    echo "deb http://edge.deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends myguard ca-certificates tzdata libjemalloc2 mimalloc wait-for-it ;\
