@@ -2,17 +2,17 @@
 FROM    debian:trixie-slim
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV	DIST=#TEMPLATE2#
+ENV	DIST=trixie
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -x ;\
     apt-get update && apt-get install -y ssl-cert ;\
     { \
         echo 'Package: *'; \
-        echo 'Pin: release a=#TEMPLATE2#-backports'; \
+        echo 'Pin: release a=trixie-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
-    echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
+    echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends myguard ca-certificates tzdata libjemalloc2 mimalloc wait-for-it ;\
