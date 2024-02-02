@@ -5,9 +5,9 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    echo "deb http://edge.deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
-    #TEMPLATE4#;\
-    #TEMPLATE5#;\
+    echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
+    #TEMPLATE4# ;\
+    #TEMPLATE5# ;\
     apt-get update ;\
     apt-get -y upgrade 
 

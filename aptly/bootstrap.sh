@@ -91,6 +91,8 @@ then
     service nginx restart 1>/dev/null
 fi
 
+service cron restart
+
 dockerid=$(hostname)
 echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
 

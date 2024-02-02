@@ -83,7 +83,7 @@ if [ -n "${PHPVERSION}" ]; then
         fi
         php-fpm${PHPVERSION} -v 2>&1 | grep -v Zend | grep -v Copy
         php-fpm${PHPVERSION} -t
-        service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
+        service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1 &
         SETPHP=1
     }
 

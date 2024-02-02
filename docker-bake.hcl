@@ -30,6 +30,7 @@ group "phpfpm" {
         "debian-phpfpm82",
         "ubuntu-phpfpm83",
         "debian-phpfpm83",
+	"bullseye-phpfpm81",
     ]
 }
 
@@ -106,6 +107,7 @@ group "apache" {
        "ubuntu-apache-php82",
        "ubuntu-apache-php83",
        "ubuntu-apache-multiphp",
+       "bullseye-apache-fpm81",
     ]
 }
 
@@ -156,7 +158,7 @@ group "misc" {
 }
 
 target "cms" {
-	dockerfile = "Dockerfile-8.3debian"
+	dockerfile = "Dockerfile"
 	context = "docker-cms"
 	tags = ["docker.io/eilandert/docker-cms:latest"]
 }
@@ -334,6 +336,13 @@ target "debian-multiphp" {
     context = "php-fpm"
     dockerfile = "Dockerfile-multidebian"
 }
+
+target "bullseye-phpfpm81" {
+    tags = ["docker.io/eilandert/php-fpm:bullseye-8.1"]
+    context = "php-fpm"
+    dockerfile = "Dockerfile-8.1bullseye"
+}
+
 
 target "debian-mariadb" {
     tags = ["docker.io/eilandert/mariadb:debian","docker.io/eilandert/mariadb:latest"]
@@ -546,11 +555,16 @@ target "ubuntu-apache-php83" {
     dockerfile= "Dockerfile-8.3"
 }
 
-
 target "ubuntu-apache-multiphp" {
     tags = ["docker.io/eilandert/apache-phpfpm:multi"]
     context = "apache-phpfpm"
     dockerfile= "Dockerfile-multi"
+}
+
+target "bullseye-apache-fpm81" {
+    tags = ["docker.io/eilandert/apache-phpfpm:81bulsseye"]
+    context = "apache-phpfpm"
+    dockerfile= "Dockerfile-8.1bullseye"
 }
 
 target "clamav" {
