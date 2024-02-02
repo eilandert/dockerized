@@ -4,8 +4,6 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV	DIST=bookworm
 COPY    bootstrap.sh /bootstrap.sh
-COPY    myguard.deb /tmp/myguard.deb
-
 
 RUN set -x ;\
     apt-get update && apt-get install -y ssl-cert ;\
