@@ -7,8 +7,6 @@ COPY    bootstrap.sh /bootstrap.sh
 COPY    myguard.deb /tmp/myguard.deb
 
 
-# Install https://deb.myguard.nl/pool/myguard.deb to setup our own repository
-
 RUN set -x ;\
     apt-get update && apt-get install -y ssl-cert ;\
     { \
@@ -16,7 +14,7 @@ RUN set -x ;\
         echo 'Pin: release a=buster-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
-    echo "deb http://edge.deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/edge.list ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends myguard ca-certificates tzdata libjemalloc2 mimalloc wait-for-it ;\
