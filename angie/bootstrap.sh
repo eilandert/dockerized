@@ -17,8 +17,9 @@ FIRSTRUN="/etc/angie/angie.conf"
 if [ ! -f ${FIRSTRUN} ]; then
     echo "[ANGIE] Default configurations are being copied to /etc/angie and /etc/modsecurity as no existing configs were found."
     cp -r /etc/angie.orig/* /etc/angie/
-    cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
+
+cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 
 #check if PHP is installed, else skip the whole block
 if [ -n "${PHPVERSION}" ]; then

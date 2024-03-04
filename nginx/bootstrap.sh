@@ -17,8 +17,9 @@ FIRSTRUN="/etc/nginx/nginx.conf"
 if [ ! -f ${FIRSTRUN} ]; then
     echo "[NGINX] Default configurations are being copied to /etc/nginx and /etc/modsecurity as no existing configs were found."
     cp -r /etc/nginx.orig/* /etc/nginx/
-    cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 fi
+
+cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 
 #check if PHP is installed, else skip the whole block
 if [ -n "${PHPVERSION}" ]; then

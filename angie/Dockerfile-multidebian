@@ -17,6 +17,9 @@ RUN apt-get -y --no-install-recommends install \
       fcgiwrap \
       geoip-bin \
       libjemalloc2 \
+      lua-http \
+      lua-socket \
+      lua-zlib \
       lua-resty \
       mimalloc \
       modsecurity-crs \
