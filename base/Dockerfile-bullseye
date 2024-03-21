@@ -6,7 +6,7 @@ ENV	DIST=bullseye
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -x ;\
-    apt-get update && apt-get install -y ssl-cert myguard ;\
+    apt-get update && apt-get install -y ssl-cert ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=bullseye-backports'; \
@@ -15,7 +15,7 @@ RUN set -x ;\
     echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
     echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
     apt-get -y update ;\
-    apt-get install -y --no-install-recommends ca-certificates tzdata libjemalloc2 mimalloc wait-for-it ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata libjemalloc2 mimalloc wait-for-it myguard ;\
     apt-get -y upgrade ;\
     apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
     apt-get -y clean ;\
