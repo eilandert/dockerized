@@ -6,7 +6,7 @@ ENV	DIST=#TEMPLATE2#
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -x ;\
-    apt-get update && apt-get install -y ssl-cert ;\
+    apt-get update && apt-get install -y ssl-cert myguard ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=#TEMPLATE2#-backports'; \
