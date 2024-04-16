@@ -1,0 +1,15 @@
+services:
+  valkey:
+    container_name: valkey
+    image: index.docker.io/eilandert/valkey:debian
+    restart: always
+    stop_grace_period: 10s
+    volumes:
+    - ./valkey/config:/etc/valkey:rw
+    - ./valkey/data:/var/lib/valkey:rw
+    environment:
+      - TZ=Europe/Amsterdam
+      - SYSLOG_HOST=10.0.0.118
+
+version: '2.4'
+

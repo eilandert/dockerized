@@ -139,6 +139,8 @@ group "db" {
     targets = [
         "ubuntu-redis",
         "debian-redis",
+	"ubuntu-valkey",
+	"debian-valkey",
 	"ubuntu-mariadb",
 	"debian-mariadb",
     ]
@@ -151,7 +153,7 @@ group "misc" {
        "rbldnsd",
        "ubuntu-reprepro",
        "debian-sitewarmup",
-       "alpine:unbound",
+       "alpine-unbound",
        "aptly",
        "debian-openssh",
     ]
@@ -628,6 +630,18 @@ target "debian-redis" {
    dockerfile = "Dockerfile.debian"
 }
 
+target "ubuntu-valkey" {
+   tags = ["docker.io/eilandert/valkey:ubuntu"]
+   context = "valkey"
+   dockerfile = "Dockerfile.ubuntu"
+}
+
+target "debian-valkey" {
+   tags = ["docker.io/eilandert/valkey:debian"]
+   context = "valkey"
+   dockerfile = "Dockerfile.debian"
+}
+
 target "ubuntu-reprepro" {
    tags = ["docker.io/eilandert/reprepro"]
    context = "reprepro"
@@ -678,7 +692,7 @@ target "debian-sitewarmup" {
    context = "sitemap_warmup"
    dockerfile = "Dockerfile"
 }
-target "alpine:unbound" {
+target "alpine-unbound" {
    tags = ["docker.io/eilandert/unbound"]
    context = "unbound"
    dockerfile = "Dockerfile"
