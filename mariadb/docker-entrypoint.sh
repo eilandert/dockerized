@@ -122,7 +122,8 @@ mysql_get_config() {
 docker_temp_server_start() {
 	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" --wsrep_on=OFF \
 		--expire-logs-days=0 \
-		--loose-innodb_buffer_pool_load_at_startup=0 &
+		--loose-innodb_buffer_pool_load_at_startup=0 \
+		&
 	declare -g MARIADB_PID
 	MARIADB_PID=$!
 	mysql_note "Waiting for server startup"
@@ -134,7 +135,8 @@ docker_temp_server_start() {
 	fi
 	local i
 	for i in {30..0}; do
-		if docker_process_sql "${extraArgs[@]}" --database=mysql <<<'SELECT 1' &> /dev/null; then
+		if docker_process_sql "${extraArgs[@]}" --database=mysql \
+			<<<'SELECT 1' &> /dev/null; then
 			break
 		fi
 		sleep 1
@@ -219,9 +221,7 @@ docker_create_db_directories() {
 }
 
 _mariadb_version() {
-        local mariaVersion="${MARIADB_VERSION##*:}"
-        mariaVersion="${mariaVersion%%[-+~]*}"
-	echo -n "${mariaVersion}-MariaDB"
+	echo -n "10.11.8-MariaDB"
 }
 
 # initializes the database directory
@@ -229,7 +229,17 @@ docker_init_database_dir() {
 	mysql_note "Initializing database files"
 	installArgs=( --datadir="$DATADIR" --rpm --auth-root-authentication-method=normal )
 	# "Other options are passed to mariadbd." (so we pass all "mariadbd" arguments directly here)
-	mariadb-install-db "${installArgs[@]}" "${@:2}" \
+
+	local mariadbdArgs=()
+	for arg in "${@:2}"; do
+		# Check if the argument contains whitespace
+		if [[ "$arg" =~ [[:space:]] ]]; then
+			mysql_warn "Not passing argument \'$arg\' to mariadb-install-db because mariadb-install-db does not support arguments with whitespace."
+		else
+			mariadbdArgs+=("$arg")
+		fi
+	done
+	mariadb-install-db "${installArgs[@]}" "${mariadbdArgs[@]}" \
 		--skip-test-db \
 		--old-mode='UTF8_IS_UTF8MB3' \
 		--default-time-zone=SYSTEM --enforce-storage-engine= \
