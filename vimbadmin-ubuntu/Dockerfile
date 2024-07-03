@@ -14,6 +14,7 @@ RUN set -ex ;\
     curl -fSL https://github.com/opensolutions/ViMbAdmin/archive/master.tar.gz | \
       tar xz --strip-components=1 -C ${INSTALL_PATH} ;\
     cd ${INSTALL_PATH} ;\
+    sed -i /chmod/d /etc/php/8.0/php-snuffleupagus/default_php8.rules ;\
     rm -rf /etc/php && cp -r /etc/php.orig /etc/php ;\
 #    rm composer.lock ;\
     composer config -g secure-http false ;\

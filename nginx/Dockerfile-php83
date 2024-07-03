@@ -24,6 +24,7 @@ RUN apt-get -y --no-install-recommends install \
       mimalloc \
       modsecurity-crs \
       nginx-full \
+      openssl \
       ssl-cert \
       zstd ;\
     apt-get -y autoremove && apt-get -y autoclean ;\

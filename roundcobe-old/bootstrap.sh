@@ -8,19 +8,42 @@ if [ -n "${TZ}" ]; then
     ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
 fi
 
-mkdir -p /etc/php
-cp -rn /etc/php.orig/* /etc/php
+case ${MALLOC} in
+    jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+        ;;
+    mimalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
+        ;;
+    none)
+        unset LD_PRELOAD
+        ;;
+    *)
+        unset LD_PRELOAD
+        ;;
+esac
 
-mkdir -p /var/roundcube/config
-cp -rn /var/roundcube/config.orig /var/roundcube/config
-cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.php.orig
-cp -rn /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf
-cp -rn /var/roundcube/config.orig/angie.conf /var/roundcube/config/angie.conf
 
-mkdir -p /etc/angie
-cp -rn /etc/angie.orig/* /etc/angie
+#fix some weird issue with php-fpm
+if [ ! -x /run/php ]; then
+    mkdir -p /run/php
+    chown www-data:www-data /run/php
+    chmod 755 /run/php
+fi
 
-rm -f ${INSTALLDIR}/index.html
+# If there are no configfiles, copy them
+FIRSTRUN="/etc/apache2/apache2.conf"
+if [ ! -f ${FIRSTRUN} ]; then
+    #    echo "[ROUNDCUBE] apache: no configs found, populating default configs to /etc/apache2"
+    cp -r /etc/apache2.orig/* /etc/apache2/
+fi
+
+FIRSTRUN="/etc/php/${PHPVERSION}/fpm/php-fpm.conf"
+if [ ! -f ${FIRSTRUN} ]; then
+    #    echo "[ROUNDCUBE] php: no configs found, populating default configs to /etc/php/${PHPVERSION}"
+    mkdir -p /etc/php/${PHPVERSION}
+    cp -r /etc/php.orig/${PHPVERSION}/* /etc/php/${PHPVERSION}
+fi
 
 service php${PHPVERSION}-fpm restart 1>/dev/null 2>&1
 
@@ -135,5 +158,25 @@ fi
 # Trigger garbage collecting routines manually
 ${INSTALLDIR}/bin/gc.sh
 
-exec /usr/sbin/angie -g 'daemon off;'
+cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.php.orig
+
+rm -f ${INSTALLDIR}/index.html
+
+if [ ! -f /var/roundcube/config/phpfpm.conf ]; then
+    cp -rp /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf
+fi
+
+if [ ! -f /var/roundcube/config/httpd.conf ]; then
+    cp -rp /var/roundcube/config.orig/httpd.conf /var/roundcube/config/httpd.conf
+fi
+
+if [ -f /etc/apache2/mods-enabled/ssl.load ]; then
+    while [ 1 ]; do sleep 1d; apachectl graceful; done &
+fi
+
+if [ -f /run/apache2/apache2.pid ]; then
+    rm /run/apache2/apache2.pid
+fi
+
+exec /usr/sbin/apache2ctl -DFOREGROUND
 

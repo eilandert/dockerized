@@ -1,62 +1,19 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
 
-FROM    eilandert/debian-base:stable
+FROM    eilandert/apache-phpfpm:deb-8.0
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
 ENV	LD_PRELOAD=""
-
 # fetch the last version, generated in the docker build script
 COPY     .lastversion /tmp/lastversion
+
 COPY	bootstrap.sh /
-ENV	PHPVERSION="8.2"
-ENV	COMPOSER_ALLOW_SUPERUSER=1
-
-RUN set -x ;\
-	echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
-        export COMPOSER_ROOT_VERSION=$(cat /tmp/lastversion) ;\
-	apt-get update ;\
-	apt-get -y install --no-install-recommends \
-	angie-minimal \
-	aspell \
-	aspell-en \
-	aspell-nl \ 
-	dbconfig-no-thanks \
-	dictionaries-common \
-	enchant-2 \
-	fonts-glyphicons-halflings \
-	hunspell-en-us \
-	libjs-bootstrap4 \
-	libjs-codemirror \
-	libjs-jquery-minicolors \
-	libjs-jquery-ui \
-	libjs-jstimezonedetect \
-	libjs-popper.js \
-	libjs-sizzle \
-	libonig5 \
-	node-jquery \
-        php${PHPVERSION}-fpm \
-        php${PHPVERSION}-gd \
-        php${PHPVERSION}-intl \
-	php${PHPVERSION}-imap \
-        php${PHPVERSION}-mbstring \
-        php${PHPVERSION}-mysql \
-        php${PHPVERSION}-opcache \
-        php${PHPVERSION}-readline \
-        php${PHPVERSION}-redis \
-        php${PHPVERSION}-snuffleupagus \
-        php${PHPVERSION}-xml \
-        php${PHPVERSION}-zip 
-
-RUN set -ex ;\
-    cd /tmp ;\
-    /usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
-    cat /tmp/composer-setup.php | /usr/bin/php -- --filename=composer --install-dir=/usr/bin ;\
-    /usr/bin/php -r "unlink('composer-setup.php');" 
 
 RUN set -x ;\
     LASTVERSION=$(cat /tmp/lastversion) ;\
     apt-get -y update ;\
+    rm -rf /etc/php && mv /etc/php.orig /etc/php ;\
     apt-get install -y --no-install-recommends \
       git \
       unzip \
@@ -75,19 +32,9 @@ RUN set -x ;\
     composer -n require roundcube/elastic4mobile dev-master ;\
     #2fa
     composer -n require kolab/kolab_2fa ;\
-    composer require endroid/qr-code ;\
-    composer require spomky-labs/otphp --no-update ;\
-    composer require enygma/yubikey ;\
-    #misc
-#    composer require ss88/easy_unsubscribe ;\
-    cd ${INSTALLDIR} ;\
-    mkdir -p plugins/authres ;\
-    curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C plugins/authres ;\
-    cd ${INSTALLDIR} ;\
-    mkdir -p plugins/easy_unsubscribe ;\
-    curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C plugins/easy_unsubscribe ;\
+    composer require "endroid/qrcode" "~1.5.0" --no-update ;\
+    composer require "spomky-labs/otphp" "~5.0.0" --no-update ;\
+    composer require "enygma/yubikey" "~3.2" ;\
     cd ${INSTALLDIR} ;\
    #show_folder_size
    mkdir -p plugins/show_folder_size ;\
@@ -153,52 +100,51 @@ RUN set -x ;\
     mkdir -p plugins/html5_notifier ;\
     curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | \
       tar xz --strip-components=1 -C plugins/html5_notifier ;\
- #   mkdir -p skins/mabola ;\
- #   curl -L https://github.com/EstudioNexos/mabola/archive/master.tar.gz | \
- #     tar xz --strip-components=1 -C skins/mabola ;\
     # Mabola theme
- #   mkdir -p skins/mabola-blue ;\
- #   curl -L https://github.com/EstudioNexos/mabola-blue/archive/master.tar.gz | \
- #     tar xz --strip-components=1 -C skins/mabola-blue ;\
+    mkdir -p skins/mabola ;\
+    curl -L https://github.com/filhocf/mabola/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C skins/mabola ;\
+    # Mabola theme
+    mkdir -p skins/mabola-blue ;\
+    curl -L https://github.com/EstudioNexos/mabola-blue/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C skins/mabola-blue ;\
     # Chameleon theme
- #   mkdir -p skins/chameleon ;\
- #   curl -L https://github.com/daniele-athome/roundcubemail-skin-chameleon/archive/master.tar.gz | \
- #     tar xz --strip-components=1 -C skins/chameleon ;\
+    mkdir -p skins/chameleon ;\
+    curl -L https://github.com/filhocf/roundcube-chameleon/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C skins/chameleon ;\
     # Chameleon Blue theme
- #   mkdir -p skins/chameleon-blue ;\
- #   curl -L https://github.com/Anisotropic/Chameleon-blue/archive/master.tar.gz | \
- #     tar xz --strip-components=1 -C skins/chameleon-blue ;\
-    # Classic
-    mkdir -p skins/larry ;\
-    curl -L https://github.com/roundcube/larry/archive/master.tar.gz | \
-	tar xz --strip-components=1 -C skins/larry ;\
-    mkdir -p skins/classic ;\
-    curl -L https://github.com/roundcube/classic/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C skins/classic ;\
+    mkdir -p skins/chameleon-blue ;\
+    curl -L https://github.com/filhocf/roundcube-chameleon-blue/archive/master.tar.gz | \
+      tar xz --strip-components=1 -C skins/chameleon-blue ;\
     for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;\
     composer clear-cache ;\
-    echo "include=/var/roundcube/config/phpfpm.conf;" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
-    echo "include /var/roundcube/config/angie.conf;" > /etc/angie/sites-available/default ;\
+    echo "include=/var/roundcube/config/phpfpm.conf" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
+    echo "include=/var/roundcube/config/phpfpm.conf.override" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
+    echo "Include /var/roundcube/config/httpd.conf" > /etc/apache2.orig/sites-enabled/000-default.conf ;\
+    mv /etc/php /etc/php.orig && mkdir /etc/php ;\
     mkdir -p /var/roundcube/config.orig ;\
     cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;\
     touch /var/roundcube/config.orig/phpfpm.conf.override ;\
     cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;\
-    apt-get -y purge git git-man mailutils nullmailer curl ;\
+    apt-get -y purge git mailutils nullmailer curl ;\
     apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\
     cd ${INSTALLDIR} ;\
     rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
     rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ${INSTALLDIR}/plugins/*/.git* ;\
+#    rm -rf composer.json composer.lock jsdeps.json bin/install-jsdeps.sh *.orig vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/endroid/qrcode/tests temp/js_cache ;\
+    rm -f /etc/apache2.orig/conf-enabled/other-vhosts-access-log.conf ;\
     rm -f ${INSTALLDIR}/index.html ;\
-    rm /etc/apt/sources.list.d/* ;\
     chown -R www-data:www-data ${INSTALLDIR}/logs ;\
     chown -R www-data:www-data ${INSTALLDIR}/temp ;\
-    chmod +x /bootstrap.sh ;\
-    mv /etc/php /etc/php.orig ;\
-    mv /etc/angie /etc/angie.orig
+    chmod +x /bootstrap.sh
 
-COPY angie.conf /var/roundcube/config.orig
+COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
 
 WORKDIR ${INSTALLDIR}
 ENTRYPOINT ["/bootstrap.sh"]
+
+VOLUME /var/roundcube/config
+VOLUME /var/roundcube/db
+

@@ -113,7 +113,6 @@ group "apache" {
 
 group "apache-misc" {
     targets = [
-       "ubuntu-roundcube",
        "debian-roundcube",
 #       "alpine-vimbadmin",
        "debian-vimbadmin",
@@ -649,13 +648,13 @@ target "ubuntu-reprepro" {
 }
 
 target "ubuntu-roundcube" {
-   tags = ["docker.io/eilandert/roundcube:ubuntu","docker.io/eilandert/roundcube:latest"]
+   tags = ["docker.io/eilandert/roundcube:ubuntu"]
    context = "roundcube"
    dockerfile = "Dockerfile-ubuntu"
 }
 
 target "debian-roundcube" {
-   tags = ["docker.io/eilandert/roundcube:debian"]
+   tags = ["docker.io/eilandert/roundcube:debian","docker.io/eilandert/roundcube:latest"]
    context = "roundcube"
    dockerfile = "Dockerfile-debian"
 }

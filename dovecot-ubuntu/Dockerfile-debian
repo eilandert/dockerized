@@ -25,6 +25,7 @@ RUN set -ex ;\
       libdbd-mysql \
       libdbd-mariadb-perl \
       pyzor \
+      openssl \
       razor \
       rspamd \
       spamc \

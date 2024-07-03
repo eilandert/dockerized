@@ -296,10 +296,10 @@ git commit -m "Changes from upstream"
 git push
 
 #roundcube
-cp roundcube/Dockerfile-template roundcube/Dockerfile-debian
-cp roundcube/Dockerfile-template roundcube/Dockerfile-ubuntu
-sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:8\.0/"     roundcube/Dockerfile-ubuntu
-sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:deb-8\.0"/ roundcube/Dockerfile-debian
+#cp roundcube/Dockerfile-template roundcube/Dockerfile-debian
+#cp roundcube/Dockerfile-template roundcube/Dockerfile-ubuntu
+#sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:8\.3/"     roundcube/Dockerfile-ubuntu
+#sed -i s/"#TEMPLATE1#"/"eilandert\/apache-phpfpm:deb-8\.3"/ roundcube/Dockerfile-debian
 
 LASTVERSION=$(lastversion -b 1.6 https://github.com/roundcube/roundcubemail/)
 if [ "${LASTVERSION}" == "" ]; then

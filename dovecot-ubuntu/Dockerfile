@@ -24,6 +24,7 @@ RUN set -ex ;\
       libdbd-pgsql \
       libdbd-mysql-perl \
       libdbd-mysql \
+      openssl \
       pyzor \
       razor \
       rspamd \
