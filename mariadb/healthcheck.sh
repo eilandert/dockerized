@@ -10,8 +10,8 @@
 # the --replication option. This allows a different set of replication checks
 # on different connections.
 #
-# --su{=|-mariadb} is option to run the healthcheck as a different unix user.
-# Useful if mariadb@localhost user exists with unix socket authentication
+# --su{=|-mysql} is option to run the healthcheck as a different unix user.
+# Useful if mysql@localhost user exists with unix socket authentication
 # Using this option disregards previous options set, so should usually be the
 # first option.
 #
@@ -32,7 +32,7 @@
 # different from elsewhere.
 #
 # Note * though denied error message will result in error log without
-#      any permissions.
+#      any permissions. USAGE recommend to avoid this.
 
 set -eo pipefail
 
@@ -42,6 +42,7 @@ _process_sql()
 		${def['file']:+--defaults-file=${def['file']}} \
 		${def['extra_file']:+--defaults-extra-file=${def['extra_file']}} \
 		${def['group_suffix']:+--defaults-group-suffix=${def['group_suffix']}} \
+		--protocol socket \
 		-B "$@"
 }
 
@@ -55,22 +56,49 @@ _process_sql()
 # isn't tested.
 connect()
 {
-	set +e +o pipefail
-	# (on second extra_file)
-	# shellcheck disable=SC2086
-	mariadb ${nodefaults:+--no-defaults} \
+	local s
+	# short cut mechanism, to work with --require-secure-transport
+	s=$(_process_sql --skip-column-names -e 'select @@skip_networking')
+	case "$s" in
+		0|1)
+			connect_s=$s
+			return "$s";
+			;;
+	esac
+	# falling back to tcp if there wasn't a connection answer.
+	s=$(mariadb ${nodefaults:+--no-defaults} \
 		${def['file']:+--defaults-file=${def['file']}} \
 		${def['extra_file']:+--defaults-extra-file=${def['extra_file']}}  \
 		${def['group_suffix']:+--defaults-group-suffix=${def['group_suffix']}}  \
-		-h localhost --protocol tcp -e 'select 1' 2>&1 \
-		| grep -qF "Can't connect"
-	local ret=${PIPESTATUS[1]}
-	set -eo pipefail
-	if (( "$ret" == 0 )); then
-		# grep Matched "Can't connect" so we fail
-		return 1
-	fi
-	return 0
+		-h localhost --protocol tcp \
+		--skip-column-names --batch --skip-print-query-on-error \
+		-e 'select @@skip_networking' 2>&1)
+
+	case "$s" in
+		1)      # skip-networking=1 (no network)
+			;&
+		ERROR\ 2002\ \(HY000\):*)
+			# cannot connect
+			connect_s=1
+			;;
+		0)      # skip-networking=0
+			;&
+		ERROR\ 1820\ \(HY000\)*) # password expire
+			;&
+		ERROR\ 4151\ \(HY000\):*) # account locked
+			;&
+		ERROR\ 1226\ \(42000\)*) # resource limit exceeded
+			;&
+		ERROR\ 1[0-9][0-9][0-9]\ \(28000\):*)
+			# grep access denied and other 28000 client errors - we did connect
+			connect_s=0
+			;;
+		*)
+			>&2 echo "Unknown error $s"
+			connect_s=1
+			;;
+	esac
+	return $connect_s
 }
 
 # INNODB_INITIALIZED
@@ -225,6 +253,7 @@ fi
 declare -A repl
 declare -A def
 nodefaults=
+connect_s=
 datadir=/var/lib/mysql
 if [ -f $datadir/.my-healthcheck.cnf ]; then
 	def['extra_file']=$datadir/.my-healthcheck.cnf
@@ -351,3 +380,9 @@ while [ $# -gt 0 ]; do
 	fi
 	shift
 done
+if [ "$connect_s" != "0" ]; then
+	# we didn't pass a connnect test, so the current success status is suspicious
+	# return what connect thinks.
+	connect
+	exit $?
+fi
