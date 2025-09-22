@@ -224,7 +224,7 @@ docker_create_db_directories() {
 }
 
 _mariadb_version() {
-	echo -n "10.11.13-MariaDB"
+	echo -n "10.11.14-MariaDB"
 }
 
 # initializes the database directory
@@ -654,7 +654,7 @@ _check_if_upgrade_is_needed() {
 		return 0
 	fi
 	if [ ! -f "$DATADIR"/.my-healthcheck.cnf ]; then
-		mysql_note "MariaDB heathcheck configation file missing, assuming desirable"
+		mysql_note "MariaDB healthcheck configuration file missing, assuming desirable"
 		return 0
 	fi
 	mysql_note "MariaDB upgrade not required"
