@@ -56,7 +56,6 @@ RUN set -x ;\
       do dpkg-statoverride --quiet --update --add root adm 0000 /bin/$file; rm -f /bin/$file; \
          dpkg-statoverride --quiet --update --add root adm 0000 /usr/bin/$file; rm -f /usr/bin/$file; \
       done ;\
-
     echo "alias ls='ls --color=auto'" > /root/.bashrc
 
         

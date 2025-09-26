@@ -1,15 +1,15 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
-FROM    ubuntu:jammy
+FROM    ubuntu:noble
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV	DIST=jammy
+ENV	DIST=noble
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -x ;\
     apt-get update && apt-get install -y ssl-cert ;\
     { \
         echo 'Package: *'; \
-        echo 'Pin: release a=jammy-backports'; \
+        echo 'Pin: release a=noble-backports'; \
         echo 'Pin-Priority: 900'; \
     } > /etc/apt/preferences.d/99backports ;\
     echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
@@ -56,7 +56,6 @@ RUN set -x ;\
       do dpkg-statoverride --quiet --update --add root adm 0000 /bin/$file; rm -f /bin/$file; \
          dpkg-statoverride --quiet --update --add root adm 0000 /usr/bin/$file; rm -f /usr/bin/$file; \
       done ;\
-
     echo "alias ls='ls --color=auto'" > /root/.bashrc
 
         
