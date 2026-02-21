@@ -16,6 +16,7 @@ RUN set -ex ;\
       aptly \
       ca-certificates \
       cron \
+      gpg-agent \
       less \
       libnginx-mod-http-fancyindex \
       libnginx-mod-http-brotli \

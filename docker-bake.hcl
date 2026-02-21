@@ -2,12 +2,11 @@ group "default" {
     targets = [
 	"rolling",
 	"devel",
-	"bookworm",
 	]
 }
 
 group "base-current" {
-    targets = ["jammy", "bookworm","noble","trixie"]
+    targets = ["noble","trixie","rolling"]
 }
 
 group "base" {
@@ -30,7 +29,7 @@ group "phpfpm" {
         "debian-phpfpm82",
         "ubuntu-phpfpm83",
         "debian-phpfpm83",
-	"bullseye-phpfpm81",
+        "debian-phpfpm84",
     ]
 }
 
@@ -64,6 +63,7 @@ group "angie-php" {
        "debian-angie-php81",
        "debian-angie-php82",
        "debian-angie-php83",
+       "debian-angie-php84",
        "debian-angie-multi",
     ]
 }
@@ -84,6 +84,8 @@ group "nginx-php" {
        "debian-nginx-php82",
        "ubuntu-nginx-php83",
        "debian-nginx-php83",
+       "ubuntu-nginx-php84",
+       "debian-nginx-php84",
        "ubuntu-nginx-multi",
        "debian-nginx-multi",
     ]
@@ -98,6 +100,7 @@ group "apache" {
        "debian-apache-php81",
        "debian-apache-php82",
        "debian-apache-php83",
+       "debian-apache-php84",
        "debian-apache-multiphp",
        "ubuntu-apache-php56",
        "ubuntu-apache-php72",
@@ -106,6 +109,7 @@ group "apache" {
        "ubuntu-apache-php81",
        "ubuntu-apache-php82",
        "ubuntu-apache-php83",
+       "ubuntu-apache-php84",
        "ubuntu-apache-multiphp",
        "bullseye-apache-fpm81",
     ]
@@ -215,13 +219,13 @@ target "trusty" {
 target "trixie" {
     dockerfile = "Dockerfile-trixie"
     context = "base"
-    tags = ["docker.io/eilandert/debian-base:trixie"]
+    tags = ["docker.io/eilandert/debian-base:trixie","docker.io/eilandert/debian-base:stable"]
 }
 
 target "bookworm" {
     dockerfile = "Dockerfile-bookworm"
     context = "base"
-    tags = ["docker.io/eilandert/debian-base:bookworm","docker.io/eilandert/debian-base:stable"]
+    tags = ["docker.io/eilandert/debian-base:bookworm"]
 }
 
 target "bullseye" {
@@ -320,11 +324,25 @@ target "ubuntu-phpfpm83" {
     dockerfile = "Dockerfile-8.3"
 }
 
+target "ubuntu-phpfpm84" {
+    tags = ["docker.io/eilandert/php-fpm:8.4"]
+    context = "php-fpm"
+    dockerfile = "Dockerfile-8.4"
+}
+
 target "debian-phpfpm83" {
     tags = ["docker.io/eilandert/php-fpm:deb-8.3"]
     context = "php-fpm"
     dockerfile = "Dockerfile-8.3debian"
 }
+
+
+target "debian-phpfpm84" {
+    tags = ["docker.io/eilandert/php-fpm:deb-8.4"]
+    context = "php-fpm"
+    dockerfile = "Dockerfile-8.4debian"
+}
+
 
 target "ubuntu-multiphp" {
     tags = ["docker.io/eilandert/php-fpm:multi"]
@@ -435,6 +453,13 @@ target "ubuntu-nginx-php83" {
     dockerfile = "Dockerfile-php83"
 }
 
+target "ubuntu-nginx-php84" {
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.4"]
+    context = "nginx"
+    dockerfile = "Dockerfile-php84"
+}
+
+
 target "debian-nginx-php81" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.1","docker.io/eilandert/nginx:deb-php8.1"]
     context = "nginx"
@@ -452,6 +477,13 @@ target "debian-nginx-php83" {
     context = "nginx"
     dockerfile = "Dockerfile-php83debian"
 }
+
+target "debian-nginx-php83" {
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.4","docker.io/eilandert/nginx:deb-php8.4"]
+    context = "nginx"
+    dockerfile = "Dockerfile-php84debian"
+}
+
 
 target "ubuntu-nginx-multi" {
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:multi"]
@@ -508,6 +540,13 @@ target "debian-apache-php83" {
     dockerfile= "Dockerfile-8.3debian"
 }
 
+target "debian-apache-php84" {
+    tags = ["docker.io/eilandert/apache-phpfpm:deb-8.4"]
+    context = "apache-phpfpm"
+    dockerfile= "Dockerfile-8.4debian"
+}
+
+
 target "debian-apache-multiphp" {
     tags = ["docker.io/eilandert/apache-phpfpm:deb-multi"]
     context = "apache-phpfpm"
@@ -555,6 +594,13 @@ target "ubuntu-apache-php83" {
     context = "apache-phpfpm"
     dockerfile= "Dockerfile-8.3"
 }
+
+target "ubuntu-apache-php83" {
+    tags = ["docker.io/eilandert/apache-phpfpm:8.4"]
+    context = "apache-phpfpm"
+    dockerfile= "Dockerfile-8.4"
+}
+
 
 target "ubuntu-apache-multiphp" {
     tags = ["docker.io/eilandert/apache-phpfpm:multi"]
@@ -807,6 +853,13 @@ target "ubuntu-angie-php83" {
     dockerfile = "Dockerfile-php83"
 }
 
+target "ubuntu-angie-php83" {
+    tags = ["docker.io/eilandert/angie:php8.4"]
+    context = "angie"
+    dockerfile = "Dockerfile-php84"
+}
+
+
 target "debian-angie-php81" {
     tags = ["docker.io/eilandert/angie:deb-php8.1"]
     context = "angie"
@@ -823,6 +876,14 @@ target "debian-angie-php83" {
     context = "angie"
     dockerfile = "Dockerfile-php83debian"
 }
+
+target "debian-angie-php84" {
+    tags = ["docker.io/eilandert/angie:deb-php8.4"]
+    context = "angie"
+    dockerfile = "Dockerfile-php84debian"
+}
+
+
 
 target "ubuntu-angie-multi" {
     tags = ["docker.io/eilandert/angie:multi"]

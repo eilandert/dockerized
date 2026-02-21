@@ -8,7 +8,8 @@
 
 set -x
 
-export UBUNTU_ROLLING="jammy"
+export UBUNTU_ROLLING="noble"
+
 
 ####
 ## SCRIPTS DEBIAN/UBUNTU BASE IMAGES
@@ -77,6 +78,8 @@ cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php80
 cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php81
 cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php82
 cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php83
+cp php-fpm/Dockerfile-template.php php-fpm/Dockerfile-template.generated.php84
+
 
 sed -i 's/#PHPVERSION#/5.6/' php-fpm/Dockerfile-template.generated.php56
 sed -i 's/#PHPVERSION#/7.2/' php-fpm/Dockerfile-template.generated.php72
@@ -85,6 +88,8 @@ sed -i 's/#PHPVERSION#/8.0/' php-fpm/Dockerfile-template.generated.php80
 sed -i 's/#PHPVERSION#/8.1/' php-fpm/Dockerfile-template.generated.php81
 sed -i 's/#PHPVERSION#/8.2/' php-fpm/Dockerfile-template.generated.php82
 sed -i 's/#PHPVERSION#/8.3/' php-fpm/Dockerfile-template.generated.php83
+sed -i 's/#PHPVERSION#/8.4/' php-fpm/Dockerfile-template.generated.php84
+
 
 sed -i 's/#removedinphp72#//' php-fpm/Dockerfile-template.generated.php56 #mcrypt
 sed -i 's/#removedinphp74#//' php-fpm/Dockerfile-template.generated.php56 #recode
@@ -100,6 +105,8 @@ sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php80
 sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php81
 sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php82
 sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php83
+sed -i '/#removedinphp/d' php-fpm/Dockerfile-template.generated.php84
+
 
 cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.generated.php56 \
@@ -130,6 +137,11 @@ cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-8.3
 
 cat php-fpm/Dockerfile-template.header \
+    php-fpm/Dockerfile-template.generated.php84 \
+    php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-8.4
+
+
+cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.generated.php56 \
     php-fpm/Dockerfile-template.generated.php72 \
     php-fpm/Dockerfile-template.generated.php74 \
@@ -137,6 +149,7 @@ cat php-fpm/Dockerfile-template.header \
     php-fpm/Dockerfile-template.generated.php81 \
     php-fpm/Dockerfile-template.generated.php82 \
     php-fpm/Dockerfile-template.generated.php83 \
+    php-fpm/Dockerfile-template.generated.php84 \
     php-fpm/Dockerfile-template.footer > php-fpm/Dockerfile-multi
 
 rm -f php-fpm/Dockerfile-template.generated.*
@@ -148,6 +161,8 @@ sed -i 's/#PHPVERSION#/8.0/' php-fpm/Dockerfile-8.0
 sed -i 's/#PHPVERSION#/8.1/' php-fpm/Dockerfile-8.1
 sed -i 's/#PHPVERSION#/8.2/' php-fpm/Dockerfile-8.2
 sed -i 's/#PHPVERSION#/8.3/' php-fpm/Dockerfile-8.3
+sed -i 's/#PHPVERSION#/8.4/' php-fpm/Dockerfile-8.4
+
 
 sed -i 's/#PHPVERSION#/MULTI/' php-fpm/Dockerfile-multi
 sed -i 's/MODE=FPM/MODE=MULTI/' php-fpm/Dockerfile-multi
@@ -159,6 +174,8 @@ sed -i 's/rm -rf \/etc\/php\/8.0/#rm -rf \/etc\/php\/8.0/' php-fpm/Dockerfile-8.
 sed -i 's/rm -rf \/etc\/php\/8.1/#rm -rf \/etc\/php\/8.1/' php-fpm/Dockerfile-8.1
 sed -i 's/rm -rf \/etc\/php\/8.2/#rm -rf \/etc\/php\/8.2/' php-fpm/Dockerfile-8.2
 sed -i 's/rm -rf \/etc\/php\/8.3/#rm -rf \/etc\/php\/8.3/' php-fpm/Dockerfile-8.3
+sed -i 's/rm -rf \/etc\/php\/8.4/#rm -rf \/etc\/php\/8.4/' php-fpm/Dockerfile-8.4
+
 sed -i 's/rm -rf \/etc\/php/#rm -rf \/etc\/php/' php-fpm/Dockerfile-multi
 
 sed -i /zstd/d php-fpm/Dockerfile-5.6
@@ -171,6 +188,7 @@ cp php-fpm/Dockerfile-8.0 php-fpm/Dockerfile-8.0debian
 cp php-fpm/Dockerfile-8.1 php-fpm/Dockerfile-8.1debian
 cp php-fpm/Dockerfile-8.2 php-fpm/Dockerfile-8.2debian
 cp php-fpm/Dockerfile-8.3 php-fpm/Dockerfile-8.3debian
+cp php-fpm/Dockerfile-8.4 php-fpm/Dockerfile-8.4debian
 cp php-fpm/Dockerfile-multi php-fpm/Dockerfile-multidebian
 
 sed -i s/"eilandert\/ubuntu-base:rolling"/"eilandert\/debian-base:stable"/ php-fpm/*debian
@@ -188,6 +206,7 @@ cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.0
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.1
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.2
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.3
+cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-8.4
 cp apache-phpfpm/Dockerfile-template apache-phpfpm/Dockerfile-multi
 
 sed -i 's/#PHPVERSION#/5.6/' apache-phpfpm/Dockerfile-5.6
@@ -197,6 +216,7 @@ sed -i 's/#PHPVERSION#/8.0/' apache-phpfpm/Dockerfile-8.0
 sed -i 's/#PHPVERSION#/8.1/' apache-phpfpm/Dockerfile-8.1
 sed -i 's/#PHPVERSION#/8.2/' apache-phpfpm/Dockerfile-8.2
 sed -i 's/#PHPVERSION#/8.3/' apache-phpfpm/Dockerfile-8.3
+sed -i 's/#PHPVERSION#/8.4/' apache-phpfpm/Dockerfile-8.4
 sed -i 's/#PHPVERSION#/multi/' apache-phpfpm/Dockerfile-multi
 
 sed -i '/libapache2-mod-php/d'   apache-phpfpm/Dockerfile-multi
@@ -210,6 +230,7 @@ cp apache-phpfpm/Dockerfile-8.0 apache-phpfpm/Dockerfile-8.0debian
 cp apache-phpfpm/Dockerfile-8.1 apache-phpfpm/Dockerfile-8.1debian
 cp apache-phpfpm/Dockerfile-8.2 apache-phpfpm/Dockerfile-8.2debian
 cp apache-phpfpm/Dockerfile-8.3 apache-phpfpm/Dockerfile-8.3debian
+cp apache-phpfpm/Dockerfile-8.4 apache-phpfpm/Dockerfile-8.4debian
 cp apache-phpfpm/Dockerfile-multi apache-phpfpm/Dockerfile-multidebian
 sed -i s/"eilandert\/php-fpm:"/"eilandert\/php-fpm:deb-"/ apache-phpfpm/*debian
 
@@ -225,6 +246,8 @@ cp nginx/Dockerfile.template nginx/Dockerfile-php80
 cp nginx/Dockerfile.template nginx/Dockerfile-php81
 cp nginx/Dockerfile.template nginx/Dockerfile-php82
 cp nginx/Dockerfile.template nginx/Dockerfile-php83
+cp nginx/Dockerfile.template nginx/Dockerfile-php84
+
 
 cp nginx/Dockerfile.template nginx/Dockerfile-multi
 
@@ -236,6 +259,7 @@ cp nginx/Dockerfile.template nginx/Dockerfile-php80debian
 cp nginx/Dockerfile.template nginx/Dockerfile-php81debian
 cp nginx/Dockerfile.template nginx/Dockerfile-php82debian
 cp nginx/Dockerfile.template nginx/Dockerfile-php83debian
+cp nginx/Dockerfile.template nginx/Dockerfile-php84debian
 cp nginx/Dockerfile.template nginx/Dockerfile-multidebian
 
 sed -i 's/#FROM#/eilandert\/ubuntu-base:rolling/' nginx/Dockerfile
@@ -247,6 +271,7 @@ sed -i 's/#FROM#/eilandert\/php-fpm:8.0/' nginx/Dockerfile-php80
 sed -i 's/#FROM#/eilandert\/php-fpm:8.1/' nginx/Dockerfile-php81
 sed -i 's/#FROM#/eilandert\/php-fpm:8.2/' nginx/Dockerfile-php82
 sed -i 's/#FROM#/eilandert\/php-fpm:8.3/' nginx/Dockerfile-php83
+sed -i 's/#FROM#/eilandert\/php-fpm:8.4/' nginx/Dockerfile-php84
 
 sed -i 's/#FROM#/eilandert\/debian-base:stable/' nginx/Dockerfile-debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-multi/' nginx/Dockerfile-multidebian
@@ -257,6 +282,7 @@ sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.0/' nginx/Dockerfile-php80debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.1/' nginx/Dockerfile-php81debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.2/' nginx/Dockerfile-php82debian
 sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.3/' nginx/Dockerfile-php83debian
+sed -i 's/#FROM#/eilandert\/php-fpm:deb-8.4/' nginx/Dockerfile-php84debian
 
 ####
 ## SCRIPT ANGIE 
@@ -268,7 +294,7 @@ sed -i s/nginx/angie/g angie/Dockerfile*
 sed -i s/nginx/angie/g angie/bootstrap.sh
 sed -i s/NGINX/ANGIE/g angie/bootstrap.sh
 
-export UBUNTU_ROLLING="jammy"
+export UBUNTU_ROLLING="noble"
 
 #SCRIPTS MARIADB
 curl https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.11/Dockerfile -o mariadb/Dockerfile.ubuntu

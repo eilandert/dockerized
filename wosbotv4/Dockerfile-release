@@ -1,0 +1,30 @@
+FROM    python:slim-bookworm
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+
+# Install OS dependencies
+RUN set -x; \
+        apt update ;\
+	apt-get install --no-install-recommends -y git ;\
+	apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip and set up Python environment
+RUN pip install --upgrade pip setuptools wheel
+
+# Install Python packages with specific versions
+RUN pip install numpy Pillow opencv-python-headless onnxruntime --no-cache-dir --force-reinstall --ignore-requires-python ;\
+    pip install ddddocr==1.5.6 --no-cache-dir --force-reinstall --ignore-requires-python 
+
+# Clone repo by latest tag and set up
+RUN git clone --branch $(git ls-remote --tags --sort="v:refname"  https://github.com/whiteout-project/bot | tail -n1 | sed 's/.*\///; s/\^{}//') --single-branch  https://github.com/whiteout-project/bot.git app ;\
+    cd /app ;\
+    echo 0 > bot_token.txt ;\
+    python main.py --autoupdate ;\
+    rm bot_token.txt
+
+# Copy bootstrap script
+COPY bootstrap.sh /bootstrap.sh
+RUN chmod +x /bootstrap.sh
+
+WORKDIR /app
+ENTRYPOINT ["/bootstrap.sh"]
+
