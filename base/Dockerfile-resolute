@@ -32,7 +32,7 @@ RUN set -x ;\
             usermod -L -s /usr/sbin/nologin $user ;\
          fi ;\
     done ;\
-    # Don't need these files in a Docker. 
+    # Don't need these files in a Docker.
     # Ubuntu symlinks /sbin to /usr/sbin and Debian does not, so we have to delete the same file twice
     for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
     for file in `ls /usr/sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
@@ -58,5 +58,5 @@ RUN set -x ;\
       done ;\
     echo "alias ls='ls --color=auto'" > /root/.bashrc
 
-        
+
 CMD     ["/bootstrap.sh"]
