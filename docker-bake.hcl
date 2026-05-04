@@ -6,11 +6,11 @@ group "default" {
 }
 
 group "base-current" {
-    targets = ["noble","trixie","rolling"]
+    targets = ["resolute","noble","trixie","rolling"]
 }
 
 group "base" {
-    targets = ["rolling", "devel","noble","jammy","focal","bionic","trixie","bookworm","bullseye","buster"]
+    targets = ["rolling", "devel","resolute","noble","jammy","focal","bionic","trixie","bookworm","bullseye","buster"]
 }
 
 group "phpfpm" {
@@ -184,6 +184,12 @@ target "noble" {
     dockerfile = "Dockerfile-noble"
     context = "base"
     tags = ["docker.io/eilandert/ubuntu-base:noble"]
+}
+
+target "resolute" {
+    dockerfile = "Dockerfile-resolute"
+    context = "base"
+    tags = ["docker.io/eilandert/ubuntu-base:resolute"]
 }
 
 target "jammy" {
