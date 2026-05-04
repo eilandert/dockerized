@@ -2,7 +2,7 @@
 FROM    ubuntu:resolute
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
-ENV	DIST=resolute
+ENV     DIST=resolute
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -x ;\
