@@ -88,7 +88,6 @@ declare -a TARGETS=(
     "debian-phpfpm84"
     "ubuntu-multiphp"
     "debian-multiphp"
-    "bullseye-phpfpm81"
     # Databases (layer 2 - depends on base images)
     "ubuntu-mariadb"
     "debian-mariadb"
@@ -151,7 +150,6 @@ declare -a TARGETS=(
     "ubuntu-apache-php83"
     "ubuntu-apache-php84"
     "ubuntu-apache-multiphp"
-    "bullseye-apache-fpm81"
     # Web servers (layer 3 - depends on base)
     "debian-nginx"
     "ubuntu-nginx"

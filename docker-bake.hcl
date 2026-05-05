@@ -43,7 +43,7 @@ group "nginx-php" {
 
 group "apache" {
     targets = [
-       "debian-apache-php56", "debian-apache-php72", "debian-apache-php74", "debian-apache-php80", "debian-apache-php81", "debian-apache-php82", "debian-apache-php83", "debian-apache-php84", "debian-apache-multiphp", "ubuntu-apache-php56", "ubuntu-apache-php72", "ubuntu-apache-php74", "ubuntu-apache-php80", "ubuntu-apache-php81", "ubuntu-apache-php82", "ubuntu-apache-php83", "ubuntu-apache-php84", "ubuntu-apache-multiphp", "bullseye-apache-fpm81", ]
+       "debian-apache-php56", "debian-apache-php72", "debian-apache-php74", "debian-apache-php80", "debian-apache-php81", "debian-apache-php82", "debian-apache-php83", "debian-apache-php84", "debian-apache-multiphp", "ubuntu-apache-php56", "ubuntu-apache-php72", "ubuntu-apache-php74", "ubuntu-apache-php80", "ubuntu-apache-php81", "ubuntu-apache-php82", "ubuntu-apache-php83", "ubuntu-apache-php84", "ubuntu-apache-multiphp", ]
 }
 
 group "apache-misc" {
@@ -262,12 +262,6 @@ target "debian-multiphp" {
     tags = ["docker.io/eilandert/php-fpm:deb-multi"]
     context = "php-fpm"
     dockerfile = "Dockerfile-multidebian"
-}
-
-target "bullseye-phpfpm81" {
-    tags = ["docker.io/eilandert/php-fpm:bullseye-8.1"]
-    context = "php-fpm"
-    dockerfile = "Dockerfile-8.1bullseye"
 }
 
 target "debian-mariadb" {
@@ -508,12 +502,6 @@ target "ubuntu-apache-multiphp" {
     tags = ["docker.io/eilandert/apache-phpfpm:multi"]
     context = "apache-phpfpm"
     dockerfile = "Dockerfile-multi"
-}
-
-target "bullseye-apache-fpm81" {
-    tags = ["docker.io/eilandert/apache-phpfpm:81bulsseye"]
-    context = "apache-phpfpm"
-    dockerfile = "Dockerfile-8.1bullseye"
 }
 
 target "clamav" {
