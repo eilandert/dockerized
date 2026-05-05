@@ -29,7 +29,7 @@ log_info "  Nginx multi (debian)"
 process_template "$TEMPLATE" "Dockerfile-multidebian" "FROM=eilandert/php-fpm:deb-multi"
 
 # PHP versions
-declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4)
+declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4 8.5)
 
 for version in "${VERSIONS[@]}"; do
     ubuntu_output="Dockerfile-php${version}"

@@ -19,7 +19,7 @@ check_template "$TEMPLATE_FOOTER" || exit 1
 
 log_info "Generating PHP-FPM Dockerfiles..."
 
-declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4)
+declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4 8.5)
 declare -a REMOVE_MARKERS=(
     "5.6:removedinphp72,removedinphp74,removedinphp80"
     "7.2:removedinphp74,removedinphp80"
@@ -29,6 +29,7 @@ declare -a REMOVE_MARKERS=(
     "8.2:"
     "8.3:"
     "8.4:"
+    "8.5:"
 )
 
 # Step 1: Generate individual version Dockerfiles
@@ -108,4 +109,4 @@ safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$multi_
 # Step 4: Clean up temp files
 rm -f Dockerfile-template.generated.*
 
-log_info "✓ PHP-FPM Dockerfiles generated (${#VERSIONS[@]} versions + multi)"
+log_info "✓ PHP-FPM Dockerfiles generated (9 PHP versions + multi + debian variants)"

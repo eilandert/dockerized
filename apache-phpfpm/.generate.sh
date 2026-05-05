@@ -13,7 +13,7 @@ check_template "$TEMPLATE" || exit 1
 
 log_info "Generating Apache PHP-FPM Dockerfiles..."
 
-declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4)
+declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4 8.5)
 
 # Generate individual version Dockerfiles
 for version in "${VERSIONS[@]}"; do
