@@ -26,6 +26,8 @@ VOLUME ["/var/lib/redis"]
 EXPOSE 6379
 COPY syslog-ng.conf /etc/syslog-ng
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD redis-cli ping || exit 1
+
 CMD [ "/bootstrap.sh" ]
 
 

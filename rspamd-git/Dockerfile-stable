@@ -25,7 +25,9 @@ RUN apt-get -y update ;\
     apt-get -y autoremove ;\
     apt-get -y clean autoclean ;\
     rm -rf /var/lib/apt/lists/* ;\
-    chmod +x /bootstrap.sh
+    chmod +x /bootstrap.sh && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt
 
 COPY syslog-ng.conf /etc/syslog-ng
 VOLUME  [ "/var/lib/rspamd" ]

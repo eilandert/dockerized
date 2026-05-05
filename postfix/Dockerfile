@@ -29,6 +29,8 @@ VOLUME [ "/var/lib/postfix" ]
 EXPOSE 25 587
 COPY syslog-ng.conf /etc/syslog-ng
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD postfix status || exit 1
+
 CMD [ "/bootstrap.sh" ]
 
 

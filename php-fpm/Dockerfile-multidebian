@@ -345,5 +345,7 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     chmod 755 /bootstrap.sh
 EXPOSE  9000
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD fcgi-check localhost 9000 || exit 1
+
 CMD     ["/bootstrap.sh"]
 

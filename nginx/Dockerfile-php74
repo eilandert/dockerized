@@ -44,5 +44,7 @@ EXPOSE  443/udp
 EXPOSE  443 443
 EXPOSE  80 80
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD curl -f http://localhost/ || exit 1
+
 CMD     ["/bootstrap.sh"]
 

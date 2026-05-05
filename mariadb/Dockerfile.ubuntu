@@ -140,6 +140,8 @@ VOLUME /var/lib/mysql
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 COPY docker-entrypoint.sh /usr/local/bin/
 EXPOSE 3306
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD mysqladmin ping -h localhost || exit 1
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["mariadbd"]

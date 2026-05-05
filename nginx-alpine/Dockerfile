@@ -14,5 +14,7 @@ RUN  apk update && apk upgrade \
 
 EXPOSE 80/TCP
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD curl -f http://localhost/ || exit 1
+
 CMD "/bootstrap.sh"
 

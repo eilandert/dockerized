@@ -18,5 +18,7 @@ COPY syslog-ng.conf /etc/syslog-ng
 
 EXPOSE 24 143 110 993 995 4190
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD doveadm stats || exit 1
+
 CMD [ "/bootstrap.sh" ]
 
