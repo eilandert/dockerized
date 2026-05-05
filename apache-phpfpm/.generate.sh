@@ -43,7 +43,3 @@ cp "$multi_output" "$multi_debian"
 safe_sed "eilandert/php-fpm:" "eilandert/php-fpm:deb-" "$multi_debian"
 
 log_info "✓ Apache PHP-FPM Dockerfiles generated (${#VERSIONS[@]} versions + multi)"
-cp "$multi_output" "$multi_debian"
-safe_sed "eilandert/php-fpm:" "eilandert/php-fpm:deb-" "$multi_debian"
-
-log_info "✓ Apache PHP-FPM Dockerfiles generated (${#VERSIONS[@]} versions + multi)"

@@ -4,28 +4,25 @@ LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-# Install OS dependencies
-RUN set -x; \
-        apt update && apt upgrade ;\
+# Install OS and Python dependencies
+RUN set -x ;\
+    apt update && apt upgrade ;\
     apt-get install --no-install-recommends -y git ;\
-    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
-
-# Upgrade pip and set up Python environment
-RUN pip install --upgrade pip setuptools wheel && \
+    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    pip install --upgrade pip setuptools wheel ;\
     pip install --upgrade numpy Pillow opencv-python-headless onnxruntime --no-cache-dir --ignore-requires-python ;\
     pip install --upgrade aiohttp discord certifi requests colorama discord aiohttp-socks pytz pyzipper --no-cache-dir
 
 # Clone repo by latest tag and set up
-RUN git clone https://github.com/whiteout-project/bot app --depth 1;\ && \
+RUN git clone https://github.com/whiteout-project/bot app --depth 1 ;\
     cd /app ;\
     git checkout - ;\
     python main.py --autoupdate ;\
     rm -rf .git
 
-# Copy bootstrap script
+# Copy bootstrap script and prepare
 COPY bootstrap.sh /bootstrap.sh
 RUN chmod +x /bootstrap.sh
 
 WORKDIR /app
 ENTRYPOINT ["/bootstrap.sh"]
-

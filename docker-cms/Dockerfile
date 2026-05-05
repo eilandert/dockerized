@@ -10,17 +10,10 @@ COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
     echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
-    apt-get -y update
-
-RUN apt-get install -y nullmailer mailutils ;\
-    rm -rf /var/spool/nullmailer/trigger
-
-RUN apt-get install -y nano less imagemagick mariadb-client wget curl sudo mc libvips42 php-vips && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/apt
-
-RUN set -x ;\
-    apt-get update ;\
+    apt-get -y update ;\
+    apt-get install -y nullmailer mailutils ;\
+    rm -rf /var/spool/nullmailer/trigger ;\
+    apt-get install -y nano less imagemagick mariadb-client wget curl sudo mc libvips42 php-vips ;\
     apt-get install -m -y --no-install-recommends \
     php8.3 \
     php8.3-apcu \
@@ -50,24 +43,22 @@ RUN set -x ;\
     php8.3-xml \
     php8.3-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /var/cache/apt
 
-RUN    set -ex ;\
+RUN set -ex ;\
     cd /tmp ;\
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
-    php -r "unlink('composer-setup.php');"
-
-RUN    set -ex ;\
+    php -r "unlink('composer-setup.php');" ;\
     php -r "copy('https://raw.githubusercontent.com/wp-cli/wp-cli/v2.9.0/utils/wp-completion.bash', '/usr/lib/wp-completion.bash');" ;\
-    php -r "copy('https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar', '/usr/bin/wp');"  ;\
+    php -r "copy('https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar', '/usr/bin/wp');" ;\
     chmod +x /usr/bin/wp ;\
-    echo "alias wp='sudo -u www-data -i -- wp --path=$(pwd)'" >> /root/.bashrc ;\
-    echo "source /usr/lib/wp-completion.bash"  >> /root/.bashrc ;\
+    echo "alias wp='sudo -u www-data -i -- wp --path=\$(pwd)'" >> /root/.bashrc ;\
+    echo "source /usr/lib/wp-completion.bash" >> /root/.bashrc ;\
     mkdir /var/www ;\
     chsh www-data -s /bin/bash
 
-RUN    set -ex ;\
+RUN set -ex ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\
     rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
@@ -78,13 +69,11 @@ RUN    set -ex ;\
     rm -rf /etc/php/8.0 /usr/lib/php/20200930 ;\
     rm -rf /etc/php/8.1 /usr/lib/php/20210902 ;\
     rm -rf /etc/php/8.2 /usr/lib/php/20220829 ;\
-    #rm -rf /etc/php/8.3 /usr/lib/php/20230831 ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     echo "alias ls='ls --color=auto'" >> /root/.bashrc ;\
-    echo "alias grep='grep --color=auto'"  >> /root/.bashrc ;\
+    echo "alias grep='grep --color=auto'" >> /root/.bashrc ;\
     chmod 755 /bootstrap.sh ;\
     chmod 755 /usr/bin/sudo
 
 CMD     ["/bootstrap.sh"]
-
