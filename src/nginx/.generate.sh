@@ -7,7 +7,7 @@ set -e
 
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPTDIR"
-source ../generate-lib.sh
+source ../../build/generate-lib.sh
 
 TEMPLATE="Dockerfile.template"
 check_template "$TEMPLATE" || exit 1
@@ -35,7 +35,7 @@ for version in "${VERSIONS[@]}"; do
     ubuntu_output="Dockerfile-php${version}"
     debian_output="Dockerfile-php${version}-deb"
     process_template "$TEMPLATE" "$ubuntu_output" "FROM=eilandert/php-fpm:${version}"
-    
+
     log_info "  Nginx PHP $version (debian)"
     process_template "$TEMPLATE" "$debian_output" "FROM=eilandert/php-fpm:deb-${version}"
 done

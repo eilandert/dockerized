@@ -6,7 +6,7 @@ set -e
 
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPTDIR"
-source ../generate-lib.sh
+source ../../build/generate-lib.sh
 
 TEMPLATE="Dockerfile-template"
 check_template "$TEMPLATE" || exit 1
@@ -20,7 +20,7 @@ for version in "${VERSIONS[@]}"; do
     output="Dockerfile-${version}"
     log_info "  Apache PHP $version"
     process_template "$TEMPLATE" "$output" "PHPVERSION=$version"
-    
+
     # Create debian variant
     debian_output="Dockerfile-${version}-deb"
     cp "$output" "$debian_output"

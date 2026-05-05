@@ -8,7 +8,7 @@ set -e
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NGINXDIR="$(cd "$SCRIPTDIR/../nginx" && pwd)"
 cd "$SCRIPTDIR"
-source ../generate-lib.sh
+source ../../build/generate-lib.sh
 
 log_info "Generating Angie Dockerfiles from Nginx templates..."
 

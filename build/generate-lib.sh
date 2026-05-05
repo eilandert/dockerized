@@ -19,9 +19,9 @@ process_template() {
     local template="$1"
     local output="$2"
     shift 2
-    
+
     cp "$template" "$output"
-    
+
     while [[ $# -gt 0 ]]; do
         local key="${1%%=*}"
         local val="${1#*=}"
@@ -78,9 +78,9 @@ compose_dockerfile() {
     local header="${2:-}"
     local body="${3:-}"
     local footer="${4:-}"
-    
+
     > "$output"  # Clear output file
-    
+
     [[ -n "$header" && -f "$header" ]] && cat "$header" >> "$output"
     [[ -n "$body" && -f "$body" ]] && cat "$body" >> "$output"
     [[ -n "$footer" && -f "$footer" ]] && cat "$footer" >> "$output"
@@ -91,7 +91,7 @@ compose_dockerfile() {
 create_debian_variant() {
     local ubuntu_file="$1"
     local debian_output="$2"
-    
+
     cp "$ubuntu_file" "$debian_output"
     safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$debian_output"
     safe_sed "eilandert/php-fpm:" "eilandert/php-fpm:deb-" "$debian_output"

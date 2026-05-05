@@ -7,7 +7,7 @@ set -e
 
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPTDIR"
-source ../generate-lib.sh
+source ../../build/generate-lib.sh
 
 TEMPLATE_PHP="Dockerfile-template.php"
 TEMPLATE_HEADER="Dockerfile-template.header"
