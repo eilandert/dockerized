@@ -1,8 +1,5 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/php-fpm for a recent one
 FROM    eilandert/ubuntu-base:rolling
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
-
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
@@ -36,8 +33,8 @@ RUN set -x ;\
       php7.4-imagick \
       php7.4-imap \
       php7.4-intl \
-      php7.4-json \
       php7.4-ldap \
+      #removedinphp72#php7.4-mcrypt \
       php7.4-memcache \
       php7.4-memcached \
       php7.4-mbstring \
@@ -46,6 +43,7 @@ RUN set -x ;\
       php7.4-pspell \
       php7.4-pgsql \
       php7.4-readline \
+      #removedinphp74#php7.4-recode \
       php7.4-redis \
       php7.4-soap \
       php7.4-sqlite3 \
@@ -80,8 +78,6 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     chmod 755 /bootstrap.sh
 EXPOSE  9000
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD fcgi-check localhost 9000 || exit 1
 
 CMD     ["/bootstrap.sh"]
 

@@ -1,9 +1,6 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/apache-phpfpm for a recent one
 
 FROM    eilandert/php-fpm:7.2
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
-
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
@@ -30,8 +27,6 @@ RUN mv /etc/apache2 /etc/apache2.orig ;\
     chmod +x /bootstrap.sh
 EXPOSE  443 443
 EXPOSE  80 80
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD curl -f http://localhost/ || exit 1
 
 CMD     ["/bootstrap.sh"]
 
