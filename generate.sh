@@ -77,11 +77,11 @@ if bash -c '
     curl --fail -s https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.11/Dockerfile -o mariadb/Dockerfile.ubuntu
     curl --fail -s https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.11/docker-entrypoint.sh -o mariadb/docker-entrypoint.sh
     curl --fail -s https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/10.11/healthcheck.sh -o mariadb/healthcheck.sh
-    
+
     # Create debian variant
     cp mariadb/Dockerfile.ubuntu mariadb/Dockerfile.debian
     chmod +x mariadb/docker-entrypoint.sh
-    
+
     # Customize for our setup
     sed -i "s|FROM ubuntu:jammy|FROM eilandert/ubuntu-base:rolling\nCOPY bootstrap.sh /|" mariadb/Dockerfile.ubuntu
     sed -i "s|FROM ubuntu:jammy|FROM eilandert/debian-base:stable\nCOPY bootstrap.sh /|" mariadb/Dockerfile.debian

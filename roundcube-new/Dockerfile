@@ -1,42 +1,45 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
 
 FROM    eilandert/debian-base:stable
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
-ENV	LD_PRELOAD=""
+ENV    LD_PRELOAD=""
 # fetch the last version, generated in the docker build script
 COPY     .lastversion /tmp/lastversion
-COPY	bootstrap.sh /
-ENV	PHPVERSION="8.2"
-ENV	COMPOSER_ALLOW_SUPERUSER=1
+COPY    bootstrap.sh /
+ENV    PHPVERSION="8.2"
+ENV    COMPOSER_ALLOW_SUPERUSER=1
 
 RUN set -x ;\
-	echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
-	apt-get update ;\
-	apt-get -y install --no-install-recommends \
-	angie-minimal \
-	aspell \
-	aspell-en \
-	aspell-nl \ 
-	dbconfig-no-thanks \
-	dictionaries-common \
-	enchant-2 \
-	fonts-glyphicons-halflings \
-	hunspell-en-us \
-	libjs-bootstrap4 \
-	libjs-codemirror \
-	libjs-jquery-minicolors \
-	libjs-jquery-ui \
-	libjs-jstimezonedetect \
-	libjs-popper.js \
-	libjs-sizzle \
-	libonig5 \
-	node-jquery \
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    apt-get update ;\
+    apt-get -y install --no-install-recommends \
+    angie-minimal \
+    aspell \
+    aspell-en \
+    aspell-nl \
+    dbconfig-no-thanks \
+    dictionaries-common \
+    enchant-2 \
+    fonts-glyphicons-halflings \
+    hunspell-en-us \
+    libjs-bootstrap4 \
+    libjs-codemirror \
+    libjs-jquery-minicolors \
+    libjs-jquery-ui \
+    libjs-jstimezonedetect \
+    libjs-popper.js \
+    libjs-sizzle \
+    libonig5 \
+    node-jquery \
         php${PHPVERSION}-fpm \
         php${PHPVERSION}-gd \
         php${PHPVERSION}-intl \
-	php${PHPVERSION}-imap \
+    php${PHPVERSION}-imap \
         php${PHPVERSION}-mbstring \
         php${PHPVERSION}-mysql \
         php${PHPVERSION}-opcache \
@@ -44,13 +47,13 @@ RUN set -x ;\
         php${PHPVERSION}-redis \
         php${PHPVERSION}-snuffleupagus \
         php${PHPVERSION}-xml \
-        php${PHPVERSION}-zip 
+        php${PHPVERSION}-zip
 
 RUN set -ex ;\
     cd /tmp ;\
     /usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
     cat /tmp/composer-setup.php | /usr/bin/php -- --filename=composer --install-dir=/usr/bin ;\
-    /usr/bin/php -r "unlink('composer-setup.php');" 
+    /usr/bin/php -r "unlink('composer-setup.php');"
 
 RUN set -x ;\
     LASTVERSION=$(cat /tmp/lastversion) ;\
@@ -79,7 +82,7 @@ RUN set -x ;\
 
     #misc
 #    composer require ss88/easy_unsubscribe ;\
- 
+
     cd ${INSTALLDIR} ;\
     mkdir -p plugins/authres ;\
     curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | \
@@ -100,7 +103,7 @@ RUN set -x ;\
    #account_details
     mkdir -p plugins/account_details ;\
     curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C plugins/account_details ;\ 
+      tar xz --strip-components=1 -C plugins/account_details ;\
    #responses
     mkdir -p plugins/responses ;\
     curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | \
@@ -171,7 +174,7 @@ RUN set -x ;\
     # Classic
     mkdir -p skins/larry ;\
     curl -L https://github.com/roundcube/larry/archive/master.tar.gz | \
-	tar xz --strip-components=1 -C skins/larry ;\
+    tar xz --strip-components=1 -C skins/larry ;\
     mkdir -p skins/classic ;\
     curl -L https://github.com/roundcube/classic/archive/master.tar.gz | \
       tar xz --strip-components=1 -C skins/classic ;\

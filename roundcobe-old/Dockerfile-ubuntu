@@ -1,14 +1,17 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
 
 FROM    eilandert/apache-phpfpm:8.0
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     INSTALLDIR="/var/www/html"
-ENV	LD_PRELOAD=""
+ENV    LD_PRELOAD=""
 # fetch the last version, generated in the docker build script
 COPY     .lastversion /tmp/lastversion
 
-COPY	bootstrap.sh /
+COPY    bootstrap.sh /
 
 RUN set -x ;\
     LASTVERSION=$(cat /tmp/lastversion) ;\
@@ -47,7 +50,7 @@ RUN set -x ;\
    #account_details
     mkdir -p plugins/account_details ;\
     curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | \
-      tar xz --strip-components=1 -C plugins/account_details ;\ 
+      tar xz --strip-components=1 -C plugins/account_details ;\
    #responses
     mkdir -p plugins/responses ;\
     curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | \
@@ -143,8 +146,8 @@ COPY httpd.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
 
 WORKDIR ${INSTALLDIR}
+VOLUME /var/roundcube/db
+VOLUME /var/roundcube/config
 ENTRYPOINT ["/bootstrap.sh"]
 
-VOLUME /var/roundcube/config
-VOLUME /var/roundcube/db
 

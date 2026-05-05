@@ -1,4 +1,7 @@
 FROM    eilandert/ubuntu-base:rolling
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 

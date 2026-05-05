@@ -1,9 +1,12 @@
 FROM    eilandert/debian-base:stable
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
 COPY    bootstrap.sh /bootstrap.sh
-COPY	ssh-createkeys.sh /ssh-createkeys.sh
+COPY    ssh-createkeys.sh /ssh-createkeys.sh
 COPY    syslog-ng.conf /etc/syslog-ng
 
 RUN set -ex ;\
@@ -36,7 +39,7 @@ RUN chmod +x /bootstrap.sh ;\
     useradd -u 1010 -g 1010 aptly -s /bin/bash -d /aptly ;\
     rm -f /etc/ssh/ssh_host_rsa_key* ;\
     rm -f /etc/ssh/ssh_host_dsa_key* ;\
-    rm -f /etc/ssh/ssh_host_ecdsa_key* ;\ 
+    rm -f /etc/ssh/ssh_host_ecdsa_key* ;\
     rm -f /etc/ssh/ssh_host_ed25519_key* ;\
     rm -f /etc/nginx/modules-enabled/50-mod-http-echo.conf ;\
     sed -i /^Banner/d /etc/ssh/sshd_config.d/20-security.conf ;\
@@ -46,17 +49,17 @@ RUN chmod +x /bootstrap.sh ;\
     cp -rp /etc/ssh /etc/ssh.orig
 
 RUN apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/*
+VOLUME /etc/ssh  #otherwise ssh serverkeys will change on each pull
+WORKDIR /aptly
+EXPOSE 22 80
+RUN cp -rp /etc/nginx /etc/nginx.orig ;\
+COPY examples /aptly.orig/examples
+COPY default-vhost.nginx /etc/nginx/sites-available/default
 
 CMD [ "/bootstrap.sh" ]
 
-COPY default-vhost.nginx /etc/nginx/sites-available/default
-COPY examples /aptly.orig/examples
 
-RUN cp -rp /etc/nginx /etc/nginx.orig ;\
-	chmod 644 /etc/syslog-ng/syslog-ng.conf ;\
-	chmod 666 /etc/syslog-ng/conf.d/
+    chmod 644 /etc/syslog-ng/syslog-ng.conf ;\
+    chmod 666 /etc/syslog-ng/conf.d/
 
-EXPOSE 22 80
-WORKDIR /aptly
-VOLUME /etc/ssh  #otherwise ssh serverkeys will change on each pull
 

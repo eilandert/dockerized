@@ -1,5 +1,8 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
 FROM eilandert/debian-base:stable
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -19,10 +22,10 @@ RUN set -ex ;\
     mv /etc/valkey /etc/valkey.orig ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
     chmod +x /bootstrap.sh
+VOLUME ["/var/lib/valkey"]
+EXPOSE 6379
+COPY syslog-ng.conf /etc/syslog-ng
 
 CMD [ "/bootstrap.sh" ]
-COPY syslog-ng.conf /etc/syslog-ng
-EXPOSE 6379
-VOLUME ["/var/lib/valkey"]
 
 

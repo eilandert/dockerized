@@ -1,4 +1,7 @@
 FROM alpine:edge
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 RUN apk update && apk upgrade && apk add rspamd rspamd-openrc rspamd-client rspamd-controller rspamd-fuzzy rspamd-proxy rspamd-utils gnupg tzdata syslog-ng
@@ -14,8 +17,8 @@ RUN     addgroup -S -g 1000 _rspamd && adduser -S -G _rspamd -u 1000 _rspamd \
         && chmod +x /bootstrap.sh
 
 COPY syslog-ng.conf /etc/syslog-ng
+VOLUME  [ "/var/lib/rspamd" ]
+EXPOSE 11332 11333 11334
 
 CMD [ "/bootstrap.sh" ]
 
-EXPOSE 11332 11333 11334
-VOLUME  [ "/var/lib/rspamd" ]

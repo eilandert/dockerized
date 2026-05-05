@@ -1,12 +1,15 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/vimbadmin-ubuntu for a recent one
 
-FROM	eilandert/apache-phpfpm:deb-8.0
-LABEL	maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV     DEBIAN_FRONTEND="noninteractive"
-ENV	LD_PRELOAD=""
-ENV	INSTALL_PATH=/opt/vimbadmin
+FROM    eilandert/apache-phpfpm:deb-8.0
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
-COPY	bootstrap.sh /bootstrap.sh
+LABEL    maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+ENV    LD_PRELOAD=""
+ENV    INSTALL_PATH=/opt/vimbadmin
+
+COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
     apt-get update && apt-get -y install --no-install-recommends curl unzip ca-certificates ;\
@@ -42,6 +45,6 @@ RUN set -ex ;\
 COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/
 
 WORKDIR /opt/vimbadmin
+EXPOSE 80/TCP
 CMD "/bootstrap.sh"
 
-EXPOSE 80/TCP

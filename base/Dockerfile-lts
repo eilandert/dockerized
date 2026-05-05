@@ -1,5 +1,8 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
 FROM    ubuntu:latest
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     DIST=focal
@@ -39,8 +42,8 @@ for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
         usermod -L $user && usermod -s /usr/sbin/nologin $user ;\
     fi ;\
 done ;\
-#	  for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
-#	  for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+#      for file in `ls /usr/bin/apt*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
+#      for file in `ls /usr/bin/deb*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
 #     for file in `ls /usr/bin/dpkg*`; do dpkg-statoverride --update --add root adm 0500 $file; done ;\
 for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\
 for file in `ls /usr/sbin/fsck*`; do dpkg-statoverride --update --add root adm 0000 $file; done ;\

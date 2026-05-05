@@ -9,7 +9,7 @@ RUN set -ex ;\
     #TEMPLATE4# ;\
     #TEMPLATE5# ;\
     apt-get update ;\
-    apt-get -y upgrade 
+    apt-get -y upgrade
 
 RUN apt-get -y --no-install-recommends install \
       brotli \
@@ -36,10 +36,10 @@ RUN mv /etc/nginx /etc/nginx.orig ;\
     mkdir -p /etc/modsecurity ;\
     chmod +x /bootstrap.sh ;\
     rm -f /var/spool/nullmailer/trigger
+WORKDIR /etc/nginx
+EXPOSE  443/udp
+EXPOSE  443 443
+EXPOSE  80 80
 
 CMD     ["/bootstrap.sh"]
-EXPOSE  80 80
-EXPOSE  443 443
-EXPOSE  443/udp
 
-WORKDIR /etc/nginx

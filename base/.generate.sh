@@ -35,7 +35,7 @@ declare -A VARIANTS=(
 for variant in "${!VARIANTS[@]}"; do
     IFS='|' read -r from dist <<< "${VARIANTS[$variant]}"
     output="Dockerfile-${variant}"
-    
+
     log_info "  $variant: FROM=$from DIST=$dist"
     process_template "$TEMPLATE" "$output" "TEMPLATE1=$from" "TEMPLATE2=$dist"
 done

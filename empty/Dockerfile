@@ -1,4 +1,7 @@
-FROM alpine:edge 
+FROM alpine:edge
+
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
 COPY bootstrap.sh /bootstrap.sh
 

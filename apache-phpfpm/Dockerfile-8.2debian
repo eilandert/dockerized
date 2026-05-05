@@ -1,11 +1,14 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/apache-phpfpm for a recent one
 
 FROM    eilandert/php-fpm:deb-8.2
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
 COPY    bootstrap.sh /bootstrap.sh
-COPY	conf-available /tmp/conf-available
+COPY    conf-available /tmp/conf-available
 
 RUN apt-get -y update ;\
     apt-get install -y --no-install-recommends apache2 apache2-utils libjemalloc2 mimalloc ;\
@@ -25,8 +28,8 @@ RUN mv /etc/apache2 /etc/apache2.orig ;\
     mkdir -p /etc/php ;\
     mkdir -p /etc/nullmailer ;\
     chmod +x /bootstrap.sh
+EXPOSE  443 443
+EXPOSE  80 80
 
 CMD     ["/bootstrap.sh"]
-EXPOSE  80 80
-EXPOSE  443 443
 

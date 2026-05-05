@@ -1,11 +1,14 @@
 FROM alpine:edge
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY config.orig /config.orig
 COPY bootstrap.sh /bootstrap.sh
 COPY check.sh /check.sh
 
-RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tzdata \   
+RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tzdata \
   && apk update && apk upgrade \
   && apk del alpine-keys apk-tools \
   && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
@@ -21,9 +24,9 @@ RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tz
   && chmod +x /usr/local/sbin/clamav-unofficial-sigs \
   && chmod +x /bootstrap.sh && chmod +x /check.sh \
 #  && freshclam --user=clamav --no-warnings --foreground
+VOLUME ["/var/lib/clamav"]
+EXPOSE 3310/tcp
 
 
 CMD ["/bootstrap.sh"]
-EXPOSE 3310/tcp
-VOLUME ["/var/lib/clamav"]
 HEALTHCHECK CMD /check.sh

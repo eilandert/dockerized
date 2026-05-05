@@ -69,3 +69,29 @@ remove_markers() {
     local marker="$2"
     sed -i "/${marker}/d" "$file"
 }
+# Check if array contains value
+array_contains() {
+    local needle="$1"
+    shift
+    local item
+    for item in "$@"; do
+        [[ "$item" == "$needle" ]] && return 0
+    done
+    return 1
+}
+
+# Validate template file exists
+check_template() {
+    local template="$1"
+    if [[ ! -f "$template" ]]; then
+        log_error "Template not found: $template"
+        return 1
+    fi
+}
+
+# Remove marker lines from file
+remove_markers() {
+    local file="$1"
+    local marker="$2"
+    sed -i "/${marker}/d" "$file"
+}

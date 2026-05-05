@@ -1,4 +1,7 @@
 FROM    eilandert/debian-base:stable
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
@@ -7,7 +10,7 @@ COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
     echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
-    apt-get -y update 
+    apt-get -y update
 
 RUN apt-get install -y nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger
@@ -47,22 +50,22 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN	set -ex ;\
+RUN    set -ex ;\
     cd /tmp ;\
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
     cat /tmp/composer-setup.php | php -- --filename=composer --install-dir=/usr/bin ;\
-    php -r "unlink('composer-setup.php');" 
+    php -r "unlink('composer-setup.php');"
 
-RUN	set -ex ;\
+RUN    set -ex ;\
     php -r "copy('https://raw.githubusercontent.com/wp-cli/wp-cli/v2.9.0/utils/wp-completion.bash', '/usr/lib/wp-completion.bash');" ;\
     php -r "copy('https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar', '/usr/bin/wp');"  ;\
     chmod +x /usr/bin/wp ;\
     echo "alias wp='sudo -u www-data -i -- wp --path=$(pwd)'" >> /root/.bashrc ;\
     echo "source /usr/lib/wp-completion.bash"  >> /root/.bashrc ;\
-    mkdir /var/www ;\ 
+    mkdir /var/www ;\
     chsh www-data -s /bin/bash
 
-RUN	set -ex ;\
+RUN    set -ex ;\
     rm -rf /var/lib/apt/lists/* /tmp/* ;\
     rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
@@ -79,7 +82,7 @@ RUN	set -ex ;\
     echo "alias ls='ls --color=auto'" >> /root/.bashrc ;\
     echo "alias grep='grep --color=auto'"  >> /root/.bashrc ;\
     chmod 755 /bootstrap.sh ;\
-    chmod 755 /usr/bin/sudo 
+    chmod 755 /usr/bin/sudo
 
 CMD     ["/bootstrap.sh"]
 

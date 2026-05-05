@@ -1,4 +1,7 @@
 FROM    eilandert/debian-base:trixie
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
@@ -10,8 +13,8 @@ COPY check.sh /check.sh
 
 RUN set -ex ;\
   apt-get update ;\
-  apt-get -y --no-install-recommends install bash wget curl rsync tzdata bind9-host bind9-dnsutils ;\  
-  apt-get -y --no-install-recommends install clamav clamav-daemon clamav-freshclam clamav-milter clamdscan ;\ 
+  apt-get -y --no-install-recommends install bash wget curl rsync tzdata bind9-host bind9-dnsutils ;\
+  apt-get -y --no-install-recommends install clamav clamav-daemon clamav-freshclam clamav-milter clamdscan ;\
   mkdir -p /usr/local/sbin/ ;\
   mkdir -p /config.orig/clamav-unofficial-sigs ;\
   mv /etc/clamav /config.orig ;\
@@ -24,10 +27,10 @@ RUN set -ex ;\
   apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
   sed -i /Proxy/d /config.orig/clamav/freshclam.conf ;\
   sed -i /^#/d /config.orig/clamav/*.conf ;\
-  sed -i s/work_dir_urlhaust/work_dir_urlhaus/ /usr/local/sbin/clamav-unofficial-sigs.sh ;\  
+  sed -i s/work_dir_urlhaust/work_dir_urlhaus/ /usr/local/sbin/clamav-unofficial-sigs.sh ;\
   echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
+VOLUME ["/var/lib/clamav"]
+EXPOSE 3310/tcp
 
 CMD ["/bootstrap.sh"]
-EXPOSE 3310/tcp
-VOLUME ["/var/lib/clamav"]
 HEALTHCHECK CMD /check.sh

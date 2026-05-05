@@ -3,8 +3,8 @@ FROM    eilandert/ubuntu-base:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
-ENV	PHPVERSION=#PHPVERSION#
-ENV	MODE=FPM
+ENV    PHPVERSION=#PHPVERSION#
+ENV    MODE=FPM
 
 COPY    bootstrap.sh /bootstrap.sh
 

@@ -1,4 +1,7 @@
 FROM alpine:latest
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 ENV INSTALL_PATH=/opt/vimbadmin
@@ -10,7 +13,7 @@ RUN  apk update && apk upgrade && apk add --no-cache git curl \
               -c advice.detachedHead=false \
               -j`nproc` \
                https://github.com/opensolutions/ViMbAdmin.git \
-              ${INSTALL_PATH}; 
+              ${INSTALL_PATH};
 
 RUN  apk add --no-cache php7-apache2 php7-phar php7-mbstring php7-mcrypt php7-json php7-pdo php-gettext \
         php7-memcached php7-pdo_mysql php7-opcache php7-tokenizer php7-simplexml php7-ctype php7-iconv php7-openssl \
@@ -20,7 +23,7 @@ RUN  apk add --no-cache php7-apache2 php7-phar php7-mbstring php7-mcrypt php7-js
   && composer config -g secure-http false \
   && composer install --prefer-dist --no-dev \
   && chown -R apache:apache ${INSTALL_PATH}/var \
-  && cp -r ${INSTALL_PATH}/application/configs ${INSTALL_PATH}/application/configs.orig \	
+  && cp -r ${INSTALL_PATH}/application/configs ${INSTALL_PATH}/application/configs.orig \
   && echo "Include ${INSTALL_PATH}/application/configs/httpd.conf" >> /etc/apache2/httpd.conf \
   && rm ${INSTALL_PATH}/application/configs.orig/application.ini.vagrant \
   && rm -rf ${INSTALL_PATH}/.git /root/.composer /usr/local/bin/composer \

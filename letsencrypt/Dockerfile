@@ -1,4 +1,7 @@
 FROM alpine:latest
+LABEL org.opencontainers.image.authors="eilandert"
+LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY bootstrap.sh /bootstrap.sh
