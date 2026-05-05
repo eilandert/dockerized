@@ -74,7 +74,7 @@ for version in "${VERSIONS[@]}"; do
     safe_sed "rm -rf /etc/php/${version}" "#rm -rf /etc/php/${version}" "$output"
 
     # Create debian variant
-    debian_output="Dockerfile-${version}debian"
+    debian_output="Dockerfile-${version}-deb"
     cp "$output" "$debian_output"
     safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$debian_output"
 
@@ -102,7 +102,7 @@ safe_sed "MODE=FPM" "MODE=MULTI" "$multi_output"
 safe_sed "rm -rf /etc/php" "#rm -rf /etc/php" "$multi_output"
 
 # Create debian variant
-multi_debian="Dockerfile-multidebian"
+multi_debian="Dockerfile-multi-deb"
 cp "$multi_output" "$multi_debian"
 safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$multi_debian"
 

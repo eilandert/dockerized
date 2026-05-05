@@ -22,7 +22,7 @@ for version in "${VERSIONS[@]}"; do
     process_template "$TEMPLATE" "$output" "PHPVERSION=$version"
     
     # Create debian variant
-    debian_output="Dockerfile-${version}debian"
+    debian_output="Dockerfile-${version}-deb"
     cp "$output" "$debian_output"
     safe_sed "eilandert/php-fpm:" "eilandert/php-fpm:deb-" "$debian_output"
 done
@@ -38,7 +38,7 @@ safe_sed "a2enconf php" "" "$multi_output"
 safe_sed "a2dismod php" "" "$multi_output"
 
 # Create debian variant
-multi_debian="Dockerfile-multidebian"
+multi_debian="Dockerfile-multi-deb"
 cp "$multi_output" "$multi_debian"
 safe_sed "eilandert/php-fpm:" "eilandert/php-fpm:deb-" "$multi_debian"
 

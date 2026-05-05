@@ -19,23 +19,21 @@ log_info "  Nginx base (ubuntu)"
 process_template "$TEMPLATE" "Dockerfile" "FROM=eilandert/ubuntu-base:rolling"
 
 log_info "  Nginx base (debian)"
-process_template "$TEMPLATE" "Dockerfile-debian" "FROM=eilandert/debian-base:stable"
+process_template "$TEMPLATE" "Dockerfile-deb" "FROM=eilandert/debian-base:stable"
 
 # Multi-PHP
 log_info "  Nginx multi (ubuntu)"
 process_template "$TEMPLATE" "Dockerfile-multi" "FROM=eilandert/php-fpm:multi"
 
 log_info "  Nginx multi (debian)"
-process_template "$TEMPLATE" "Dockerfile-multidebian" "FROM=eilandert/php-fpm:deb-multi"
+process_template "$TEMPLATE" "Dockerfile-multi-deb" "FROM=eilandert/php-fpm:deb-multi"
 
 # PHP versions
 declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4 8.5)
 
 for version in "${VERSIONS[@]}"; do
     ubuntu_output="Dockerfile-php${version}"
-    debian_output="Dockerfile-php${version}debian"
-    
-    log_info "  Nginx PHP $version (ubuntu)"
+    debian_output="Dockerfile-php${version}-deb"
     process_template "$TEMPLATE" "$ubuntu_output" "FROM=eilandert/php-fpm:${version}"
     
     log_info "  Nginx PHP $version (debian)"
