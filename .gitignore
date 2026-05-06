@@ -1,0 +1,14 @@
+# Build output
+*.log
+*.tmp
+
+# Generated files
+src/*/generated/
+src/*/dist/
+
+# Docker build cache
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
