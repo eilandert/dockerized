@@ -57,154 +57,72 @@ docker system prune -f -a
 log_info "Creating buildx instance..."
 docker buildx create --use
 
-# Define build targets in dependency order (layered)
-# Base images must be built first, then php-fpm, then webservers with php, etc.
-declare -a TARGETS=(
-    # Base images (layer 1)
-    "resolute"
-    "noble"
-    "jammy"
-    "focal"
-    "bionic"
-    "xenial"
-    "trusty"
-    "trixie"
-    "bookworm"
-    "bullseye"
-    "buster"
-    "stretch"
-    "rolling"
-    "devel"
-    # PHP-FPM (layer 2 - depends on base images)
-    "ubuntu-phpfpm56"
-    "debian-phpfpm56"
-    "ubuntu-phpfpm72"
-    "debian-phpfpm72"
-    "ubuntu-phpfpm74"
-    "debian-phpfpm74"
-    "ubuntu-phpfpm80"
-    "debian-phpfpm80"
-    "ubuntu-phpfpm81"
-    "debian-phpfpm81"
-    "ubuntu-phpfpm82"
-    "debian-phpfpm82"
-    "ubuntu-phpfpm83"
-    "debian-phpfpm83"
-    "ubuntu-phpfpm84"
-    "debian-phpfpm84"
-    "ubuntu-phpfpm85"
-    "debian-phpfpm85"
-    "ubuntu-multiphp"
-    "debian-multiphp"
-    # Databases (layer 2 - depends on base images)
-    "ubuntu-mariadb"
-    "debian-mariadb"
-    "ubuntu-redis"
-    "debian-redis"
-    "ubuntu-valkey"
-    "debian-valkey"
-    # Web servers with PHP (layer 3 - depends on php-fpm and base)
-    "ubuntu-nginx-php56"
-    "debian-nginx-php56"
-    "ubuntu-nginx-php72"
-    "debian-nginx-php72"
-    "ubuntu-nginx-php74"
-    "debian-nginx-php74"
-    "ubuntu-nginx-php80"
-    "debian-nginx-php80"
-    "ubuntu-nginx-php81"
-    "debian-nginx-php81"
-    "ubuntu-nginx-php82"
-    "debian-nginx-php82"
-    "ubuntu-nginx-php83"
-    "debian-nginx-php83"
-    "ubuntu-nginx-php84"
-    "debian-nginx-php84"
-    "ubuntu-nginx-php85"
-    "debian-nginx-php85"
-    "ubuntu-nginx-multi"
-    "debian-nginx-multi"
-    "ubuntu-angie-php56"
-    "debian-angie-php56"
-    "ubuntu-angie-php72"
-    "debian-angie-php72"
-    "ubuntu-angie-php74"
-    "debian-angie-php74"
-    "ubuntu-angie-php80"
-    "debian-angie-php80"
-    "ubuntu-angie-php81"
-    "debian-angie-php81"
-    "ubuntu-angie-php82"
-    "debian-angie-php82"
-    "ubuntu-angie-php83"
-    "debian-angie-php83"
-    "ubuntu-angie-php84"
-    "debian-angie-php84"
-    "ubuntu-angie-php85"
-    "debian-angie-php85"
-    "ubuntu-angie-multi"
-    "debian-angie-multi"
-    "debian-apache-php56"
-    "debian-apache-php72"
-    "debian-apache-php74"
-    "debian-apache-php80"
-    "debian-apache-php81"
-    "debian-apache-php82"
-    "debian-apache-php83"
-    "debian-apache-php84"
-    "debian-apache-php85"
-    "debian-apache-multiphp"
-    "ubuntu-apache-php56"
-    "ubuntu-apache-php72"
-    "ubuntu-apache-php74"
-    "ubuntu-apache-php80"
-    "ubuntu-apache-php81"
-    "ubuntu-apache-php82"
-    "ubuntu-apache-php83"
-    "ubuntu-apache-php84"
-    "ubuntu-apache-php85"
-    "ubuntu-apache-multiphp"
-    # Web servers (layer 3 - depends on base)
-    "debian-nginx"
-    "ubuntu-nginx"
-    "debian-angie"
-    "ubuntu-angie"
-    # Mail services (layer 3 - depends on base)
-    "ubuntu-postfix"
-    "debian-postfix"
-    "alpine-rspamd"
-    "debian-rspamd-git"
-    "debian-rspamd"
-    "debian-rspamd-official"
-    "ubuntu-rspamd"
-    "ubuntu-dovecot"
-    "debian-dovecot"
-    # Other services and utilities (layer 3+)
-    "debian-roundcube"
-    "debian-vimbadmin"
-    "ubuntu-vimbadmin"
-    "ubuntu-reprepro"
-    "clamav"
-    "alpine-letsencrypt"
-    "rbldnsd"
-    "alpine-unbound"
-    "debian-openssh"
+# Define build targets organized by dependency layer for parallel building
+# Each layer can build all its targets in parallel since they don't depend on each other
+# Layers must be built sequentially (next layer depends on previous)
+
+declare -a LAYERS=(
+    # Layer 1: Base images (14 targets) - no dependencies
+    "resolute noble jammy focal bionic xenial trusty trixie bookworm bullseye buster stretch rolling devel"
+    
+    # Layer 2: PHP-FPM and Databases (26 targets) - depends on base images
+    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
+    
+    # Layer 3: Web servers with PHP (62 targets) - depends on PHP-FPM
+    "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php72 debian-nginx-php72 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php81 debian-nginx-php81 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php83 debian-nginx-php83 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php72 debian-angie-php72 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php81 debian-angie-php81 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php83 debian-angie-php83 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php72 debian-apache-php74 debian-apache-php80 debian-apache-php81 debian-apache-php82 debian-apache-php83 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php72 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php81 ubuntu-apache-php82 ubuntu-apache-php83 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
+    
+    # Layer 4: Other web servers and services (20 targets) - depends on base images
+    "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro clamav alpine-letsencrypt rbldnsd alpine-unbound debian-openssh"
 )
 
-# Build targets
-log_info "Starting builds for ${#TARGETS[@]} targets..."
+# Build targets in parallel by dependency layer
+# Layer 1: Base images (14 targets)
+# Layer 2: PHP-FPM and Databases (26 targets)
+# Layer 3+: Web servers, mail services, utilities (82 targets)
+
+declare -a LAYERS=(
+    # Layer 1: Base images - build in parallel
+    "resolute noble jammy focal bionic xenial trusty trixie bookworm bullseye buster stretch rolling devel"
+    # Layer 2: PHP-FPM and Databases - build in parallel (depends on layer 1)
+    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
+    # Layer 3: Web servers with PHP - build in parallel (depends on layer 2)
+    "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php72 debian-nginx-php72 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php81 debian-nginx-php81 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php83 debian-nginx-php83 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php72 debian-angie-php72 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php81 debian-angie-php81 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php83 debian-angie-php83 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php72 debian-apache-php74 debian-apache-php80 debian-apache-php81 debian-apache-php82 debian-apache-php83 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php72 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php81 ubuntu-apache-php82 ubuntu-apache-php83 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
+    # Layer 4: Other web servers and services - build in parallel (depends on layer 1)
+    "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro clamav alpine-letsencrypt rbldnsd alpine-unbound debian-openssh"
+)
+
+
+log_info "Starting parallel builds across ${#LAYERS[@]} dependency layers..."
+echo ""
 FAILED=0
 SUCCESS=0
+TOTAL_TARGETS=0
+LAYER_NUM=1
 
-for BUILD in "${TARGETS[@]}"; do
-    echo ""
-    log_info "Building: ${BUILD}"
-    if docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" ${PUSH} "${BUILD}" 2>&1 | tail -5; then
-        ((SUCCESS++))
+# Calculate total targets for display
+for LAYER in "${LAYERS[@]}"; do
+    TARGET_COUNT=$(echo "$LAYER" | wc -w)
+    ((TOTAL_TARGETS+=TARGET_COUNT))
+done
+log_info "Total targets to build: $TOTAL_TARGETS"
+echo ""
+
+for LAYER in "${LAYERS[@]}"; do
+    TARGET_COUNT=$(echo "$LAYER" | wc -w)
+    log_info "Building Layer $LAYER_NUM ($TARGET_COUNT targets in parallel)..."
+    
+    # Build all targets in this layer in parallel using docker buildx bake
+    # docker buildx bake can process multiple targets and will build them in parallel
+    if docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" ${PUSH} $LAYER 2>&1 | tail -30; then
+        ((SUCCESS+=TARGET_COUNT))
+        log_info "✓ Layer $LAYER_NUM complete ($TARGET_COUNT/$TOTAL_TARGETS targets)"
     else
-        log_error "Build failed for ${BUILD}"
-        ((FAILED++))
+        log_error "✗ Build failed for layer $LAYER_NUM"
+        ((FAILED+=TARGET_COUNT))
     fi
+    
+    echo ""
+    ((LAYER_NUM++))
 done
 
 # Cleanup

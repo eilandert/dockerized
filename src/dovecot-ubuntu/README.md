@@ -8,7 +8,7 @@ Built with dovecot packages on https://deb.myguard.nl
 The docker-compose file is on my github https://github.com/eilandert/dockerized/blob/master/dovecot-ubuntu/docker-compose.yml
 
 Tags:
-eilandert/dovecot:ubuntu 
+eilandert/dovecot:ubuntu
 eilandert/dovecot:debian
 eilandert/dovecot:alpine (without the loaded stuff as stated below)
 
@@ -34,7 +34,7 @@ This docker is loaded with:<BR>
   Dovecot and all modules (obviously)<BR>
   rspamd (to use rspamd's client rspamc for reporting spam)<BR>
   spamc (spamassassin client for reporting spam)<BR>
-  pyzor (for reporting spam)<BR> 
+  pyzor (for reporting spam)<BR>
   razor (for reporting spam)<BR>
   vimbadmin scripts in /opt/scripts/vimbadmin<BR>
 <BR>
