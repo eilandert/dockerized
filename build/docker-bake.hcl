@@ -8,7 +8,7 @@ group "base-current" {
 }
 
 group "base" {
-    targets = ["rolling", "devel", "resolute", "noble", "jammy", "focal", "bionic", "trixie", "bookworm", "bullseye", "buster"]
+    targets = ["rolling", "devel", "resolute", "noble", "jammy", "trixie"]
 }
 
 group "phpfpm" {
@@ -64,7 +64,7 @@ group "db" {
 
 group "misc" {
     targets = [
-       "clamav", "alpine-letsencrypt", "rbldnsd", "ubuntu-reprepro", "debian-sitewarmup", "alpine-unbound", "aptly", "debian-openssh" ]
+       "alpine-letsencrypt", "rbldnsd", "ubuntu-reprepro", "debian-sitewarmup", "alpine-unbound", "aptly", "debian-openssh" ]
 }
 
 target "cms" {
@@ -103,58 +103,10 @@ target "jammy" {
     tags = ["docker.io/eilandert/ubuntu-base:jammy"]
 }
 
-target "focal" {
-    dockerfile = "Dockerfile-focal"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:focal"]
-}
-
-target "bionic" {
-    dockerfile = "Dockerfile-bionic"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:bionic"]
-}
-
-target "xenial" {
-    dockerfile = "Dockerfile-xenial"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:xenial"]
-}
-
-target "trusty" {
-    dockerfile = "Dockerfile-trusty"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:trusty"]
-}
-
 target "trixie" {
     dockerfile = "Dockerfile-trixie"
     context = "src/base"
     tags = ["docker.io/eilandert/debian-base:trixie", "docker.io/eilandert/debian-base:stable"]
-}
-
-target "bookworm" {
-    dockerfile = "Dockerfile-bookworm"
-    context = "src/base"
-    tags = ["docker.io/eilandert/debian-base:bookworm"]
-}
-
-target "bullseye" {
-    dockerfile = "Dockerfile-bullseye"
-    context = "src/base"
-    tags = ["docker.io/eilandert/debian-base:bullseye"]
-}
-
-target "buster" {
-    dockerfile = "Dockerfile-buster"
-    context = "src/base"
-    tags = ["docker.io/eilandert/debian-base:buster"]
-}
-
-target "stretch" {
-    dockerfile = "Dockerfile-stretch"
-    context = "src/base"
-    tags = ["docker.io/eilandert/debian-base:stretch"]
 }
 
 target "ubuntu-phpfpm56" {
@@ -541,11 +493,7 @@ target "ubuntu-apache-multiphp" {
     dockerfile = "Dockerfile-multi-ubu"
 }
 
-target "clamav" {
-   tags = ["docker.io/eilandert/clamav-unofficial-sigs"]
-   context = "src/clamav-unofficial-signatures"
-   dockerfile = "Dockerfile-ubu"
-}
+
 
 target "ubuntu-dovecot" {
    tags = ["docker.io/eilandert/dovecot:ubuntu", "docker.io/eilandert/dovecot:latest"]
@@ -562,7 +510,7 @@ target "debian-dovecot" {
 target "alpine-letsencrypt" {
    tags = ["docker.io/eilandert/letsencrypt"]
    context = "src/letsencrypt"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 
 target "ubuntu-postfix" {
@@ -580,7 +528,7 @@ target "debian-postfix" {
 target "rbldnsd" {
    tags = ["docker.io/eilandert/rbldnsd"]
    context = "src/rbldnsd"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 
 target "alpine-redis" {
@@ -616,7 +564,7 @@ target "debian-valkey" {
 target "ubuntu-reprepro" {
    tags = ["docker.io/eilandert/reprepro"]
    context = "src/reprepro"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 
 target "ubuntu-roundcube" {
@@ -666,7 +614,7 @@ target "debian-sitewarmup" {
 target "alpine-unbound" {
    tags = ["docker.io/eilandert/unbound"]
    context = "src/unbound"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 target "alpine-vimbadmin" {
    tags = ["docker.io/eilandert/vimbadmin:alpine"]
@@ -830,5 +778,37 @@ target "debian-angie-multi" {
     tags = ["docker.io/eilandert/angie:deb-multi"]
     context = "src/angie"
     dockerfile = "Dockerfile-multi-deb"
+}
+
+# Global cache configuration for docker buildx
+# This enables inline caching and persistent build cache mounts
+variable "DOCKER_REGISTRY" {
+  default = "docker.io"
+}
+
+variable "CACHE_REGISTRY" {
+  default = "docker.io"
+}
+
+# Cache configuration applied to all targets
+# - type=inline: include cache metadata in built image (requires push)
+# - type=local: persist cache to local directory
+variable "CACHE_TO" {
+  default = ""
+}
+
+variable "CACHE_FROM" {
+  default = ""
+}
+
+# Apply cache settings to all targets via common settings
+# Override in buildx.sh: CACHE_TO="type=inline" or CACHE_TO="type=local,dest=/tmp/buildx-cache"
+common {
+  output {
+    # Enable inline cache for faster rebuilds when images are pushed
+    # Add to BUILDX_OPTS in buildx.sh: CACHE_TO="type=inline"
+    cache-to = [ notequal(CACHE_TO, "") ? CACHE_TO : "" ]
+    cache-from = [ notequal(CACHE_FROM, "") ? CACHE_FROM : "" ]
+  }
 }
 

@@ -68,8 +68,8 @@ docker buildx create --use
 # Layers must be built sequentially (next layer depends on previous)
 
 declare -a LAYERS=(
-    # Layer 1: Base images (14 targets) - no dependencies
-    "resolute noble jammy focal bionic xenial trusty trixie bookworm bullseye buster stretch rolling devel"
+    # Layer 1: Base images (6 targets) - no dependencies
+    "resolute noble jammy trixie rolling devel"
     
     # Layer 2: PHP-FPM and Databases (26 targets) - depends on base images
     "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
@@ -82,13 +82,13 @@ declare -a LAYERS=(
 )
 
 # Build targets in parallel by dependency layer
-# Layer 1: Base images (14 targets)
+# Layer 1: Base images (6 targets)
 # Layer 2: PHP-FPM and Databases (26 targets)
 # Layer 3+: Web servers, mail services, utilities (82 targets)
 
 declare -a LAYERS=(
     # Layer 1: Base images - build in parallel
-    "resolute noble jammy focal bionic xenial trusty trixie bookworm bullseye buster stretch rolling devel"
+    "resolute noble jammy trixie rolling devel"
     # Layer 2: PHP-FPM and Databases - build in parallel (depends on layer 1)
     "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
     # Layer 3: Web servers with PHP - build in parallel (depends on layer 2)
@@ -127,7 +127,10 @@ for LAYER in "${LAYERS[@]}"; do
     # Build all targets in this layer with detailed progress
     # --progress=plain shows all build steps and target names
     # We tee to file and pipe to grep to show relevant progress
+    # Cache options: --set *.cache-to=type=inline enables caching in image metadata
     if timeout 3600 docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" \
+    --set "*.cache-to=type=inline" \
+    --set "*.cache-from=type=registry" \
     --progress=plain \
     ${PUSH} $LAYER > "$LAYER_LOG" 2>&1; then
         
@@ -165,10 +168,38 @@ log_info "Cleaning up buildx instance..."
 docker buildx rm 2>/dev/null || true
 docker system prune -f -a
 
-# Summary
+# Summary - save to file and print
+SUMMARY_FILE="/tmp/buildx-summary-$(date +%s).txt"
+{
+    echo "========================================="
+    echo "Build Summary"
+    echo "========================================="
+    echo "Successful: $SUCCESS"
+    echo "Failed: $FAILED"
+    echo "Total: $TOTAL_TARGETS"
+    echo ""
+    
+    if [ $SUCCESS -eq $TOTAL_TARGETS ]; then
+        echo "✓ All targets built successfully!"
+    else
+        echo "⚠ Some targets failed. Build logs saved to:"
+        for i in $(seq 1 $((LAYER_NUM-1))); do
+            if [ -f "/tmp/buildx-layer-$i.log" ]; then
+                echo "  /tmp/buildx-layer-$i.log"
+                # Extract error details from each layer log
+                if grep -q "ERROR\|error:" "/tmp/buildx-layer-$i.log" 2>/dev/null; then
+                    echo ""
+                    echo "  Errors in layer $i:"
+                    grep -E "(ERROR|error:|FAILED)" "/tmp/buildx-layer-$i.log" 2>/dev/null | head -10 | sed 's/^/    /'
+                fi
+            fi
+        done
+        echo ""
+        echo "View logs with: tail -f /tmp/buildx-layer-*.log"
+    fi
+} | tee "$SUMMARY_FILE"
+
 echo ""
-echo "========================================="
-log_info "Build Summary"
 echo "========================================="
 echo -e "  ${GREEN}Successful${NC}: $SUCCESS"
 echo -e "  ${RED}Failed${NC}: $FAILED"
@@ -189,6 +220,8 @@ else
     log_warning "View logs with: tail -f /tmp/buildx-layer-*.log"
 fi
 
+echo ""
+log_info "Summary saved to: $SUMMARY_FILE"
 echo ""
 
 if [ $FAILED -gt 0 ]; then

@@ -68,8 +68,8 @@ docker buildx create --use
 # Layers must be built sequentially (next layer depends on previous)
 
 declare -a LAYERS=(
-    # Layer 1: Base images (14 targets) - no dependencies
-    "resolute noble jammy focal bionic xenial trusty trixie bookworm bullseye buster stretch rolling devel"
+    # Layer 1: Base images (6 targets) - no dependencies
+    "resolute noble jammy trixie rolling devel"
     
     # Layer 2: PHP-FPM and Databases (26 targets) - depends on base images
     "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
@@ -82,13 +82,13 @@ declare -a LAYERS=(
 )
 
 # Build targets in parallel by dependency layer
-# Layer 1: Base images (14 targets)
+# Layer 1: Base images (6 targets)
 # Layer 2: PHP-FPM and Databases (26 targets)
 # Layer 3+: Web servers, mail services, utilities (82 targets)
 
 declare -a LAYERS=(
     # Layer 1: Base images - build in parallel
-    "resolute noble jammy focal bionic xenial trusty trixie bookworm bullseye buster stretch rolling devel"
+    "resolute noble jammy trixie rolling devel"
     # Layer 2: PHP-FPM and Databases - build in parallel (depends on layer 1)
     "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
     # Layer 3: Web servers with PHP - build in parallel (depends on layer 2)
@@ -128,6 +128,8 @@ for LAYER in "${LAYERS[@]}"; do
     # --progress=plain shows all build steps and target names
     # We tee to file and pipe to grep to show relevant progress
     if timeout 3600 docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" \
+    --set "*.cache-to=type=inline" \
+    --set "*.cache-from=type=registry" \
     --progress=plain \
     ${PUSH} $LAYER > "$LAYER_LOG" 2>&1; then
         
