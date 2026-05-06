@@ -21,6 +21,7 @@ RUN apt-get -y --no-install-recommends install \
       fcgiwrap \
       geoip-bin \
       libjemalloc2 \
+      libluajit-5.1-2 \
       lua-http \
       lua-socket \
       lua-zlib \
