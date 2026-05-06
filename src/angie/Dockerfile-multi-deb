@@ -1,5 +1,11 @@
 FROM    eilandert/php-fpm:deb-multi
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
+        org.opencontainers.image.title="Nginx with ModSecurity & PageSpeed" \
+        org.opencontainers.image.description="High-performance web server with security and optimization modules" \
+        org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/angie" \
+        org.opencontainers.image.vendor="MyGuard" \
+        org.opencontainers.image.version="#VERSION#"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
 COPY    bootstrap.sh /bootstrap.sh
@@ -40,6 +46,9 @@ WORKDIR /etc/angie
 EXPOSE  443/udp
 EXPOSE  443 443
 EXPOSE  80 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
 
 CMD     ["/bootstrap.sh"]
 

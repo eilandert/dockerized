@@ -1,4 +1,4 @@
-Latest OpenSSH, installed from https://deb.paranoid.nl , meant to be a jumphost.
+Latest OpenSSH, installed from https://deb.myguard.nl , meant to be a jumphost.
 
 Daily rebuilds
 

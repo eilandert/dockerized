@@ -43,7 +43,10 @@ if ! ./generate.sh; then
 fi
 
 # Change to parent directory for docker buildx (contexts need to be relative to project root)
-cd ..
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+BUILD_DIR="$SCRIPT_DIR"
+cd "$PROJECT_ROOT"
 
 # Clean up any existing buildx instances
 log_info "Cleaning up buildx..."
@@ -196,7 +199,7 @@ SUCCESS=0
 for BUILD in "${TARGETS[@]}"; do
     echo ""
     log_info "Building: ${BUILD}"
-    if docker buildx bake -f docker-bake.hcl ${PUSH} "${BUILD}" 2>&1 | tail -5; then
+    if docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" ${PUSH} "${BUILD}" 2>&1 | tail -5; then
         ((SUCCESS++))
     else
         log_error "Build failed for ${BUILD}"

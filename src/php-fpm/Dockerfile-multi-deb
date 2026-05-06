@@ -1,6 +1,12 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/php-fpm for a recent one
 FROM    eilandert/debian-base:stable
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
+        org.opencontainers.image.title="PHP-FPM" \
+        org.opencontainers.image.description="PHP-FPM FastCGI Process Manager" \
+        org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/php-fpm" \
+        org.opencontainers.image.vendor="MyGuard" \
+        org.opencontainers.image.version="#VERSION#"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
 ENV    PHPVERSION=MULTI
@@ -393,6 +399,9 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     chmod 755 /bootstrap.sh
 EXPOSE  9000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD php-fpm -r 2>/dev/null || exit 1
 
 CMD     ["/bootstrap.sh"]
 

@@ -2,7 +2,7 @@ dockerized dovecot+sieve image based on ubuntu:rolling or debian:stable
 
 Mount /etc/dovecot for configfiles, if dovecot.conf does not exist all default configfiles will be copied on startup.
 
-Built with dovecot packages on https://deb.paranoid.nl
+Built with dovecot packages on https://deb.myguard.nl
 (mirror on https://launchpad.net/~eilander/+archive/ubuntu/backports)
 
 The docker-compose file is on my github https://github.com/eilandert/dockerized/blob/master/dovecot-ubuntu/docker-compose.yml

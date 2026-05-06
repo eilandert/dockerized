@@ -22,5 +22,8 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     chmod 755 /bootstrap.sh
 EXPOSE  9000
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD php-fpm -r 2>/dev/null || exit 1
+
 CMD     ["/bootstrap.sh"]
 

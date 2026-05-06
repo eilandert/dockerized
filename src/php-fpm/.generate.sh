@@ -61,27 +61,30 @@ done
 # Step 2: Build individual Dockerfiles from header + version + footer
 log_info "  Building complete Dockerfiles..."
 for version in "${VERSIONS[@]}"; do
-    temp="Dockerfile-template.generated.php${version}"
-    output="Dockerfile-${version}"
+    # Normalize version: remove dots (5.6 -> 56, 7.4 -> 74, etc.)
+    normalized_version="${version//.}"
 
-    log_info "    $output"
-    cat "$TEMPLATE_HEADER" "$temp" "$TEMPLATE_FOOTER" > "$output"
+    temp="Dockerfile-template.generated.php${version}"
+    ubuntu_output="Dockerfile-${normalized_version}-ubu"
+    debian_output="Dockerfile-${normalized_version}-deb"
+
+    log_info "    $ubuntu_output"
+    cat "$TEMPLATE_HEADER" "$temp" "$TEMPLATE_FOOTER" > "$ubuntu_output"
 
     # Set version in output
-    safe_sed "#PHPVERSION#" "$version" "$output"
+    safe_sed "#PHPVERSION#" "$version" "$ubuntu_output"
 
     # Comment out the rm -rf for this PHP version (keep all versions in single Dockerfile potential)
-    safe_sed "rm -rf /etc/php/${version}" "#rm -rf /etc/php/${version}" "$output"
+    safe_sed "rm -rf /etc/php/${version}" "#rm -rf /etc/php/${version}" "$ubuntu_output"
 
     # Create debian variant
-    debian_output="Dockerfile-${version}-deb"
-    cp "$output" "$debian_output"
+    cp "$ubuntu_output" "$debian_output"
     safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$debian_output"
 
     # Remove unsupported packages from PHP 5.6 debian
     if [[ "$version" == "5.6" ]]; then
-        sed -i '/zstd/d' "$output"
-        sed -i '/snuffleupagus/d' "$output"
+        sed -i '/zstd/d' "$ubuntu_output"
+        sed -i '/snuffleupagus/d' "$ubuntu_output"
         sed -i '/zstd/d' "$debian_output"
         sed -i '/snuffleupagus/d' "$debian_output"
     fi
@@ -89,7 +92,7 @@ done
 
 # Step 3: Build multi-PHP Dockerfile
 log_info "  Building multi-PHP variant..."
-multi_output="Dockerfile-multi"
+multi_output="Dockerfile-multi-ubu"
 cat "$TEMPLATE_HEADER" > "$multi_output"
 for version in "${VERSIONS[@]}"; do
     temp="Dockerfile-template.generated.php${version}"

@@ -1,4 +1,4 @@
-dockerized postfix based on ubuntu:rolling with packages from http://deb.paranoid.nl
+dockerized postfix based on ubuntu:rolling with packages from http://deb.myguard.nl
 
 If /etc/postfix/main.cf does not exist, all the original configurationfiles will be copied to /etc/postfix
 

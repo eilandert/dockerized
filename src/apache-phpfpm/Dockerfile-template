@@ -1,7 +1,13 @@
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/apache-phpfpm for a recent one
 
 FROM    eilandert/php-fpm:#PHPVERSION#
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
+        org.opencontainers.image.title="Apache with PHP-FPM" \
+        org.opencontainers.image.description="Apache web server with PHP-FPM FastCGI backend" \
+        org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/apache-phpfpm" \
+        org.opencontainers.image.vendor="MyGuard" \
+        org.opencontainers.image.version="#VERSION#"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
 COPY    bootstrap.sh /bootstrap.sh
@@ -27,6 +33,9 @@ RUN mv /etc/apache2 /etc/apache2.orig ;\
     chmod +x /bootstrap.sh
 EXPOSE  443 443
 EXPOSE  80 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
 
 CMD     ["/bootstrap.sh"]
 
