@@ -13,7 +13,7 @@ COPY     .lastversion /tmp/lastversion
 
 COPY    bootstrap.sh /
 
-RUN set -x ;\
+RUN set -xe ;\
     LASTVERSION=$(cat /tmp/lastversion) ;\
     apt-get -y update ;\
     rm -rf /etc/php && mv /etc/php.orig /etc/php ;\

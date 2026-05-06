@@ -22,7 +22,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.0 \

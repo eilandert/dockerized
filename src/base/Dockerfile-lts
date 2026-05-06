@@ -12,7 +12,7 @@ COPY    deb.myguard.nl.gpg /etc/apt/trusted.gpg.d/deb.myguard.nl.gpg
 COPY    ondrej-ubuntu-php.gpg /etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg
 
 # prefer install latest packages from my own repository on https://deb.myguard.nl
-RUN set -x ;\
+RUN set -xe ;\
 apt-get -y update ;\
 apt-get install -y --no-install-recommends ca-certificates ;\
 echo "deb [arch=amd64] http://deb.myguard.nl ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\

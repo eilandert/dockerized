@@ -14,7 +14,7 @@ COPY    bootstrap.sh /
 ENV    PHPVERSION="8.2"
 ENV    COMPOSER_ALLOW_SUPERUSER=1
 
-RUN set -x ;\
+RUN set -xe ;\
     echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get update ;\
     apt-get -y install --no-install-recommends \
@@ -55,7 +55,7 @@ RUN set -ex ;\
     cat /tmp/composer-setup.php | /usr/bin/php -- --filename=composer --install-dir=/usr/bin ;\
     /usr/bin/php -r "unlink('composer-setup.php');"
 
-RUN set -x ;\
+RUN set -xe ;\
     LASTVERSION=$(cat /tmp/lastversion) ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends \

@@ -22,7 +22,7 @@ RUN set -ex ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php5.6 \
@@ -59,7 +59,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php7.2 \
@@ -97,7 +97,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php7.4 \
@@ -136,7 +136,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.0 \
@@ -176,7 +176,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.1 \
@@ -216,7 +216,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.2 \
@@ -256,7 +256,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.3 \
@@ -296,7 +296,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.4 \
@@ -336,7 +336,7 @@ RUN set -x ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/*
 
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php8.5 \

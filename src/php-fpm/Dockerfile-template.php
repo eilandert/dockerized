@@ -1,4 +1,4 @@
-RUN set -x ;\
+RUN set -xe ;\
     apt-get update ;\
     apt-get install -m -y --no-install-recommends \
       php#PHPVERSION# \

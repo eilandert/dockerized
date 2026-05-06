@@ -6,7 +6,7 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY    bootstrap.sh /bootstrap.sh
 COPY app /app
-RUN set -x; \
+RUN set -xe; \
         apt update ;\
     apt-get install --no-install-recommends -y git ;\
     pip install --upgrade pip ;\

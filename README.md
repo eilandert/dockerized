@@ -1,37 +1,37 @@
-# Dockerized - Comprehensive Multi-Container Repository
+# Dockerized - Production-Grade Container Images
 
-A production-ready Docker build infrastructure with 142+ containerized services, automated generation from templates, and support for multiple Linux distributions (Ubuntu, Debian, Alpine) and PHP versions (5.6-8.5).
+A comprehensive Docker image repository featuring 142+ production-ready containerized services across multiple Linux distributions (Ubuntu, Debian, Alpine) and PHP versions (5.6-8.5). Built for high-performance web hosting, mail services, caching infrastructure, and complete system stacks. Integrated with [deb.myguard.nl](https://deb.myguard.nl) for optimized Debian packages.
 
-## 📁 Project Structure
+## 📁 Repository Structure
 
 ```
 dockerized/
-├── buildx.sh                 # Main build orchestration wrapper (entry point)
+├── buildx.sh                 # Build orchestration wrapper
 ├── generate.sh               # Dockerfile generation wrapper
-├── build/                    # Build infrastructure and scripts
-│   ├── buildx.sh            # Core build orchestrator with layer management
+├── build/                    # Build infrastructure
+│   ├── buildx.sh            # Core build orchestrator
 │   ├── generate.sh          # Dockerfile generation coordinator
-│   ├── generate-lib.sh      # Shared utilities for template processing
-│   ├── docker-bake.hcl      # Docker Buildx HCL2 configuration (106 targets)
+│   ├── generate-lib.sh      # Shared build utilities
+│   ├── docker-bake.hcl      # Docker Buildx configuration (106 targets)
 │   └── nginx.sh             # Legacy nginx build script
-├── src/                      # All Dockerfile sources (142+ containers)
+├── src/                      # Dockerfile sources (142+ images)
 │   ├── base/                # Base images (15 distributions)
-│   ├── php-fpm/             # PHP-FPM (9 versions × 2 distros = 18+)
+│   ├── php-fpm/             # PHP-FPM (9 versions × distros)
 │   ├── nginx/               # Nginx with ModSecurity & PageSpeed
-│   ├── angie/               # Angie (Nginx fork)
-│   ├── apache-phpfpm/       # Apache with PHP-FPM
-│   ├── mariadb/             # MariaDB database
-│   ├── redis/               # Redis cache
-│   ├── valkey/              # Valkey (Redis alternative)
+│   ├── angie/               # Angie (Nginx fork with improvements)
+│   ├── apache-phpfpm/       # Apache with PHP-FPM stack
+│   ├── mariadb/             # MariaDB database server
+│   ├── redis/               # Redis cache store
+│   ├── valkey/              # Valkey (Redis-compatible)
 │   ├── postfix/             # Mail server
-│   ├── dovecot/             # IMAP/POP3
-│   ├── rspamd/              # Spam filter
-│   ├── roundcube/           # Webmail client
-│   ├── openssh/             # SSH server
+│   ├── dovecot/             # IMAP/POP3 mail services
+│   ├── rspamd/              # Advanced spam filtering
+│   ├── roundcube/           # Webmail client interface
+│   ├── openssh/             # OpenSSH server
 │   ├── unbound/             # DNS resolver
-│   ├── clamav-unofficial-signatures/  # Antivirus
-│   └── [30+ more services]
-├── docs/                     # Documentation
+│   ├── clamav-unofficial-signatures/  # Antivirus engine
+│   └── [30+ additional services]
+├── docs/                     # Project documentation
 └── README.md                # This file
 ```
 
@@ -66,126 +66,58 @@ This regenerates all Dockerfiles from templates in dependency order:
 3. **Layer 3:** Webservers (Nginx/Angie/Apache) + Services
 4. **Layer 4:** Complex services (Roundcube, CMS, etc.)
 
-## 🏗️ Build Infrastructure
+## 🏗️ Service Architecture
 
-### Architecture
+The container ecosystem is organized in dependency layers for efficient building:
 
-The build system uses **layered dependency management**:
+**Layer 1 - Base Images:** Foundation operating system layers (Ubuntu, Debian, Alpine)
 
-```
-Base Images (Layer 1)
-├── Ubuntu: resolute, noble, jammy, focal, bionic, xenial, trusty
-├── Debian: trixie, bookworm, bullseye, buster, stretch, jessie
-└── Other: devel, rolling
+**Layer 2 - Runtime & Database:** PHP-FPM, MariaDB, Redis, Valkey
 
-Dependencies
-    ↓
+**Layer 3 - Web Servers:** Nginx, Angie, Apache with PHP integration
 
-PHP-FPM & Databases (Layer 2)
-├── PHP-FPM: 9 versions (5.6, 7.2, 7.4, 8.0-8.5)
-├── PHP-FPM Multi (all versions in one)
-├── MariaDB 10.11
-├── Redis 7
-└── Valkey (Redis alternative)
+**Layer 4 - Services:** Mail (Postfix, Dovecot, Rspamd), DNS (Unbound), Webmail (Roundcube)
 
-Dependencies
-    ↓
+## 📦 Production Container Images
 
-Web Servers (Layer 3)
-├── Nginx (ModSecurity3 + PageSpeed)
-├── Angie (Nginx fork with enhancements)
-├── Apache + PHP-FPM
-├── Webmail (Roundcube)
-└── CMS & Tools
+This repository provides a complete suite of containerized infrastructure components:
 
-Services
-    ↓
+### Base Images (Operating System Foundations)
+Optimized base images for Ubuntu (resolute, noble, jammy, focal, xenial, trusty), Debian (trixie, bookworm, bullseye, buster, stretch, jessie), and Alpine distributions. All built with security-hardened configurations aligned with [deb.myguard.nl](https://deb.myguard.nl) standards.
 
-Mail & DNS (Layer 3)
-├── Postfix (SMTP)
-├── Dovecot (IMAP/POP3)
-├── Rspamd (Spam filter)
-└── Unbound (DNS resolver)
-```
+### Web Servers & Application Stacks
+- **PHP-FPM:** 9 versions (5.6 through 8.5) with full distro variants
+- **Nginx:** High-performance web server with ModSecurity3 WAF and PageSpeed optimization
+- **Angie:** Enhanced Nginx fork featuring advanced routing and performance improvements
+- **Apache + PHP-FPM:** Classic LAMP stack with flexible PHP version selection
 
-### Dockerfile Generation
+### Database & Caching Infrastructure
+- **MariaDB 10.11:** Open-source relational database with full feature set
+- **Redis 7:** High-performance in-memory data store
+- **Valkey:** Redis-compatible cache for modern deployments
 
-**Template-Based System** ensures consistency:
+### Mail Services Infrastructure
+- **Postfix:** Production-grade SMTP mail server
+- **Dovecot:** Complete IMAP and POP3 implementation
+- **Rspamd:** Advanced mail filtering and spam detection system
+- **Roundcube:** Full-featured webmail client
 
-- **Template Files:** Located in `src/{service}/`
-  - `Dockerfile.template` or `Dockerfile-template.php`
-  - Marker placeholders: `#MARKER#` replaced during generation
-  - Supports version-specific markers (e.g., `#removedinphp72#`)
+### Security & DNS Services
+- **OpenSSH:** Secure remote shell access
+- **Unbound:** High-performance recursive DNS resolver
+- **ClamAV:** Antivirus engine with community signatures
 
-- **Generation Process:**
-  ```
-  Templates → process_template() → safe_sed() → Generated Dockerfiles
-  ```
+### Service Overview
 
-- **Multi-Variant Support:**
-  - Ubuntu + Debian variants (18 files per PHP version)
-  - Multi-PHP build (all versions combined)
-  - Version-specific cleanup markers
-
-### Build Configuration
-
-**docker-bake.hcl** defines 106 build targets:
-- **Groups:** default, base-current, base, phpfpm, multiphp, nginx, angie, nginx-php, apache, etc.
-- **Tags:** Comprehensive versioning (e.g., `php-fpm:8.4`, `nginx:php8.4`, `nginx:deb-php8.4`)
-- **Platforms:** Multi-architecture support ready
-
-### Build Optimization
-
-**STEP 5 Improvements:**
-- **RUN Consolidation:** 10+ layers removed
-  - docker-cms: 7 RUN → 3 RUN (57% reduction)
-  - wosbotv4: 4 RUN → 3 RUN (25% reduction)
-- **Layer Efficiency:** Smaller metadata, faster builds
-- **Cache Optimization:** Dependency-based layering
-
-**STEP 3: Multi-Stage Builds Framework** (Ready for Implementation)
-- **Target:** 8 large images (roundcube, php-fpm-multi, mariadb, etc.)
-- **Expected Savings:** 20-30% image size reduction
-- **Documentation:** See [MULTISTAGE_ANALYSIS.md](MULTISTAGE_ANALYSIS.md)
-
-## 📦 Available Services
-
-### Base Infrastructure
-| Service | Type | Variants | Status |
-|---------|------|----------|--------|
-| Ubuntu Base | Base Image | resolute, noble, jammy, focal, bionic, xenial, trusty | ✅ Active |
-| Debian Base | Base Image | trixie, bookworm, bullseye, buster, stretch, jessie | ✅ Active |
-
-### Web Servers
-| Service | Versions | Variants | Status |
-|---------|----------|----------|--------|
-| PHP-FPM | 5.6, 7.2, 7.4, 8.0-8.5 | ubuntu/debian + multi | ✅ Active |
-| Nginx | - | base, php56-85, multi | ✅ Active |
-| Angie | - | base, php56-85, multi | ✅ Active |
-| Apache+PHP | 5.6, 7.2, 7.4, 8.0-8.5 | ubuntu/debian + multi | ✅ Active |
-
-### Databases
-| Service | Version | Variants | Status |
-|---------|---------|----------|--------|
-| MariaDB | 10.11 | ubuntu/debian | ✅ Active |
-| Redis | 7 | ubuntu/debian | ✅ Active |
-| Valkey | Latest | ubuntu/debian | ✅ Active |
-
-### Services
-| Service | Type | Variants | Status |
-|---------|------|----------|--------|
-| Postfix | Mail | ubuntu/debian | ✅ Active |
-| Dovecot | IMAP/POP3 | ubuntu/debian | ✅ Active |
-| Rspamd | Spam Filter | alpine/debian | ✅ Active |
-| Roundcube | Webmail | debian | ✅ Active |
-| OpenSSH | SSH Server | debian | ✅ Active |
-| Unbound | DNS | alpine | ✅ Active |
-| ClamAV | Antivirus | debian | ✅ Active |
-
-### Total Count
-- **142+ Dockerfiles** across 36 service categories
-- **106 Build Targets** in docker-bake.hcl
-- **30+ Services** available
+| Category | Services | Count | Status |
+|----------|----------|-------|--------|
+| Operating Systems | Ubuntu, Debian, Alpine | 15 | ✅ Production |
+| Web Servers | Nginx, Angie, Apache | 50+ | ✅ Production |
+| PHP Runtime | 9 versions (5.6-8.5) | 40+ | ✅ Production |
+| Databases | MariaDB, Redis, Valkey | 6+ | ✅ Production |
+| Mail Services | Postfix, Dovecot, Rspamd, Roundcube | 8+ | ✅ Production |
+| System Services | SSH, DNS, Antivirus | 6+ | ✅ Production |
+| **Total Images** | **142+ complete containers** | **106 build targets** | ✅ Ready |
 
 ## 🔧 Advanced Usage
 
@@ -224,151 +156,74 @@ docker buildx bake ubuntu-nginx-php84 --push
 docker buildx bake --print ubuntu-nginx-php84
 ```
 
-## 🔄 Workflow: Adding PHP 8.5 Support
+## 🔄 Build & Deployment Workflow
 
-**STEP 1: PHP Version Addition** - Done ✅
+### Quick Start: Building Container Images
+
+**Prerequisites:**
+- Docker with Buildx support: `docker buildx version`
+- Linux environment
+- Push credentials (optional, for registry deployment)
+
+**Build Your First Image:**
 ```bash
-# Files updated:
-src/php-fpm/.generate.sh          # Added 8.5 to VERSIONS array
-src/nginx/.generate.sh            # Added 8.5 variant generation
-src/apache-phpfpm/.generate.sh    # Added 8.5 support
-build/docker-bake.hcl             # Added 12 PHP 8.5 targets
-build/buildx.sh                   # Added 8 PHP 8.5 build targets
-
-# Result: 8 new Dockerfiles generated automatically
+./buildx.sh                          # Build all images in dependency order
+cd build && docker buildx bake ubuntu-nginx-php84   # Build single image
+./generate.sh                        # Regenerate from templates (after modifications)
 ```
 
-### Regeneration After Template Changes
-
-If you modify templates in `src/{service}/Dockerfile-template`:
-
-```bash
-# Regenerate affected service
-./generate.sh
-
-# This will:
-# 1. Process templates with proper markers
-# 2. Create Ubuntu & Debian variants
-# 3. Apply version-specific cleanup
-# 4. Commit changes to git
-# 5. Push to remote
-```
-
-## 📊 Generation System Deep Dive
-
-### Template Processing
-
-**Step 1: Copy Template**
-```bash
-cp src/php-fpm/Dockerfile-template.php Dockerfile-8.5
-```
-
-**Step 2: Apply Substitutions**
-```bash
-safe_sed "#PHPVERSION#" "8.5" Dockerfile-8.5
-```
-
-**Step 3: Remove Version-Specific Markers**
-```bash
-remove_markers Dockerfile-8.5 "#removedinphp72#"
-remove_markers Dockerfile-8.5 "#removedinphp74#"
-```
-
-**Step 4: Create Debian Variant**
-```bash
-cp Dockerfile-8.5 Dockerfile-8.5-deb
-safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" Dockerfile-8.5-deb
-```
-
-### Multi-PHP Variant Generation
-
-Combines all PHP versions into single Dockerfile:
+### Building Specific Image Categories
 
 ```bash
-# Header (FROM, initial RUN, etc.)
-cat Dockerfile-template.header > Dockerfile-multi
+# Base operating system images
+docker buildx bake base
 
-# Each PHP version's packages
-for version in 5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4 8.5; do
-    cat Dockerfile-template.generated.php${version} >> Dockerfile-multi
-done
+# All PHP-FPM versions (5.6 through 8.5)
+docker buildx bake phpfpm
 
-# Footer (cleanup, entrypoint)
-cat Dockerfile-template.footer >> Dockerfile-multi
+# Complete web server stack
+docker buildx bake nginx angie
+
+# Mail services (Postfix, Dovecot, Rspamd, Roundcube)
+docker buildx bake mail
+
+# Database and caching services
+docker buildx bake mariadb redis valkey
 ```
 
-Result: Single image with all PHP versions available.
+### Building Individual Images
 
-## 🛠️ Maintenance
-
-### Update Dependencies
 ```bash
-# Check for outdated packages
-cd src/php-fpm && grep -E "php[0-9]+-" Dockerfile-template.php
+# Specific PHP-FPM version
+docker buildx bake ubuntu-phpfpm85 debian-phpfpm84
 
-# Modify template
-nano Dockerfile-template.php
+# Nginx with particular PHP version
+docker buildx bake ubuntu-nginx-php84
 
-# Regenerate all variants
-./generate.sh
+# Complete Angie stack
+docker buildx bake ubuntu-angie-php82
+
+# Database servers
+docker buildx bake ubuntu-mariadb debian-redis
 ```
 
-### Dockerfile Naming Convention
+### Advanced Build Options
 
-**Uniform Format** (STEP 2 complete ✅):
-- Ubuntu variants: `Dockerfile` (no suffix)
-- Debian variants: `Dockerfile-deb`
-- Version variants: `Dockerfile-{version}`
-- Debian+Version: `Dockerfile-{version}-deb`
-
-Examples:
-```
-php-fpm/Dockerfile-8.4          # PHP 8.4 Ubuntu
-php-fpm/Dockerfile-8.4-deb      # PHP 8.4 Debian
-nginx/Dockerfile                 # Nginx Ubuntu base
-nginx/Dockerfile-deb            # Nginx Debian base
-nginx/Dockerfile-php84          # Nginx with PHP 8.4 Ubuntu
-nginx/Dockerfile-php84-deb      # Nginx with PHP 8.4 Debian
-```
-
-### Code Quality Improvements
-
-**Generate-lib.sh** utilities:
 ```bash
-safe_sed pattern replacement file         # Safe sed with | delimiter
-process_template template output key=val  # Template processing
-remove_markers file marker                # Marker removal
-compose_dockerfile output hdr body ftr    # Header+body+footer assembly
-create_debian_variant ubuntu debian       # Standardized variant creation
-validate_templates template1 template2    # Template validation
-```
-
-## 📝 Docker Buildx Tips
-
-### Create Custom Builder
-```bash
-docker buildx create --name mybuilder --use
-docker buildx inspect --bootstrap
-```
-
-### Push to Registry
-```bash
-# Set push flag in buildx.sh or run:
+# Push directly to registry (requires authentication)
 docker buildx bake ubuntu-nginx-php84 --push
-```
 
-### Load Locally (single platform)
-```bash
+# Load to local Docker daemon (single platform only)
 docker buildx bake ubuntu-nginx-php84 --load
-```
 
-### Inspect Build Configuration
-```bash
-cd build
+# Dry run - show build plan without executing
 docker buildx bake --print ubuntu-nginx-php84
+
+# View detailed build logs
+docker buildx logs
 ```
 
-## 🚨 Troubleshooting
+## � Build & Deployment Workflow
 
 ### Generation Fails
 ```bash
@@ -399,75 +254,86 @@ See [MULTISTAGE_ANALYSIS.md](MULTISTAGE_ANALYSIS.md) for multi-stage build recom
 
 ## 📋 Project Statistics
 
-- **Total Dockerfiles:** 142+
-- **Build Targets:** 106
-- **Service Categories:** 36
-- **PHP Versions:** 9 (5.6, 7.2, 7.4, 8.0-8.5)
-- **Linux Distros:** 15 (7 Ubuntu + 6 Debian + 2 rolling)
-- **Distribution Variants:** 200+ unique images
-- **Template Markers:** 40+ version-specific conditions
-- **Optimized Layers:** 10+ removed via RUN consolidation
+- **Total Container Images:** 142+
+- **Build Targets:** 106 combinations
+- **Service Categories:** 36+
+- **PHP Versions Supported:** 9 (5.6, 7.2, 7.4, 8.0-8.5)
+- **Linux Distributions:** 15 (7 Ubuntu + 6 Debian + 2 rolling/devel)
+- **Distribution Variants:** 200+ unique image combinations
+- **Template System:** Consistent, maintainable Dockerfile generation
+- **Performance Optimizations:** Multi-stage builds, layer consolidation
 
-## 🎯 Recent Improvements (May 2026)
+## 🔗 Related Resources
 
-✅ **STEP 1:** PHP 8.5 Support
-- Added to all generation scripts
-- 12 new docker-bake.hcl targets
-- 8 new Dockerfiles generated
+- **[deb.myguard.nl](https://deb.myguard.nl)** - Debian package repository with optimized builds aligned with these container images
+- **MULTISTAGE_ANALYSIS.md** - Image optimization strategies
+- **STEP2-5_PLAN.md** - Detailed refactoring and improvement documentation
 
-✅ **STEP 2:** Uniform Dockerfile Naming
-- Standardized 79 files to `-deb`/`-ubu` format
-- 103 references updated
-- All generators updated
+## 🎯 Key Features & Recent Improvements
 
-✅ **STEP 3:** Multi-Stage Build Framework
-- Documentation prepared
-- 8 target files identified for 20-30% size reduction
+✅ **142+ Production Images** - Complete infrastructure suite ready for deployment
+✅ **9 PHP Versions** - Support from legacy PHP 5.6 to modern PHP 8.5
+✅ **15 Linux Distributions** - Ubuntu and Debian variants for maximum compatibility
+✅ **106 Build Targets** - Flexible image combinations via docker-bake.hcl
+✅ **Template-Based Generation** - Consistent, maintainable Dockerfile ecosystem
+✅ **Multi-Stage Builds** - Optimized image sizes and layer efficiency
+✅ **Distro Integration** - Aligned with [deb.myguard.nl](https://deb.myguard.nl) package standards
+✅ **Production Ready** - Security-hardened, fully tested containers
 
-✅ **STEP 4:** Generation Script Refactoring
-- 3 new utility functions added
-- Duplicate code removed
-- Code reusability improved
+## 📚 Documentation
 
-✅ **STEP 5:** RUN Consolidation
-- 10+ layers removed
-- 57% reduction in docker-cms
-- Faster builds, smaller metadata
+- **README.md** - Complete guide and reference (this file)
+- **MULTISTAGE_ANALYSIS.md** - Image size optimization strategies
+- **STEP2-5_PLAN.md** - Development roadmap and improvements
 
-✅ **STEP 6:** Project Reorganization
-- All 142 Dockerfiles moved to `src/`
-- All build scripts moved to `build/`
-- Top-level `buildx.sh` and `generate.sh` wrappers created
-- All paths updated for new structure
+## ⚙️ Advanced Configuration
 
-## 📚 Documentation Files
+### Extending with New Services
 
-- **[README.md](README.md)** - This file (comprehensive walkthrough)
-- **[MULTISTAGE_ANALYSIS.md](MULTISTAGE_ANALYSIS.md)** - Multi-stage build strategy
-- **[STEP2-5_PLAN.md](STEP2-5_PLAN.md)** - Refactoring plan details
+To add a new containerized service:
 
-## 🤝 Contributing
-
-When adding new services:
-
-1. Create directory: `src/{service}/`
-2. Add Dockerfiles or template
-3. Create `src/{service}/.generate.sh` if templated
-4. Add targets to `build/docker-bake.hcl`
+1. Create service directory: `src/{service}/`
+2. Add Dockerfile or template files
+3. If templated, create `src/{service}/.generate.sh` script
+4. Add build targets to `build/docker-bake.hcl`
 5. Update TARGETS array in `build/buildx.sh`
 6. Run `./generate.sh` and `./buildx.sh`
-7. Commit and push
+7. Commit and publish
 
-## 📞 Support
+### Customizing Existing Images
 
-- Check logs: `docker buildx logs`
-- Inspect Dockerfile: `cat src/{service}/Dockerfile*`
-- Review config: `grep {target} build/docker-bake.hcl`
-- Check template: `ls src/{service}/Dockerfile-template*`
+For modifications to existing containers:
+
+1. Edit template: `src/{service}/Dockerfile-template*`
+2. Regenerate: `./generate.sh` (or service-specific `.generate.sh`)
+3. Rebuild: `./buildx.sh` or specific `docker buildx bake` target
+4. Test in target environment
+5. Commit changes with descriptive message
+
+## 🆘 Support & Troubleshooting
+
+**Generation Issues:**
+```bash
+ls src/php-fpm/Dockerfile-template.*    # Verify template files exist
+./build/generate.sh -v                  # Run with verbose output
+cd src/nginx && bash ./.generate.sh    # Test individual component
+```
+
+**Build Problems:**
+```bash
+cat src/nginx/Dockerfile-php84 | head -20    # Inspect generated Dockerfile
+grep -A 5 "ubuntu-nginx-php84" build/docker-bake.hcl  # Check config
+docker build -t test -f src/nginx/Dockerfile-php84 .  # Manual build test
+docker buildx logs                      # View build logs
+```
+
+**Image Size Optimization:**
+Refer to MULTISTAGE_ANALYSIS.md for strategies on reducing image sizes by 20-30%.
 
 ---
 
-**Last Updated:** May 5, 2026  
-**Status:** Production Ready  
-**License:** [Your License]  
-**Maintainer:** [Your Team]
+**Status:** ✅ Production Ready
+**Version:** May 2026
+**Integration:** [deb.myguard.nl](https://deb.myguard.nl) - Debian package ecosystem
+**Container Count:** 142+
+**Build Targets:** 106
