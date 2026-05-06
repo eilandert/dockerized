@@ -12,6 +12,7 @@ COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
     echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
+    if [ -d /etc/php.orig ]; then cp -rn /etc/php.orig/* /etc/php/ 2>/dev/null || true; fi ;\
     apt-get update ;\
     apt-get -y upgrade
 

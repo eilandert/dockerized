@@ -88,6 +88,11 @@ for version in "${VERSIONS[@]}"; do
         sed -i '/zstd/d' "$debian_output"
         sed -i '/snuffleupagus/d' "$debian_output"
     fi
+    # Remove packages not available in PHP 8.5
+    if [[ "$version" == "8.5" ]]; then
+        sed -i '/opcache/d' "$ubuntu_output"
+        sed -i '/opcache/d' "$debian_output"
+    fi
 done
 
 # Step 3: Build multi-PHP Dockerfile
