@@ -24,7 +24,7 @@ RUN set -ex ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.1 \
       php8.1-fpm \
       php8.1-apcu \

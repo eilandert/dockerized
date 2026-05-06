@@ -24,7 +24,7 @@ RUN set -ex ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php5.6 \
       php5.6-fpm \
       php5.6-apcu \
@@ -61,7 +61,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php7.2 \
       php7.2-fpm \
       php7.2-apcu \
@@ -99,7 +99,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php7.4 \
       php7.4-fpm \
       php7.4-apcu \
@@ -138,7 +138,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.0 \
       php8.0-fpm \
       php8.0-apcu \
@@ -178,7 +178,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.1 \
       php8.1-fpm \
       php8.1-apcu \
@@ -218,7 +218,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.2 \
       php8.2-fpm \
       php8.2-apcu \
@@ -258,7 +258,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.3 \
       php8.3-fpm \
       php8.3-apcu \
@@ -298,7 +298,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.4 \
       php8.4-fpm \
       php8.4-apcu \
@@ -338,7 +338,7 @@ RUN set -xe ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php8.5 \
       php8.5-fpm \
       php8.5-apcu \

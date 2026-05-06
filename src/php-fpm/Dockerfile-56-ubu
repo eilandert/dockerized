@@ -24,7 +24,7 @@ RUN set -ex ;\
 
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php5.6 \
       php5.6-fpm \
       php5.6-apcu \

@@ -1,6 +1,6 @@
 RUN set -xe ;\
     apt-get update ;\
-    apt-get install -m -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
       php#PHPVERSION# \
       php#PHPVERSION#-fpm \
       php#PHPVERSION#-apcu \
