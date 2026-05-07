@@ -1,6 +1,6 @@
 FROM    eilandert/php-fpm:8.3
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
-        org.opencontainers.image.title="Nginx with ModSecurity & PageSpeed" \
+        org.opencontainers.image.title="Angie with ModSecurity & PageSpeed" \
         org.opencontainers.image.description="High-performance web server with security and optimization modules" \
         org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/angie" \

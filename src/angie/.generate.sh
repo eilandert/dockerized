@@ -16,6 +16,7 @@ log_info "Generating Angie Dockerfiles from Nginx templates..."
 if [[ -f "$NGINXDIR/bootstrap.sh" ]]; then
     cp "$NGINXDIR/bootstrap.sh" "bootstrap.sh"
     safe_sed "nginx" "angie" "bootstrap.sh"
+    safe_sed "Nginx" "Angie" "bootstrap.sh"
     safe_sed "NGINX" "ANGIE" "bootstrap.sh"
 fi
 
@@ -23,6 +24,7 @@ fi
 if [[ -f "$NGINXDIR/Dockerfile.template" ]]; then
     cp "$NGINXDIR/Dockerfile.template" "Dockerfile.template"
     safe_sed "nginx" "angie" "Dockerfile.template"
+    safe_sed "Nginx" "Angie" "Dockerfile.template"
 fi
 
 # Copy and transform all generated Dockerfiles
@@ -35,6 +37,7 @@ for nginx_file in "$NGINXDIR"/Dockerfile*; do
     
     cp "$nginx_file" "$filename"
     safe_sed "nginx" "angie" "$filename"
+    safe_sed "Nginx" "Angie" "$filename"
     log_info "    $filename"
 done
 
