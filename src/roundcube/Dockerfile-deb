@@ -21,6 +21,7 @@ RUN set -xe ;\
     apt-get update ;\
     apt-get -y install --no-install-recommends \
     angie-minimal \
+    angie-common \
     aspell \
     aspell-en \
     aspell-nl \
