@@ -1,0 +1,1465 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load local bake definitions
+#1 reading docker-bake.hcl 20.57kB / 20.57kB done
+#1 DONE 0.0s
+
+#2 [1/9] FROM docker.io/eilandert/debian-base:stable
+#2 DONE 0.0s
+
+#3 [2/9] COPY     .lastversion /tmp/lastversion
+#3 CACHED
+
+#4 [internal] load build definition from Dockerfile-deb
+#4 transferring dockerfile: 8.53kB done
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/eilandert/debian-base:stable
+#5 DONE 0.0s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 8.66kB done
+#7 DONE 0.0s
+
+#8 [2/9] COPY     .lastversion /tmp/lastversion
+#8 CACHED
+
+#9 [3/9] COPY    bootstrap.sh /
+#9 DONE 0.1s
+
+#10 [4/9] RUN set -xe ;echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;export COMPOSER_ROOT_VERSION=$(cat /tmp/lastversion) ;apt-get update ;apt-get -y install --no-install-recommends nginx-minimal nginx-common aspell aspell-en aspell-nl dbconfig-no-thanks dictionaries-common enchant-2 fonts-glyphicons-halflings hunspell-en-us libjs-bootstrap4 libjs-codemirror libjs-jquery-minicolors libjs-jquery-ui libjs-jstimezonedetect libjs-popper.js libjs-sizzle libonig5 node-jquery php8.2-fpm php8.2-gd php8.2-intl php8.2-imap php8.2-mbstring php8.2-mysql php8.2-opcache php8.2-readline php8.2-redis php8.2-snuffleupagus php8.2-xml php8.2-zip
+#10 0.582 + echo deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie main
+#10 0.583 + cat /tmp/lastversion
+#10 0.586 + export COMPOSER_ROOT_VERSION=1.6.15
+#10 0.586 + apt-get update
+#10 0.663 Ign:1 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie InRelease
+#10 0.668 Get:2 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie Release [3427 B]
+#10 0.677 Ign:3 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie Release.gpg
+#10 0.683 Get:4 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 Packages [473 kB]
+#10 0.711 Get:5 http://deb.myguard.nl:8888 trixie InRelease [9461 B]
+#10 0.741 Get:6 http://deb.debian.org/debian trixie InRelease [140 kB]
+#10 0.754 Get:7 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#10 0.776 Get:8 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#10 0.793 Get:9 http://deb.myguard.nl:8888 trixie/main amd64 Packages [98.1 kB]
+#10 0.825 Get:10 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
+#10 0.953 Get:11 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
+#10 0.970 Get:12 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [154 kB]
+#10 1.793 Fetched 10.6 MB in 1s (9429 kB/s)
+#10 1.793 Reading package lists...
+#10 2.816 + apt-get -y install --no-install-recommends nginx-minimal nginx-common aspell aspell-en aspell-nl dbconfig-no-thanks dictionaries-common enchant-2 fonts-glyphicons-halflings hunspell-en-us libjs-bootstrap4 libjs-codemirror libjs-jquery-minicolors libjs-jquery-ui libjs-jstimezonedetect libjs-popper.js libjs-sizzle libonig5 node-jquery php8.2-fpm php8.2-gd php8.2-intl php8.2-imap php8.2-mbstring php8.2-mysql php8.2-opcache php8.2-readline php8.2-redis php8.2-snuffleupagus php8.2-xml php8.2-zip
+#10 2.832 Reading package lists...
+#10 3.680 Building dependency tree...
+#10 3.978 Reading state information...
+#10 4.462 The following additional packages will be installed:
+#10 4.462   dbconfig-common emacsen-common fontconfig-config fonts-dejavu-core
+#10 4.463   fonts-dejavu-mono javascript-common libabsl20240722 libaom3 libapparmor1
+#10 4.463   libargon2-1 libaspell15 libatomic1 libavif16 libbrotli1 libc-client2007e
+#10 4.463   libcom-err2 libdav1d7 libde265-0 libdeflate0 libedit2 libenchant-2-2
+#10 4.463   libexpat1 libffi8 libfontconfig1 libfreetype6 libgav1-1 libgcrypt20 libgd3
+#10 4.463   libglib2.0-0t64 libgomp1 libgpg-error0 libgssapi-krb5-2 libheif-plugin-dav1d
+#10 4.463   libheif-plugin-libde265 libheif1 libhunspell-1.7-0 libicu76 libimagequant0
+#10 4.464   libjbig0 libjpeg62-turbo libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
+#10 4.464   liblerc4 libncursesw6 libpng16-16t64 libproc2-0 librav1e0.7 libsharpyuv0
+#10 4.464   libsodium23 libsvtav1enc2 libsystemd-shared libtext-charwidth-perl
+#10 4.464   libtext-iconv-perl libtext-wrapi18n-perl libtiff6 libwebp7 libx11-6
+#10 4.464   libx11-data libxau6 libxcb1 libxdmcp6 libxml2 libxpm4 libxslt1.1 libyuv0
+#10 4.465   libz-ng2 libzip5 media-types mlock php-common php8.2-cli php8.2-common
+#10 4.466   php8.2-igbinary procps psmisc sensible-utils systemd ucf
+#10 4.470 Suggested packages:
+#10 4.470   aspell-doc spellutils wordlist hunspell openoffice.org-hunspell
+#10 4.470   | openoffice.org-core uw-mailutils libenchant-2-voikko rng-tools libgd-tools
+#10 4.470   low-memory-monitor krb5-doc krb5-user libheif-plugin-ffmpegdec
+#10 4.470   libheif-plugin-jpegdec libheif-plugin-jpegenc libheif-plugin-j2kdec
+#10 4.470   libheif-plugin-j2kenc libheif-plugin-kvazaar libheif-plugin-rav1e
+#10 4.470   libheif-plugin-svtenc libjs-requirejs libjs-jquery-ui-docs libarchive13t64
+#10 4.470   libbpf1 libcryptsetup12 libdw1t64 libelf1t64 libfido2-1 libidn2-0 libip4tc2
+#10 4.470   libp11-kit0 libpwquality1 libqrencode4 libtss2-rc0t64 fcgiwrap php-pear
+#10 4.470   redis-server systemd-container systemd-homed systemd-userdbd systemd-boot
+#10 4.470   systemd-resolved systemd-repart libtss2-tcti-device0 polkitd
+#10 4.470 Recommended packages:
+#10 4.470   libglib2.0-data shared-mime-info xdg-user-dirs libgpg-error-l10n
+#10 4.470   libheif-plugin-x265 libheif-plugin-aomenc libjs-bootstrap krb5-locales
+#10 4.470   libgpm2 libkmod2 cron | cron-daemon | anacron | systemd-sysv
+#10 4.470   linux-sysctl-defaults default-dbus-system-bus | dbus-system-bus
+#10 4.470   systemd-timesyncd | time-daemon systemd-cryptsetup
+#10 4.946 The following NEW packages will be installed:
+#10 4.946   aspell aspell-en aspell-nl dbconfig-common dbconfig-no-thanks
+#10 4.946   dictionaries-common emacsen-common enchant-2 fontconfig-config
+#10 4.948   fonts-dejavu-core fonts-dejavu-mono fonts-glyphicons-halflings
+#10 4.948   hunspell-en-us javascript-common libabsl20240722 libaom3 libapparmor1
+#10 4.948   libargon2-1 libaspell15 libatomic1 libavif16 libbrotli1 libc-client2007e
+#10 4.948   libcom-err2 libdav1d7 libde265-0 libdeflate0 libedit2 libenchant-2-2
+#10 4.948   libexpat1 libffi8 libfontconfig1 libfreetype6 libgav1-1 libgcrypt20 libgd3
+#10 4.948   libglib2.0-0t64 libgomp1 libgpg-error0 libgssapi-krb5-2 libheif-plugin-dav1d
+#10 4.948   libheif-plugin-libde265 libheif1 libhunspell-1.7-0 libicu76 libimagequant0
+#10 4.948   libjbig0 libjpeg62-turbo libjs-bootstrap4 libjs-codemirror
+#10 4.948   libjs-jquery-minicolors libjs-jquery-ui libjs-jstimezonedetect
+#10 4.948   libjs-popper.js libjs-sizzle libk5crypto3 libkeyutils1 libkrb5-3
+#10 4.948   libkrb5support0 liblerc4 libncursesw6 libonig5 libpng16-16t64 libproc2-0
+#10 4.949   librav1e0.7 libsharpyuv0 libsodium23 libsvtav1enc2 libsystemd-shared
+#10 4.949   libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl libtiff6
+#10 4.949   libwebp7 libx11-6 libx11-data libxau6 libxcb1 libxdmcp6 libxml2 libxpm4
+#10 4.949   libxslt1.1 libyuv0 libz-ng2 libzip5 media-types mlock nginx-common
+#10 4.949   nginx-minimal node-jquery php-common php8.2-cli php8.2-common php8.2-fpm
+#10 4.949   php8.2-gd php8.2-igbinary php8.2-imap php8.2-intl php8.2-mbstring
+#10 4.949   php8.2-mysql php8.2-opcache php8.2-readline php8.2-redis
+#10 4.950   php8.2-snuffleupagus php8.2-xml php8.2-zip procps psmisc sensible-utils
+#10 4.950   systemd ucf
+#10 5.044 0 upgraded, 111 newly installed, 0 to remove and 2 not upgraded.
+#10 5.044 Need to get 47.5 MB of archives.
+#10 5.044 After this operation, 168 MB of additional disk space will be used.
+#10 5.044 Get:1 http://deb.debian.org/debian trixie/main amd64 libsystemd-shared amd64 257.9-1~deb13u1 [2151 kB]
+#10 5.044 Get:2 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php-common all 2:101~+0~20260503.72+debian13~1.gbp7da167 [14.0 kB]
+#10 5.044 Get:3 http://deb.myguard.nl:8888 trixie/main amd64 libbrotli1 amd64 1.1.0-3myguard7~trixie [309 kB]
+#10 5.045 Get:4 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-common amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [692 kB]
+#10 5.056 Get:5 http://deb.myguard.nl:8888 trixie/main amd64 libz-ng2 amd64 2.2.5-3myguard5~trixie [79.1 kB]
+#10 5.059 Get:6 http://deb.myguard.nl:8888 trixie/main amd64 nginx-minimal amd64 3:1.29.8-1myguard74~trixie [544 kB]
+#10 5.069 Get:7 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-opcache amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [352 kB]
+#10 5.075 Get:8 http://deb.myguard.nl:8888 trixie/main amd64 nginx-common all 3:1.29.8-1myguard74~trixie [122 kB]
+#10 5.079 Get:9 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-readline amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [12.5 kB]
+#10 5.079 Get:10 http://deb.myguard.nl:8888 trixie/main amd64 php8.2-snuffleupagus amd64 0.13.0-3myguard17~trixie [67.5 kB]
+#10 5.079 Get:11 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-cli amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [1749 kB]
+#10 5.095 Get:12 http://deb.debian.org/debian trixie/main amd64 libapparmor1 amd64 4.1.0-1 [43.7 kB]
+#10 5.095 Get:13 http://deb.debian.org/debian trixie/main amd64 systemd amd64 257.9-1~deb13u1 [3096 kB]
+#10 5.098 Get:14 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-fpm amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [1761 kB]
+#10 5.128 Get:15 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-igbinary amd64 3.2.16-6+0~20260330.57+debian13~1.gbp1eff65 [34.4 kB]
+#10 5.128 Get:16 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-redis amd64 6.3.0-2+0~20251204.66+debian13~1.gbpd148c3 [187 kB]
+#10 5.131 Get:17 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 mlock amd64 8:2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca [8108 B]
+#10 5.131 Get:18 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 libc-client2007e amd64 8:2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca [571 kB]
+#10 5.139 Get:19 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 libgd3 amd64 2.3.3-13+0~20250427.18+debian13~1.gbp492e76 [126 kB]
+#10 5.143 Get:20 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-gd amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [29.3 kB]
+#10 5.144 Get:21 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-imap amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [33.0 kB]
+#10 5.147 Get:22 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-intl amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [139 kB]
+#10 5.150 Get:23 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-mbstring amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [443 kB]
+#10 5.154 Get:24 http://deb.debian.org/debian trixie/main amd64 libexpat1 amd64 2.7.1-2 [108 kB]
+#10 5.156 Get:25 http://deb.debian.org/debian trixie/main amd64 psmisc amd64 23.7-2 [267 kB]
+#10 5.156 Get:26 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-mysql amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [118 kB]
+#10 5.157 Get:27 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-xml amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [113 kB]
+#10 5.160 Get:28 http://deb.debian.org/debian trixie/main amd64 libtext-charwidth-perl amd64 0.04-11+b4 [9476 B]
+#10 5.160 Get:29 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie/main amd64 php8.2-zip amd64 8.2.30-3+0~20260505.86+debian13~1.gbp61826c [26.6 kB]
+#10 5.162 Get:30 http://deb.debian.org/debian trixie/main amd64 libtext-wrapi18n-perl all 0.06-10 [8808 B]
+#10 5.164 Get:31 http://deb.debian.org/debian trixie/main amd64 libncursesw6 amd64 6.5+20250216-2 [135 kB]
+#10 5.165 Get:32 http://deb.debian.org/debian trixie/main amd64 libproc2-0 amd64 2:4.0.4-9 [65.6 kB]
+#10 5.167 Get:33 http://deb.debian.org/debian trixie/main amd64 procps amd64 2:4.0.4-9 [882 kB]
+#10 5.172 Get:34 http://deb.debian.org/debian trixie/main amd64 sensible-utils all 0.0.25 [25.0 kB]
+#10 5.172 Get:35 http://deb.debian.org/debian trixie/main amd64 ucf all 3.0052 [43.3 kB]
+#10 5.172 Get:36 http://deb.debian.org/debian trixie/main amd64 libffi8 amd64 3.4.8-2 [24.1 kB]
+#10 5.174 Get:37 http://deb.debian.org/debian trixie/main amd64 media-types all 13.0.0 [29.3 kB]
+#10 5.174 Get:38 http://deb.debian.org/debian trixie/main amd64 libedit2 amd64 3.1-20250104-1 [93.8 kB]
+#10 5.174 Get:39 http://deb.debian.org/debian trixie/main amd64 libargon2-1 amd64 0~20190702+dfsg-4+b2 [21.4 kB]
+#10 5.175 Get:40 http://deb.debian.org/debian trixie/main amd64 libsodium23 amd64 1.0.18-1+deb13u1 [165 kB]
+#10 5.176 Get:41 http://deb.debian.org/debian trixie/main amd64 libxml2 amd64 2.12.7+dfsg+really2.9.14-2.1+deb13u2 [698 kB]
+#10 5.180 Get:42 http://deb.debian.org/debian trixie/main amd64 libaspell15 amd64 0.60.8.1-4 [338 kB]
+#10 5.182 Get:43 http://deb.debian.org/debian trixie/main amd64 libtext-iconv-perl amd64 1.7-8+b4 [14.4 kB]
+#10 5.183 Get:44 http://deb.debian.org/debian trixie/main amd64 emacsen-common all 3.0.8 [13.6 kB]
+#10 5.184 Get:45 http://deb.debian.org/debian trixie/main amd64 dictionaries-common all 1.30.10 [174 kB]
+#10 5.186 Get:46 http://deb.debian.org/debian trixie/main amd64 aspell amd64 0.60.8.1-4 [275 kB]
+#10 5.189 Get:47 http://deb.debian.org/debian trixie/main amd64 aspell-en all 2020.12.07-0-1 [306 kB]
+#10 5.191 Get:48 http://deb.debian.org/debian trixie/main amd64 aspell-nl all 1:2.20.19+1-3 [872 kB]
+#10 5.196 Get:49 http://deb.debian.org/debian trixie/main amd64 dbconfig-common all 2.0.25 [604 kB]
+#10 5.200 Get:50 http://deb.debian.org/debian trixie/main amd64 dbconfig-no-thanks all 2.0.25 [1344 B]
+#10 5.201 Get:51 http://deb.debian.org/debian trixie/main amd64 hunspell-en-us all 1:2020.12.07-4 [558 kB]
+#10 5.206 Get:52 http://deb.debian.org/debian trixie/main amd64 libatomic1 amd64 14.2.0-19 [9308 B]
+#10 5.206 Get:53 http://deb.debian.org/debian trixie/main amd64 libglib2.0-0t64 amd64 2.84.4-3~deb13u2 [1518 kB]
+#10 5.216 Get:54 http://deb.debian.org/debian trixie/main amd64 libhunspell-1.7-0 amd64 1.7.2+really1.7.2-10+b4 [237 kB]
+#10 5.218 Get:55 http://deb.debian.org/debian trixie/main amd64 libenchant-2-2 amd64 2.8.2+dfsg1-3 [56.8 kB]
+#10 5.219 Get:56 http://deb.debian.org/debian trixie/main amd64 enchant-2 amd64 2.8.2+dfsg1-3 [20.9 kB]
+#10 5.219 Get:57 http://deb.debian.org/debian trixie/main amd64 fonts-dejavu-mono all 2.37-8 [489 kB]
+#10 5.223 Get:58 http://deb.debian.org/debian trixie/main amd64 fonts-dejavu-core all 2.37-8 [840 kB]
+#10 5.228 Get:59 http://deb.debian.org/debian trixie/main amd64 fontconfig-config amd64 2.15.0-2.3 [318 kB]
+#10 5.230 Get:60 http://deb.debian.org/debian trixie/main amd64 fonts-glyphicons-halflings all 1.009~3.4.1+dfsg-6 [163 kB]
+#10 5.231 Get:61 http://deb.debian.org/debian trixie/main amd64 javascript-common all 12+nmu1 [4864 B]
+#10 5.232 Get:62 http://deb.debian.org/debian trixie/main amd64 libabsl20240722 amd64 20240722.0-4 [492 kB]
+#10 5.234 Get:63 http://deb.debian.org/debian trixie/main amd64 libaom3 amd64 3.12.1-1 [1871 kB]
+#10 5.245 Get:64 http://deb.debian.org/debian trixie/main amd64 libdav1d7 amd64 1.5.1-1 [559 kB]
+#10 5.248 Get:65 http://deb.debian.org/debian trixie/main amd64 libgav1-1 amd64 0.19.0-3+b1 [353 kB]
+#10 5.251 Get:66 http://deb.debian.org/debian trixie/main amd64 librav1e0.7 amd64 0.7.1-9+b2 [946 kB]
+#10 5.256 Get:67 http://deb.debian.org/debian trixie/main amd64 libsvtav1enc2 amd64 2.3.0+dfsg-1 [2489 kB]
+#10 5.270 Get:68 http://deb.debian.org/debian trixie/main amd64 libjpeg62-turbo amd64 1:2.1.5-4 [168 kB]
+#10 5.272 Get:69 http://deb.debian.org/debian trixie/main amd64 libyuv0 amd64 0.0.1904.20250204-1 [174 kB]
+#10 5.273 Get:70 http://deb.debian.org/debian trixie/main amd64 libavif16 amd64 1.2.1-1.2 [133 kB]
+#10 5.274 Get:71 http://deb.debian.org/debian trixie/main amd64 libkrb5support0 amd64 1.21.3-5 [33.0 kB]
+#10 5.274 Get:72 http://deb.debian.org/debian trixie/main amd64 libcom-err2 amd64 1.47.2-3+b10 [25.0 kB]
+#10 5.275 Get:73 http://deb.debian.org/debian trixie/main amd64 libk5crypto3 amd64 1.21.3-5 [81.5 kB]
+#10 5.276 Get:74 http://deb.debian.org/debian trixie/main amd64 libkeyutils1 amd64 1.6.3-6 [9456 B]
+#10 5.276 Get:75 http://deb.debian.org/debian trixie/main amd64 libkrb5-3 amd64 1.21.3-5 [326 kB]
+#10 5.278 Get:76 http://deb.debian.org/debian trixie/main amd64 libgssapi-krb5-2 amd64 1.21.3-5 [138 kB]
+#10 5.279 Get:77 http://deb.debian.org/debian trixie/main amd64 libde265-0 amd64 1.0.15-1+b3 [189 kB]
+#10 5.281 Get:78 http://deb.debian.org/debian trixie/main amd64 libdeflate0 amd64 1.23-2 [47.3 kB]
+#10 5.282 Get:79 http://deb.debian.org/debian-security trixie-security/main amd64 libpng16-16t64 amd64 1.6.48-1+deb13u4 [283 kB]
+#10 5.285 Get:80 http://deb.debian.org/debian-security trixie-security/main amd64 libfreetype6 amd64 2.13.3+dfsg-1+deb13u1 [452 kB]
+#10 5.287 Get:81 http://deb.debian.org/debian trixie/main amd64 libfontconfig1 amd64 2.15.0-2.3 [392 kB]
+#10 5.289 Get:82 http://deb.debian.org/debian trixie/main amd64 libgpg-error0 amd64 1.51-4 [82.1 kB]
+#10 5.289 Get:83 http://deb.debian.org/debian trixie/main amd64 libgcrypt20 amd64 1.11.0-7 [843 kB]
+#10 5.296 Get:84 http://deb.debian.org/debian trixie/main amd64 libsharpyuv0 amd64 1.5.0-0.1 [116 kB]
+#10 5.296 Get:85 http://deb.debian.org/debian trixie/main amd64 libheif-plugin-dav1d amd64 1.19.8-1 [11.7 kB]
+#10 5.299 Get:86 http://deb.debian.org/debian trixie/main amd64 libheif-plugin-libde265 amd64 1.19.8-1 [15.3 kB]
+#10 5.299 Get:87 http://deb.debian.org/debian trixie/main amd64 libheif1 amd64 1.19.8-1 [520 kB]
+#10 5.302 Get:88 http://deb.debian.org/debian trixie/main amd64 libgomp1 amd64 14.2.0-19 [137 kB]
+#10 5.302 Get:89 http://deb.debian.org/debian trixie/main amd64 libimagequant0 amd64 2.18.0-1+b2 [35.2 kB]
+#10 5.303 Get:90 http://deb.debian.org/debian trixie/main amd64 libjbig0 amd64 2.1-6.1+b2 [32.1 kB]
+#10 5.305 Get:91 http://deb.debian.org/debian trixie/main amd64 liblerc4 amd64 4.0.0+ds-5 [183 kB]
+#10 5.306 Get:92 http://deb.debian.org/debian trixie/main amd64 libwebp7 amd64 1.5.0-0.1 [318 kB]
+#10 5.308 Get:93 http://deb.debian.org/debian-security trixie-security/main amd64 libtiff6 amd64 4.7.0-3+deb13u2 [345 kB]
+#10 5.310 Get:94 http://deb.debian.org/debian trixie/main amd64 libxau6 amd64 1:1.0.11-1 [20.4 kB]
+#10 5.311 Get:95 http://deb.debian.org/debian trixie/main amd64 libxdmcp6 amd64 1:1.1.5-1 [27.8 kB]
+#10 5.312 Get:96 http://deb.debian.org/debian trixie/main amd64 libxcb1 amd64 1.17.0-2+b1 [144 kB]
+#10 5.314 Get:97 http://deb.debian.org/debian trixie/main amd64 libx11-data all 2:1.8.12-1 [343 kB]
+#10 5.318 Get:98 http://deb.debian.org/debian trixie/main amd64 libx11-6 amd64 2:1.8.12-1 [815 kB]
+#10 5.324 Get:99 http://deb.debian.org/debian trixie/main amd64 libxpm4 amd64 1:3.5.17-1+b3 [56.2 kB]
+#10 5.325 Get:100 http://deb.debian.org/debian trixie/main amd64 libicu76 amd64 76.1-4 [9722 kB]
+#10 5.393 Get:101 http://deb.debian.org/debian trixie/main amd64 libjs-popper.js all 1.16.1+ds-6 [52.4 kB]
+#10 5.394 Get:102 http://deb.debian.org/debian trixie/main amd64 libjs-bootstrap4 all 4.6.2+dfsg-1 [519 kB]
+#10 5.397 Get:103 http://deb.debian.org/debian trixie/main amd64 libjs-codemirror all 5.65.0+~cs5.83.9-3 [774 kB]
+#10 5.401 Get:104 http://deb.debian.org/debian trixie/main amd64 libjs-jquery-minicolors all 2.3.6+dfsg-1 [90.7 kB]
+#10 5.402 Get:105 http://deb.debian.org/debian trixie/main amd64 libjs-jquery-ui all 1.13.2+dfsg-1 [250 kB]
+#10 5.404 Get:106 http://deb.debian.org/debian trixie/main amd64 libjs-jstimezonedetect all 1.0.7+~1.0.3-1 [13.2 kB]
+#10 5.404 Get:107 http://deb.debian.org/debian trixie/main amd64 libjs-sizzle all 2.3.10+ds+~2.3.6-1 [32.2 kB]
+#10 5.405 Get:108 http://deb.debian.org/debian trixie/main amd64 libonig5 amd64 6.9.9-1+b1 [189 kB]
+#10 5.406 Get:109 http://deb.debian.org/debian trixie/main amd64 libxslt1.1 amd64 1.1.35-1.2+deb13u2 [233 kB]
+#10 5.407 Get:110 http://deb.debian.org/debian trixie/main amd64 libzip5 amd64 1.11.3-2 [62.6 kB]
+#10 5.408 Get:111 http://deb.debian.org/debian trixie/main amd64 node-jquery all 3.6.1+dfsg+~3.5.14-1 [160 kB]
+#10 10.01 Preconfiguring packages ...
+#10 10.32 Fetched 47.5 MB in 0s (115 MB/s)
+#10 10.37 Selecting previously unselected package libsystemd-shared:amd64.
+#10 10.37 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 5660 files and directories currently installed.)
+#10 10.38 Preparing to unpack .../libsystemd-shared_257.9-1~deb13u1_amd64.deb ...
+#10 10.38 Unpacking libsystemd-shared:amd64 (257.9-1~deb13u1) ...
+#10 10.58 Selecting previously unselected package libapparmor1:amd64.
+#10 10.58 Preparing to unpack .../libapparmor1_4.1.0-1_amd64.deb ...
+#10 10.60 Unpacking libapparmor1:amd64 (4.1.0-1) ...
+#10 10.67 Setting up libsystemd-shared:amd64 (257.9-1~deb13u1) ...
+#10 10.74 Selecting previously unselected package systemd.
+#10 10.74 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 5673 files and directories currently installed.)
+#10 10.75 Preparing to unpack .../00-systemd_257.9-1~deb13u1_amd64.deb ...
+#10 10.78 Unpacking systemd (257.9-1~deb13u1) ...
+#10 11.04 Selecting previously unselected package libexpat1:amd64.
+#10 11.04 Preparing to unpack .../01-libexpat1_2.7.1-2_amd64.deb ...
+#10 11.05 Unpacking libexpat1:amd64 (2.7.1-2) ...
+#10 11.11 Selecting previously unselected package psmisc.
+#10 11.11 Preparing to unpack .../02-psmisc_23.7-2_amd64.deb ...
+#10 11.12 Unpacking psmisc (23.7-2) ...
+#10 11.21 Selecting previously unselected package php-common.
+#10 11.21 Preparing to unpack .../03-php-common_2%3a101~+0~20260503.72+debian13~1.gbp7da167_all.deb ...
+#10 11.22 Unpacking php-common (2:101~+0~20260503.72+debian13~1.gbp7da167) ...
+#10 11.28 Selecting previously unselected package libtext-charwidth-perl:amd64.
+#10 11.28 Preparing to unpack .../04-libtext-charwidth-perl_0.04-11+b4_amd64.deb ...
+#10 11.29 Unpacking libtext-charwidth-perl:amd64 (0.04-11+b4) ...
+#10 11.34 Selecting previously unselected package libtext-wrapi18n-perl.
+#10 11.34 Preparing to unpack .../05-libtext-wrapi18n-perl_0.06-10_all.deb ...
+#10 11.35 Unpacking libtext-wrapi18n-perl (0.06-10) ...
+#10 11.41 Selecting previously unselected package libncursesw6:amd64.
+#10 11.41 Preparing to unpack .../06-libncursesw6_6.5+20250216-2_amd64.deb ...
+#10 11.42 Unpacking libncursesw6:amd64 (6.5+20250216-2) ...
+#10 11.47 Selecting previously unselected package libproc2-0:amd64.
+#10 11.48 Preparing to unpack .../07-libproc2-0_2%3a4.0.4-9_amd64.deb ...
+#10 11.48 Unpacking libproc2-0:amd64 (2:4.0.4-9) ...
+#10 11.54 Selecting previously unselected package procps.
+#10 11.54 Preparing to unpack .../08-procps_2%3a4.0.4-9_amd64.deb ...
+#10 11.56 Unpacking procps (2:4.0.4-9) ...
+#10 11.64 Selecting previously unselected package sensible-utils.
+#10 11.64 Preparing to unpack .../09-sensible-utils_0.0.25_all.deb ...
+#10 11.65 Unpacking sensible-utils (0.0.25) ...
+#10 11.71 Selecting previously unselected package ucf.
+#10 11.71 Preparing to unpack .../10-ucf_3.0052_all.deb ...
+#10 11.72 Moving old data out of the way
+#10 11.72 Unpacking ucf (3.0052) ...
+#10 11.77 Selecting previously unselected package libffi8:amd64.
+#10 11.77 Preparing to unpack .../11-libffi8_3.4.8-2_amd64.deb ...
+#10 11.78 Unpacking libffi8:amd64 (3.4.8-2) ...
+#10 11.84 Selecting previously unselected package php8.2-common.
+#10 11.84 Preparing to unpack .../12-php8.2-common_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 11.85 Unpacking php8.2-common (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 11.95 Selecting previously unselected package media-types.
+#10 11.95 Preparing to unpack .../13-media-types_13.0.0_all.deb ...
+#10 11.96 Unpacking media-types (13.0.0) ...
+#10 12.01 Selecting previously unselected package libedit2:amd64.
+#10 12.02 Preparing to unpack .../14-libedit2_3.1-20250104-1_amd64.deb ...
+#10 12.02 Unpacking libedit2:amd64 (3.1-20250104-1) ...
+#10 12.08 Selecting previously unselected package php8.2-opcache.
+#10 12.08 Preparing to unpack .../15-php8.2-opcache_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 12.09 Unpacking php8.2-opcache (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 12.16 Selecting previously unselected package php8.2-readline.
+#10 12.16 Preparing to unpack .../16-php8.2-readline_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 12.17 Unpacking php8.2-readline (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 12.21 Selecting previously unselected package libargon2-1:amd64.
+#10 12.21 Preparing to unpack .../17-libargon2-1_0~20190702+dfsg-4+b2_amd64.deb ...
+#10 12.22 Unpacking libargon2-1:amd64 (0~20190702+dfsg-4+b2) ...
+#10 12.28 Selecting previously unselected package libsodium23:amd64.
+#10 12.28 Preparing to unpack .../18-libsodium23_1.0.18-1+deb13u1_amd64.deb ...
+#10 12.29 Unpacking libsodium23:amd64 (1.0.18-1+deb13u1) ...
+#10 12.40 Selecting previously unselected package libxml2:amd64.
+#10 12.40 Preparing to unpack .../19-libxml2_2.12.7+dfsg+really2.9.14-2.1+deb13u2_amd64.deb ...
+#10 12.41 Unpacking libxml2:amd64 (2.12.7+dfsg+really2.9.14-2.1+deb13u2) ...
+#10 12.54 Selecting previously unselected package php8.2-cli.
+#10 12.54 Preparing to unpack .../20-php8.2-cli_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 12.55 Unpacking php8.2-cli (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 12.73 Selecting previously unselected package php8.2-fpm.
+#10 12.73 Preparing to unpack .../21-php8.2-fpm_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 12.75 Unpacking php8.2-fpm (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 12.93 Setting up psmisc (23.7-2) ...
+#10 12.97 Setting up php-common (2:101~+0~20260503.72+debian13~1.gbp7da167) ...
+#10 13.23 Created symlink '/etc/systemd/system/timers.target.wants/phpsessionclean.timer' → '/usr/lib/systemd/system/phpsessionclean.timer'.
+#10 13.33 Selecting previously unselected package php8.2-igbinary.
+#10 13.33 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 7189 files and directories currently installed.)
+#10 13.34 Preparing to unpack .../00-php8.2-igbinary_3.2.16-6+0~20260330.57+debian13~1.gbp1eff65_amd64.deb ...
+#10 13.35 Unpacking php8.2-igbinary (3.2.16-6+0~20260330.57+debian13~1.gbp1eff65) ...
+#10 13.45 Selecting previously unselected package php8.2-redis.
+#10 13.46 Preparing to unpack .../01-php8.2-redis_6.3.0-2+0~20251204.66+debian13~1.gbpd148c3_amd64.deb ...
+#10 13.47 Unpacking php8.2-redis (6.3.0-2+0~20251204.66+debian13~1.gbpd148c3) ...
+#10 13.56 Selecting previously unselected package libaspell15:amd64.
+#10 13.56 Preparing to unpack .../02-libaspell15_0.60.8.1-4_amd64.deb ...
+#10 13.57 Unpacking libaspell15:amd64 (0.60.8.1-4) ...
+#10 13.71 Selecting previously unselected package libtext-iconv-perl:amd64.
+#10 13.72 Preparing to unpack .../03-libtext-iconv-perl_1.7-8+b4_amd64.deb ...
+#10 13.73 Unpacking libtext-iconv-perl:amd64 (1.7-8+b4) ...
+#10 13.81 Selecting previously unselected package emacsen-common.
+#10 13.81 Preparing to unpack .../04-emacsen-common_3.0.8_all.deb ...
+#10 13.85 Unpacking emacsen-common (3.0.8) ...
+#10 13.96 Selecting previously unselected package dictionaries-common.
+#10 13.96 Preparing to unpack .../05-dictionaries-common_1.30.10_all.deb ...
+#10 13.98 Adding 'diversion of /usr/share/dict/words to /usr/share/dict/words.pre-dictionaries-common by dictionaries-common'
+#10 14.01 Unpacking dictionaries-common (1.30.10) ...
+#10 14.15 Selecting previously unselected package aspell.
+#10 14.15 Preparing to unpack .../06-aspell_0.60.8.1-4_amd64.deb ...
+#10 14.16 Unpacking aspell (0.60.8.1-4) ...
+#10 14.23 Selecting previously unselected package aspell-en.
+#10 14.23 Preparing to unpack .../07-aspell-en_2020.12.07-0-1_all.deb ...
+#10 14.24 Unpacking aspell-en (2020.12.07-0-1) ...
+#10 14.34 Selecting previously unselected package aspell-nl.
+#10 14.34 Preparing to unpack .../08-aspell-nl_1%3a2.20.19+1-3_all.deb ...
+#10 14.34 Unpacking aspell-nl (1:2.20.19+1-3) ...
+#10 14.43 Selecting previously unselected package dbconfig-common.
+#10 14.43 Preparing to unpack .../09-dbconfig-common_2.0.25_all.deb ...
+#10 14.45 Unpacking dbconfig-common (2.0.25) ...
+#10 14.54 Selecting previously unselected package dbconfig-no-thanks.
+#10 14.54 Preparing to unpack .../10-dbconfig-no-thanks_2.0.25_all.deb ...
+#10 14.55 Unpacking dbconfig-no-thanks (2.0.25) ...
+#10 14.65 Selecting previously unselected package hunspell-en-us.
+#10 14.65 Preparing to unpack .../11-hunspell-en-us_1%3a2020.12.07-4_all.deb ...
+#10 14.66 Unpacking hunspell-en-us (1:2020.12.07-4) ...
+#10 14.75 Selecting previously unselected package libatomic1:amd64.
+#10 14.76 Preparing to unpack .../12-libatomic1_14.2.0-19_amd64.deb ...
+#10 14.76 Unpacking libatomic1:amd64 (14.2.0-19) ...
+#10 14.85 Selecting previously unselected package libglib2.0-0t64:amd64.
+#10 14.85 Preparing to unpack .../13-libglib2.0-0t64_2.84.4-3~deb13u2_amd64.deb ...
+#10 14.87 Unpacking libglib2.0-0t64:amd64 (2.84.4-3~deb13u2) ...
+#10 15.00 Selecting previously unselected package libhunspell-1.7-0:amd64.
+#10 15.00 Preparing to unpack .../14-libhunspell-1.7-0_1.7.2+really1.7.2-10+b4_amd64.deb ...
+#10 15.01 Unpacking libhunspell-1.7-0:amd64 (1.7.2+really1.7.2-10+b4) ...
+#10 15.09 Selecting previously unselected package libenchant-2-2:amd64.
+#10 15.09 Preparing to unpack .../15-libenchant-2-2_2.8.2+dfsg1-3_amd64.deb ...
+#10 15.10 Unpacking libenchant-2-2:amd64 (2.8.2+dfsg1-3) ...
+#10 15.14 Selecting previously unselected package enchant-2.
+#10 15.15 Preparing to unpack .../16-enchant-2_2.8.2+dfsg1-3_amd64.deb ...
+#10 15.16 Unpacking enchant-2 (2.8.2+dfsg1-3) ...
+#10 15.22 Selecting previously unselected package fonts-dejavu-mono.
+#10 15.22 Preparing to unpack .../17-fonts-dejavu-mono_2.37-8_all.deb ...
+#10 15.23 Unpacking fonts-dejavu-mono (2.37-8) ...
+#10 15.35 Selecting previously unselected package fonts-dejavu-core.
+#10 15.36 Preparing to unpack .../18-fonts-dejavu-core_2.37-8_all.deb ...
+#10 15.41 Unpacking fonts-dejavu-core (2.37-8) ...
+#10 15.53 Selecting previously unselected package fontconfig-config.
+#10 15.54 Preparing to unpack .../19-fontconfig-config_2.15.0-2.3_amd64.deb ...
+#10 15.54 Unpacking fontconfig-config (2.15.0-2.3) ...
+#10 15.67 Selecting previously unselected package fonts-glyphicons-halflings.
+#10 15.68 Preparing to unpack .../20-fonts-glyphicons-halflings_1.009~3.4.1+dfsg-6_all.deb ...
+#10 15.69 Unpacking fonts-glyphicons-halflings (1.009~3.4.1+dfsg-6) ...
+#10 15.76 Selecting previously unselected package javascript-common.
+#10 15.76 Preparing to unpack .../21-javascript-common_12+nmu1_all.deb ...
+#10 15.77 Unpacking javascript-common (12+nmu1) ...
+#10 15.82 Selecting previously unselected package libabsl20240722:amd64.
+#10 15.82 Preparing to unpack .../22-libabsl20240722_20240722.0-4_amd64.deb ...
+#10 15.83 Unpacking libabsl20240722:amd64 (20240722.0-4) ...
+#10 15.93 Selecting previously unselected package libaom3:amd64.
+#10 15.94 Preparing to unpack .../23-libaom3_3.12.1-1_amd64.deb ...
+#10 15.94 Unpacking libaom3:amd64 (3.12.1-1) ...
+#10 16.07 Selecting previously unselected package libdav1d7:amd64.
+#10 16.07 Preparing to unpack .../24-libdav1d7_1.5.1-1_amd64.deb ...
+#10 16.08 Unpacking libdav1d7:amd64 (1.5.1-1) ...
+#10 16.15 Selecting previously unselected package libgav1-1:amd64.
+#10 16.16 Preparing to unpack .../25-libgav1-1_0.19.0-3+b1_amd64.deb ...
+#10 16.16 Unpacking libgav1-1:amd64 (0.19.0-3+b1) ...
+#10 16.23 Selecting previously unselected package librav1e0.7:amd64.
+#10 16.23 Preparing to unpack .../26-librav1e0.7_0.7.1-9+b2_amd64.deb ...
+#10 16.24 Unpacking librav1e0.7:amd64 (0.7.1-9+b2) ...
+#10 16.33 Selecting previously unselected package libsvtav1enc2:amd64.
+#10 16.33 Preparing to unpack .../27-libsvtav1enc2_2.3.0+dfsg-1_amd64.deb ...
+#10 16.34 Unpacking libsvtav1enc2:amd64 (2.3.0+dfsg-1) ...
+#10 16.51 Selecting previously unselected package libjpeg62-turbo:amd64.
+#10 16.51 Preparing to unpack .../28-libjpeg62-turbo_1%3a2.1.5-4_amd64.deb ...
+#10 16.52 Unpacking libjpeg62-turbo:amd64 (1:2.1.5-4) ...
+#10 16.58 Selecting previously unselected package libyuv0:amd64.
+#10 16.58 Preparing to unpack .../29-libyuv0_0.0.1904.20250204-1_amd64.deb ...
+#10 16.58 Unpacking libyuv0:amd64 (0.0.1904.20250204-1) ...
+#10 16.65 Selecting previously unselected package libavif16:amd64.
+#10 16.65 Preparing to unpack .../30-libavif16_1.2.1-1.2_amd64.deb ...
+#10 16.66 Unpacking libavif16:amd64 (1.2.1-1.2) ...
+#10 16.73 Selecting previously unselected package libbrotli1:amd64.
+#10 16.73 Preparing to unpack .../31-libbrotli1_1.1.0-3myguard7~trixie_amd64.deb ...
+#10 16.73 Unpacking libbrotli1:amd64 (1.1.0-3myguard7~trixie) ...
+#10 16.80 Selecting previously unselected package mlock.
+#10 16.80 Preparing to unpack .../32-mlock_8%3a2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca_amd64.deb ...
+#10 16.81 Unpacking mlock (8:2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca) ...
+#10 16.88 Selecting previously unselected package libkrb5support0:amd64.
+#10 16.88 Preparing to unpack .../33-libkrb5support0_1.21.3-5_amd64.deb ...
+#10 16.89 Unpacking libkrb5support0:amd64 (1.21.3-5) ...
+#10 16.97 Selecting previously unselected package libcom-err2:amd64.
+#10 16.97 Preparing to unpack .../34-libcom-err2_1.47.2-3+b10_amd64.deb ...
+#10 16.97 Unpacking libcom-err2:amd64 (1.47.2-3+b10) ...
+#10 17.09 Selecting previously unselected package libk5crypto3:amd64.
+#10 17.09 Preparing to unpack .../35-libk5crypto3_1.21.3-5_amd64.deb ...
+#10 17.11 Unpacking libk5crypto3:amd64 (1.21.3-5) ...
+#10 17.28 Selecting previously unselected package libkeyutils1:amd64.
+#10 17.28 Preparing to unpack .../36-libkeyutils1_1.6.3-6_amd64.deb ...
+#10 17.30 Unpacking libkeyutils1:amd64 (1.6.3-6) ...
+#10 17.39 Selecting previously unselected package libkrb5-3:amd64.
+#10 17.39 Preparing to unpack .../37-libkrb5-3_1.21.3-5_amd64.deb ...
+#10 17.40 Unpacking libkrb5-3:amd64 (1.21.3-5) ...
+#10 17.50 Selecting previously unselected package libgssapi-krb5-2:amd64.
+#10 17.50 Preparing to unpack .../38-libgssapi-krb5-2_1.21.3-5_amd64.deb ...
+#10 17.51 Unpacking libgssapi-krb5-2:amd64 (1.21.3-5) ...
+#10 17.61 Selecting previously unselected package libc-client2007e.
+#10 17.61 Preparing to unpack .../39-libc-client2007e_8%3a2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca_amd64.deb ...
+#10 17.62 Unpacking libc-client2007e (8:2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca) ...
+#10 17.70 Selecting previously unselected package libde265-0:amd64.
+#10 17.70 Preparing to unpack .../40-libde265-0_1.0.15-1+b3_amd64.deb ...
+#10 17.71 Unpacking libde265-0:amd64 (1.0.15-1+b3) ...
+#10 17.76 Selecting previously unselected package libdeflate0:amd64.
+#10 17.77 Preparing to unpack .../41-libdeflate0_1.23-2_amd64.deb ...
+#10 17.78 Unpacking libdeflate0:amd64 (1.23-2) ...
+#10 17.83 Selecting previously unselected package libpng16-16t64:amd64.
+#10 17.83 Preparing to unpack .../42-libpng16-16t64_1.6.48-1+deb13u4_amd64.deb ...
+#10 17.84 Unpacking libpng16-16t64:amd64 (1.6.48-1+deb13u4) ...
+#10 17.90 Selecting previously unselected package libfreetype6:amd64.
+#10 17.90 Preparing to unpack .../43-libfreetype6_2.13.3+dfsg-1+deb13u1_amd64.deb ...
+#10 17.90 Unpacking libfreetype6:amd64 (2.13.3+dfsg-1+deb13u1) ...
+#10 17.98 Selecting previously unselected package libfontconfig1:amd64.
+#10 17.98 Preparing to unpack .../44-libfontconfig1_2.15.0-2.3_amd64.deb ...
+#10 17.99 Unpacking libfontconfig1:amd64 (2.15.0-2.3) ...
+#10 18.05 Selecting previously unselected package libgpg-error0:amd64.
+#10 18.06 Preparing to unpack .../45-libgpg-error0_1.51-4_amd64.deb ...
+#10 18.07 Unpacking libgpg-error0:amd64 (1.51-4) ...
+#10 18.13 Selecting previously unselected package libgcrypt20:amd64.
+#10 18.13 Preparing to unpack .../46-libgcrypt20_1.11.0-7_amd64.deb ...
+#10 18.14 Unpacking libgcrypt20:amd64 (1.11.0-7) ...
+#10 18.22 Selecting previously unselected package libsharpyuv0:amd64.
+#10 18.22 Preparing to unpack .../47-libsharpyuv0_1.5.0-0.1_amd64.deb ...
+#10 18.23 Unpacking libsharpyuv0:amd64 (1.5.0-0.1) ...
+#10 18.29 Selecting previously unselected package libheif-plugin-dav1d:amd64.
+#10 18.29 Preparing to unpack .../48-libheif-plugin-dav1d_1.19.8-1_amd64.deb ...
+#10 18.30 Unpacking libheif-plugin-dav1d:amd64 (1.19.8-1) ...
+#10 18.36 Selecting previously unselected package libheif-plugin-libde265:amd64.
+#10 18.37 Preparing to unpack .../49-libheif-plugin-libde265_1.19.8-1_amd64.deb ...
+#10 18.37 Unpacking libheif-plugin-libde265:amd64 (1.19.8-1) ...
+#10 18.43 Selecting previously unselected package libheif1:amd64.
+#10 18.44 Preparing to unpack .../50-libheif1_1.19.8-1_amd64.deb ...
+#10 18.44 Unpacking libheif1:amd64 (1.19.8-1) ...
+#10 18.51 Selecting previously unselected package libgomp1:amd64.
+#10 18.51 Preparing to unpack .../51-libgomp1_14.2.0-19_amd64.deb ...
+#10 18.52 Unpacking libgomp1:amd64 (14.2.0-19) ...
+#10 18.59 Selecting previously unselected package libimagequant0:amd64.
+#10 18.59 Preparing to unpack .../52-libimagequant0_2.18.0-1+b2_amd64.deb ...
+#10 18.60 Unpacking libimagequant0:amd64 (2.18.0-1+b2) ...
+#10 18.67 Selecting previously unselected package libjbig0:amd64.
+#10 18.68 Preparing to unpack .../53-libjbig0_2.1-6.1+b2_amd64.deb ...
+#10 18.69 Unpacking libjbig0:amd64 (2.1-6.1+b2) ...
+#10 18.77 Selecting previously unselected package liblerc4:amd64.
+#10 18.77 Preparing to unpack .../54-liblerc4_4.0.0+ds-5_amd64.deb ...
+#10 18.77 Unpacking liblerc4:amd64 (4.0.0+ds-5) ...
+#10 18.83 Selecting previously unselected package libwebp7:amd64.
+#10 18.84 Preparing to unpack .../55-libwebp7_1.5.0-0.1_amd64.deb ...
+#10 18.84 Unpacking libwebp7:amd64 (1.5.0-0.1) ...
+#10 18.92 Selecting previously unselected package libtiff6:amd64.
+#10 18.92 Preparing to unpack .../56-libtiff6_4.7.0-3+deb13u2_amd64.deb ...
+#10 18.93 Unpacking libtiff6:amd64 (4.7.0-3+deb13u2) ...
+#10 19.00 Selecting previously unselected package libxau6:amd64.
+#10 19.00 Preparing to unpack .../57-libxau6_1%3a1.0.11-1_amd64.deb ...
+#10 19.01 Unpacking libxau6:amd64 (1:1.0.11-1) ...
+#10 19.06 Selecting previously unselected package libxdmcp6:amd64.
+#10 19.07 Preparing to unpack .../58-libxdmcp6_1%3a1.1.5-1_amd64.deb ...
+#10 19.07 Unpacking libxdmcp6:amd64 (1:1.1.5-1) ...
+#10 19.14 Selecting previously unselected package libxcb1:amd64.
+#10 19.15 Preparing to unpack .../59-libxcb1_1.17.0-2+b1_amd64.deb ...
+#10 19.16 Unpacking libxcb1:amd64 (1.17.0-2+b1) ...
+#10 19.23 Selecting previously unselected package libx11-data.
+#10 19.24 Preparing to unpack .../60-libx11-data_2%3a1.8.12-1_all.deb ...
+#10 19.24 Unpacking libx11-data (2:1.8.12-1) ...
+#10 19.36 Selecting previously unselected package libx11-6:amd64.
+#10 19.36 Preparing to unpack .../61-libx11-6_2%3a1.8.12-1_amd64.deb ...
+#10 19.37 Unpacking libx11-6:amd64 (2:1.8.12-1) ...
+#10 19.45 Selecting previously unselected package libxpm4:amd64.
+#10 19.45 Preparing to unpack .../62-libxpm4_1%3a3.5.17-1+b3_amd64.deb ...
+#10 19.46 Unpacking libxpm4:amd64 (1:3.5.17-1+b3) ...
+#10 19.53 Selecting previously unselected package libgd3:amd64.
+#10 19.53 Preparing to unpack .../63-libgd3_2.3.3-13+0~20250427.18+debian13~1.gbp492e76_amd64.deb ...
+#10 19.54 Unpacking libgd3:amd64 (2.3.3-13+0~20250427.18+debian13~1.gbp492e76) ...
+#10 19.63 Selecting previously unselected package libicu76:amd64.
+#10 19.63 Preparing to unpack .../64-libicu76_76.1-4_amd64.deb ...
+#10 19.64 Unpacking libicu76:amd64 (76.1-4) ...
+#10 20.11 Selecting previously unselected package libjs-popper.js.
+#10 20.12 Preparing to unpack .../65-libjs-popper.js_1.16.1+ds-6_all.deb ...
+#10 20.14 Unpacking libjs-popper.js (1.16.1+ds-6) ...
+#10 20.21 Selecting previously unselected package libjs-bootstrap4.
+#10 20.21 Preparing to unpack .../66-libjs-bootstrap4_4.6.2+dfsg-1_all.deb ...
+#10 20.24 Unpacking libjs-bootstrap4 (4.6.2+dfsg-1) ...
+#10 20.38 Selecting previously unselected package libjs-codemirror.
+#10 20.38 Preparing to unpack .../67-libjs-codemirror_5.65.0+~cs5.83.9-3_all.deb ...
+#10 20.39 Unpacking libjs-codemirror (5.65.0+~cs5.83.9-3) ...
+#10 20.63 Selecting previously unselected package libjs-jquery-minicolors.
+#10 20.64 Preparing to unpack .../68-libjs-jquery-minicolors_2.3.6+dfsg-1_all.deb ...
+#10 20.65 Unpacking libjs-jquery-minicolors (2.3.6+dfsg-1) ...
+#10 20.74 Selecting previously unselected package libjs-jquery-ui.
+#10 20.74 Preparing to unpack .../69-libjs-jquery-ui_1.13.2+dfsg-1_all.deb ...
+#10 20.74 Unpacking libjs-jquery-ui (1.13.2+dfsg-1) ...
+#10 20.89 Selecting previously unselected package libjs-jstimezonedetect.
+#10 20.90 Preparing to unpack .../70-libjs-jstimezonedetect_1.0.7+~1.0.3-1_all.deb ...
+#10 20.90 Unpacking libjs-jstimezonedetect (1.0.7+~1.0.3-1) ...
+#10 20.95 Selecting previously unselected package libjs-sizzle.
+#10 20.95 Preparing to unpack .../71-libjs-sizzle_2.3.10+ds+~2.3.6-1_all.deb ...
+#10 20.96 Unpacking libjs-sizzle (2.3.10+ds+~2.3.6-1) ...
+#10 21.02 Selecting previously unselected package libonig5:amd64.
+#10 21.02 Preparing to unpack .../72-libonig5_6.9.9-1+b1_amd64.deb ...
+#10 21.03 Unpacking libonig5:amd64 (6.9.9-1+b1) ...
+#10 21.11 Selecting previously unselected package libxslt1.1:amd64.
+#10 21.12 Preparing to unpack .../73-libxslt1.1_1.1.35-1.2+deb13u2_amd64.deb ...
+#10 21.13 Unpacking libxslt1.1:amd64 (1.1.35-1.2+deb13u2) ...
+#10 21.20 Selecting previously unselected package libz-ng2:amd64.
+#10 21.21 Preparing to unpack .../74-libz-ng2_2.2.5-3myguard5~trixie_amd64.deb ...
+#10 21.21 Unpacking libz-ng2:amd64 (2.2.5-3myguard5~trixie) ...
+#10 21.28 Selecting previously unselected package libzip5:amd64.
+#10 21.28 Preparing to unpack .../75-libzip5_1.11.3-2_amd64.deb ...
+#10 21.29 Unpacking libzip5:amd64 (1.11.3-2) ...
+#10 21.35 Selecting previously unselected package nginx-minimal.
+#10 21.35 Preparing to unpack .../76-nginx-minimal_3%3a1.29.8-1myguard74~trixie_amd64.deb ...
+#10 21.36 Unpacking nginx-minimal (3:1.29.8-1myguard74~trixie) ...
+#10 21.45 Selecting previously unselected package nginx-common.
+#10 21.45 Preparing to unpack .../77-nginx-common_3%3a1.29.8-1myguard74~trixie_all.deb ...
+#10 21.47 Unpacking nginx-common (3:1.29.8-1myguard74~trixie) ...
+#10 21.54 Selecting previously unselected package node-jquery.
+#10 21.54 Preparing to unpack .../78-node-jquery_3.6.1+dfsg+~3.5.14-1_all.deb ...
+#10 21.54 Unpacking node-jquery (3.6.1+dfsg+~3.5.14-1) ...
+#10 21.61 Selecting previously unselected package php8.2-gd.
+#10 21.61 Preparing to unpack .../79-php8.2-gd_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 21.62 Unpacking php8.2-gd (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 21.68 Selecting previously unselected package php8.2-imap.
+#10 21.68 Preparing to unpack .../80-php8.2-imap_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 21.70 Unpacking php8.2-imap (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 21.78 Selecting previously unselected package php8.2-intl.
+#10 21.78 Preparing to unpack .../81-php8.2-intl_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 21.79 Unpacking php8.2-intl (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 21.88 Selecting previously unselected package php8.2-mbstring.
+#10 21.88 Preparing to unpack .../82-php8.2-mbstring_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 21.89 Unpacking php8.2-mbstring (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 22.03 Selecting previously unselected package php8.2-mysql.
+#10 22.04 Preparing to unpack .../83-php8.2-mysql_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 22.05 Unpacking php8.2-mysql (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 22.15 Selecting previously unselected package php8.2-snuffleupagus.
+#10 22.16 Preparing to unpack .../84-php8.2-snuffleupagus_0.13.0-3myguard17~trixie_amd64.deb ...
+#10 22.17 Unpacking php8.2-snuffleupagus (0.13.0-3myguard17~trixie) ...
+#10 22.23 Selecting previously unselected package php8.2-xml.
+#10 22.24 Preparing to unpack .../85-php8.2-xml_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 22.25 Unpacking php8.2-xml (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 22.33 Selecting previously unselected package php8.2-zip.
+#10 22.33 Preparing to unpack .../86-php8.2-zip_8.2.30-3+0~20260505.86+debian13~1.gbp61826c_amd64.deb ...
+#10 22.35 Unpacking php8.2-zip (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 22.43 Setting up libz-ng2:amd64 (2.2.5-3myguard5~trixie) ...
+#10 22.44 Setting up libexpat1:amd64 (2.7.1-2) ...
+#10 22.46 Setting up media-types (13.0.0) ...
+#10 22.48 Setting up libtext-iconv-perl:amd64 (1.7-8+b4) ...
+#10 22.50 Setting up javascript-common (12+nmu1) ...
+#10 22.54 Setting up libtext-charwidth-perl:amd64 (0.04-11+b4) ...
+#10 22.56 Setting up libsharpyuv0:amd64 (1.5.0-0.1) ...
+#10 22.57 Setting up libaom3:amd64 (3.12.1-1) ...
+#10 22.58 Setting up libxau6:amd64 (1:1.0.11-1) ...
+#10 22.60 Setting up libxdmcp6:amd64 (1:1.1.5-1) ...
+#10 22.61 Setting up libkeyutils1:amd64 (1.6.3-6) ...
+#10 22.62 Setting up libjs-jstimezonedetect (1.0.7+~1.0.3-1) ...
+#10 22.63 Setting up libapparmor1:amd64 (4.1.0-1) ...
+#10 22.64 Setting up libxcb1:amd64 (1.17.0-2+b1) ...
+#10 22.65 Setting up libsodium23:amd64 (1.0.18-1+deb13u1) ...
+#10 22.66 Setting up liblerc4:amd64 (4.0.0+ds-5) ...
+#10 22.68 Setting up libjs-jquery-minicolors (2.3.6+dfsg-1) ...
+#10 22.69 Setting up libgpg-error0:amd64 (1.51-4) ...
+#10 22.71 Setting up libjs-popper.js (1.16.1+ds-6) ...
+#10 22.73 Setting up libzip5:amd64 (1.11.3-2) ...
+#10 22.75 Setting up libaspell15:amd64 (0.60.8.1-4) ...
+#10 22.76 Setting up fonts-glyphicons-halflings (1.009~3.4.1+dfsg-6) ...
+#10 22.77 Setting up libargon2-1:amd64 (0~20190702+dfsg-4+b2) ...
+#10 22.78 Setting up mlock (8:2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca) ...
+#10 22.79 Setting up libbrotli1:amd64 (1.1.0-3myguard7~trixie) ...
+#10 22.80 Setting up libedit2:amd64 (3.1-20250104-1) ...
+#10 22.81 Setting up libdeflate0:amd64 (1.23-2) ...
+#10 22.82 Setting up libgcrypt20:amd64 (1.11.0-7) ...
+#10 22.84 Setting up systemd (257.9-1~deb13u1) ...
+#10 22.88 Created symlink '/etc/systemd/system/getty.target.wants/getty@tty1.service' → '/usr/lib/systemd/system/getty@.service'.
+#10 22.90 Created symlink '/etc/systemd/system/multi-user.target.wants/remote-fs.target' → '/usr/lib/systemd/system/remote-fs.target'.
+#10 22.91 Created symlink '/etc/systemd/system/sysinit.target.wants/systemd-pstore.service' → '/usr/lib/systemd/system/systemd-pstore.service'.
+#10 22.92 Initializing machine ID from random generator.
+#10 22.97 Creating group 'games' with GID 60.
+#10 22.97 Creating group 'systemd-journal' with GID 999.
+#10 22.97 Creating user 'games' (n/a) with UID 5 and GID 60.
+#10 22.97 Creating group 'lp' with GID 7.
+#10 22.97 Creating user 'lp' (n/a) with UID 7 and GID 7.
+#10 22.97 Creating group 'news' with GID 9.
+#10 22.97 Creating user 'news' (n/a) with UID 9 and GID 9.
+#10 22.97 Creating group 'uucp' with GID 10.
+#10 22.97 Creating user 'uucp' (n/a) with UID 10 and GID 10.
+#10 22.97 Creating group 'proxy' with GID 13.
+#10 22.97 Creating user 'proxy' (n/a) with UID 13 and GID 13.
+#10 22.97 Creating group 'backup' with GID 34.
+#10 22.97 Creating user 'backup' (n/a) with UID 34 and GID 34.
+#10 22.97 Creating group 'list' with GID 38.
+#10 22.97 Creating user 'list' (n/a) with UID 38 and GID 38.
+#10 22.97 Creating group 'irc' with GID 39.
+#10 22.97 Creating user 'irc' (n/a) with UID 39 and GID 39.
+#10 22.97 Creating group 'systemd-network' with GID 998.
+#10 22.97 Creating user 'systemd-network' (systemd Network Management) with UID 998 and GID 998.
+#10 23.00 /usr/lib/tmpfiles.d/legacy.conf:14: Duplicate line for path "/run/lock", ignoring.
+#10 23.03 Setting up libcom-err2:amd64 (1.47.2-3+b10) ...
+#10 23.05 Setting up libgomp1:amd64 (14.2.0-19) ...
+#10 23.06 Setting up libabsl20240722:amd64 (20240722.0-4) ...
+#10 23.08 Setting up php8.2-snuffleupagus (0.13.0-3myguard17~trixie) ...
+#10 23.14 Setting up libjs-sizzle (2.3.10+ds+~2.3.6-1) ...
+#10 23.17 Setting up libtext-wrapi18n-perl (0.06-10) ...
+#10 23.18 Setting up libjbig0:amd64 (2.1-6.1+b2) ...
+#10 23.20 Setting up libkrb5support0:amd64 (1.21.3-5) ...
+#10 23.21 Setting up libjs-jquery-ui (1.13.2+dfsg-1) ...
+#10 23.22 Setting up libjpeg62-turbo:amd64 (1:2.1.5-4) ...
+#10 23.23 Setting up emacsen-common (3.0.8) ...
+#10 23.31 Setting up libx11-data (2:1.8.12-1) ...
+#10 23.33 Setting up libsvtav1enc2:amd64 (2.3.0+dfsg-1) ...
+#10 23.35 Setting up libimagequant0:amd64 (2.18.0-1+b2) ...
+#10 23.37 Setting up libproc2-0:amd64 (2:4.0.4-9) ...
+#10 23.39 Setting up libjs-codemirror (5.65.0+~cs5.83.9-3) ...
+#10 23.40 Setting up fonts-dejavu-mono (2.37-8) ...
+#10 23.43 Setting up libpng16-16t64:amd64 (1.6.48-1+deb13u4) ...
+#10 23.46 Setting up libatomic1:amd64 (14.2.0-19) ...
+#10 23.48 Setting up fonts-dejavu-core (2.37-8) ...
+#10 23.56 Setting up libgav1-1:amd64 (0.19.0-3+b1) ...
+#10 23.57 Setting up libncursesw6:amd64 (6.5+20250216-2) ...
+#10 23.58 Setting up libk5crypto3:amd64 (1.21.3-5) ...
+#10 23.59 Setting up libwebp7:amd64 (1.5.0-0.1) ...
+#10 23.60 Setting up libffi8:amd64 (3.4.8-2) ...
+#10 23.61 Setting up libdav1d7:amd64 (1.5.1-1) ...
+#10 23.64 Setting up sensible-utils (0.0.25) ...
+#10 23.65 Setting up libtiff6:amd64 (4.7.0-3+deb13u2) ...
+#10 23.67 Setting up librav1e0.7:amd64 (0.7.1-9+b2) ...
+#10 23.69 Setting up procps (2:4.0.4-9) ...
+#10 23.78 Setting up libx11-6:amd64 (2:1.8.12-1) ...
+#10 23.81 Setting up libkrb5-3:amd64 (1.21.3-5) ...
+#10 23.83 Setting up libjs-bootstrap4 (4.6.2+dfsg-1) ...
+#10 23.88 Setting up libicu76:amd64 (76.1-4) ...
+#10 23.89 Setting up libhunspell-1.7-0:amd64 (1.7.2+really1.7.2-10+b4) ...
+#10 23.91 Setting up libde265-0:amd64 (1.0.15-1+b3) ...
+#10 23.92 Setting up libyuv0:amd64 (0.0.1904.20250204-1) ...
+#10 23.93 Setting up libxml2:amd64 (2.12.7+dfsg+really2.9.14-2.1+deb13u2) ...
+#10 23.94 Setting up libonig5:amd64 (6.9.9-1+b1) ...
+#10 23.96 Setting up node-jquery (3.6.1+dfsg+~3.5.14-1) ...
+#10 23.98 Setting up libavif16:amd64 (1.2.1-1.2) ...
+#10 24.00 Setting up libxpm4:amd64 (1:3.5.17-1+b3) ...
+#10 24.01 Setting up dictionaries-common (1.30.10) ...
+#10 24.42 Setting up fontconfig-config (2.15.0-2.3) ...
+#10 24.65 Setting up libglib2.0-0t64:amd64 (2.84.4-3~deb13u2) ...
+#10 24.67 No schema files found: doing nothing.
+#10 24.68 Setting up libfreetype6:amd64 (2.13.3+dfsg-1+deb13u1) ...
+#10 24.71 Setting up libgssapi-krb5-2:amd64 (1.21.3-5) ...
+#10 24.74 Setting up ucf (3.0052) ...
+#10 24.78 Setting up aspell (0.60.8.1-4) ...
+#10 24.90 Setting up libxslt1.1:amd64 (1.1.35-1.2+deb13u2) ...
+#10 24.97 Setting up hunspell-en-us (1:2020.12.07-4) ...
+#10 25.07 Setting up libfontconfig1:amd64 (2.15.0-2.3) ...
+#10 25.15 Setting up libc-client2007e (8:2007f~dfsg-7.1+0~20250310.3+debian13~1.gbpe1afca) ...
+#10 25.20 Setting up php8.2-common (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 25.88 Creating config file /etc/php/8.2/mods-available/calendar.ini with new version
+#10 26.60 Creating config file /etc/php/8.2/mods-available/ctype.ini with new version
+#10 27.28 Creating config file /etc/php/8.2/mods-available/exif.ini with new version
+#10 27.98 Creating config file /etc/php/8.2/mods-available/fileinfo.ini with new version
+#10 28.66 Creating config file /etc/php/8.2/mods-available/ffi.ini with new version
+#10 29.30 Creating config file /etc/php/8.2/mods-available/ftp.ini with new version
+#10 29.88 Creating config file /etc/php/8.2/mods-available/gettext.ini with new version
+#10 30.46 Creating config file /etc/php/8.2/mods-available/iconv.ini with new version
+#10 31.02 Creating config file /etc/php/8.2/mods-available/pdo.ini with new version
+#10 31.61 Creating config file /etc/php/8.2/mods-available/phar.ini with new version
+#10 32.23 Creating config file /etc/php/8.2/mods-available/posix.ini with new version
+#10 32.77 Creating config file /etc/php/8.2/mods-available/shmop.ini with new version
+#10 33.34 Creating config file /etc/php/8.2/mods-available/sockets.ini with new version
+#10 33.88 Creating config file /etc/php/8.2/mods-available/sysvmsg.ini with new version
+#10 34.38 Creating config file /etc/php/8.2/mods-available/sysvsem.ini with new version
+#10 34.89 Creating config file /etc/php/8.2/mods-available/sysvshm.ini with new version
+#10 35.42 Creating config file /etc/php/8.2/mods-available/tokenizer.ini with new version
+#10 35.78 Setting up php8.2-imap (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 36.03 Creating config file /etc/php/8.2/mods-available/imap.ini with new version
+#10 36.36 Setting up php8.2-mysql (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 36.59 Creating config file /etc/php/8.2/mods-available/mysqlnd.ini with new version
+#10 37.22 Creating config file /etc/php/8.2/mods-available/mysqli.ini with new version
+#10 37.78 Creating config file /etc/php/8.2/mods-available/pdo_mysql.ini with new version
+#10 38.18 Setting up libenchant-2-2:amd64 (2.8.2+dfsg1-3) ...
+#10 38.21 Setting up php8.2-zip (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 38.48 Creating config file /etc/php/8.2/mods-available/zip.ini with new version
+#10 38.92 Setting up aspell-nl (1:2.20.19+1-3) ...
+#10 39.02 Setting up php8.2-opcache (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 39.28 Creating config file /etc/php/8.2/mods-available/opcache.ini with new version
+#10 39.64 Setting up php8.2-readline (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 39.87 Creating config file /etc/php/8.2/mods-available/readline.ini with new version
+#10 40.25 Setting up php8.2-mbstring (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 40.49 Creating config file /etc/php/8.2/mods-available/mbstring.ini with new version
+#10 40.86 Setting up aspell-en (2020.12.07-0-1) ...
+#10 40.96 Setting up enchant-2 (2.8.2+dfsg1-3) ...
+#10 40.97 Setting up dbconfig-common (2.0.25) ...
+#10 41.20 Creating config file /etc/dbconfig-common/config with new version
+#10 41.37 Setting up php8.2-intl (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 41.59 Creating config file /etc/php/8.2/mods-available/intl.ini with new version
+#10 41.95 Setting up dbconfig-no-thanks (2.0.25) ...
+#10 41.97 Setting up php8.2-xml (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 42.20 Creating config file /etc/php/8.2/mods-available/dom.ini with new version
+#10 42.76 Creating config file /etc/php/8.2/mods-available/simplexml.ini with new version
+#10 43.38 Creating config file /etc/php/8.2/mods-available/xml.ini with new version
+#10 44.12 Creating config file /etc/php/8.2/mods-available/xmlreader.ini with new version
+#10 44.90 Creating config file /etc/php/8.2/mods-available/xmlwriter.ini with new version
+#10 45.60 Creating config file /etc/php/8.2/mods-available/xsl.ini with new version
+#10 46.05 Setting up php8.2-cli (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 46.08 update-alternatives: using /usr/bin/php8.2 to provide /usr/bin/php (php) in auto mode
+#10 46.08 update-alternatives: warning: skip creation of /usr/share/man/man1/php.1.gz because associated file /usr/share/man/man1/php8.2.1.gz (of link group php) doesn't exist
+#10 46.09 update-alternatives: using /usr/bin/phar8.2 to provide /usr/bin/phar (phar) in auto mode
+#10 46.09 update-alternatives: warning: skip creation of /usr/share/man/man1/phar.1.gz because associated file /usr/share/man/man1/phar8.2.1.gz (of link group phar) doesn't exist
+#10 46.10 update-alternatives: using /usr/bin/phar.phar8.2 to provide /usr/bin/phar.phar (phar.phar) in auto mode
+#10 46.10 update-alternatives: warning: skip creation of /usr/share/man/man1/phar.phar.1.gz because associated file /usr/share/man/man1/phar.phar8.2.1.gz (of link group phar.phar) doesn't exist
+#10 46.43 Creating config file /etc/php/8.2/cli/php.ini with new version
+#10 49.22 Setting up php8.2-igbinary (3.2.16-6+0~20260330.57+debian13~1.gbp1eff65) ...
+#10 49.61 Setting up php8.2-fpm (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 49.92 Creating config file /etc/php/8.2/fpm/php.ini with new version
+#10 52.40 Created symlink '/etc/systemd/system/multi-user.target.wants/php8.2-fpm.service' → '/usr/lib/systemd/system/php8.2-fpm.service'.
+#10 52.44 invoke-rc.d: could not determine current runlevel
+#10 52.45 invoke-rc.d: policy-rc.d denied execution of start.
+#10 52.47 Setting up php8.2-redis (6.3.0-2+0~20251204.66+debian13~1.gbpd148c3) ...
+#10 52.73 Setting up libheif1:amd64 (1.19.8-1) ...
+#10 52.74 Setting up nginx-common (3:1.29.8-1myguard74~trixie) ...
+#10 53.14 Created symlink '/etc/systemd/system/multi-user.target.wants/nginx.service' → '/usr/lib/systemd/system/nginx.service'.
+#10 53.18 Setting up libgd3:amd64 (2.3.3-13+0~20250427.18+debian13~1.gbp492e76) ...
+#10 53.19 Setting up php8.2-gd (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 53.42 Creating config file /etc/php/8.2/mods-available/gd.ini with new version
+#10 53.81 Setting up libheif-plugin-dav1d:amd64 (1.19.8-1) ...
+#10 53.82 Setting up libheif-plugin-libde265:amd64 (1.19.8-1) ...
+#10 53.83 Setting up nginx-minimal (3:1.29.8-1myguard74~trixie) ...
+#10 53.86 /var/lib/dpkg/info/nginx-minimal.postinst: 24: ss: not found
+#10 53.86 invoke-rc.d: could not determine current runlevel
+#10 53.88 invoke-rc.d: policy-rc.d denied execution of start.
+#10 53.88 -> Thanks! You installed NGINX from https://deb.myguard.nl
+#10 53.88 Processing triggers for libc-bin (2.41-12+deb13u2) ...
+#10 53.93 Processing triggers for dictionaries-common (1.30.10) ...
+#10 54.16 aspell-autobuildhash: processing: en [en-common].
+#10 54.31 aspell-autobuildhash: processing: en [en-variant_0].
+#10 54.32 aspell-autobuildhash: processing: en [en-variant_1].
+#10 54.33 aspell-autobuildhash: processing: en [en-variant_2].
+#10 54.35 aspell-autobuildhash: processing: en [en-w_accents-only].
+#10 54.37 aspell-autobuildhash: processing: en [en-wo_accents-only].
+#10 54.39 aspell-autobuildhash: processing: en [en_AU-variant_0].
+#10 54.40 aspell-autobuildhash: processing: en [en_AU-variant_1].
+#10 54.42 aspell-autobuildhash: processing: en [en_AU-w_accents-only].
+#10 54.43 aspell-autobuildhash: processing: en [en_AU-wo_accents-only].
+#10 54.45 aspell-autobuildhash: processing: en [en_CA-variant_0].
+#10 54.47 aspell-autobuildhash: processing: en [en_CA-variant_1].
+#10 54.48 aspell-autobuildhash: processing: en [en_CA-w_accents-only].
+#10 54.50 aspell-autobuildhash: processing: en [en_CA-wo_accents-only].
+#10 54.51 aspell-autobuildhash: processing: en [en_GB-ise-w_accents-only].
+#10 54.54 aspell-autobuildhash: processing: en [en_GB-ise-wo_accents-only].
+#10 54.56 aspell-autobuildhash: processing: en [en_GB-ize-w_accents-only].
+#10 54.57 aspell-autobuildhash: processing: en [en_GB-ize-wo_accents-only].
+#10 54.60 aspell-autobuildhash: processing: en [en_GB-variant_0].
+#10 54.61 aspell-autobuildhash: processing: en [en_GB-variant_1].
+#10 54.63 aspell-autobuildhash: processing: en [en_US-w_accents-only].
+#10 54.64 aspell-autobuildhash: processing: en [en_US-wo_accents-only].
+#10 54.66 aspell-autobuildhash: processing: nl [nl].
+#10 55.15 Processing triggers for php8.2-cli (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 55.18 Processing triggers for php8.2-fpm (8.2.30-3+0~20260505.86+debian13~1.gbp61826c) ...
+#10 55.20 invoke-rc.d: could not determine current runlevel
+#10 55.22 invoke-rc.d: policy-rc.d denied execution of restart.
+#10 DONE 55.5s
+
+#11 [5/9] RUN set -ex ;cd /tmp ;/usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;cat /tmp/composer-setup.php | /usr/bin/php -- --filename=composer --install-dir=/usr/bin ;/usr/bin/php -r "unlink('composer-setup.php');"
+#11 0.755 + cd /tmp
+#11 0.755 + /usr/bin/php -r copy('https://getcomposer.org/installer', 'composer-setup.php');
+#11 1.046 + cat /tmp/composer-setup.php
+#11 1.046 + /usr/bin/php -- --filename=composer --install-dir=/usr/bin
+#11 1.113 All settings correct for using Composer
+#11 1.116 Downloading...
+#11 1.744 
+#11 1.744 Composer (version 2.9.7) successfully installed to: /usr/bin/composer
+#11 1.744 Use it: php /usr/bin/composer
+#11 1.744 
+#11 1.757 + /usr/bin/php -r unlink('composer-setup.php');
+#11 DONE 1.9s
+
+#12 [6/9] RUN set -xe ;LASTVERSION=$(cat /tmp/lastversion) ;apt-get -y update ;apt-get install -y --no-install-recommends git unzip curl locales ;rm -rf /var/www/html ;mkdir /var/www/html ;curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | tar xz --strip-components=1 -C /var/www/html ;cd /var/www/html ;mv composer.json-dist composer.json ;composer config -g secure-http false ;composer -n update --no-dev;composer -n require roundcube/elastic4mobile dev-master ;composer -n require kolab/kolab_2fa ;composer require endroid/qr-code ;composer require -W spomky-labs/otphp ;composer require enygma/yubikey ;cd /var/www/html ;mkdir -p plugins/authres ;curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/authres ;cd /var/www/html ;mkdir -p plugins/easy_unsubscribe ;curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/easy_unsubscribe ;cd /var/www/html ;mkdir -p plugins/show_folder_size ;curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/show_folder_size ;mkdir -p plugins/quota ;curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/quota ;mkdir -p plugins/account_details ;curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/account_details ;mkdir -p plugins/responses ;curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/responses ;mkdir -p plugins/fail2ban ;curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/fail2ban ;mkdir -p plugins/rcguard ;curl -L https://github.com/dsoares/roundcube-rcguard/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/rcguard ;mkdir -p plugins/swipe ;curl -L https://github.com/johndoh/roundcube-swipe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/swipe ;mkdir -p plugins/advanced_search ;curl -L https://github.com/texxasrulez/advanced_search/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/advanced_search ;mkdir -p plugins/persistent_login ;curl -L https://github.com/texxasrulez/persistent_login/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/persistent_login ;mkdir -p plugins/contextmenu ;curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu ;mkdir -p plugins/contextmenu_folder ;curl -L https://github.com/random-cuber/contextmenu_folder/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu_folder ;mkdir -p plugins/message_highlight ;curl -L https://github.com/texxasrulez/message_highlight/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/message_highlight ;mkdir -p plugins/infinitescroll ;curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/infinitescroll ;mkdir -p plugins/thunderbird_labels ;curl -L https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/thunderbird_labels ;mkdir -p plugins/attachment_position ;curl -L https://github.com/filhocf/roundcube-attachment_position/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/attachment_position ;mkdir -p plugins/html5_notifier ;curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/html5_notifier ;mkdir -p skins/larry ;curl -L https://github.com/roundcube/larry/archive/master.tar.gz | tar xz --strip-components=1 -C skins/larry ;mkdir -p skins/classic ;curl -L https://github.com/roundcube/classic/archive/master.tar.gz | tar xz --strip-components=1 -C skins/classic ;for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;composer clear-cache ;echo "include=/var/roundcube/config/phpfpm.conf;" >> /etc/php/8.2/fpm/pool.d/www.conf ;echo "include /var/roundcube/config/nginx.conf;" > /etc/nginx/sites-available/default ;mkdir -p /var/roundcube/config.orig ;cp /var/www/html/config/defaults.inc.php /var/roundcube/config.orig ;touch /var/roundcube/config.orig/phpfpm.conf.override ;cp -rp /var/www/html/plugins /var/www/html/plugins.orig ;apt-get -y purge git git-man mailutils nullmailer curl ;apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;rm -rf /var/lib/apt/lists/* /tmp/* ;cd /var/www/html ;rm -rf /var/www/html/installer /var/www/html/.ci /var/www/html/.tx /var/www/html/.git* /var/www/html/.travis.yml /root/.c* ;rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests /var/www/html/plugins/*/.git* ;rm -f /var/www/html/index.html ;rm /etc/apt/sources.list.d/* ;chown -R www-data:www-data /var/www/html/logs ;chown -R www-data:www-data /var/www/html/temp ;chmod +x /bootstrap.sh ;mv /etc/php /etc/php.orig ;mv /etc/nginx /etc/nginx.orig
+#12 0.614 + cat /tmp/lastversion
+#12 0.618 + LASTVERSION=1.6.15
+#12 0.618 + apt-get -y update
+#12 0.691 Ign:1 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie InRelease
+#12 0.694 Hit:2 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie Release
+#12 0.698 Ign:3 http://edge.deb.myguard.nl:8888/mirror/ondrej-php trixie Release.gpg
+#12 0.742 Hit:4 http://deb.debian.org/debian trixie InRelease
+#12 0.742 Hit:5 http://deb.myguard.nl:8888 trixie InRelease
+#12 0.742 Hit:6 http://deb.debian.org/debian trixie-updates InRelease
+#12 0.754 Hit:7 http://deb.debian.org/debian-security trixie-security InRelease
+#12 0.828 Reading package lists...
+#12 2.121 + apt-get install -y --no-install-recommends git unzip curl locales
+#12 2.140 Reading package lists...
+#12 3.514 Building dependency tree...
+#12 3.931 Reading state information...
+#12 4.505 The following additional packages will be installed:
+#12 4.505   git-man libc-l10n libcurl3t64-gnutls libcurl4t64 liberror-perl
+#12 4.506   libgdbm-compat4t64 libgdbm6t64 libgnutls30t64 libidn2-0 libldap2
+#12 4.506   libnghttp2-14 libnghttp3-9 libngtcp2-16 libngtcp2-crypto-gnutls8 libp11-kit0
+#12 4.507   libperl5.40 libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules-db libssh2-1t64
+#12 4.510   libtasn1-6 libunistring5 perl perl-modules-5.40
+#12 4.514 Suggested packages:
+#12 4.514   gettext-base git-doc git-email git-gui gitk gitweb git-cvs git-mediawiki
+#12 4.514   git-svn gdbm-l10n gnutls-bin perl-doc libterm-readline-gnu-perl
+#12 4.514   | libterm-readline-perl-perl make libtap-harness-archive-perl zip
+#12 4.514 Recommended packages:
+#12 4.514   bash-completion patch less ssh-client libldap-common publicsuffix
+#12 4.514   libsasl2-modules netbase
+#12 4.750 The following NEW packages will be installed:
+#12 4.753   curl git git-man libc-l10n libcurl3t64-gnutls libcurl4t64 liberror-perl
+#12 4.753   libgdbm-compat4t64 libgdbm6t64 libgnutls30t64 libidn2-0 libldap2
+#12 4.753   libnghttp2-14 libnghttp3-9 libngtcp2-16 libngtcp2-crypto-gnutls8 libp11-kit0
+#12 4.753   libperl5.40 libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules-db libssh2-1t64
+#12 4.755   libtasn1-6 libunistring5 locales perl perl-modules-5.40 unzip
+#12 4.852 0 upgraded, 29 newly installed, 0 to remove and 2 not upgraded.
+#12 4.852 Need to get 28.2 MB of archives.
+#12 4.852 After this operation, 139 MB of additional disk space will be used.
+#12 4.852 Get:1 http://deb.debian.org/debian trixie/main amd64 libc-l10n all 2.41-12+deb13u2 [740 kB]
+#12 4.857 Get:2 http://deb.debian.org/debian trixie/main amd64 locales all 2.41-12+deb13u2 [3925 kB]
+#12 4.890 Get:3 http://deb.debian.org/debian trixie/main amd64 perl-modules-5.40 all 5.40.1-6 [3019 kB]
+#12 4.911 Get:4 http://deb.debian.org/debian trixie/main amd64 libgdbm6t64 amd64 1.24-2 [75.2 kB]
+#12 4.913 Get:5 http://deb.debian.org/debian trixie/main amd64 libgdbm-compat4t64 amd64 1.24-2 [50.3 kB]
+#12 4.913 Get:6 http://deb.debian.org/debian trixie/main amd64 libperl5.40 amd64 5.40.1-6 [4341 kB]
+#12 4.943 Get:7 http://deb.debian.org/debian trixie/main amd64 perl amd64 5.40.1-6 [267 kB]
+#12 4.945 Get:8 http://deb.debian.org/debian trixie/main amd64 libunistring5 amd64 1.3-2 [477 kB]
+#12 4.948 Get:9 http://deb.debian.org/debian trixie/main amd64 libidn2-0 amd64 2.3.8-2 [109 kB]
+#12 4.950 Get:10 http://deb.debian.org/debian trixie/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg1-9 [19.8 kB]
+#12 4.951 Get:11 http://deb.debian.org/debian trixie/main amd64 libsasl2-2 amd64 2.1.28+dfsg1-9 [57.5 kB]
+#12 4.951 Get:12 http://deb.debian.org/debian trixie/main amd64 libldap2 amd64 2.6.10+dfsg-1 [194 kB]
+#12 4.953 Get:13 http://deb.debian.org/debian trixie/main amd64 libnghttp2-14 amd64 1.64.0-1.1 [76.0 kB]
+#12 4.955 Get:14 http://deb.debian.org/debian trixie/main amd64 libnghttp3-9 amd64 1.8.0-1 [67.7 kB]
+#12 4.955 Get:15 http://deb.debian.org/debian trixie/main amd64 libpsl5t64 amd64 0.21.2-1.1+b1 [57.2 kB]
+#12 4.957 Get:16 http://deb.debian.org/debian trixie/main amd64 libp11-kit0 amd64 0.25.5-3 [425 kB]
+#12 4.959 Get:17 http://deb.debian.org/debian trixie/main amd64 libtasn1-6 amd64 4.20.0-2 [49.9 kB]
+#12 4.959 Get:18 http://deb.debian.org/debian trixie/main amd64 libgnutls30t64 amd64 3.8.9-3+deb13u2 [1468 kB]
+#12 4.973 Get:19 http://deb.debian.org/debian trixie/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2+b5 [58.8 kB]
+#12 4.973 Get:20 http://deb.debian.org/debian trixie/main amd64 libssh2-1t64 amd64 1.11.1-1 [245 kB]
+#12 4.973 Get:21 http://deb.debian.org/debian trixie/main amd64 libcurl4t64 amd64 8.14.1-2+deb13u2 [391 kB]
+#12 4.977 Get:22 http://deb.debian.org/debian trixie/main amd64 curl amd64 8.14.1-2+deb13u2 [270 kB]
+#12 4.978 Get:23 http://deb.debian.org/debian-security trixie-security/main amd64 libngtcp2-16 amd64 1.11.0-1+deb13u1 [132 kB]
+#12 4.980 Get:24 http://deb.debian.org/debian-security trixie-security/main amd64 libngtcp2-crypto-gnutls8 amd64 1.11.0-1+deb13u1 [29.5 kB]
+#12 4.980 Get:25 http://deb.debian.org/debian trixie/main amd64 libcurl3t64-gnutls amd64 8.14.1-2+deb13u2 [383 kB]
+#12 4.983 Get:26 http://deb.debian.org/debian trixie/main amd64 liberror-perl all 0.17030-1 [26.9 kB]
+#12 4.983 Get:27 http://deb.debian.org/debian trixie/main amd64 git-man all 1:2.47.3-0+deb13u1 [2205 kB]
+#12 4.997 Get:28 http://deb.debian.org/debian trixie/main amd64 git amd64 1:2.47.3-0+deb13u1 [8862 kB]
+#12 5.062 Get:29 http://deb.debian.org/debian trixie/main amd64 unzip amd64 6.0-29 [173 kB]
+#12 6.267 Preconfiguring packages ...
+#12 6.417 Fetched 28.2 MB in 0s (108 MB/s)
+#12 6.452 Selecting previously unselected package libc-l10n.
+#12 6.452 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 10687 files and directories currently installed.)
+#12 6.471 Preparing to unpack .../00-libc-l10n_2.41-12+deb13u2_all.deb ...
+#12 6.478 Unpacking libc-l10n (2.41-12+deb13u2) ...
+#12 6.562 Selecting previously unselected package locales.
+#12 6.566 Preparing to unpack .../01-locales_2.41-12+deb13u2_all.deb ...
+#12 6.574 Unpacking locales (2.41-12+deb13u2) ...
+#12 6.855 Selecting previously unselected package perl-modules-5.40.
+#12 6.858 Preparing to unpack .../02-perl-modules-5.40_5.40.1-6_all.deb ...
+#12 6.867 Unpacking perl-modules-5.40 (5.40.1-6) ...
+#12 7.303 Selecting previously unselected package libgdbm6t64:amd64.
+#12 7.306 Preparing to unpack .../03-libgdbm6t64_1.24-2_amd64.deb ...
+#12 7.318 Unpacking libgdbm6t64:amd64 (1.24-2) ...
+#12 7.361 Selecting previously unselected package libgdbm-compat4t64:amd64.
+#12 7.363 Preparing to unpack .../04-libgdbm-compat4t64_1.24-2_amd64.deb ...
+#12 7.370 Unpacking libgdbm-compat4t64:amd64 (1.24-2) ...
+#12 7.414 Selecting previously unselected package libperl5.40:amd64.
+#12 7.418 Preparing to unpack .../05-libperl5.40_5.40.1-6_amd64.deb ...
+#12 7.422 Unpacking libperl5.40:amd64 (5.40.1-6) ...
+#12 7.722 Selecting previously unselected package perl.
+#12 7.726 Preparing to unpack .../06-perl_5.40.1-6_amd64.deb ...
+#12 7.731 Unpacking perl (5.40.1-6) ...
+#12 7.823 Selecting previously unselected package libunistring5:amd64.
+#12 7.827 Preparing to unpack .../07-libunistring5_1.3-2_amd64.deb ...
+#12 7.839 Unpacking libunistring5:amd64 (1.3-2) ...
+#12 7.945 Selecting previously unselected package libidn2-0:amd64.
+#12 7.950 Preparing to unpack .../08-libidn2-0_2.3.8-2_amd64.deb ...
+#12 7.963 Unpacking libidn2-0:amd64 (2.3.8-2) ...
+#12 8.023 Selecting previously unselected package libsasl2-modules-db:amd64.
+#12 8.023 Preparing to unpack .../09-libsasl2-modules-db_2.1.28+dfsg1-9_amd64.deb ...
+#12 8.023 Unpacking libsasl2-modules-db:amd64 (2.1.28+dfsg1-9) ...
+#12 8.086 Selecting previously unselected package libsasl2-2:amd64.
+#12 8.090 Preparing to unpack .../10-libsasl2-2_2.1.28+dfsg1-9_amd64.deb ...
+#12 8.095 Unpacking libsasl2-2:amd64 (2.1.28+dfsg1-9) ...
+#12 8.176 Selecting previously unselected package libldap2:amd64.
+#12 8.180 Preparing to unpack .../11-libldap2_2.6.10+dfsg-1_amd64.deb ...
+#12 8.190 Unpacking libldap2:amd64 (2.6.10+dfsg-1) ...
+#12 8.361 Selecting previously unselected package libnghttp2-14:amd64.
+#12 8.361 Preparing to unpack .../12-libnghttp2-14_1.64.0-1.1_amd64.deb ...
+#12 8.430 Unpacking libnghttp2-14:amd64 (1.64.0-1.1) ...
+#12 8.694 Selecting previously unselected package libnghttp3-9:amd64.
+#12 8.698 Preparing to unpack .../13-libnghttp3-9_1.8.0-1_amd64.deb ...
+#12 8.734 Unpacking libnghttp3-9:amd64 (1.8.0-1) ...
+#12 8.809 Selecting previously unselected package libpsl5t64:amd64.
+#12 8.811 Preparing to unpack .../14-libpsl5t64_0.21.2-1.1+b1_amd64.deb ...
+#12 8.815 Unpacking libpsl5t64:amd64 (0.21.2-1.1+b1) ...
+#12 9.065 Selecting previously unselected package libp11-kit0:amd64.
+#12 9.065 Preparing to unpack .../15-libp11-kit0_0.25.5-3_amd64.deb ...
+#12 9.065 Unpacking libp11-kit0:amd64 (0.25.5-3) ...
+#12 9.254 Selecting previously unselected package libtasn1-6:amd64.
+#12 9.260 Preparing to unpack .../16-libtasn1-6_4.20.0-2_amd64.deb ...
+#12 9.324 Unpacking libtasn1-6:amd64 (4.20.0-2) ...
+#12 9.475 Selecting previously unselected package libgnutls30t64:amd64.
+#12 9.479 Preparing to unpack .../17-libgnutls30t64_3.8.9-3+deb13u2_amd64.deb ...
+#12 9.526 Unpacking libgnutls30t64:amd64 (3.8.9-3+deb13u2) ...
+#12 9.715 Selecting previously unselected package librtmp1:amd64.
+#12 9.721 Preparing to unpack .../18-librtmp1_2.4+20151223.gitfa8646d.1-2+b5_amd64.deb ...
+#12 9.729 Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+#12 9.811 Selecting previously unselected package libssh2-1t64:amd64.
+#12 9.815 Preparing to unpack .../19-libssh2-1t64_1.11.1-1_amd64.deb ...
+#12 9.818 Unpacking libssh2-1t64:amd64 (1.11.1-1) ...
+#12 9.920 Selecting previously unselected package libcurl4t64:amd64.
+#12 9.923 Preparing to unpack .../20-libcurl4t64_8.14.1-2+deb13u2_amd64.deb ...
+#12 9.937 Unpacking libcurl4t64:amd64 (8.14.1-2+deb13u2) ...
+#12 10.03 Selecting previously unselected package curl.
+#12 10.04 Preparing to unpack .../21-curl_8.14.1-2+deb13u2_amd64.deb ...
+#12 10.04 Unpacking curl (8.14.1-2+deb13u2) ...
+#12 10.15 Selecting previously unselected package libngtcp2-16:amd64.
+#12 10.15 Preparing to unpack .../22-libngtcp2-16_1.11.0-1+deb13u1_amd64.deb ...
+#12 10.16 Unpacking libngtcp2-16:amd64 (1.11.0-1+deb13u1) ...
+#12 10.26 Selecting previously unselected package libngtcp2-crypto-gnutls8:amd64.
+#12 10.27 Preparing to unpack .../23-libngtcp2-crypto-gnutls8_1.11.0-1+deb13u1_amd64.deb ...
+#12 10.28 Unpacking libngtcp2-crypto-gnutls8:amd64 (1.11.0-1+deb13u1) ...
+#12 10.37 Selecting previously unselected package libcurl3t64-gnutls:amd64.
+#12 10.37 Preparing to unpack .../24-libcurl3t64-gnutls_8.14.1-2+deb13u2_amd64.deb ...
+#12 10.38 Unpacking libcurl3t64-gnutls:amd64 (8.14.1-2+deb13u2) ...
+#12 10.46 Selecting previously unselected package liberror-perl.
+#12 10.46 Preparing to unpack .../25-liberror-perl_0.17030-1_all.deb ...
+#12 10.47 Unpacking liberror-perl (0.17030-1) ...
+#12 10.55 Selecting previously unselected package git-man.
+#12 10.55 Preparing to unpack .../26-git-man_1%3a2.47.3-0+deb13u1_all.deb ...
+#12 10.55 Unpacking git-man (1:2.47.3-0+deb13u1) ...
+#12 10.67 Selecting previously unselected package git.
+#12 10.68 Preparing to unpack .../27-git_1%3a2.47.3-0+deb13u1_amd64.deb ...
+#12 10.70 Unpacking git (1:2.47.3-0+deb13u1) ...
+#12 11.11 Selecting previously unselected package unzip.
+#12 11.12 Preparing to unpack .../28-unzip_6.0-29_amd64.deb ...
+#12 11.12 Unpacking unzip (6.0-29) ...
+#12 11.19 Setting up libc-l10n (2.41-12+deb13u2) ...
+#12 11.21 Setting up libgdbm6t64:amd64 (1.24-2) ...
+#12 11.22 Setting up libgdbm-compat4t64:amd64 (1.24-2) ...
+#12 11.23 Setting up unzip (6.0-29) ...
+#12 11.25 Setting up libnghttp2-14:amd64 (1.64.0-1.1) ...
+#12 11.27 Setting up locales (2.41-12+deb13u2) ...
+#12 12.85 Generating locales (this might take a while)...
+#12 12.87 Generation complete.
+#12 12.93 Setting up libsasl2-modules-db:amd64 (2.1.28+dfsg1-9) ...
+#12 12.95 Setting up libp11-kit0:amd64 (0.25.5-3) ...
+#12 12.96 Setting up libunistring5:amd64 (1.3-2) ...
+#12 12.97 Setting up libsasl2-2:amd64 (2.1.28+dfsg1-9) ...
+#12 12.98 Setting up libnghttp3-9:amd64 (1.8.0-1) ...
+#12 12.99 Setting up perl-modules-5.40 (5.40.1-6) ...
+#12 13.00 Setting up libtasn1-6:amd64 (4.20.0-2) ...
+#12 13.01 Setting up git-man (1:2.47.3-0+deb13u1) ...
+#12 13.02 Setting up libngtcp2-16:amd64 (1.11.0-1+deb13u1) ...
+#12 13.03 Setting up libssh2-1t64:amd64 (1.11.1-1) ...
+#12 13.05 Setting up libldap2:amd64 (2.6.10+dfsg-1) ...
+#12 13.06 Setting up libidn2-0:amd64 (2.3.8-2) ...
+#12 13.07 Setting up libperl5.40:amd64 (5.40.1-6) ...
+#12 13.08 Setting up perl (5.40.1-6) ...
+#12 13.11 Setting up libgnutls30t64:amd64 (3.8.9-3+deb13u2) ...
+#12 13.12 Setting up libpsl5t64:amd64 (0.21.2-1.1+b1) ...
+#12 13.13 Setting up liberror-perl (0.17030-1) ...
+#12 13.14 Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+#12 13.15 Setting up libngtcp2-crypto-gnutls8:amd64 (1.11.0-1+deb13u1) ...
+#12 13.16 Setting up libcurl4t64:amd64 (8.14.1-2+deb13u2) ...
+#12 13.17 Setting up libcurl3t64-gnutls:amd64 (8.14.1-2+deb13u2) ...
+#12 13.18 Setting up git (1:2.47.3-0+deb13u1) ...
+#12 13.21 Setting up curl (8.14.1-2+deb13u2) ...
+#12 13.23 Processing triggers for libc-bin (2.41-12+deb13u2) ...
+#12 13.32 + rm -rf /var/www/html
+#12 13.32 + mkdir /var/www/html
+#12 13.32 + curl -fSL https://github.com/roundcube/roundcubemail/releases/download/1.6.15/roundcubemail-1.6.15-complete.tar.gz
+#12 13.33 + tar xz --strip-components=1 -C /var/www/html
+#12 13.34   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 13.34                                  Dload  Upload   Total   Spent    Left  Speed
+#12 13.34   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 13.99 100 5734k  100 5734k    0     0  8861k      0 --:--:-- --:--:-- --:--:-- 8861k
+#12 14.01 + cd /var/www/html
+#12 14.01 + mv composer.json-dist composer.json
+#12 14.01 + composer config -g secure-http false
+#12 14.25 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 14.31 + composer -n update --no-dev
+#12 14.70 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 14.76 Composer is operating significantly slower than normal because you do not have the PHP curl extension enabled.
+#12 14.78 Loading composer repositories with package information
+#12 28.89 Updating dependencies
+#12 28.91 Lock file operations: 28 installs, 1 update, 2 removals
+#12 28.91   - Removing kolab/net_ldap3 (v1.1.5)
+#12 28.91   - Removing pear/net_ldap2 (v2.3.0)
+#12 28.91   - Locking doctrine/instantiator (2.0.0)
+#12 28.91   - Locking myclabs/deep-copy (1.13.4)
+#12 28.91   - Locking nikic/php-parser (v5.7.0)
+#12 28.91   - Locking phar-io/manifest (2.0.4)
+#12 28.91   - Locking phar-io/version (3.2.1)
+#12 28.91   - Locking phpunit/php-code-coverage (9.2.32)
+#12 28.91   - Locking phpunit/php-file-iterator (3.0.6)
+#12 28.91   - Locking phpunit/php-invoker (3.1.1)
+#12 28.91   - Locking phpunit/php-text-template (2.0.4)
+#12 28.91   - Locking phpunit/php-timer (5.0.3)
+#12 28.91   - Locking phpunit/phpunit (9.6.34)
+#12 28.91   - Locking sebastian/cli-parser (1.0.2)
+#12 28.91   - Locking sebastian/code-unit (1.0.8)
+#12 28.91   - Locking sebastian/code-unit-reverse-lookup (2.0.3)
+#12 28.91   - Locking sebastian/comparator (4.0.10)
+#12 28.91   - Locking sebastian/complexity (2.0.3)
+#12 28.91   - Locking sebastian/diff (4.0.6)
+#12 28.91   - Locking sebastian/environment (5.1.5)
+#12 28.91   - Locking sebastian/exporter (4.0.8)
+#12 28.91   - Locking sebastian/global-state (5.0.8)
+#12 28.91   - Locking sebastian/lines-of-code (1.0.4)
+#12 28.91   - Locking sebastian/object-enumerator (4.0.4)
+#12 28.91   - Locking sebastian/object-reflector (2.0.4)
+#12 28.91   - Locking sebastian/recursion-context (4.0.6)
+#12 28.91   - Locking sebastian/resource-operations (3.0.4)
+#12 28.91   - Locking sebastian/type (3.2.1)
+#12 28.91   - Locking sebastian/version (3.0.2)
+#12 28.91   - Upgrading symfony/deprecation-contracts (v2.5.4 => v3.7.0)
+#12 28.91   - Locking theseer/tokenizer (1.3.1)
+#12 28.91 Writing lock file
+#12 28.91 Installing dependencies from lock file
+#12 28.91 Package operations: 0 installs, 1 update, 2 removals
+#12 28.92   - Downloading symfony/deprecation-contracts (v3.7.0)
+#12 29.32   - Removing pear/net_ldap2 (v2.3.0)
+#12 29.32   - Removing kolab/net_ldap3 (v1.1.5)
+#12 29.33   - Upgrading symfony/deprecation-contracts (v2.5.4 => v3.7.0): Extracting archive
+#12 29.36  0/1 [>---------------------------]   0%
+#12 29.39  1/1 [============================] 100%
+#12 29.62 5 package suggestions were added by new dependencies, use `composer suggest` to see details.
+#12 29.63 Package pear/console_commandline is abandoned, you should avoid using it. No replacement was suggested.
+#12 29.63 Package pear/net_socket is abandoned, you should avoid using it. No replacement was suggested.
+#12 29.63 Generating autoload files
+#12 29.65 5 packages you are using are looking for funding.
+#12 29.65 Use the `composer fund` command to find out more!
+#12 29.65 No security vulnerability advisories found.
+#12 29.68 + composer -n require roundcube/elastic4mobile dev-master
+#12 29.95 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 30.00 ./composer.json has been updated
+#12 30.09 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 30.11 Running composer update roundcube/elastic4mobile
+#12 30.12 Loading composer repositories with package information
+#12 31.00 Updating dependencies
+#12 31.01 Lock file operations: 2 installs, 0 updates, 0 removals
+#12 31.01   - Locking mobiledetect/mobiledetectlib (2.8.47)
+#12 31.01   - Locking roundcube/elastic4mobile (dev-master 924edef)
+#12 31.02 Writing lock file
+#12 31.02 Installing dependencies from lock file (including require-dev)
+#12 31.03 Package operations: 30 installs, 0 updates, 0 removals
+#12 31.04   - Downloading sebastian/version (3.0.2)
+#12 31.42   - Downloading sebastian/type (3.2.1)
+#12 31.83   - Downloading sebastian/resource-operations (3.0.4)
+#12 32.24   - Downloading sebastian/recursion-context (4.0.6)
+#12 32.62   - Downloading sebastian/object-reflector (2.0.4)
+#12 33.05   - Downloading sebastian/object-enumerator (4.0.4)
+#12 33.46   - Downloading sebastian/global-state (5.0.8)
+#12 33.86   - Downloading sebastian/exporter (4.0.8)
+#12 34.25   - Downloading sebastian/environment (5.1.5)
+#12 34.62   - Downloading sebastian/diff (4.0.6)
+#12 35.01   - Downloading sebastian/comparator (4.0.10)
+#12 35.41   - Downloading sebastian/code-unit (1.0.8)
+#12 35.81   - Downloading sebastian/cli-parser (1.0.2)
+#12 36.22   - Downloading phpunit/php-timer (5.0.3)
+#12 36.62   - Downloading phpunit/php-text-template (2.0.4)
+#12 37.01   - Downloading phpunit/php-invoker (3.1.1)
+#12 37.40   - Downloading phpunit/php-file-iterator (3.0.6)
+#12 37.80   - Downloading theseer/tokenizer (1.3.1)
+#12 38.21   - Downloading nikic/php-parser (v5.7.0)
+#12 38.67   - Downloading sebastian/lines-of-code (1.0.4)
+#12 39.05   - Downloading sebastian/complexity (2.0.3)
+#12 39.44   - Downloading sebastian/code-unit-reverse-lookup (2.0.3)
+#12 39.81   - Downloading phpunit/php-code-coverage (9.2.32)
+#12 40.34   - Downloading phar-io/version (3.2.1)
+#12 40.78   - Downloading phar-io/manifest (2.0.4)
+#12 41.22   - Downloading myclabs/deep-copy (1.13.4)
+#12 41.65   - Downloading doctrine/instantiator (2.0.0)
+#12 42.03   - Downloading phpunit/phpunit (9.6.34)
+#12 42.52   - Downloading mobiledetect/mobiledetectlib (2.8.47)
+#12 43.03   - Downloading roundcube/elastic4mobile (dev-master 924edef)
+#12 43.47     0 [>---------------------------]    0 [->--------------------------]
+#12 43.47   - Installing sebastian/version (3.0.2): Extracting archive
+#12 43.48   - Installing sebastian/type (3.2.1): Extracting archive
+#12 43.48   - Installing sebastian/resource-operations (3.0.4): Extracting archive
+#12 43.48   - Installing sebastian/recursion-context (4.0.6): Extracting archive
+#12 43.49   - Installing sebastian/object-reflector (2.0.4): Extracting archive
+#12 43.49   - Installing sebastian/object-enumerator (4.0.4): Extracting archive
+#12 43.49   - Installing sebastian/global-state (5.0.8): Extracting archive
+#12 43.50   - Installing sebastian/exporter (4.0.8): Extracting archive
+#12 43.51   - Installing sebastian/environment (5.1.5): Extracting archive
+#12 43.51   - Installing sebastian/diff (4.0.6): Extracting archive
+#12 43.52   - Installing sebastian/comparator (4.0.10): Extracting archive
+#12 43.52   - Installing sebastian/code-unit (1.0.8): Extracting archive
+#12 43.52   - Installing sebastian/cli-parser (1.0.2): Extracting archive
+#12 43.52   - Installing phpunit/php-timer (5.0.3): Extracting archive
+#12 43.52   - Installing phpunit/php-text-template (2.0.4): Extracting archive
+#12 43.52   - Installing phpunit/php-invoker (3.1.1): Extracting archive
+#12 43.52   - Installing phpunit/php-file-iterator (3.0.6): Extracting archive
+#12 43.52   - Installing theseer/tokenizer (1.3.1): Extracting archive
+#12 43.52   - Installing nikic/php-parser (v5.7.0): Extracting archive
+#12 43.52   - Installing sebastian/lines-of-code (1.0.4): Extracting archive
+#12 43.52   - Installing sebastian/complexity (2.0.3): Extracting archive
+#12 43.52   - Installing sebastian/code-unit-reverse-lookup (2.0.3): Extracting archive
+#12 43.52   - Installing phpunit/php-code-coverage (9.2.32): Extracting archive
+#12 43.52   - Installing phar-io/version (3.2.1): Extracting archive
+#12 43.53   - Installing phar-io/manifest (2.0.4): Extracting archive
+#12 43.53   - Installing myclabs/deep-copy (1.13.4): Extracting archive
+#12 43.53   - Installing doctrine/instantiator (2.0.0): Extracting archive
+#12 43.53   - Installing phpunit/phpunit (9.6.34): Extracting archive
+#12 43.53   - Installing mobiledetect/mobiledetectlib (2.8.47): Extracting archive
+#12 43.53   - Installing roundcube/elastic4mobile (dev-master 924edef): Extracting archive
+#12 43.57   0/30 [>---------------------------]   0%
+#12 43.62  10/30 [=========>------------------]  33%
+#12 43.74  19/30 [=================>----------]  63%
+#12 43.86  27/30 [=========================>--]  90%
+#12 43.89  30/30 [============================] 100%
+#12 44.10 Package pear/console_commandline is abandoned, you should avoid using it. No replacement was suggested.
+#12 44.10 Package pear/net_socket is abandoned, you should avoid using it. No replacement was suggested.
+#12 44.10 Package roundcube/elastic4mobile is abandoned, you should avoid using it. No replacement was suggested.
+#12 44.10 Generating autoload files
+#12 44.26 32 packages you are using are looking for funding.
+#12 44.26 Use the `composer fund` command to find out more!
+#12 53.44 No security vulnerability advisories found.
+#12 53.46 + composer -n require kolab/kolab_2fa
+#12 53.68 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 54.26 ./composer.json has been updated
+#12 54.34 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 54.37 Running composer update kolab/kolab_2fa
+#12 54.38 Loading composer repositories with package information
+#12 56.02 Updating dependencies
+#12 56.03 Lock file operations: 6 installs, 0 updates, 0 removals
+#12 56.03   - Locking christian-riesen/base32 (1.6.0)
+#12 56.03   - Locking endroid/qrcode (1.7.4)
+#12 56.03   - Locking enygma/yubikey (3.9)
+#12 56.03   - Locking kolab/kolab_2fa (3.3.4)
+#12 56.03   - Locking spomky-labs/otphp (v6.0.4)
+#12 56.03   - Locking symfony/options-resolver (v3.4.47)
+#12 56.04 Writing lock file
+#12 56.04 Installing dependencies from lock file (including require-dev)
+#12 56.21 Package operations: 6 installs, 0 updates, 0 removals
+#12 56.22   - Downloading christian-riesen/base32 (1.6.0)
+#12 56.66   - Downloading spomky-labs/otphp (v6.0.4)
+#12 57.24   - Downloading enygma/yubikey (3.9)
+#12 57.69   - Downloading symfony/options-resolver (v3.4.47)
+#12 58.15   - Downloading endroid/qrcode (1.7.4)
+#12 58.74   - Downloading kolab/kolab_2fa (3.3.4)
+#12 59.22     0 [>---------------------------]    0 [->--------------------------]
+#12 59.22   - Installing christian-riesen/base32 (1.6.0): Extracting archive
+#12 59.22   - Installing spomky-labs/otphp (v6.0.4): Extracting archive
+#12 59.23   - Installing enygma/yubikey (3.9): Extracting archive
+#12 59.23   - Installing symfony/options-resolver (v3.4.47): Extracting archive
+#12 59.23   - Installing endroid/qrcode (1.7.4): Extracting archive
+#12 59.24   - Installing kolab/kolab_2fa (3.3.4): Extracting archive
+#12 59.27  0/6 [>---------------------------]   0%Creating package config file
+#12 59.33 
+#12 59.33  6/6 [============================] 100%
+#12 59.55 Package endroid/qrcode is abandoned, you should avoid using it. Use endroid/qr-code instead.
+#12 59.55 Package kolab/kolab_2fa is abandoned, you should avoid using it. No replacement was suggested.
+#12 59.55 Package pear/console_commandline is abandoned, you should avoid using it. No replacement was suggested.
+#12 59.55 Package pear/net_socket is abandoned, you should avoid using it. No replacement was suggested.
+#12 59.55 Package roundcube/elastic4mobile is abandoned, you should avoid using it. No replacement was suggested.
+#12 59.55 Generating autoload files
+#12 59.73 33 packages you are using are looking for funding.
+#12 59.73 Use the `composer fund` command to find out more!
+#12 69.40 No security vulnerability advisories found.
+#12 69.40 Using version ^3.3 for kolab/kolab_2fa
+#12 69.42 + composer require endroid/qr-code
+#12 69.66 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 70.24 Cannot use endroid/qr-code's latest version 6.1.3 as it requires php ^8.4 which is not satisfied by your platform.
+#12 70.24 ./composer.json has been updated
+#12 70.33 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 70.35 Running composer update endroid/qr-code
+#12 70.36 Loading composer repositories with package information
+#12 80.14 Updating dependencies
+#12 80.18 Lock file operations: 1 install, 0 updates, 0 removals
+#12 80.18   - Locking endroid/qr-code (5.0.7)
+#12 80.18 Writing lock file
+#12 80.18 Installing dependencies from lock file (including require-dev)
+#12 80.38 Package operations: 1 install, 0 updates, 0 removals
+#12 80.39   - Downloading endroid/qr-code (5.0.7)
+#12 82.08   - Installing endroid/qr-code (5.0.7): Extracting archive
+#12 82.54 3 package suggestions were added by new dependencies, use `composer suggest` to see details.
+#12 82.55 Package endroid/qrcode is abandoned, you should avoid using it. Use endroid/qr-code instead.
+#12 82.55 Package kolab/kolab_2fa is abandoned, you should avoid using it. No replacement was suggested.
+#12 82.55 Package pear/console_commandline is abandoned, you should avoid using it. No replacement was suggested.
+#12 82.55 Package pear/net_socket is abandoned, you should avoid using it. No replacement was suggested.
+#12 82.55 Package roundcube/elastic4mobile is abandoned, you should avoid using it. No replacement was suggested.
+#12 82.55 Generating autoload files
+#12 82.75 34 packages you are using are looking for funding.
+#12 82.75 Use the `composer fund` command to find out more!
+#12 94.41 No security vulnerability advisories found.
+#12 94.41 Using version ^5.0 for endroid/qr-code
+#12 94.44 + composer require -W spomky-labs/otphp
+#12 94.70 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 95.31 ./composer.json has been updated
+#12 95.41 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 95.43 Running composer update spomky-labs/otphp --with-all-dependencies
+#12 95.45 Loading composer repositories with package information
+#12 97.87 Updating dependencies
+#12 97.88 Nothing to modify in lock file
+#12 97.89 Writing lock file
+#12 97.89 Installing dependencies from lock file (including require-dev)
+#12 98.08 Nothing to install, update or remove
+#12 98.09 Package endroid/qrcode is abandoned, you should avoid using it. Use endroid/qr-code instead.
+#12 98.09 Package kolab/kolab_2fa is abandoned, you should avoid using it. No replacement was suggested.
+#12 98.09 Package pear/console_commandline is abandoned, you should avoid using it. No replacement was suggested.
+#12 98.09 Package pear/net_socket is abandoned, you should avoid using it. No replacement was suggested.
+#12 98.09 Package roundcube/elastic4mobile is abandoned, you should avoid using it. No replacement was suggested.
+#12 98.09 Generating autoload files
+#12 98.30 34 packages you are using are looking for funding.
+#12 98.30 Use the `composer fund` command to find out more!
+#12 113.6 No security vulnerability advisories found.
+#12 113.6 Using version ^6.0 for spomky-labs/otphp
+#12 113.6 + composer require enygma/yubikey
+#12 113.8 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 114.4 ./composer.json has been updated
+#12 114.5 Composer could not detect the root package (roundcube/roundcubemail) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+#12 114.5 Running composer update enygma/yubikey
+#12 114.5 Loading composer repositories with package information
+#12 116.6 Updating dependencies
+#12 116.6 Nothing to modify in lock file
+#12 116.6 Writing lock file
+#12 116.6 Installing dependencies from lock file (including require-dev)
+#12 116.8 Nothing to install, update or remove
+#12 116.8 Package endroid/qrcode is abandoned, you should avoid using it. Use endroid/qr-code instead.
+#12 116.8 Package kolab/kolab_2fa is abandoned, you should avoid using it. No replacement was suggested.
+#12 116.8 Package pear/console_commandline is abandoned, you should avoid using it. No replacement was suggested.
+#12 116.8 Package pear/net_socket is abandoned, you should avoid using it. No replacement was suggested.
+#12 116.8 Package roundcube/elastic4mobile is abandoned, you should avoid using it. No replacement was suggested.
+#12 116.8 Generating autoload files
+#12 117.0 34 packages you are using are looking for funding.
+#12 117.0 Use the `composer fund` command to find out more!
+#12 127.7 No security vulnerability advisories found.
+#12 127.7 Using version ^3.9 for enygma/yubikey
+#12 127.7 + cd /var/www/html
+#12 127.7 + mkdir -p plugins/authres
+#12 127.7 + curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz
+#12 127.7 + tar xz --strip-components=1 -C plugins/authres
+#12 127.7   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 127.7                                  Dload  Upload   Total   Spent    Left  Speed
+#12 127.7   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 128.3 100 15699    0 15699    0     0  25820      0 --:--:-- --:--:-- --:--:-- 25820100 74159    0 74159    0     0    98k      0 --:--:-- --:--:-- --:--:--  439k
+#12 128.5 + cd /var/www/html
+#12 128.5 + mkdir -p plugins/easy_unsubscribe
+#12 128.5 + + tar xz --strip-components=1 -C plugins/easy_unsubscribe
+#12 128.5 curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz
+#12 128.5   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 128.5                                  Dload  Upload   Total   Spent    Left  Speed
+#12 128.5   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 128.8   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 129.0 100  4947    0  4947    0     0   9824      0 --:--:-- --:--:-- --:--:--  9824
+#12 129.0 + cd /var/www/html
+#12 129.0 + mkdir -p plugins/show_folder_size
+#12 129.0 + curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz
+#12 129.0 + tar xz --strip-components=1 -C plugins/show_folder_size
+#12 129.0   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 129.0                                  Dload  Upload   Total   Spent    Left  Speed
+#12 129.0   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 129.4 100 13150    0 13150    0     0  35571      0 --:--:-- --:--:-- --:--:-- 35571100 33366    0 33366    0     0  84061      0 --:--:-- --:--:-- --:--:--  731k
+#12 129.4 + mkdir -p plugins/quota
+#12 129.4 + curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz
+#12 129.4 + tar xz --strip-components=1 -C plugins/quota
+#12 129.5   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 129.5                                  Dload  Upload   Total   Spent    Left  Speed
+#12 129.5   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 130.2 100 65366    0 65366    0     0  84139      0 --:--:-- --:--:-- --:--:-- 84139
+#12 130.3 + mkdir -p plugins/account_details
+#12 130.3 + curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz
+#12 130.3 + tar xz --strip-components=1 -C plugins/account_details
+#12 130.3   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 130.3                                  Dload  Upload   Total   Spent    Left  Speed
+#12 130.3   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 130.8 100  602k    0  602k    0     0  1065k      0 --:--:-- --:--:-- --:--:-- 1065k
+#12 130.8 + mkdir -p plugins/responses
+#12 130.9 + curl -L https://github.com/random-cuber/responses/archive/master.tar.gz
+#12 130.9 + tar xz --strip-components=1 -C plugins/responses
+#12 130.9   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 130.9                                  Dload  Upload   Total   Spent    Left  Speed
+#12 130.9   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+#12 131.3 100 13008    0 13008    0     0  28793      0 --:--:-- --:--:-- --:--:-- 28793100  131k    0  131k    0     0   248k      0 --:--:-- --:--:-- --:--:-- 1525k
+#12 131.4 + mkdir -p plugins/fail2ban
+#12 131.4 + + tarcurl xz -L --strip-components=1 https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz -C
+#12 131.4  plugins/fail2ban
+#12 131.4   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+#12 131.4                                  Dload  Upload   Total   Spent    Left  Speed
+#12 131.4   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100     9  100     9    0     0     38      0 --:--:-- --:--:-- --:--:--    38
+#12 131.7 
+#12 131.7 gzip: stdin: not in gzip format
+#12 131.7 tar: Child returned status 1
+#12 131.7 tar: Error is not recoverable: exiting now
+#12 ERROR: process "/bin/sh -c set -xe ;LASTVERSION=$(cat /tmp/lastversion) ;apt-get -y update ;apt-get install -y --no-install-recommends git unzip curl locales ;rm -rf ${INSTALLDIR} ;mkdir ${INSTALLDIR} ;curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | tar xz --strip-components=1 -C ${INSTALLDIR} ;cd ${INSTALLDIR} ;mv composer.json-dist composer.json ;composer config -g secure-http false ;composer -n update --no-dev;composer -n require roundcube/elastic4mobile dev-master ;composer -n require kolab/kolab_2fa ;composer require endroid/qr-code ;composer require -W spomky-labs/otphp ;composer require enygma/yubikey ;cd ${INSTALLDIR} ;mkdir -p plugins/authres ;curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/authres ;cd ${INSTALLDIR} ;mkdir -p plugins/easy_unsubscribe ;curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/easy_unsubscribe ;cd ${INSTALLDIR} ;mkdir -p plugins/show_folder_size ;curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/show_folder_size ;mkdir -p plugins/quota ;curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/quota ;mkdir -p plugins/account_details ;curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/account_details ;mkdir -p plugins/responses ;curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/responses ;mkdir -p plugins/fail2ban ;curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/fail2ban ;mkdir -p plugins/rcguard ;curl -L https://github.com/dsoares/roundcube-rcguard/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/rcguard ;mkdir -p plugins/swipe ;curl -L https://github.com/johndoh/roundcube-swipe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/swipe ;mkdir -p plugins/advanced_search ;curl -L https://github.com/texxasrulez/advanced_search/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/advanced_search ;mkdir -p plugins/persistent_login ;curl -L https://github.com/texxasrulez/persistent_login/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/persistent_login ;mkdir -p plugins/contextmenu ;curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu ;mkdir -p plugins/contextmenu_folder ;curl -L https://github.com/random-cuber/contextmenu_folder/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu_folder ;mkdir -p plugins/message_highlight ;curl -L https://github.com/texxasrulez/message_highlight/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/message_highlight ;mkdir -p plugins/infinitescroll ;curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/infinitescroll ;mkdir -p plugins/thunderbird_labels ;curl -L https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/thunderbird_labels ;mkdir -p plugins/attachment_position ;curl -L https://github.com/filhocf/roundcube-attachment_position/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/attachment_position ;mkdir -p plugins/html5_notifier ;curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/html5_notifier ;mkdir -p skins/larry ;curl -L https://github.com/roundcube/larry/archive/master.tar.gz | tar xz --strip-components=1 -C skins/larry ;mkdir -p skins/classic ;curl -L https://github.com/roundcube/classic/archive/master.tar.gz | tar xz --strip-components=1 -C skins/classic ;for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;composer clear-cache ;echo \"include=/var/roundcube/config/phpfpm.conf;\" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;echo \"include /var/roundcube/config/nginx.conf;\" > /etc/nginx/sites-available/default ;mkdir -p /var/roundcube/config.orig ;cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;touch /var/roundcube/config.orig/phpfpm.conf.override ;cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;apt-get -y purge git git-man mailutils nullmailer curl ;apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;rm -rf /var/lib/apt/lists/* /tmp/* ;cd ${INSTALLDIR} ;rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ${INSTALLDIR}/plugins/*/.git* ;rm -f ${INSTALLDIR}/index.html ;rm /etc/apt/sources.list.d/* ;chown -R www-data:www-data ${INSTALLDIR}/logs ;chown -R www-data:www-data ${INSTALLDIR}/temp ;chmod +x /bootstrap.sh ;mv /etc/php /etc/php.orig ;mv /etc/nginx /etc/nginx.orig" did not complete successfully: exit code: 2
+------
+ > [6/9] RUN set -xe ;LASTVERSION=$(cat /tmp/lastversion) ;apt-get -y update ;apt-get install -y --no-install-recommends git unzip curl locales ;rm -rf /var/www/html ;mkdir /var/www/html ;curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | tar xz --strip-components=1 -C /var/www/html ;cd /var/www/html ;mv composer.json-dist composer.json ;composer config -g secure-http false ;composer -n update --no-dev;composer -n require roundcube/elastic4mobile dev-master ;composer -n require kolab/kolab_2fa ;composer require endroid/qr-code ;composer require -W spomky-labs/otphp ;composer require enygma/yubikey ;cd /var/www/html ;mkdir -p plugins/authres ;curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/authres ;cd /var/www/html ;mkdir -p plugins/easy_unsubscribe ;curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/easy_unsubscribe ;cd /var/www/html ;mkdir -p plugins/show_folder_size ;curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/show_folder_size ;mkdir -p plugins/quota ;curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/quota ;mkdir -p plugins/account_details ;curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/account_details ;mkdir -p plugins/responses ;curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/responses ;mkdir -p plugins/fail2ban ;curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/fail2ban ;mkdir -p plugins/rcguard ;curl -L https://github.com/dsoares/roundcube-rcguard/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/rcguard ;mkdir -p plugins/swipe ;curl -L https://github.com/johndoh/roundcube-swipe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/swipe ;mkdir -p plugins/advanced_search ;curl -L https://github.com/texxasrulez/advanced_search/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/advanced_search ;mkdir -p plugins/persistent_login ;curl -L https://github.com/texxasrulez/persistent_login/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/persistent_login ;mkdir -p plugins/contextmenu ;curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu ;mkdir -p plugins/contextmenu_folder ;curl -L https://github.com/random-cuber/contextmenu_folder/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu_folder ;mkdir -p plugins/message_highlight ;curl -L https://github.com/texxasrulez/message_highlight/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/message_highlight ;mkdir -p plugins/infinitescroll ;curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/infinitescroll ;mkdir -p plugins/thunderbird_labels ;curl -L https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/thunderbird_labels ;mkdir -p plugins/attachment_position ;curl -L https://github.com/filhocf/roundcube-attachment_position/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/attachment_position ;mkdir -p plugins/html5_notifier ;curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/html5_notifier ;mkdir -p skins/larry ;curl -L https://github.com/roundcube/larry/archive/master.tar.gz | tar xz --strip-components=1 -C skins/larry ;mkdir -p skins/classic ;curl -L https://github.com/roundcube/classic/archive/master.tar.gz | tar xz --strip-components=1 -C skins/classic ;for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;composer clear-cache ;echo "include=/var/roundcube/config/phpfpm.conf;" >> /etc/php/8.2/fpm/pool.d/www.conf ;echo "include /var/roundcube/config/nginx.conf;" > /etc/nginx/sites-available/default ;mkdir -p /var/roundcube/config.orig ;cp /var/www/html/config/defaults.inc.php /var/roundcube/config.orig ;touch /var/roundcube/config.orig/phpfpm.conf.override ;cp -rp /var/www/html/plugins /var/www/html/plugins.orig ;apt-get -y purge git git-man mailutils nullmailer curl ;apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;rm -rf /var/lib/apt/lists/* /tmp/* ;cd /var/www/html ;rm -rf /var/www/html/installer /var/www/html/.ci /var/www/html/.tx /var/www/html/.git* /var/www/html/.travis.yml /root/.c* ;rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests /var/www/html/plugins/*/.git* ;rm -f /var/www/html/index.html ;rm /etc/apt/sources.list.d/* ;chown -R www-data:www-data /var/www/html/logs ;chown -R www-data:www-data /var/www/html/temp ;chmod +x /bootstrap.sh ;mv /etc/php /etc/php.orig ;mv /etc/nginx /etc/nginx.orig:
+130.9 + curl -L https://github.com/random-cuber/responses/archive/master.tar.gz
+130.9 + tar xz --strip-components=1 -C plugins/responses
+130.9   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+130.9                                  Dload  Upload   Total   Spent    Left  Speed
+130.9   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100     9  100     9    0     0     38      0 --:--:-- --:--:-- --:--:--    38
+131.7 
+131.7 gzip: stdin: not in gzip format
+131.7 tar: Child returned status 1
+131.7 tar: Error is not recoverable: exiting now
+------
+Dockerfile-deb:61
+--------------------
+  60 |     
+  61 | >>> RUN set -xe ;\
+  62 | >>> LASTVERSION=$(cat /tmp/lastversion) ;\
+  63 | >>> apt-get -y update ;\
+  64 | >>> apt-get install -y --no-install-recommends \
+  65 | >>> git \
+  66 | >>> unzip \
+  67 | >>> curl \
+  68 | >>> locales ;\
+  69 | >>> rm -rf ${INSTALLDIR} ;\
+  70 | >>> mkdir ${INSTALLDIR} ;\
+  71 | >>> curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | \
+  72 | >>> tar xz --strip-components=1 -C ${INSTALLDIR} ;\
+  73 | >>> cd ${INSTALLDIR} ;\
+  74 | >>> mv composer.json-dist composer.json ;\
+  75 | >>> composer config -g secure-http false ;\
+  76 | >>> composer -n update --no-dev;\
+  77 | >>> #    bin/install-jsdeps.sh ;\
+  78 | >>> composer -n require roundcube/elastic4mobile dev-master ;\
+  79 | >>> #2fa
+  80 | >>> composer -n require kolab/kolab_2fa ;\
+  81 | >>> composer require endroid/qr-code ;\
+  82 | >>> composer require -W spomky-labs/otphp ;\
+  83 | >>> composer require enygma/yubikey ;\
+  84 | >>> #misc
+  85 | >>> #    composer require ss88/easy_unsubscribe ;\
+  86 | >>> cd ${INSTALLDIR} ;\
+  87 | >>> mkdir -p plugins/authres ;\
+  88 | >>> curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | \
+  89 | >>> tar xz --strip-components=1 -C plugins/authres ;\
+  90 | >>> cd ${INSTALLDIR} ;\
+  91 | >>> mkdir -p plugins/easy_unsubscribe ;\
+  92 | >>> curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz | \
+  93 | >>> tar xz --strip-components=1 -C plugins/easy_unsubscribe ;\
+  94 | >>> cd ${INSTALLDIR} ;\
+  95 | >>> #show_folder_size
+  96 | >>> mkdir -p plugins/show_folder_size ;\
+  97 | >>> curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz | \
+  98 | >>> tar xz --strip-components=1 -C plugins/show_folder_size ;\
+  99 | >>> #quota
+ 100 | >>> mkdir -p plugins/quota ;\
+ 101 | >>> curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz | \
+ 102 | >>> tar xz --strip-components=1 -C plugins/quota ;\
+ 103 | >>> #account_details
+ 104 | >>> mkdir -p plugins/account_details ;\
+ 105 | >>> curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | \
+ 106 | >>> tar xz --strip-components=1 -C plugins/account_details ;\
+ 107 | >>> #responses
+ 108 | >>> mkdir -p plugins/responses ;\
+ 109 | >>> curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | \
+ 110 | >>> tar xz --strip-components=1 -C plugins/responses ;\
+ 111 | >>> #fail2ban
+ 112 | >>> mkdir -p plugins/fail2ban ;\
+ 113 | >>> curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | \
+ 114 | >>> tar xz --strip-components=1 -C plugins/fail2ban ;\
+ 115 | >>> #RCGuard
+ 116 | >>> mkdir -p plugins/rcguard ;\
+ 117 | >>> curl -L https://github.com/dsoares/roundcube-rcguard/archive/master.tar.gz | \
+ 118 | >>> tar xz --strip-components=1 -C plugins/rcguard ;\
+ 119 | >>> #swipe
+ 120 | >>> mkdir -p plugins/swipe ;\
+ 121 | >>> curl -L https://github.com/johndoh/roundcube-swipe/archive/master.tar.gz | \
+ 122 | >>> tar xz --strip-components=1 -C plugins/swipe ;\
+ 123 | >>> #advanced_search
+ 124 | >>> mkdir -p plugins/advanced_search ;\
+ 125 | >>> curl -L https://github.com/texxasrulez/advanced_search/archive/master.tar.gz | \
+ 126 | >>> tar xz --strip-components=1 -C plugins/advanced_search ;\
+ 127 | >>> #persistent_login
+ 128 | >>> mkdir -p plugins/persistent_login ;\
+ 129 | >>> curl -L https://github.com/texxasrulez/persistent_login/archive/master.tar.gz | \
+ 130 | >>> tar xz --strip-components=1 -C plugins/persistent_login ;\
+ 131 | >>> # Context Menu
+ 132 | >>> mkdir -p plugins/contextmenu ;\
+ 133 | >>> curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | \
+ 134 | >>> tar xz --strip-components=1 -C plugins/contextmenu ;\
+ 135 | >>> # Context Menu Folder
+ 136 | >>> mkdir -p plugins/contextmenu_folder ;\
+ 137 | >>> curl -L https://github.com/random-cuber/contextmenu_folder/archive/master.tar.gz | \
+ 138 | >>> tar xz --strip-components=1 -C plugins/contextmenu_folder ;\
+ 139 | >>> # Message Highlight
+ 140 | >>> mkdir -p plugins/message_highlight ;\
+ 141 | >>> curl -L https://github.com/texxasrulez/message_highlight/archive/master.tar.gz | \
+ 142 | >>> tar xz --strip-components=1 -C plugins/message_highlight ;\
+ 143 | >>> #Infinite Scroll
+ 144 | >>> mkdir -p plugins/infinitescroll ;\
+ 145 | >>> curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll/archive/master.tar.gz | \
+ 146 | >>> tar xz --strip-components=1 -C plugins/infinitescroll ;\
+ 147 | >>> # Thunderbird Labels
+ 148 | >>> mkdir -p plugins/thunderbird_labels ;\
+ 149 | >>> curl -L https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/master.tar.gz | \
+ 150 | >>> tar xz --strip-components=1 -C plugins/thunderbird_labels ;\
+ 151 | >>> # Remove Attach Position
+ 152 | >>> mkdir -p plugins/attachment_position ;\
+ 153 | >>> curl -L https://github.com/filhocf/roundcube-attachment_position/archive/master.tar.gz | \
+ 154 | >>> tar xz --strip-components=1 -C plugins/attachment_position ;\
+ 155 | >>> # HTML5 Notifier
+ 156 | >>> mkdir -p plugins/html5_notifier ;\
+ 157 | >>> curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | \
+ 158 | >>> tar xz --strip-components=1 -C plugins/html5_notifier ;\
+ 159 | >>> #   mkdir -p skins/mabola ;\
+ 160 | >>> #   curl -L https://github.com/EstudioNexos/mabola/archive/master.tar.gz | \
+ 161 | >>> #     tar xz --strip-components=1 -C skins/mabola ;\
+ 162 | >>> # Mabola theme
+ 163 | >>> #   mkdir -p skins/mabola-blue ;\
+ 164 | >>> #   curl -L https://github.com/EstudioNexos/mabola-blue/archive/master.tar.gz | \
+ 165 | >>> #     tar xz --strip-components=1 -C skins/mabola-blue ;\
+ 166 | >>> # Chameleon theme
+ 167 | >>> #   mkdir -p skins/chameleon ;\
+ 168 | >>> #   curl -L https://github.com/daniele-athome/roundcubemail-skin-chameleon/archive/master.tar.gz | \
+ 169 | >>> #     tar xz --strip-components=1 -C skins/chameleon ;\
+ 170 | >>> # Chameleon Blue theme
+ 171 | >>> #   mkdir -p skins/chameleon-blue ;\
+ 172 | >>> #   curl -L https://github.com/Anisotropic/Chameleon-blue/archive/master.tar.gz | \
+ 173 | >>> #     tar xz --strip-components=1 -C skins/chameleon-blue ;\
+ 174 | >>> # Classic
+ 175 | >>> mkdir -p skins/larry ;\
+ 176 | >>> curl -L https://github.com/roundcube/larry/archive/master.tar.gz | \
+ 177 | >>> tar xz --strip-components=1 -C skins/larry ;\
+ 178 | >>> mkdir -p skins/classic ;\
+ 179 | >>> curl -L https://github.com/roundcube/classic/archive/master.tar.gz | \
+ 180 | >>> tar xz --strip-components=1 -C skins/classic ;\
+ 181 | >>> for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;\
+ 182 | >>> composer clear-cache ;\
+ 183 | >>> echo "include=/var/roundcube/config/phpfpm.conf;" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;\
+ 184 | >>> echo "include /var/roundcube/config/nginx.conf;" > /etc/nginx/sites-available/default ;\
+ 185 | >>> mkdir -p /var/roundcube/config.orig ;\
+ 186 | >>> cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;\
+ 187 | >>> touch /var/roundcube/config.orig/phpfpm.conf.override ;\
+ 188 | >>> cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;\
+ 189 | >>> apt-get -y purge git git-man mailutils nullmailer curl ;\
+ 190 | >>> apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;\
+ 191 | >>> rm -rf /var/lib/apt/lists/* /tmp/* ;\
+ 192 | >>> cd ${INSTALLDIR} ;\
+ 193 | >>> rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;\
+ 194 | >>> rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ${INSTALLDIR}/plugins/*/.git* ;\
+ 195 | >>> rm -f ${INSTALLDIR}/index.html ;\
+ 196 | >>> rm /etc/apt/sources.list.d/* ;\
+ 197 | >>> chown -R www-data:www-data ${INSTALLDIR}/logs ;\
+ 198 | >>> chown -R www-data:www-data ${INSTALLDIR}/temp ;\
+ 199 | >>> chmod +x /bootstrap.sh ;\
+ 200 | >>> mv /etc/php /etc/php.orig ;\
+ 201 | >>> mv /etc/nginx /etc/nginx.orig
+ 202 |     
+--------------------
+ERROR: failed to solve: process "/bin/sh -c set -xe ;LASTVERSION=$(cat /tmp/lastversion) ;apt-get -y update ;apt-get install -y --no-install-recommends git unzip curl locales ;rm -rf ${INSTALLDIR} ;mkdir ${INSTALLDIR} ;curl -fSL https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz | tar xz --strip-components=1 -C ${INSTALLDIR} ;cd ${INSTALLDIR} ;mv composer.json-dist composer.json ;composer config -g secure-http false ;composer -n update --no-dev;composer -n require roundcube/elastic4mobile dev-master ;composer -n require kolab/kolab_2fa ;composer require endroid/qr-code ;composer require -W spomky-labs/otphp ;composer require enygma/yubikey ;cd ${INSTALLDIR} ;mkdir -p plugins/authres ;curl -L https://github.com/pimlie/authres_status/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/authres ;cd ${INSTALLDIR} ;mkdir -p plugins/easy_unsubscribe ;curl -L https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/easy_unsubscribe ;cd ${INSTALLDIR} ;mkdir -p plugins/show_folder_size ;curl -L https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/show_folder_size ;mkdir -p plugins/quota ;curl -L https://github.com/jfcherng-roundcube/plugin-quota/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/quota ;mkdir -p plugins/account_details ;curl -L https://github.com/texxasrulez/account_details/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/account_details ;mkdir -p plugins/responses ;curl -L https://github.com/random-cuber/responses/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/responses ;mkdir -p plugins/fail2ban ;curl -L https://github.com/texxasrulez/roundcube_fail2ban/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/fail2ban ;mkdir -p plugins/rcguard ;curl -L https://github.com/dsoares/roundcube-rcguard/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/rcguard ;mkdir -p plugins/swipe ;curl -L https://github.com/johndoh/roundcube-swipe/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/swipe ;mkdir -p plugins/advanced_search ;curl -L https://github.com/texxasrulez/advanced_search/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/advanced_search ;mkdir -p plugins/persistent_login ;curl -L https://github.com/texxasrulez/persistent_login/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/persistent_login ;mkdir -p plugins/contextmenu ;curl -L https://github.com/johndoh/roundcube-contextmenu/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu ;mkdir -p plugins/contextmenu_folder ;curl -L https://github.com/random-cuber/contextmenu_folder/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/contextmenu_folder ;mkdir -p plugins/message_highlight ;curl -L https://github.com/texxasrulez/message_highlight/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/message_highlight ;mkdir -p plugins/infinitescroll ;curl -L https://github.com/messagerie-melanie2/Roundcube-Plugin-Infinite-Scroll/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/infinitescroll ;mkdir -p plugins/thunderbird_labels ;curl -L https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/thunderbird_labels ;mkdir -p plugins/attachment_position ;curl -L https://github.com/filhocf/roundcube-attachment_position/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/attachment_position ;mkdir -p plugins/html5_notifier ;curl -L https://github.com/filhocf/roundcube-html5_notifier/archive/master.tar.gz | tar xz --strip-components=1 -C plugins/html5_notifier ;mkdir -p skins/larry ;curl -L https://github.com/roundcube/larry/archive/master.tar.gz | tar xz --strip-components=1 -C skins/larry ;mkdir -p skins/classic ;curl -L https://github.com/roundcube/classic/archive/master.tar.gz | tar xz --strip-components=1 -C skins/classic ;for dir in `ls plugins`; do if [ -d plugins/$dir ]; then if [ -f plugins/$dir/composer.json ]; then echo $dir; composer upgrade plugins/$dir --no-dev; fi; fi; done ;composer clear-cache ;echo \"include=/var/roundcube/config/phpfpm.conf;\" >> /etc/php/${PHPVERSION}/fpm/pool.d/www.conf ;echo \"include /var/roundcube/config/nginx.conf;\" > /etc/nginx/sites-available/default ;mkdir -p /var/roundcube/config.orig ;cp ${INSTALLDIR}/config/defaults.inc.php /var/roundcube/config.orig ;touch /var/roundcube/config.orig/phpfpm.conf.override ;cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig ;apt-get -y purge git git-man mailutils nullmailer curl ;apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean ;rm -rf /var/lib/apt/lists/* /tmp/* ;cd ${INSTALLDIR} ;rm -rf ${INSTALLDIR}/installer ${INSTALLDIR}/.ci ${INSTALLDIR}/.tx ${INSTALLDIR}/.git* ${INSTALLDIR}/.travis.yml /root/.c* ;rm -rf README.md INSTALL UPGRADING, LICENSE, CHANGELOG tests ${INSTALLDIR}/plugins/*/.git* ;rm -f ${INSTALLDIR}/index.html ;rm /etc/apt/sources.list.d/* ;chown -R www-data:www-data ${INSTALLDIR}/logs ;chown -R www-data:www-data ${INSTALLDIR}/temp ;chmod +x /bootstrap.sh ;mv /etc/php /etc/php.orig ;mv /etc/nginx /etc/nginx.orig" did not complete successfully: exit code: 2

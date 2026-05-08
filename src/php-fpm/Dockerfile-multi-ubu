@@ -395,6 +395,8 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     #rm -rf /etc/php/8.1 /usr/lib/php/20210902 ;\
     #rm -rf /etc/php/8.2 /usr/lib/php/20220829 ;\
     #rm -rf /etc/php/8.3 /usr/lib/php/20230831 ;\
+    #rm -rf /etc/php/8.4 /usr/lib/php/20240924 ;\
+    #rm -rf /etc/php/8.5 /usr/lib/php/20250925 ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
     chmod 755 /bootstrap.sh

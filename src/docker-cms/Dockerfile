@@ -9,39 +9,39 @@ ENV     TZ=Europe/Amsterdam
 COPY    bootstrap.sh /bootstrap.sh
 
 RUN set -ex ;\
-    echo "deb [trusted=yes] http://packages.sury.org/php/ ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
     apt-get -y update ;\
     apt-get install -y nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger ;\
-    apt-get install -y nano less imagemagick mariadb-client wget curl sudo mc libvips42 php-vips ;\
-    apt-get install -m -y --no-install-recommends \
-    php8.3 \
-    php8.3-apcu \
-    php8.3-bcmath \
-    php8.3-cli \
-    php8.3-curl \
-    php8.3-dom \
-    php8.3-exif \
-    php8.3-gd \
-    php8.3-gmp \
-    php8.3-igbinary \
-    php8.3-imagick \
-    php8.3-imap \
-    php8.3-intl \
-    php8.3-ldap \
-    php8.3-memcache \
-    php8.3-mbstring \
-    php8.3-mysql \
-    php8.3-opcache \
-    php8.3-pspell \
-    php8.3-pgsql \
-    php8.3-readline \
-    php8.3-redis \
-    php8.3-soap \
-    php8.3-sqlite3 \
-    php8.3-tidy \
-    php8.3-xml \
-    php8.3-zip ;\
+    apt-get install -y nano less imagemagick mariadb-client wget curl sudo mc libvips42 php-vips \
+    unzip zip git rsync cron jq pv openssh-client ;\
+    apt-get install -y --no-install-recommends \
+    php8.5 \
+    php8.5-apcu \
+    php8.5-bcmath \
+    php8.5-cli \
+    php8.5-curl \
+    php8.5-dom \
+    php8.5-exif \
+    php8.5-gd \
+    php8.5-gmp \
+    php8.5-igbinary \
+    php8.5-imagick \
+    php8.5-imap \
+    php8.5-intl \
+    php8.5-ldap \
+    php8.5-memcache \
+    php8.5-mbstring \
+    php8.5-mysql \
+    php8.5-pspell \
+    php8.5-pgsql \
+    php8.5-readline \
+    php8.5-redis \
+    php8.5-soap \
+    php8.5-sqlite3 \
+    php8.5-tidy \
+    php8.5-xml \
+    php8.5-zip ;\
     apt-get -y autoremove && apt-get -y autoclean ;\
     rm -rf /var/lib/apt/lists/* /var/cache/apt
 

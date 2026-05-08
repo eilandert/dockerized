@@ -25,4 +25,4 @@ runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 dockerid=$(hostname)
 echo "[DOCKER-CMS] For breaking into this docker: docker exec -it $dockerid bash"
 
-exec while(1) { sleep 3600; }
+exec sleep infinity

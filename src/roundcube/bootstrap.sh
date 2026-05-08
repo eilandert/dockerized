@@ -15,10 +15,11 @@ mkdir -p /var/roundcube/config
 cp -rn /var/roundcube/config.orig /var/roundcube/config
 cp -rp /var/roundcube/config.orig/defaults.inc.php /var/roundcube/config/defaults.php.orig
 cp -rn /var/roundcube/config.orig/phpfpm.conf /var/roundcube/config/phpfpm.conf
-cp -rn /var/roundcube/config.orig/angie.conf /var/roundcube/config/angie.conf
+cp -rn /var/roundcube/config.orig/nginx.conf /var/roundcube/config/nginx.conf
 
-mkdir -p /etc/angie
-cp -rn /etc/angie.orig/* /etc/angie
+# Restore nginx runtime dirs (sites-available/default, modules-enabled, etc.)
+mkdir -p /etc/nginx
+cp -rn /etc/nginx.orig/* /etc/nginx
 
 rm -f ${INSTALLDIR}/index.html
 
@@ -41,10 +42,10 @@ if [ ! -z "${!POSTGRES_ENV_POSTGRES_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "pgsq
     : "${ROUNDCUBEMAIL_DB_PASSWORD:=${POSTGRES_ENV_POSTGRES_PASSWORD}}"
     : "${ROUNDCUBEMAIL_DB_NAME:=${POSTGRES_ENV_POSTGRES_DB:-roundcubemail}}"
     : "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}://${ROUNDCUBEMAIL_DB_USER}:${ROUNDCUBEMAIL_DB_PASSWORD}@${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}/${ROUNDCUBEMAIL_DB_NAME}}"
-
+    
     wait-for-it.sh -q ${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT} -t 30
-
-elif [ ! -z "${!MYSQL_ENV_MYSQL_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "mysql" ]; then
+    
+    elif [ ! -z "${!MYSQL_ENV_MYSQL_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "mysql" ]; then
     : "${ROUNDCUBEMAIL_DB_TYPE:=mysql}"
     : "${ROUNDCUBEMAIL_DB_HOST:=mysql}"
     : "${ROUNDCUBEMAIL_DB_PORT:=3306}"
@@ -56,16 +57,16 @@ elif [ ! -z "${!MYSQL_ENV_MYSQL_*}" ] || [ "$ROUNDCUBEMAIL_DB_TYPE" == "mysql" ]
     fi
     : "${ROUNDCUBEMAIL_DB_NAME:=${MYSQL_ENV_MYSQL_DATABASE:-roundcubemail}}"
     : "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}://${ROUNDCUBEMAIL_DB_USER}:${ROUNDCUBEMAIL_DB_PASSWORD}@${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}/${ROUNDCUBEMAIL_DB_NAME}}"
-
+    
     wait-for-it.sh -q ${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT} -t 30
-
+    
 else
     # use local SQLite DB in /var/roundcube/db
     : "${ROUNDCUBEMAIL_DB_TYPE:=sqlite}"
     : "${ROUNDCUBEMAIL_DB_DIR:=/var/roundcube/db}"
     : "${ROUNDCUBEMAIL_DB_NAME:=sqlite}"
     : "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}:///$ROUNDCUBEMAIL_DB_DIR/${ROUNDCUBEMAIL_DB_NAME}.db?mode=0646}"
-
+    
     mkdir -p $ROUNDCUBEMAIL_DB_DIR
     chown www-data:www-data $ROUNDCUBEMAIL_DB_DIR
 fi
@@ -135,5 +136,5 @@ fi
 # Trigger garbage collecting routines manually
 ${INSTALLDIR}/bin/gc.sh
 
-exec /usr/sbin/angie -g 'daemon off;'
+exec /usr/sbin/nginx -g 'daemon off;'
 

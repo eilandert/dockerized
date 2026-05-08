@@ -55,7 +55,7 @@ if [ "${DELETE}" == "YES" ]; then
     # The following block might be overkill and not needed...
     # I created it because there were some leftovers after disabling a subpackage
     # Also, I couldn't be "creative" with version numbers on my testing instance of aptly
-
+    
     # if SPKG is defined, delete the complete package+subpackages
     if [ -n "${SPKG}" ]; then
         echo "Removing ${SPKG}"
@@ -66,7 +66,7 @@ if [ "${DELETE}" == "YES" ]; then
         aptly repo remove ${REPO} ${DEB}
     fi
     # Update repo to reflect the changes of deletion
-    aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
+    aptly -architectures=amd64,i386,source,all publish update --force-overwrite ${DIST} filesystem:${REPO}:.
 fi
 
 # Add everything from the .changes file
@@ -78,7 +78,7 @@ if [ "${CREATE}" == "YES" ]; then
 fi
 
 # Update repo
-aptly -architectures=amd64,i386,source,all publish update ${DIST} filesystem:${REPO}:.
+aptly -architectures=amd64,i386,source,all publish update --force-overwrite ${DIST} filesystem:${REPO}:.
 
 cd ~
 rm -rf ${DIR}
