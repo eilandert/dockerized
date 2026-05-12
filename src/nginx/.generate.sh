@@ -29,7 +29,7 @@ log_info "  Nginx base (debian)"
 process_template "$TEMPLATE" "Dockerfile-deb" "FROM=eilandert/debian-base:stable"
 
 # PHP versions
-declare -a VERSIONS=(5.6 7.2 7.4 8.0 8.1 8.2 8.3 8.4 8.5)
+declare -a VERSIONS=(5.6 7.4 8.0 8.2 8.4 8.5)
 
 for version in "${VERSIONS[@]}"; do
     # Normalize version: remove dots (5.6 -> 56, 7.4 -> 74, etc.)

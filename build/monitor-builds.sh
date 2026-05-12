@@ -127,7 +127,7 @@ for LAYER in "${LAYERS[@]}"; do
     # Build all targets in this layer with detailed progress
     # --progress=plain shows all build steps and target names
     # We tee to file and pipe to grep to show relevant progress
-    if timeout 3600 docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" \
+    if timeout 3600 docker buildx bake -f "$PROJECT_ROOT/docker-bake.hcl" \
     --set "*.cache-to=type=inline" \
     --set "*.cache-from=type=registry" \
     --progress=plain \

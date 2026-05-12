@@ -1,5 +1,5 @@
 #!/bin/bash
-# Docker buildx SEQUENTIAL builder for 122 targets across 4 dependency layers
+# Docker buildx SEQUENTIAL builder across 4 dependency layers
 # Builds one target at a time (NOT parallel) to maintain order and simplicity
 
 set -e
@@ -76,18 +76,18 @@ log_info "Creating buildx instance..."
 docker buildx create --use 2>/dev/null || true
 
 # Define build targets organized by dependency layer
-# NOTE: php8.4 and php8.5 included in all applicable layers
+# PHP versions built: 5.6, 7.4, 8.0, 8.2, 8.4, 8.5
 declare -a LAYERS=(
     # Layer 1: Base images (6 targets) - no dependencies
     "resolute noble jammy trixie rolling devel"
     
-    # Layer 2: PHP-FPM and Databases (26 targets) - depends on base images
-    # Includes: 56, 72, 74, 80, 81, 82, 83, 84 (NEW), 85 (NEW), multiphp, mariadb, redis, valkey
-    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm72 debian-phpfpm72 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm81 debian-phpfpm81 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm83 debian-phpfpm83 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
-    
-    # Layer 3: Web servers with PHP (62+ targets) - depends on PHP-FPM
-    # Includes nginx/angie/apache with: 56, 72, 74, 80, 81, 82, 83, 84 (NEW), 85 (NEW)
-    "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php72 debian-nginx-php72 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php81 debian-nginx-php81 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php83 debian-nginx-php83 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php72 debian-angie-php72 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php81 debian-angie-php81 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php83 debian-angie-php83 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php72 debian-apache-php74 debian-apache-php80 debian-apache-php81 debian-apache-php82 debian-apache-php83 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php72 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php81 ubuntu-apache-php82 ubuntu-apache-php83 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
+    # Layer 2: PHP-FPM and Databases - depends on base images
+    # Includes: 56, 74, 80, 82, 84, 85, multiphp, mariadb, redis, valkey
+    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
+
+    # Layer 3: Web servers with PHP - depends on PHP-FPM
+    # Includes nginx/angie/apache with: 56, 74, 80, 82, 84, 85
+    "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php74 debian-apache-php80 debian-apache-php82 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php82 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
     
     # Layer 4: Other web servers and services (20 targets) - depends on base images
     "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro clamav alpine-letsencrypt rbldnsd alpine-unbound debian-openssh"
@@ -153,7 +153,7 @@ for LAYER in "${LAYERS[@]}"; do
         rm -f "$TARGET_LOG"
         
         # Build single target (30 minute timeout per target)
-        if timeout 1800 docker buildx bake -f "$BUILD_DIR/docker-bake.hcl" \
+        if timeout 1800 docker buildx bake -f "$PROJECT_ROOT/docker-bake.hcl" \
         --set "*.cache-to=type=inline" \
         --set "*.cache-from=type=registry" \
         --progress=plain \
