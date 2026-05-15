@@ -66,6 +66,12 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$SCRIPT_DIR"
 cd "$PROJECT_ROOT"
 
+# Persistent build cache directory - shared across all targets and runs
+DEFAULT_CACHE_ROOT="${XDG_CACHE_HOME:-${HOME:-/tmp}/.cache}"
+CACHE_DIR="${BUILDX_CACHE_DIR:-$DEFAULT_CACHE_ROOT/dockerized-buildx}"
+mkdir -p "$CACHE_DIR"
+log_info "Using build cache: $CACHE_DIR"
+
 # Clean up any existing buildx instances
 log_info "Cleaning up buildx..."
 docker buildx rm 2>/dev/null || true
@@ -89,8 +95,8 @@ declare -a LAYERS=(
     # Includes nginx/angie/apache with: 56, 74, 80, 82, 84, 85
     "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php74 debian-apache-php80 debian-apache-php82 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php82 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
     
-    # Layer 4: Other web servers and services (20 targets) - depends on base images
-    "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro clamav alpine-letsencrypt rbldnsd alpine-unbound debian-openssh"
+    # Layer 4: Other web servers and services - depends on base images
+    "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro debian-sitewarmup alpine-letsencrypt rbldnsd alpine-unbound aptly debian-openssh"
 )
 
 echo ""
@@ -154,8 +160,8 @@ for LAYER in "${LAYERS[@]}"; do
         
         # Build single target (30 minute timeout per target)
         if timeout 1800 docker buildx bake -f "$PROJECT_ROOT/docker-bake.hcl" \
-        --set "*.cache-to=type=inline" \
-        --set "*.cache-from=type=registry" \
+        --set "*.cache-from=type=local,src=$CACHE_DIR" \
+        --set "*.cache-to=type=local,dest=$CACHE_DIR,mode=max" \
         --progress=plain \
         ${PUSH} $TARGET > "$TARGET_LOG" 2>&1; then
             

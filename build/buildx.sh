@@ -81,7 +81,7 @@ declare -a LAYERS=(
     
     # Layer 2: PHP-FPM, databases, and all standalone services
     # All depend only on Layer 1 base images - run fully in parallel
-    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro clamav alpine-letsencrypt rbldnsd alpine-unbound debian-openssh"
+    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix alpine-rspamd debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd ubuntu-dovecot debian-dovecot debian-roundcube debian-vimbadmin ubuntu-vimbadmin ubuntu-reprepro debian-sitewarmup alpine-letsencrypt rbldnsd alpine-unbound aptly debian-openssh"
 
     # Layer 3: Web servers with PHP - FROM Layer 2 phpfpm images
     "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php74 debian-apache-php80 debian-apache-php82 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php82 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
@@ -91,7 +91,8 @@ declare -a LAYERS=(
 # Persistent build cache directory - shared across all layers and runs
 # mode=max exports all intermediate layers (not just final), maximizing cache reuse
 # for images sharing common base layers (e.g., all debian images share debian-base layers)
-CACHE_DIR="${BUILDX_CACHE_DIR:-/var/cache/dockerized-buildx}"
+DEFAULT_CACHE_ROOT="${XDG_CACHE_HOME:-${HOME:-/tmp}/.cache}"
+CACHE_DIR="${BUILDX_CACHE_DIR:-$DEFAULT_CACHE_ROOT/dockerized-buildx}"
 mkdir -p "$CACHE_DIR"
 log_info "Using build cache: $CACHE_DIR"
 
