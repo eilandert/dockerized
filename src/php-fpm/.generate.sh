@@ -1,5 +1,6 @@
 #!/bin/bash
 # Generate PHP-FPM Dockerfiles for multiple PHP versions
+# Sources config.sh for PHP versions and docker registry settings
 # Includes ubuntu and debian variants
 # Usage: php-fpm/.generate.sh
 
@@ -8,6 +9,7 @@ set -e
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPTDIR"
 source ../../build/generate-lib.sh
+source ../../build/config.sh
 
 TEMPLATE_PHP="Dockerfile-template.php"
 TEMPLATE_HEADER="Dockerfile-template.header"
@@ -18,29 +20,32 @@ check_template "$TEMPLATE_HEADER" || exit 1
 check_template "$TEMPLATE_FOOTER" || exit 1
 
 log_info "Generating PHP-FPM Dockerfiles..."
+log_info "  PHP versions: ${PHP_VERSIONS[*]}"
+log_info "  Docker registry: ${DOCKER_REGISTRY_PREFIX}"
 
-declare -a VERSIONS=(5.6 7.4 8.0 8.2 8.4 8.5)
-declare -a REMOVE_MARKERS=(
-    "5.6:removedinphp72,removedinphp74,removedinphp80"
-    "7.4:removedinphp80"
-    "8.0:"
-    "8.2:"
-    "8.4:"
-    "8.5:"
-)
+# Build removal markers array from config
+declare -a REMOVE_MARKERS_ARRAY=()
+for version in "${PHP_VERSIONS[@]}"; do
+    markers="${PHP_REMOVAL_MARKERS[$version]}"
+    if [[ -n "$markers" ]]; then
+        REMOVE_MARKERS_ARRAY+=("$version:$markers")
+    else
+        REMOVE_MARKERS_ARRAY+=("$version:")
+    fi
+done
 
 # Step 1: Generate individual version Dockerfiles
 log_info "  Generating individual PHP versions..."
 temp_files=()
 
-for version in "${VERSIONS[@]}"; do
+for version in "${PHP_VERSIONS[@]}"; do
     temp="Dockerfile-template.generated.php${version}"
     log_info "    PHP $version"
 
     process_template "$TEMPLATE_PHP" "$temp" "PHPVERSION=$version"
 
     # Remove version-specific marker lines
-    for marker_spec in "${REMOVE_MARKERS[@]}"; do
+    for marker_spec in "${REMOVE_MARKERS_ARRAY[@]}"; do
         spec_version="${marker_spec%%:*}"
         markers="${marker_spec#*:}"
 
@@ -57,7 +62,7 @@ done
 
 # Step 2: Build individual Dockerfiles from header + version + footer
 log_info "  Building complete Dockerfiles..."
-for version in "${VERSIONS[@]}"; do
+for version in "${PHP_VERSIONS[@]}"; do
     # Normalize version: remove dots (5.6 -> 56, 7.4 -> 74, etc.)
     normalized_version="${version//.}"
 
@@ -71,12 +76,15 @@ for version in "${VERSIONS[@]}"; do
     # Set version in output
     safe_sed "#PHPVERSION#" "$version" "$ubuntu_output"
 
+    # Replace registry/tag with config values
+    safe_sed "eilandert/ubuntu-base:rolling" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_UBUNTU_BASE}:${UBUNTU_BASE_TAG}" "$ubuntu_output"
+
     # Comment out the rm -rf for this PHP version (keep all versions in single Dockerfile potential)
     safe_sed "rm -rf /etc/php/${version}" "#rm -rf /etc/php/${version}" "$ubuntu_output"
 
     # Create debian variant
     cp "$ubuntu_output" "$debian_output"
-    safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$debian_output"
+    safe_sed "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_UBUNTU_BASE}:${UBUNTU_BASE_TAG}" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_DEBIAN_BASE}:${DEBIAN_BASE_TAG}" "$debian_output"
 
     # Remove unsupported packages from PHP 5.6 debian
     if [[ "$version" == "5.6" ]]; then
@@ -96,7 +104,7 @@ done
 log_info "  Building multi-PHP variant..."
 multi_output="Dockerfile-multi-ubu"
 cat "$TEMPLATE_HEADER" > "$multi_output"
-for version in "${VERSIONS[@]}"; do
+for version in "${PHP_VERSIONS[@]}"; do
     temp="Dockerfile-template.generated.php${version}"
     cat "$temp" >> "$multi_output"
 done
@@ -105,13 +113,14 @@ cat "$TEMPLATE_FOOTER" >> "$multi_output"
 safe_sed "#PHPVERSION#" "MULTI" "$multi_output"
 safe_sed "MODE=FPM" "MODE=MULTI" "$multi_output"
 safe_sed "rm -rf /etc/php" "#rm -rf /etc/php" "$multi_output"
+safe_sed "eilandert/ubuntu-base:rolling" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_UBUNTU_BASE}:${UBUNTU_BASE_TAG}" "$multi_output"
 
 # Create debian variant
 multi_debian="Dockerfile-multi-deb"
 cp "$multi_output" "$multi_debian"
-safe_sed "eilandert/ubuntu-base:rolling" "eilandert/debian-base:stable" "$multi_debian"
+safe_sed "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_UBUNTU_BASE}:${UBUNTU_BASE_TAG}" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_DEBIAN_BASE}:${DEBIAN_BASE_TAG}" "$multi_debian"
 
 # Step 4: Clean up temp files
 rm -f Dockerfile-template.generated.*
 
-log_info "✓ PHP-FPM Dockerfiles generated (6 PHP versions + multi + debian variants)"
+log_info "✓ PHP-FPM Dockerfiles generated (${#PHP_VERSIONS[@]} PHP versions + multi + debian variants)"

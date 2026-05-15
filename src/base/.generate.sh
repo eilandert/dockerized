@@ -1,7 +1,7 @@
 #!/bin/bash
 # Generate base image Dockerfiles
+# Sources config.sh for Ubuntu/Debian versions and docker registry settings
 # Usage: base/.generate.sh
-# Sources config.sh for UBUNTULTS and DEBIANSTABLE versions
 
 set -e
 
@@ -14,7 +14,9 @@ TEMPLATE="Dockerfile-template"
 check_template "$TEMPLATE" || exit 1
 
 log_info "Generating base image Dockerfiles..."
-log_info "Using config: UBUNTULTS=$UBUNTULTS DEBIANSTABLE=$DEBIANSTABLE"
+log_info "Using distros: UBUNTULTS=$UBUNTULTS DEBIANSTABLE=$DEBIANSTABLE"
+log_info "Using tags: UBUNTU_BASE_TAG=$UBUNTU_BASE_TAG DEBIAN_BASE_TAG=$DEBIAN_BASE_TAG"
+log_info "Using registry: $DOCKER_REGISTRY_PREFIX"
 
 # Define variants: variant_name FROM DIST
 # Only generate primary Ubuntu and Debian versions from config

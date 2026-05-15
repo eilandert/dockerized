@@ -1,4 +1,4 @@
-FROM    eilandert/debian-base:stable
+FROM    docker.io/eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
         org.opencontainers.image.title="Nginx with ModSecurity & PageSpeed" \
         org.opencontainers.image.description="High-performance web server with security and optimization modules" \

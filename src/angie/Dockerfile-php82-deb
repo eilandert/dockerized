@@ -1,4 +1,4 @@
-FROM    eilandert/php-fpm:deb-8.2
+FROM    docker.io/eilandert/php-fpm:deb-8.2
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
         org.opencontainers.image.title="Angie with ModSecurity & PageSpeed" \
         org.opencontainers.image.description="High-performance web server with security and optimization modules" \

@@ -1,14 +1,13 @@
 group "default" {
-    targets = [
-    "rolling", "devel" ]
+    targets = ["ubuntu-base", "debian-base"]
 }
 
 group "base-current" {
-    targets = ["resolute", "noble", "trixie", "rolling"]
+    targets = ["ubuntu-base", "debian-base"]
 }
 
 group "base" {
-    targets = ["rolling", "devel", "resolute", "noble", "jammy", "trixie"]
+    targets = ["ubuntu-base", "debian-base"]
 }
 
 group "phpfpm" {
@@ -73,40 +72,16 @@ target "cms" {
     tags = ["docker.io/eilandert/docker-cms:latest"]
 }
 
-target "rolling" {
-    dockerfile = "Dockerfile-rolling"
+target "ubuntu-base" {
+    dockerfile = "Dockerfile-ubuntu-base"
     context = "src/base"
     tags = ["docker.io/eilandert/ubuntu-base:rolling"]
 }
 
-target "devel" {
-    dockerfile = "Dockerfile-devel"
+target "debian-base" {
+    dockerfile = "Dockerfile-debian-base"
     context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:devel"]
-}
-
-target "noble" {
-    dockerfile = "Dockerfile-noble"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:noble"]
-}
-
-target "resolute" {
-    dockerfile = "Dockerfile-resolute"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:resolute"]
-}
-
-target "jammy" {
-    dockerfile = "Dockerfile-jammy"
-    context = "src/base"
-    tags = ["docker.io/eilandert/ubuntu-base:jammy"]
-}
-
-target "trixie" {
-    dockerfile = "Dockerfile-trixie"
-    context = "src/base"
-    tags = ["docker.io/eilandert/debian-base:trixie", "docker.io/eilandert/debian-base:stable"]
+    tags = ["docker.io/eilandert/debian-base:stable"]
 }
 
 target "ubuntu-phpfpm56" {
