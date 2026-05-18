@@ -35,9 +35,29 @@ group "angie-php" {
        "ubuntu-angie-php56", "debian-angie-php56", "ubuntu-angie-php74", "debian-angie-php74", "ubuntu-angie-php80", "debian-angie-php80", "ubuntu-angie-php82", "debian-angie-php82", "ubuntu-angie-php84", "debian-angie-php84", "ubuntu-angie-php85", "debian-angie-php85", "ubuntu-angie-multi", "debian-angie-multi" ]
 }
 
+group "debian-angie-php" {
+    targets = [
+       "debian-angie-php56", "debian-angie-php74", "debian-angie-php80", "debian-angie-php82", "debian-angie-php84", "debian-angie-php85", "debian-angie-multi" ]
+}
+
+group "ubuntu-angie-php" {
+    targets = [
+       "ubuntu-angie-php56", "ubuntu-angie-php74", "ubuntu-angie-php80", "ubuntu-angie-php82", "ubuntu-angie-php84", "ubuntu-angie-php85", "ubuntu-angie-multi" ]
+}
+
 group "nginx-php" {
     targets = [
        "ubuntu-nginx-php56", "debian-nginx-php56", "ubuntu-nginx-php74", "debian-nginx-php74", "ubuntu-nginx-php80", "debian-nginx-php80", "ubuntu-nginx-php82", "debian-nginx-php82", "ubuntu-nginx-php84", "debian-nginx-php84", "ubuntu-nginx-php85", "debian-nginx-php85", "ubuntu-nginx-multi", "debian-nginx-multi" ]
+}
+
+group "debian-nginx-php" {
+    targets = [
+       "debian-nginx-php56", "debian-nginx-php74", "debian-nginx-php80", "debian-nginx-php82", "debian-nginx-php84", "debian-nginx-php85", "debian-nginx-multi" ]
+}
+
+group "ubuntu-nginx-php" {
+    targets = [
+       "ubuntu-nginx-php56", "ubuntu-nginx-php74", "ubuntu-nginx-php80", "ubuntu-nginx-php82", "ubuntu-nginx-php84", "ubuntu-nginx-php85", "ubuntu-nginx-multi" ]
 }
 
 group "apache" {

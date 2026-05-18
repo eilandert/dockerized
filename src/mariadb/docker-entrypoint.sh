@@ -223,7 +223,7 @@ docker_create_db_directories() {
 }
 
 _mariadb_version() {
-	echo -n "10.11.16-MariaDB"
+	mariadbd --version 2>/dev/null | awk '{ print $3 }'
 }
 
 # initializes the database directory
@@ -683,7 +683,7 @@ _main() {
 	#ENDOFSUBSTITUTIONS
 	# skip setup if they aren't running mysqld or want an option that stops mysqld
 	if [ "$1" = 'mariadbd' ] || [ "$1" = 'mysqld' ] && ! _mysql_want_help "$@"; then
-		mysql_note "Entrypoint script for MariaDB Server ${MARIADB_VERSION} started."
+		mysql_note "Entrypoint script for MariaDB Server $(_mariadb_version) started."
 
 		mysql_check_config "$@"
 		# Load various environment variables

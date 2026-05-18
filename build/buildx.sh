@@ -76,8 +76,8 @@ docker buildx create --use
 # only on Layer 1 and can build in parallel, saving the time of a separate Layer 4.
 
 declare -a LAYERS=(
-    # Layer 1: Base images (6 targets) - FROM official upstream images only
-    "resolute noble jammy trixie rolling devel"
+    # Layer 1: Base images (2 targets) - FROM official upstream images only
+    "ubuntu-base debian-base"
     
     # Layer 2: PHP-FPM, databases, and all standalone services
     # All depend only on Layer 1 base images - run fully in parallel
