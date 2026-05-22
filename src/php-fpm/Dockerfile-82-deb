@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/php-fpm for a recent one
 FROM    docker.io/eilandert/debian-base:stable
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
@@ -6,23 +7,60 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
         org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/php-fpm" \
         org.opencontainers.image.vendor="MyGuard" \
-        org.opencontainers.image.version="#VERSION#"
-ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     TZ=Europe/Amsterdam
-ENV    PHPVERSION=8.2
-ENV    MODE=FPM
+        org.opencontainers.image.version="8.2"
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        TZ=Europe/Amsterdam \
+        PHPVERSION=8.2 \
+        MODE=FPM
 
-COPY    bootstrap.sh /bootstrap.sh
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 
-RUN set -ex ;\
-    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
-    apt-get install -y nullmailer mailutils ;\
+    apt-get install -y --no-install-recommends nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+    # Dedicated PHP-FPM worker user. Kept OUT of the www-data group so a \
+    # compromised PHP process cannot invoke any setuid binary locked to \
+    # root:www-data (e.g. sudo in the cms image). The web server still \
+    # runs as www-data and reaches the FPM socket via listen.group=www-data. \
+    groupadd --system --gid 1500 phpfpm ;\
+    useradd  --system --uid 1500 --gid 1500 \
+             --home-dir /var/www --shell /usr/sbin/nologin \
+             --comment "PHP-FPM worker" phpfpm ;\
+    # Operator / AI-agent account. Membership of: \
+    #   - www-data → can READ /var/www (mode 2750 phpfpm:www-data) \
+    #   - sudo     → can EXECUTE /usr/bin/sudo (mode 4750 root:sudo) \
+    # The web server (also www-data) is NOT in the sudo group, so the \
+    # sudo binary is unreachable from web processes. PHP workers (phpfpm) \
+    # are in neither group. Pre-create the `sudo` group here so we can add \
+    # agent to it before the sudo package is installed in the footer. \
+    # (The apt sudo package will adopt the pre-existing group.) \
+    groupadd --system sudo 2>/dev/null || true ;\
+    groupadd --system --gid 1501 agent ;\
+    useradd  --uid 1501 --gid 1501 \
+             --groups www-data,sudo \
+             --home-dir /home/agent --create-home \
+             --shell /bin/bash \
+             --comment "Operator / AI agent" agent ;\
+    install -d -m 0700 -o agent -g agent /home/agent/.ssh
 
-RUN set -xe ;\
+# Package list source-of-truth. The generator strips lines per PHP version
+# and per distro via build/config.sh:
+#   - #removedinphpXY# markers      -> per-version, both distros
+#   - PHP_VERSION_MISSING_EXTS      -> per-version, both distros
+#   - PHP_UBUNTU_MISSING_EXTS       -> all versions, Ubuntu only
+#   - PHP_UBUNTU_MISSING_CUTOFF     -> from cutoff version, Ubuntu only
+# Do NOT add bare "#" comments inside the apt list: bash treats the joined
+# RUN line as one command and silently drops everything after the first "#".
+# dom/exif are NOT separate packages on any supported distro — they are part
+# of php<ver>-xml / php<ver>-common, so don't add them back.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -xe ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       php8.2 \
@@ -31,17 +69,13 @@ RUN set -xe ;\
       php8.2-bcmath \
       php8.2-cli \
       php8.2-curl \
-      php8.2-dom \
-      php8.2-exif \
       php8.2-gd \
       php8.2-gmp \
       php8.2-igbinary \
       php8.2-imagick \
       php8.2-imap \
       php8.2-intl \
-      #removedinphp80#php8.2-json \
       php8.2-ldap \
-      #removedinphp72#php8.2-mcrypt \
       php8.2-memcache \
       php8.2-memcached \
       php8.2-mbstring \
@@ -50,7 +84,6 @@ RUN set -xe ;\
       php8.2-pspell \
       php8.2-pgsql \
       php8.2-readline \
-      #removedinphp74#php8.2-recode \
       php8.2-redis \
       php8.2-soap \
       php8.2-sqlite3 \
@@ -58,19 +91,36 @@ RUN set -xe ;\
       php8.2-xml \
       php8.2-zstd \
       php8.2-snuffleupagus \
-      php8.2-zip ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php8.2-zip
 
-RUN set -ex ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
     cd /tmp ;\
     /usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" ;\
-    cat /tmp/composer-setup.php | /usr/bin/php -- --filename=composer --install-dir=/usr/bin ;\
+    /usr/bin/php composer-setup.php --filename=composer --install-dir=/usr/bin ;\
     /usr/bin/php -r "unlink('composer-setup.php');" ;\
     /usr/bin/php -r "copy('https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar', '/usr/bin/wp');" ;\
-    chmod +x /usr/bin/wp
+    chmod 0755 /usr/bin/wp /usr/bin/composer ;\
+    # ---- sudo: re-installed (base strips it) and locked down ---- \
+    # Binary perm 4750 root:sudo → only root and members of the `sudo` \
+    # group can execute it. Only `agent` is in the sudo group. www-data \
+    # (web server) and phpfpm (PHP workers) cannot reach the binary AT \
+    # ALL — defense in depth on top of the sudoers entry below. \
+    apt-get install -y --no-install-recommends sudo ;\
+    chmod 4750 /usr/bin/sudo ;\
+    chown root:sudo /usr/bin/sudo ;\
+    # sudoers grants passwordless ALL=(ALL) to `agent` only. www-data the \
+    # user has no entry, so even though the web server can execute the \
+    # binary, sudo refuses to authorise it. Validate with visudo -c -f. \
+    install -d -m 0750 /etc/sudoers.d ;\
+    printf 'Defaults  env_reset\nDefaults  secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nagent ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/10-agent ;\
+    chmod 0440 /etc/sudoers.d/10-agent ;\
+    visudo -c -f /etc/sudoers.d/10-agent
 
-RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
+# Per-version rm lines: the generator either keeps them (multi) or comments
+# out the active version's line (single) via sed. Do not collapse into a loop.
+RUN rm -rf /tmp/* ;\
     rm -rf /etc/php/5.6 /usr/lib/php/20131226 ;\
     rm -rf /etc/php/7.0 /usr/lib/php/20151012 ;\
     rm -rf /etc/php/7.1 /usr/lib/php/20160303 ;\
@@ -83,13 +133,149 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* ;\
     rm -rf /etc/php/8.3 /usr/lib/php/20230831 ;\
     rm -rf /etc/php/8.4 /usr/lib/php/20240924 ;\
     rm -rf /etc/php/8.5 /usr/lib/php/20250925 ;\
+    # Privilege-separate every installed PHP-FPM pool: workers run as \
+    # `phpfpm`, the listen socket is owned by phpfpm but readable by \
+    # www-data (the web server). Done BEFORE the mv to /etc/php.orig so \
+    # the runtime cp /etc/php.orig/* /etc/php picks up the patched conf. \
+    for pool in /etc/php/*/fpm/pool.d/www.conf; do \
+        [ -f "$pool" ] || continue ; \
+        sed -ri \
+            -e 's|^;?user\s*=.*|user = phpfpm|' \
+            -e 's|^;?group\s*=.*|group = phpfpm|' \
+            -e 's|^;?listen\.owner\s*=.*|listen.owner = phpfpm|' \
+            -e 's|^;?listen\.group\s*=.*|listen.group = www-data|' \
+            -e 's|^;?listen\.mode\s*=.*|listen.mode = 0660|' \
+            -e 's|^;?security\.limit_extensions\s*=.*|security.limit_extensions = .php|' \
+            -e 's|^;?process\.dumpable\s*=.*|process.dumpable = no|' \
+            -e 's|^;?clear_env\s*=.*|clear_env = no|' \
+            "$pool" ; \
+        # Append hardened php_admin_value entries to every pool. Idempotent: \
+        # if the marker is already present, skip the append. \
+        if ! grep -q '^; --- myguard hardening ---' "$pool"; then \
+            { \
+                echo "" ; \
+                echo "; --- myguard hardening ---" ; \
+                echo "; Note: deliberately NOT disabling allow_url_fopen — Composer and" ; \
+                echo ";       WordPress core updates need it. allow_url_include is the" ; \
+                echo ";       dangerous one and stays off." ; \
+                echo "php_admin_value[expose_php] = Off" ; \
+                echo "php_admin_value[allow_url_include] = Off" ; \
+                echo "php_admin_value[session.use_strict_mode] = 1" ; \
+                echo "php_admin_value[session.cookie_httponly] = 1" ; \
+                echo "php_admin_flag[log_errors] = on" ; \
+                echo "php_admin_flag[display_errors] = off" ; \
+                echo "php_admin_value[error_log] = /proc/self/fd/2" ; \
+                echo "" ; \
+                echo "; --- myguard [www] tuning ---" ; \
+                echo "; Sized for CMS workloads; tune per-deployment if needed." ; \
+                echo "pm                       = dynamic" ; \
+                echo "pm.max_children          = 25" ; \
+                echo "pm.start_servers         = 4" ; \
+                echo "pm.min_spare_servers     = 2" ; \
+                echo "pm.max_spare_servers     = 8" ; \
+                echo "pm.max_requests          = 500" ; \
+                echo "pm.process_idle_timeout  = 30s" ; \
+                echo "pm.status_path           = /fpm-status" ; \
+                echo "ping.path                = /fpm-ping" ; \
+                echo "ping.response            = pong" ; \
+                echo "" ; \
+                echo "" ; \
+                echo "; (emergency_restart_*, process_control_timeout are GLOBAL FPM" ; \
+                echo ";  directives, not per-pool — they go in php-fpm.conf [global];" ; \
+                echo ";  the upstream defaults are fine, no override here.)" ; \
+                echo "; Slowlog → stderr → docker logs." ; \
+                echo "slowlog                     = /proc/self/fd/2" ; \
+                echo "request_slowlog_timeout     = 5s" ; \
+                echo "request_terminate_timeout   = 120s" ; \
+                echo "" ; \
+                echo "chdir                       = /var/www" ; \
+                echo "catch_workers_output        = yes" ; \
+                echo "decorate_workers_output     = no" ; \
+            } >> "$pool" ; \
+        fi ; \
+    done ;\
+    # ---- Second pool: [agent] — runs as `agent`, reachable by the web ----  \
+    # Worker user is `agent` (uid 1501, in sudo + www-data). The pool is \
+    # intentionally privileged: MCP/operator code runs wp-cli, backups, etc. \
+    # Socket /run/php/php<ver>-agent.sock is owned agent:www-data 0660 — the \
+    # web server (www-data) CAN connect (needed to expose MCP over HTTPS via \
+    # angie/nginx), but the untrusted [www] phpfpm worker (uid 1500, in \
+    # neither www-data nor sudo) cannot. That's the trust boundary: a \
+    # compromised [www] worker cannot reach the agent socket. \
+    # pm=ondemand because agent/MCP traffic is bursty and rare.              \
+    # Hardening intentionally relaxed: no disable_functions, generous time  \
+    # and memory — agent code is trusted and may run wp-cli or backups.     \
+    for d in /etc/php/*/fpm/pool.d/ ; do \
+        [ -d "$d" ] || continue ; \
+        ver="$(basename "$(dirname "$(dirname "$d")")")" ; \
+        { \
+            echo "[agent]" ; \
+            echo "user = agent" ; \
+            echo "group = agent" ; \
+            echo "listen = /run/php/php${ver}-agent.sock" ; \
+            echo "listen.owner = agent" ; \
+            echo "listen.group = www-data" ; \
+            echo "listen.mode = 0660" ; \
+            echo "" ; \
+            echo "; Ondemand — agent/MCP traffic is rare. No warm workers wasted." ; \
+            echo "pm = ondemand" ; \
+            echo "pm.max_children = 4" ; \
+            echo "pm.process_idle_timeout = 60s" ; \
+            echo "pm.max_requests = 200" ; \
+            echo "" ; \
+            echo "; Long timeouts — agent scripts run backups, exports, bulk fixes." ; \
+            echo "slowlog = /proc/self/fd/2" ; \
+            echo "request_slowlog_timeout = 30s" ; \
+            echo "request_terminate_timeout = 600" ; \
+            echo "" ; \
+            echo "chdir = /var/www" ; \
+            echo "clear_env = no" ; \
+            echo "catch_workers_output = yes" ; \
+            echo "decorate_workers_output = no" ; \
+            echo "security.limit_extensions = .php" ; \
+            echo "" ; \
+            echo "; Trusted runtime — no disable_functions, no allow_url_include lock." ; \
+            echo "; The trust boundary: the [www] phpfpm worker (uid 1500, in neither" ; \
+            echo "; www-data nor sudo) cannot reach this socket — only www-data (web" ; \
+            echo "; server, for MCP-over-HTTPS) and agent itself can connect." ; \
+            echo "php_admin_value[memory_limit] = 1G" ; \
+            echo "php_admin_value[max_execution_time] = 600" ; \
+            echo "php_admin_value[disable_functions] = " ; \
+            echo "php_admin_value[expose_php] = Off" ; \
+            echo "php_admin_flag[log_errors] = on" ; \
+            echo "php_admin_flag[display_errors] = off" ; \
+            echo "php_admin_value[error_log] = /proc/self/fd/2" ; \
+            echo "" ; \
+            echo "; Snuffleupagus stays loaded globally but is fed an empty ruleset" ; \
+            echo "; here, so it enforces nothing for this pool." ; \
+            echo "php_admin_value[sp.configuration_file] = /etc/snuffleupagus/agent-noop.rules" ; \
+        } > "${d}agent.conf" ; \
+    done ;\
+    # Empty snuffleupagus rules file used by the [agent] pool to turn the \
+    # extension into a no-op there. snuffleupagus stays globally loaded \
+    # (and active for [www]) but enforces zero rules for the agent worker. \
+    install -d -m 0755 /etc/snuffleupagus ;\
+    { \
+        echo "; agent-pool snuffleupagus rules — intentionally empty." ; \
+        echo "; The extension is loaded for compatibility but enforces" ; \
+        echo "; nothing. /etc/php/<ver>/fpm/pool.d/agent.conf points here." ; \
+    } > /etc/snuffleupagus/agent-noop.rules ;\
+    chmod 0644 /etc/snuffleupagus/agent-noop.rules ;\
     mv /etc/php /etc/php.orig && mkdir -p /etc/php ;\
     mv /etc/nullmailer /etc/nullmailer.orig && mkdir -p /etc/nullmailer ;\
-    chmod 755 /bootstrap.sh
+    # /run/php must be writable by phpfpm (worker pid/socket); www-data \
+    # only needs to traverse to connect to the socket. \
+    install -d -m 0750 -o phpfpm -g www-data /run/php ;\
+    install -d -m 0750 -o phpfpm -g www-data /var/log/php ;\
+    # Pre-create /var/www so downstream images (cms, nginx-php, …) have a \
+    # consistent doc-root with the right ownership. mode 2750 = phpfpm \
+    # writes, www-data reads, files inherit the www-data group (setgid). \
+    install -d -m 2750 -o phpfpm -g www-data /var/www
 EXPOSE  9000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD php-fpm -r 2>/dev/null || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD pgrep -x php-fpm > /dev/null 2>&1 && (ss -lnt | grep -q ':9000' || [ -S /run/php/php-fpm.sock ]) || exit 1
+
+STOPSIGNAL SIGQUIT
 
 CMD     ["/bootstrap.sh"]
-

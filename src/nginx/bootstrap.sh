@@ -40,8 +40,8 @@ if [ -n "${PHPVERSION}" ]; then
 
     if [ ! -x /run/php ]; then
         mkdir -p /run/php
-        chown www-data:www-data /run/php
-        chmod 755 /run/php
+        chown phpfpm:www-data /run/php
+        chmod 750 /run/php
     fi
 
     COMPOSERPATH="/usr/bin/composer"
@@ -52,16 +52,27 @@ if [ -n "${PHPVERSION}" ]; then
     fi
 fi
 
-cp -p /etc/nginx.orig/mime.types /etc/nginx/mime.types
-cp -p /etc/nginx.orig/nginx.conf-packaged /etc/nginx/nginx.conf-packaged
-cp -p /etc/nginx.orig/nginx.conf-original /etc/nginx/nginx.conf-original
-cp -p /etc/nginx.orig/scripts/* /etc/nginx/scripts
-cp -p /etc/nginx.orig/snippets/* /etc/nginx/snippets
+# Refresh static helper files from the .orig copy. Wrapped in test guards
+# so a partial /etc/nginx.orig (e.g. an upstream package without scripts/
+# or snippets/) doesn't error out on an unmatched glob.
+[ -f /etc/nginx.orig/mime.types ] && cp -p /etc/nginx.orig/mime.types /etc/nginx/mime.types
+[ -f /etc/nginx.orig/nginx.conf-packaged ] && cp -p /etc/nginx.orig/nginx.conf-packaged /etc/nginx/nginx.conf-packaged
+[ -f /etc/nginx.orig/nginx.conf-original ] && cp -p /etc/nginx.orig/nginx.conf-original /etc/nginx/nginx.conf-original
+if [ -d /etc/nginx.orig/scripts ] && [ -n "$(ls -A /etc/nginx.orig/scripts 2>/dev/null)" ]; then
+    mkdir -p /etc/nginx/scripts
+    cp -p /etc/nginx.orig/scripts/. /etc/nginx/scripts/ 2>/dev/null || cp -rp /etc/nginx.orig/scripts/* /etc/nginx/scripts/
+fi
+if [ -d /etc/nginx.orig/snippets ] && [ -n "$(ls -A /etc/nginx.orig/snippets 2>/dev/null)" ]; then
+    mkdir -p /etc/nginx/snippets
+    cp -rp /etc/nginx.orig/snippets/* /etc/nginx/snippets/
+fi
 
 # Make sure all available modules are available outside of docker and remove modules which aren't there (anymore)
 mkdir -p /etc/nginx/modules-available
 rm -f /etc/nginx/modules-available/*
-cp -rp /usr/share/nginx/modules-available/* /etc/nginx/modules-available
+if [ -d /usr/share/nginx/modules-available ] && [ -n "$(ls -A /usr/share/nginx/modules-available 2>/dev/null)" ]; then
+    cp -rp /usr/share/nginx/modules-available/* /etc/nginx/modules-available/
+fi
 
 #reorder modules and symlink them to /usr/share/nginx/modules-enabled
 chmod +x /etc/nginx/scripts/reorder-modules.sh
@@ -116,19 +127,25 @@ if [ -n "${PHPVERSION}" ]; then
     if [ "${MODE}" = "MULTI" ] && [ "${PHP83}" = "YES" ]; then
         startphp "8.3"
     fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP84}" = "YES" ]; then
+        startphp "8.4"
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP85}" = "YES" ]; then
+        startphp "8.5"
+    fi
     if [ "${PHPVERSION}" = "MULTI" ] && [ "${SETPHP}" = 0 ]; then
         echo "[NGINX] --->"
         echo "[NGINX] ---> You have obtained the MULTI-PHP version of the Docker, however..."
-        echo "[NGINX] ---> No environment variable for PHP56, PHP74, PHP80, PHP81, PHP82, or PHP83 has been set"
+        echo "[NGINX] ---> No environment variable for PHP56, PHP74, PHP80, PHP81, PHP82, PHP83, PHP84, or PHP85 has been set"
         echo "[NGINX] ---> Uncertain of the next steps, the process will now exit..."
-	echo "[NGINX] --->"
+        echo "[NGINX] --->"
         exit
     fi
 fi
 # /PHPBLOCK
 
 if [ -n "${MODULES}" ]; then
-    $NGX_MODULES = ${MODULES};
+    NGX_MODULES="${MODULES}"
 fi
 
 if [ ! -n "${NGX_MODULES}" ]; then

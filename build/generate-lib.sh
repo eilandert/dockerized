@@ -70,6 +70,33 @@ remove_markers() {
     sed -i "/${marker}/d" "$file"
 }
 
+# version_ge "8.4" "8.0" -> 0 (true)
+# version_ge "7.4" "8.0" -> 1 (false)
+# Compares dotted versions component-by-component (max 2 components).
+version_ge() {
+    local a_major="${1%%.*}" a_minor="${1#*.}"
+    local b_major="${2%%.*}" b_minor="${2#*.}"
+    [[ "$a_minor" == "$1" ]] && a_minor=0
+    [[ "$b_minor" == "$2" ]] && b_minor=0
+    if (( a_major != b_major )); then
+        (( a_major > b_major ))
+        return
+    fi
+    (( a_minor >= b_minor ))
+}
+
+# strip_marker_for_version <file> <php-version> <marker-name> <cutoff-version>
+# If php-version >= cutoff, delete every line containing #marker-name# in the file.
+# Otherwise: strip the literal marker tag, leaving the rest of the line.
+strip_marker_for_version() {
+    local file="$1" version="$2" marker="$3" cutoff="$4"
+    if version_ge "$version" "$cutoff"; then
+        sed -i "/#${marker}#/d" "$file"
+    else
+        sed -i "s|#${marker}#||g" "$file"
+    fi
+}
+
 # Compose dockerfile from header, body, and footer files
 # Usage: compose_dockerfile output_file [header_file] [body_file] [footer_file]
 # If body_file is an array (space-separated), concatenates all bodies

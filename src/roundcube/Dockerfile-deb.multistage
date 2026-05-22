@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
 
 FROM    eilandert/debian-base:stable as builder
@@ -148,7 +149,7 @@ ENV     INSTALLDIR="/var/www/html"
 ENV    LD_PRELOAD=""
 ENV     PHPVERSION="8.2"
 
-COPY bootstrap.sh /
+COPY --chmod=0755 bootstrap.sh /
 RUN set -xe ;\
     echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get update ;\
@@ -205,4 +206,8 @@ RUN mkdir -p /var/roundcube/config.orig ;\
     cp -rp ${INSTALLDIR}/plugins ${INSTALLDIR}/plugins.orig
 
 WORKDIR ${INSTALLDIR}
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1
+
 ENTRYPOINT ["/bootstrap.sh"]

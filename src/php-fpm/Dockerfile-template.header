@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/php-fpm for a recent one
 FROM    eilandert/ubuntu-base:rolling
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
@@ -7,18 +8,43 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/php-fpm" \
         org.opencontainers.image.vendor="MyGuard" \
         org.opencontainers.image.version="#VERSION#"
-ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     TZ=Europe/Amsterdam
-ENV    PHPVERSION=#PHPVERSION#
-ENV    MODE=FPM
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        TZ=Europe/Amsterdam \
+        PHPVERSION=#PHPVERSION# \
+        MODE=FPM
 
-COPY    bootstrap.sh /bootstrap.sh
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 
-RUN set -ex ;\
-    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main"  > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main" > /etc/apt/sources.list.d/ondrej-ppa.list ;\
     apt-get -y update ;\
-    apt-get install -y nullmailer mailutils ;\
+    apt-get install -y --no-install-recommends nullmailer mailutils ;\
     rm -rf /var/spool/nullmailer/trigger ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+    # Dedicated PHP-FPM worker user. Kept OUT of the www-data group so a \
+    # compromised PHP process cannot invoke any setuid binary locked to \
+    # root:www-data (e.g. sudo in the cms image). The web server still \
+    # runs as www-data and reaches the FPM socket via listen.group=www-data. \
+    groupadd --system --gid 1500 phpfpm ;\
+    useradd  --system --uid 1500 --gid 1500 \
+             --home-dir /var/www --shell /usr/sbin/nologin \
+             --comment "PHP-FPM worker" phpfpm ;\
+    # Operator / AI-agent account. Membership of: \
+    #   - www-data → can READ /var/www (mode 2750 phpfpm:www-data) \
+    #   - sudo     → can EXECUTE /usr/bin/sudo (mode 4750 root:sudo) \
+    # The web server (also www-data) is NOT in the sudo group, so the \
+    # sudo binary is unreachable from web processes. PHP workers (phpfpm) \
+    # are in neither group. Pre-create the `sudo` group here so we can add \
+    # agent to it before the sudo package is installed in the footer. \
+    # (The apt sudo package will adopt the pre-existing group.) \
+    groupadd --system sudo 2>/dev/null || true ;\
+    groupadd --system --gid 1501 agent ;\
+    useradd  --uid 1501 --gid 1501 \
+             --groups www-data,sudo \
+             --home-dir /home/agent --create-home \
+             --shell /bin/bash \
+             --comment "Operator / AI agent" agent ;\
+    install -d -m 0700 -o agent -g agent /home/agent/.ssh
 

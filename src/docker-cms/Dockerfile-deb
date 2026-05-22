@@ -1,0 +1,134 @@
+# syntax=docker/dockerfile:1.7
+# CMS image — Angie + PHP-FPM 8.5 (Debian) with the full content-management
+# toolbox, CMS-tuned PHP/Angie config, image pipeline, backup tooling,
+# wp-cron, and privilege separation (PHP as `phpfpm`, not www-data).
+FROM    docker.io/eilandert/angie:deb-php8.5
+
+LABEL   maintainer="Thijs Eilander <eilandert@myguard.nl>" \
+        org.opencontainers.image.title="MyGuard CMS (Angie + PHP-FPM 8.5)" \
+        org.opencontainers.image.description="Angie + PHP-FPM 8.5 (debian) tuned for WordPress/Drupal/Joomla: composer, wp-cli + extras, drush, git, patch, libvips/imagemagick, image-optim toolchain, restic/rclone, goaccess. PHP isolated from sudo via the phpfpm user." \
+        org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/docker-cms" \
+        org.opencontainers.image.vendor="MyGuard" \
+        org.opencontainers.image.version="8.5"
+
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        TZ=Europe/Amsterdam \
+        COMPOSER_ALLOW_SUPERUSER=1 \
+        COMPOSER_HOME=/var/www/.composer \
+        WP_CLI_PACKAGES_DIR=/opt/wp-cli \
+        PATH=/usr/local/sbin:/usr/local/bin:/opt/drush/vendor/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# CMS config snippets — shipped into the .orig directories so the angie/
+# php-fpm bootstrap's `cp -r /etc/X.orig/* /etc/X` picks them up on first
+# run. Keeps the container restart-safe (volumes can override).
+COPY cms.ini                  /etc/php.orig/8.5/fpm/conf.d/90-cms.ini
+COPY cms-angie.conf           /etc/angie.orig/conf.d/cms.conf
+COPY snippets-wordpress.conf  /etc/angie.orig/snippets/wordpress.conf
+COPY snippets-drupal.conf     /etc/angie.orig/snippets/drupal.conf
+COPY imagemagick-policy.xml   /etc/ImageMagick-6/policy.xml.cms
+COPY --chmod=0755 cms-backup.sh /usr/local/bin/cms-backup
+COPY wpcron.crontab           /etc/cron.d/cms-wpcron
+COPY --chmod=0755 bootstrap.sh /bootstrap-cms.sh
+
+# CMS tooling on top of the angie+php-fpm base.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    # The php-fpm base did `mv /etc/php /etc/php.orig && mkdir -p /etc/php`, \
+    # so /etc/php exists but is EMPTY. We need a populated tree for the \
+    # duration of this layer: phpenmod uses it during php-vips install, \
+    # and `php -r` needs conf.d/* to load phar/mbstring/iconv (otherwise \
+    # composer dies with "Class Phar not found"). Wipe + re-copy. Synced \
+    # back into /etc/php.orig at the end of the RUN. \
+    rm -rf /etc/php ;\
+    cp -a /etc/php.orig /etc/php ;\
+    apt-get update ;\
+    apt-get install -y --no-install-recommends \
+        cron \
+        git \
+        gifsicle \
+        goaccess \
+        imagemagick \
+        jpegoptim \
+        jq \
+        less \
+        libvips42 \
+        mariadb-client \
+        mc \
+        nano \
+        openssh-client \
+        optipng \
+        patch \
+        php-vips \
+        pngquant \
+        pv \
+        rclone \
+        restic \
+        rsync \
+        unzip \
+        webp \
+        wget \
+        zip ;\
+    apt-get -y autoremove ;\
+    # ---- Composer + WP-CLI ---- \
+    # The php-fpm base already installed /usr/bin/{composer,wp}. Don't \
+    # redownload — just expose them under /usr/local/bin too so anything \
+    # expecting that path (and our $PATH override at the top) finds them. \
+    ln -sf /usr/bin/composer /usr/local/bin/composer ;\
+    ln -sf /usr/bin/wp       /usr/local/bin/wp ;\
+    php -r "copy('https://raw.githubusercontent.com/wp-cli/wp-cli/v2.9.0/utils/wp-completion.bash', '/etc/profile.d/wp-completion.sh');" ;\
+    chmod 0644 /etc/profile.d/wp-completion.sh ;\
+    # wp-cli packages — pre-installed at build time so they're available \
+    # even on a stateless container. doctor + profile are the two highest \
+    # ROI for diagnosing slow/broken WP installs. \
+    install -d -m 0755 /opt/wp-cli ;\
+    /usr/local/bin/wp --allow-root package install wp-cli/doctor-command:^1 || true ;\
+    /usr/local/bin/wp --allow-root package install wp-cli/profile-command:^1 || true ;\
+    chown -R phpfpm:www-data /opt/wp-cli ;\
+    # ---- Drush (Drupal CLI) ---- \
+    install -d -m 0755 /opt/drush ;\
+    COMPOSER_HOME=/opt/drush /usr/local/bin/composer --no-interaction \
+        --working-dir=/opt/drush require drush/drush:^13 ;\
+    chown -R phpfpm:www-data /opt/drush ;\
+    # ---- ImageMagick policy hardening — replace the stock policy ---- \
+    if [ -f /etc/ImageMagick-6/policy.xml ]; then \
+        mv /etc/ImageMagick-6/policy.xml /etc/ImageMagick-6/policy.xml.orig ;\
+    fi ;\
+    mv /etc/ImageMagick-6/policy.xml.cms /etc/ImageMagick-6/policy.xml ;\
+    # ---- Workspace ---- \
+    install -d -m 2750 -o phpfpm -g www-data /var/www/.composer /var/www/_backups ;\
+    # /etc/cron.d/ entries MUST be owned by root or cron refuses to run them. \
+    chown root:root /etc/cron.d/cms-wpcron ;\
+    chmod 0644 /etc/cron.d/cms-wpcron ;\
+    # ---- Friendly aliases for the admin shell (root, via docker exec) ---- \
+    { \
+        echo "alias wp='sudo -u phpfpm -i -- wp --path=\$(pwd)'"; \
+        echo "alias drush='sudo -u phpfpm -i -- /opt/drush/vendor/bin/drush'"; \
+        echo "alias ls='ls --color=auto'"; \
+        echo "alias grep='grep --color=auto'"; \
+        echo "source /etc/profile.d/wp-completion.sh"; \
+    } >> /root/.bashrc ;\
+    # ---- HARDENING ---- \
+    # sudo + agent user + sudoers entry are provided by the php-fpm base; \
+    # re-assert the binary lockdown here in case any package in the cms \
+    # apt list reset perms during install. \
+    find /usr -xdev \( -perm -4000 -o -perm -2000 \) -type f \
+        ! -path '/usr/bin/sudo' -exec chmod a-s {} \; 2>/dev/null || true ;\
+    chmod 4750 /usr/bin/sudo ;\
+    chown root:sudo /usr/bin/sudo ;\
+    # ---- Sync /etc/php back into /etc/php.orig and remove /etc/php ---- \
+    # The angie bootstrap expects an empty /etc/php it can populate from \
+    # /etc/php.orig at first start. Any new symlinks / conf.d entries from \
+    # apt installs above (notably php-vips) need to make it into .orig. \
+    if [ -d /etc/php ]; then \
+        rsync -a --delete /etc/php/ /etc/php.orig/ ; \
+        rm -rf /etc/php ; \
+        mkdir -p /etc/php ; \
+    fi
+
+WORKDIR /var/www
+
+# Inherits EXPOSE 80/443/443udp + HEALTHCHECK from the angie base.
+CMD ["/bootstrap-cms.sh"]

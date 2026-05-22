@@ -33,8 +33,8 @@ runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
 #fix some weird issue with php-fpm
 if [ ! -x /run/php ]; then
     mkdir -p /run/php
-    chown www-data:www-data /run/php
-    chmod 755 /run/php
+    chown phpfpm:www-data /run/php
+    chmod 750 /run/php
 fi
 php-fpm${PHPVERSION} -v
 php-fpm${PHPVERSION} -t

@@ -1,19 +1,25 @@
 # Dockerized - Production-Grade Container Images
 
-A comprehensive Docker image repository featuring 142+ production-ready containerized services across multiple Linux distributions (Ubuntu, Debian, Alpine) and PHP versions (5.6-8.5). Built for high-performance web hosting, mail services, caching infrastructure, and complete system stacks. Integrated with [deb.myguard.nl](https://deb.myguard.nl) for optimized Debian packages.
+A Docker image repository for high-performance web hosting, mail, caching, and system services. Integrated with [deb.myguard.nl](https://deb.myguard.nl) for optimized Debian packages.
+
+Current scope (see `build/config.sh` and `docker-bake.hcl`):
+
+- **Base distros**: Ubuntu `noble` and Debian `trixie` (a handful of Alpine targets for specific services)
+- **PHP versions**: 5.6, 7.4, 8.0, 8.2, 8.4, 8.5 (six versions, plus a `multi` stack)
+- **Build targets**: ~106 (`docker buildx bake --print | jq '.target | length'` to confirm)
 
 ## 📁 Repository Structure
 
 ```
 dockerized/
-├── buildx.sh                 # Build orchestration wrapper
-├── generate.sh               # Dockerfile generation wrapper
+├── buildx.sh                 # Top-level wrapper → build/buildx-sequential.sh
+├── generate.sh               # Top-level wrapper → build/generate.sh
+├── docker-bake.hcl           # Docker Buildx configuration (~106 targets)
 ├── build/                    # Build infrastructure
-│   ├── buildx.sh            # Core build orchestrator
+│   ├── buildx-sequential.sh # The orchestrator (one target at a time)
 │   ├── generate.sh          # Dockerfile generation coordinator
-│   ├── generate-lib.sh      # Shared build utilities
-│   ├── docker-bake.hcl      # Docker Buildx configuration (106 targets)
-│   └── nginx.sh             # Legacy nginx build script
+│   ├── generate-lib.sh      # Shared template helpers
+│   └── config.sh            # Distro versions, PHP versions, registry prefix
 ├── src/                      # Dockerfile sources (142+ images)
 │   ├── base/                # Base images (15 distributions)
 │   ├── php-fpm/             # PHP-FPM (9 versions × distros)
@@ -53,7 +59,7 @@ dockerized/
 ```bash
 ./buildx.sh               # Builds all targets in dependency order
 # Or use docker buildx directly:
-cd build && docker buildx bake ubuntu-nginx-php84
+docker buildx bake -f docker-bake.hcl ubuntu-nginx-php84
 ```
 
 #### Generate Dockerfiles from Templates
@@ -168,7 +174,7 @@ docker buildx bake --print ubuntu-nginx-php84
 **Build Your First Image:**
 ```bash
 ./buildx.sh                          # Build all images in dependency order
-cd build && docker buildx bake ubuntu-nginx-php84   # Build single image
+docker buildx bake -f docker-bake.hcl ubuntu-nginx-php84   # Build single image
 ./generate.sh                        # Regenerate from templates (after modifications)
 ```
 
@@ -207,6 +213,20 @@ docker buildx bake ubuntu-angie-php82
 docker buildx bake ubuntu-mariadb debian-redis
 ```
 
+### Environment Knobs
+
+| Variable | Default | Effect |
+|---|---|---|
+| `PUSH` | unset → on for hostname `build`, off elsewhere | `PUSH=1` forces `--push`; `PUSH=0` forces it off |
+| `LOAD` | `0` | `LOAD=1` loads images into the local docker daemon (only if PUSH is off) |
+| `BUILDX_CACHE_DIR` | `$XDG_CACHE_HOME/dockerized-buildx` | Persistent local buildkit cache |
+| `BUILDX_BUILDER` | `dockerized-build` | Name of the buildx builder created/used |
+| `DOCKERIZED_PRUNE` | `0` | `1` re-enables the old `docker system prune -a` behaviour |
+| `GENERATE_COMMIT` | `0` | `1` makes `generate.sh` commit + push regenerated Dockerfiles |
+| `MARIADB_UPSTREAM_REF` | `master` | git ref pulled from MariaDB/mariadb-docker (pin to a tag for reproducibility) |
+| `MARIADB_UPSTREAM_PATH` | `10.11` | directory inside the upstream repo |
+| `MARIADB_TARGET_VERSION` | `11.8` | version string written into the rebuilt Dockerfiles |
+
 ### Advanced Build Options
 
 ```bash
@@ -243,7 +263,7 @@ cd src/nginx && bash ./.generate.sh
 cat src/nginx/Dockerfile-php84 | head -20
 
 # Check docker-bake.hcl entry
-grep -A 5 "ubuntu-nginx-php84" build/docker-bake.hcl
+grep -A 5 "ubuntu-nginx-php84" docker-bake.hcl
 
 # Try manual build
 docker build -t test -f src/nginx/Dockerfile-php84 src/nginx
@@ -254,14 +274,10 @@ See [MULTISTAGE_ANALYSIS.md](MULTISTAGE_ANALYSIS.md) for multi-stage build recom
 
 ## 📋 Project Statistics
 
-- **Total Container Images:** 142+
-- **Build Targets:** 106 combinations
-- **Service Categories:** 36+
-- **PHP Versions Supported:** 9 (5.6, 7.2, 7.4, 8.0-8.5)
-- **Linux Distributions:** 15 (7 Ubuntu + 6 Debian + 2 rolling/devel)
-- **Distribution Variants:** 200+ unique image combinations
-- **Template System:** Consistent, maintainable Dockerfile generation
-- **Performance Optimizations:** Multi-stage builds, layer consolidation
+- **Build targets:** ~106 (see `docker-bake.hcl`)
+- **PHP versions:** 6 — 5.6, 7.4, 8.0, 8.2, 8.4, 8.5 (`build/config.sh`)
+- **Base distros:** Ubuntu `noble`, Debian `trixie` (plus a few Alpine-based service targets)
+- **Generator:** Template-driven; per-component `.generate.sh` under `src/<component>/`
 
 ## 🔗 Related Resources
 
@@ -295,8 +311,8 @@ To add a new containerized service:
 1. Create service directory: `src/{service}/`
 2. Add Dockerfile or template files
 3. If templated, create `src/{service}/.generate.sh` script
-4. Add build targets to `build/docker-bake.hcl`
-5. Update TARGETS array in `build/buildx.sh`
+4. Add build targets to `docker-bake.hcl`
+5. Add the target name to the appropriate LAYERS entry in `build/buildx-sequential.sh`
 6. Run `./generate.sh` and `./buildx.sh`
 7. Commit and publish
 
@@ -322,7 +338,7 @@ cd src/nginx && bash ./.generate.sh    # Test individual component
 **Build Problems:**
 ```bash
 cat src/nginx/Dockerfile-php84 | head -20    # Inspect generated Dockerfile
-grep -A 5 "ubuntu-nginx-php84" build/docker-bake.hcl  # Check config
+grep -A 5 "ubuntu-nginx-php84" docker-bake.hcl  # Check config
 docker build -t test -f src/nginx/Dockerfile-php84 .  # Manual build test
 docker buildx logs                      # View build logs
 ```

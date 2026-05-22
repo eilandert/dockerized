@@ -22,27 +22,30 @@ log_info "  Docker registry: ${DOCKER_REGISTRY_PREFIX}"
 log_info "  Nginx multi (ubuntu)"
 process_template "$TEMPLATE" "Dockerfile-multi-ubu" \
     "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:multi" \
-    "APT_UPGRADE=true"
+    "APT_UPGRADE=:" \
+    "VERSION=multi"
 
 log_info "  Nginx multi (debian)"
 process_template "$TEMPLATE" "Dockerfile-multi-deb" \
     "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:deb-multi" \
-    "APT_UPGRADE=true"
+    "APT_UPGRADE=:" \
+    "VERSION=multi"
 
-# Base: ubuntu rolling (no PHP)
+# Base: no PHP
 log_info "  Nginx base (ubuntu)"
 process_template "$TEMPLATE" "Dockerfile-ubu" \
     "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_UBUNTU_BASE}:${UBUNTU_BASE_TAG}" \
-    "APT_UPGRADE=apt-get -y upgrade"
+    "APT_UPGRADE=apt-get -y upgrade" \
+    "VERSION=base"
 
 log_info "  Nginx base (debian)"
 process_template "$TEMPLATE" "Dockerfile-deb" \
     "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_DEBIAN_BASE}:${DEBIAN_BASE_TAG}" \
-    "APT_UPGRADE=apt-get -y upgrade"
+    "APT_UPGRADE=apt-get -y upgrade" \
+    "VERSION=base"
 
 # PHP versions
 for version in "${PHP_VERSIONS[@]}"; do
-    # Normalize version: remove dots (5.6 -> 56, 7.4 -> 74, etc.)
     normalized_version="${version//.}"
 
     ubuntu_output="Dockerfile-php${normalized_version}-ubu"
@@ -51,12 +54,14 @@ for version in "${PHP_VERSIONS[@]}"; do
     log_info "  Nginx PHP $version (ubuntu)"
     process_template "$TEMPLATE" "$ubuntu_output" \
         "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:${version}" \
-        "APT_UPGRADE=apt-get -y upgrade"
+        "APT_UPGRADE=apt-get -y upgrade" \
+        "VERSION=$version"
 
     log_info "  Nginx PHP $version (debian)"
     process_template "$TEMPLATE" "$debian_output" \
         "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:deb-${version}" \
-        "APT_UPGRADE=apt-get -y upgrade"
+        "APT_UPGRADE=apt-get -y upgrade" \
+        "VERSION=$version"
 done
 
 log_info "✓ Nginx Dockerfiles generated"

@@ -1,14 +1,22 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
 FROM eilandert/debian-base:stable
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+LABEL   org.opencontainers.image.authors="eilandert" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY    syslog-ng.conf /etc/syslog-ng
 
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
-COPY    bootstrap.sh /bootstrap.sh
-
-RUN set -ex ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    # See Dockerfile-ubu for rationale: undo base image's sudo statoverride
+    # before install so dpkg can place the binary with normal setuid perms.
+    dpkg-statoverride --remove /usr/bin/sudo 2>/dev/null || true ;\
+    dpkg-statoverride --remove /bin/sudo     2>/dev/null || true ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
       ca-certificates tzdata openssl syslog-ng \
@@ -21,19 +29,14 @@ RUN set -ex ;\
       libjemalloc2 \
       mimalloc \
       ;\
-    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    apt-get -y autoremove ;\
     mv /etc/ssh /etc/ssh.orig ;\
-    chmod +x /bootstrap.sh ;\
-    mkdir /run/sshd && rm -f /etc/motd ;\
-    dpkg-statoverride --remove /usr/bin/sudo ;\
-    dpkg-statoverride --remove /bin/sudo
+    mkdir -p /run/sshd ;\
+    rm -f /etc/motd
 VOLUME /home
 VOLUME /etc/ssh
 EXPOSE 22
-COPY syslog-ng.conf /etc/syslog-ng
 
-CMD [ "/bootstrap.sh" ]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD pgrep -x sshd > /dev/null && ss -lnt | grep -q ":22 " || exit 1
 
-
-
-
+CMD ["/bootstrap.sh"]

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
 
 FROM    eilandert/debian-base:stable
@@ -11,7 +12,7 @@ ENV    LD_PRELOAD=""
 
 # fetch the last version, generated in the docker build script
 COPY     .lastversion /tmp/lastversion
-COPY    bootstrap.sh /
+COPY --chmod=0755 bootstrap.sh /
 ENV    PHPVERSION="8.2"
 ENV    COMPOSER_ALLOW_SUPERUSER=1
 
@@ -192,4 +193,8 @@ COPY nginx.conf /var/roundcube/config.orig
 COPY phpfpm.conf /var/roundcube/config.orig
 
 WORKDIR ${INSTALLDIR}
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1
+
 ENTRYPOINT ["/bootstrap.sh"]

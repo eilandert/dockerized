@@ -1,0 +1,8 @@
+# /etc/cron.d/cms-wpcron — trigger wp-cron for every site under /var/www
+# every minute. Skips dirs without wp-config.php so non-WP doc-roots are
+# ignored. Runs as phpfpm so file ownership stays consistent.
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+* * * * * phpfpm for d in /var/www/*/; do [ -f "$d/wp-config.php" ] && cd "$d" && /usr/local/bin/wp cron event run --due-now --quiet 2>&1; done

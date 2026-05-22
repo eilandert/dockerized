@@ -27,6 +27,16 @@ if [[ -f "$NGINXDIR/Dockerfile.template" ]]; then
     safe_sed "Nginx" "Angie" "Dockerfile.template"
 fi
 
+# Copy hardening snippets (referenced by COPY in the template). They are
+# distro-neutral so we copy them verbatim — no sed needed.
+for asset in 01-hardening.conf 02-rate-limits.conf \
+             security-headers.conf ssl-hardening.conf \
+             deny-hidden-files.conf; do
+    if [[ -f "$NGINXDIR/$asset" ]]; then
+        cp "$NGINXDIR/$asset" "$asset"
+    fi
+done
+
 # Copy and transform all generated Dockerfiles
 log_info "  Copying and transforming Nginx Dockerfiles to Angie..."
 for nginx_file in "$NGINXDIR"/Dockerfile*; do

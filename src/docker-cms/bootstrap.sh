@@ -1,28 +1,28 @@
 #!/bin/sh
+# CMS bootstrap — starts cron in the background and then chains into the
+# angie bootstrap inherited from the base image (saved at /bootstrap-angie.sh
+# by the Dockerfile). The angie bootstrap takes care of timezone, nullmailer,
+# PHP-FPM startup, and finally execs angie in foreground.
+set -e
 
-chmod 777 /dev/stdout
-
-if [ -n "${TZ}" ]; then
-    rm /etc/timezone /etc/localtime
-    echo "${TZ}" > /etc/timezone
-    ln -s /usr/share/zoneinfo/${TZ} /etc/localtime
+# Generate a runtime ~/.my.cnf for the admin shell if DB_HOST/DB_USER/DB_PASS
+# are set in the env. Lets `mysql` / `mariadb-dump` just work in `docker exec`.
+if [ -n "${DB_HOST:-}" ] && [ -n "${DB_USER:-}" ] && [ -n "${DB_PASS:-}" ]; then
+    {
+        echo '[client]'
+        echo "host=${DB_HOST}"
+        echo "user=${DB_USER}"
+        echo "password=${DB_PASS}"
+        [ -n "${DB_NAME:-}" ] && echo "database=${DB_NAME}"
+    } > /root/.my.cnf
+    chmod 0600 /root/.my.cnf
 fi
 
-FIRSTRUN="/etc/nullmailer/defaultdomain"
-if [ ! -f ${FIRSTRUN} ]; then
-    echo "[PHP-FPM] no configs found, populating default configs to /etc/nullmailer"
-    cp -r /etc/nullmailer.orig/* /etc/nullmailer
+# Cron — only start if there is at least one /etc/cron.d entry.
+if [ -d /etc/cron.d ] && [ -n "$(ls -A /etc/cron.d 2>/dev/null)" ]; then
+    /usr/sbin/cron
+    echo "[CMS] cron daemon started"
 fi
 
-#fix some weird issue with nullmailer
-rm -f /var/spool/nullmailer/trigger
-rm -f /var/spool/nullermailer/queue/core
-/usr/bin/mkfifo /var/spool/nullmailer/trigger
-/bin/chmod 0622 /var/spool/nullmailer/trigger
-/bin/chown -R mail:mail /var/spool/nullmailer/ /etc/nullmailer
-runuser -u mail /usr/sbin/nullmailer-send 1>/var/log/nullmailer.log 2>&1 &
-
-dockerid=$(hostname)
-echo "[DOCKER-CMS] For breaking into this docker: docker exec -it $dockerid bash"
-
-exec sleep infinity
+echo "[CMS] handing off to angie bootstrap"
+exec /bootstrap.sh

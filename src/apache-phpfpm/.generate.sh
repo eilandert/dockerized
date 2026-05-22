@@ -25,7 +25,7 @@ for version in "${PHP_VERSIONS[@]}"; do
     # Ubuntu variant
     output_ubu="Dockerfile-${normalized_version}-ubu"
     log_info "  Apache PHP $version (Ubuntu)"
-    process_template "$TEMPLATE" "$output_ubu" "PHPVERSION=$version"
+    process_template "$TEMPLATE" "$output_ubu" "PHPVERSION=$version" "VERSION=$version"
     
     # Replace registry references
     safe_sed "eilandert/php-fpm:" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:" "$output_ubu"
@@ -39,7 +39,7 @@ done
 # Generate multi-PHP variant
 log_info "  Apache PHP multi"
 multi_ubu="Dockerfile-multi-ubu"
-process_template "$TEMPLATE" "$multi_ubu" "PHPVERSION=multi"
+process_template "$TEMPLATE" "$multi_ubu" "PHPVERSION=multi" "VERSION=multi"
 
 # Replace registry references
 safe_sed "eilandert/php-fpm:" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:" "$multi_ubu"

@@ -1,15 +1,16 @@
-FROM eilandert/debian-base:stable
+# syntax=docker/dockerfile:1.7
+FROM eilandert/ubuntu-base:rolling
 LABEL org.opencontainers.image.authors="eilandert"
 LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
+ENV     LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
 
-COPY bootstrap.sh /bootstrap.sh
-
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 RUN apt-get -y update ;\
     apt-get --no-install-recommends -y install \
-      rspamd-git \
+      rspamd \
       syslog-ng-core \
     ;\
     mkdir -p /etc/rspamd/override.d/ ;\
@@ -20,17 +21,17 @@ RUN apt-get -y update ;\
     mkdir -p /var/log/rspamd ;\
     mkdir -p /var/lib/rspamd ;\
     mkdir -p /var/run/rspamd ;\
-    rm -rf /usr/local/share/man /usr/local/share/games /usr/local/share/include /usr/local/share/src /usr/local/lib/python3.8 /usr/local/sbin ;\
+    rm -rf /usr/local/share/man /usr/local/share/games /usr/local/share/include /usr/local/share/src /usr/local/sbin ;\
     apt-get -y autoremove ;\
     apt-get -y clean autoclean ;\
-    rm -rf /var/lib/apt/lists/* ;\
-    chmod +x /bootstrap.sh && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/apt
+    chmod +x /bootstrap.sh ;\
+    rm -rf /var/lib/apt/lists/* /var/cache/apt
 
 COPY syslog-ng.conf /etc/syslog-ng
 VOLUME  [ "/var/lib/rspamd" ]
 EXPOSE 11332 11333 11334
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD rspamadm control stat > /dev/null 2>&1 || curl -fsS --max-time 3 http://127.0.0.1:11334/stat > /dev/null || exit 1
 
 CMD ["/bootstrap.sh"]
 

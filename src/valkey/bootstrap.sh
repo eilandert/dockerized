@@ -23,18 +23,11 @@ else
     rm -f /etc/syslog-ng/conf.d/remote.conf
 fi
 
-FIRSTRUN="/etc/valkey/valkey.conf"
-if [ ! -f ${FIRSTRUN} ]; then
+if [ ! -f /etc/valkey/valkey.conf ]; then
     echo "[VALKEY] valkey.conf not found, populating default configs to /etc/valkey"
-    mkdir -p /etc/valkey/
-    cp -r /etc/valkey.orig/* /etc/valkey/
+    mkdir -p /etc/valkey
+    cp -r /etc/valkey.orig/. /etc/valkey/
 fi
-
-# disable Valkey protected mode and bind as it is unnecessary in context of Docker
-# Also, run in foreground so docker exits when valkey exits
-sed -i s/"^bind\ "/#bind\ / /etc/valkey/valkey.conf ;\
-sed -i s/"protected-mode yes"/"protected-mode no"/ /etc/valkey/valkey.conf ;\
-sed -i s/"daemonize yes"/"daemonize no"/ /etc/valkey/valkey.conf ;\
 
 echo "${TEXT}" && echo "Running on ${PRETTY_NAME}" && echo "Starting ${VERSION}...."
 

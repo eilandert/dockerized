@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM alpine:latest
 LABEL org.opencontainers.image.authors="eilandert"
 LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
@@ -32,12 +33,15 @@ RUN  apk add --no-cache php7-apache2 php7-phar php7-mbstring php7-mcrypt php7-js
   && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
   && mv /etc/dovecot/conf.d/10-ssl.conf /etc/dovecot/conf.d/10-ssl.bak
 
-COPY bootstrap.sh /bootstrap.sh
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/
 
 RUN chmod +x /bootstrap.sh
 
 EXPOSE 80/TCP
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1
 
 CMD "/bootstrap.sh"
 

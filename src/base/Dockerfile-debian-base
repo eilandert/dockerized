@@ -1,62 +1,91 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/base for a recent one
 FROM    debian:trixie-slim
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV     DEBIAN_FRONTEND="noninteractive"
-ENV    DIST=trixie
-COPY    bootstrap.sh /bootstrap.sh
+LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
+        org.opencontainers.image.title="Base image" \
+        org.opencontainers.image.description="Minimal hardened MyGuard base image" \
+        org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/base" \
+        org.opencontainers.image.vendor="MyGuard"
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        DIST=trixie \
+        LANG=C.UTF-8 \
+        LC_ALL=C.UTF-8
+COPY    deb.myguard.nl.gpg /usr/share/keyrings/deb.myguard.nl.gpg
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 
-RUN set -xe ;\
-    apt-get update && apt-get install -y ssl-cert ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    echo 'man-db man-db/auto-update boolean false' | debconf-set-selections ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=trixie-backports'; \
-        echo 'Pin-Priority: 900'; \
+        echo 'Pin-Priority: 600'; \
     } > /etc/apt/preferences.d/99backports ;\
-    echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
-    echo 'man-db man-db/auto-update boolean false'|debconf-set-selections ;\
+    apt-get update ;\
+    apt-get install -y --no-install-recommends ssl-cert ;\
+    echo "deb [signed-by=/usr/share/keyrings/deb.myguard.nl.gpg] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
     apt-get -y update ;\
-    apt-get install -y --no-install-recommends ca-certificates tzdata libjemalloc2 mimalloc wait-for-it myguard openssl ;\
+    apt-get install -y --no-install-recommends ca-certificates tzdata libjemalloc2 mimalloc wait-for-it openssl ;\
     apt-get -y upgrade ;\
     apt-get purge -y --allow-remove-essential e2fsprogs libext2fs2 iproute2 ;\
-    apt-get -y clean ;\
     apt-get -y autoremove ;\
-    apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/* ;\
-    chmod +x /bootstrap.sh ;\
-    # Delete users we don't need
-    sh -x ;\
-        for user in games lp news uucp proxy list irc gnats backup; do deluser -q $user && delgroup -q $user; done ;\
-    # Put users with userid <1000 except root on invalid shell and lock them out
-    for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do \
-        if [ $user != "root" ]; then \
-            usermod -L -s /usr/sbin/nologin $user ;\
-         fi ;\
+    # ---- HARDENING ---- \
+    # Tighter default umask + restrictive login.defs \
+    sed -ri 's|^UMASK\s+[0-9]+|UMASK 027|;  \
+             s|^PASS_MAX_DAYS\s+[0-9]+|PASS_MAX_DAYS 90|;  \
+             s|^PASS_MIN_DAYS\s+[0-9]+|PASS_MIN_DAYS 1|;  \
+             s|^PASS_WARN_AGE\s+[0-9]+|PASS_WARN_AGE 7|;  \
+             s|^LOGIN_RETRIES\s+[0-9]+|LOGIN_RETRIES 3|;  \
+             s|^LOG_OK_LOGINS\s+.*|LOG_OK_LOGINS yes|' /etc/login.defs ;\
+    # Make /etc/profile.d/00-hardening.sh enforce umask 027 + no core dumps \
+    printf 'umask 027\nulimit -S -c 0 >/dev/null 2>&1 || true\nreadonly TMOUT=900\nexport HISTSIZE=1000 HISTFILESIZE=2000 HISTCONTROL=ignoredups:ignorespace\n' > /etc/profile.d/00-hardening.sh ;\
+    chmod 0644 /etc/profile.d/00-hardening.sh ;\
+    # Disable core dumps system-wide \
+    { echo '* hard core 0'; echo '* soft core 0'; echo 'root hard core 0'; echo 'root soft core 0'; } >> /etc/security/limits.conf ;\
+    # No interactive cron for unknown users \
+    : > /etc/cron.allow ;\
+    chmod 0600 /etc/cron.allow ;\
+    # Lock down /etc/securetty so root cannot log in on any tty \
+    : > /etc/securetty ;\
+    chmod 0600 /etc/securetty ;\
+    # Remove world-writable bits on system dirs \
+    chmod -R go-w /usr/local/bin /usr/local/sbin 2>/dev/null || true ;\
+    # ---- USER PRUNING ---- \
+    for user in games lp news uucp proxy list irc gnats backup; do deluser -q "$user" || true; delgroup -q "$user" || true; done ;\
+    for user in $(awk -F: '($3 < 1000) {print $1 }' /etc/passwd); do \
+        if [ "$user" != "root" ]; then \
+            usermod -L -s /usr/sbin/nologin "$user" ;\
+        fi ;\
     done ;\
-    # Don't need these files in a Docker.
-    # Ubuntu symlinks /sbin to /usr/sbin and Debian does not, so we have to delete the same file twice
-    for file in `ls /usr/sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /usr/sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /usr/sbin/fs*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /usr/sbin/mk*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /usr/sbin/swap*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; unlink $file; done ;\
-    for file in `ls /sbin/e2*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /sbin/e4*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /sbin/fs*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /sbin/mk*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    for file in `ls /sbin/swap*`; do dpkg-statoverride --quiet --update --add root adm 0000 $file; rm -f $file; done ;\
-    \
-    for file in backblocks dumpe2fs fstrim isosize resize2fs rtcwake sulogin tune2fs wipefs; \
-      do dpkg-statoverride --quiet --update --add root adm 0000 /sbin/$file; rm -f /sbin/$file; \
-         dpkg-statoverride --quiet --update --add root adm 0000 /usr/sbin/$file; rm -f /usr/sbin/$file; \
-      done ;\
-    \
-    # same applies for /bin -> /usr/bin
-    \
-    for file in dmesg su sudo; \
-      do dpkg-statoverride --quiet --update --add root adm 0000 /bin/$file; rm -f /bin/$file; \
-         dpkg-statoverride --quiet --update --add root adm 0000 /usr/bin/$file; rm -f /usr/bin/$file; \
-      done ;\
-    echo "alias ls='ls --color=auto'" > /root/.bashrc
+    # ---- SUID / DANGEROUS BINARY REMOVAL ---- \
+    remove_path() { \
+        path="$1" ; \
+        dpkg-statoverride --quiet --remove "$path" 2>/dev/null || true ; \
+        dpkg-statoverride --quiet --update --add root adm 0000 "$path" 2>/dev/null || true ; \
+        rm -f "$path" ; \
+    } ;\
+    for file in /usr/sbin/e2* /usr/sbin/e4* /usr/sbin/fs* /usr/sbin/mk* /usr/sbin/swap* /sbin/e2* /sbin/e4* /sbin/fs* /sbin/mk* /sbin/swap*; do \
+        [ -e "$file" ] || [ -L "$file" ] || continue ; \
+        remove_path "$file" ; \
+    done ;\
+    for file in backblocks dumpe2fs fstrim isosize resize2fs rtcwake sulogin tune2fs wipefs; do \
+        remove_path "/sbin/$file" ; \
+        remove_path "/usr/sbin/$file" ; \
+    done ;\
+    for file in dmesg su sudo wall write; do \
+        remove_path "/bin/$file" ; \
+        remove_path "/usr/bin/$file" ; \
+    done ;\
+    # Drop setuid/setgid from everything still left — containers don't need it. \
+    # Child images that install setuid binaries (e.g. openssh's sudo) re-add the \
+    # bit explicitly via dpkg or chmod. \
+    find /usr /bin /sbin -xdev \( -perm -4000 -o -perm -2000 \) -type f -exec chmod a-s {} \; 2>/dev/null || true
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD test -f /tmp/healthy && find /tmp/healthy -mmin -10 | grep -q . || exit 1
+
+STOPSIGNAL SIGTERM
 
 CMD     ["/bootstrap.sh"]

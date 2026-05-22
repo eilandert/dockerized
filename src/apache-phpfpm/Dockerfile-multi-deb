@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/apache-phpfpm for a recent one
 
 FROM    docker.io/eilandert/php-fpm:deb-multi
@@ -7,35 +8,30 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
         org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/apache-phpfpm" \
         org.opencontainers.image.vendor="MyGuard" \
-        org.opencontainers.image.version="#VERSION#"
-ENV     DEBIAN_FRONTEND="noninteractive"
-ENV     TZ=Europe/Amsterdam
-COPY    bootstrap.sh /bootstrap.sh
+        org.opencontainers.image.version="multi"
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        TZ=Europe/Amsterdam
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 COPY    conf-available /tmp/conf-available
 
-RUN apt-get -y update ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    apt-get -y update ;\
     apt-get install -y --no-install-recommends apache2 apache2-utils libjemalloc2 mimalloc ;\
-    apt-get -y autoremove ;\
-    apt-get -y clean ;\
-    apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
-
-RUN a2dismod status mpm_prefork ;\
+    a2dismod status mpm_prefork ;\
     a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
     cp /tmp/conf-available/php${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\
-    ${PHPVERSION}-fpm
-
-RUN mv /etc/apache2 /etc/apache2.orig ;\
+    ${PHPVERSION}-fpm ;\
+    mv /etc/apache2 /etc/apache2.orig ;\
     mv /etc/nullmailer /etc/nullmailer.orig ;\
-    mkdir -p /etc/apache2 ;\
-    mkdir -p /etc/php ;\
-    mkdir -p /etc/nullmailer ;\
-    chmod +x /bootstrap.sh
-EXPOSE  443 443
-EXPOSE  80 80
+    mkdir -p /etc/apache2 /etc/php /etc/nullmailer ;\
+    rm -rf /tmp/conf-available
+EXPOSE  80
+EXPOSE  443
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1
 
 CMD     ["/bootstrap.sh"]
-

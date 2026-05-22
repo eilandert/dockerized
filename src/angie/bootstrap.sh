@@ -40,8 +40,8 @@ if [ -n "${PHPVERSION}" ]; then
 
     if [ ! -x /run/php ]; then
         mkdir -p /run/php
-        chown www-data:www-data /run/php
-        chmod 755 /run/php
+        chown phpfpm:www-data /run/php
+        chmod 750 /run/php
     fi
 
     COMPOSERPATH="/usr/bin/composer"
@@ -52,16 +52,27 @@ if [ -n "${PHPVERSION}" ]; then
     fi
 fi
 
-cp -p /etc/angie.orig/mime.types /etc/angie/mime.types
-cp -p /etc/angie.orig/angie.conf-packaged /etc/angie/angie.conf-packaged
-cp -p /etc/angie.orig/angie.conf-original /etc/angie/angie.conf-original
-cp -p /etc/angie.orig/scripts/* /etc/angie/scripts
-cp -p /etc/angie.orig/snippets/* /etc/angie/snippets
+# Refresh static helper files from the .orig copy. Wrapped in test guards
+# so a partial /etc/angie.orig (e.g. an upstream package without scripts/
+# or snippets/) doesn't error out on an unmatched glob.
+[ -f /etc/angie.orig/mime.types ] && cp -p /etc/angie.orig/mime.types /etc/angie/mime.types
+[ -f /etc/angie.orig/angie.conf-packaged ] && cp -p /etc/angie.orig/angie.conf-packaged /etc/angie/angie.conf-packaged
+[ -f /etc/angie.orig/angie.conf-original ] && cp -p /etc/angie.orig/angie.conf-original /etc/angie/angie.conf-original
+if [ -d /etc/angie.orig/scripts ] && [ -n "$(ls -A /etc/angie.orig/scripts 2>/dev/null)" ]; then
+    mkdir -p /etc/angie/scripts
+    cp -p /etc/angie.orig/scripts/. /etc/angie/scripts/ 2>/dev/null || cp -rp /etc/angie.orig/scripts/* /etc/angie/scripts/
+fi
+if [ -d /etc/angie.orig/snippets ] && [ -n "$(ls -A /etc/angie.orig/snippets 2>/dev/null)" ]; then
+    mkdir -p /etc/angie/snippets
+    cp -rp /etc/angie.orig/snippets/* /etc/angie/snippets/
+fi
 
 # Make sure all available modules are available outside of docker and remove modules which aren't there (anymore)
 mkdir -p /etc/angie/modules-available
 rm -f /etc/angie/modules-available/*
-cp -rp /usr/share/angie/modules-available/* /etc/angie/modules-available
+if [ -d /usr/share/angie/modules-available ] && [ -n "$(ls -A /usr/share/angie/modules-available 2>/dev/null)" ]; then
+    cp -rp /usr/share/angie/modules-available/* /etc/angie/modules-available/
+fi
 
 #reorder modules and symlink them to /usr/share/angie/modules-enabled
 chmod +x /etc/angie/scripts/reorder-modules.sh
@@ -116,19 +127,25 @@ if [ -n "${PHPVERSION}" ]; then
     if [ "${MODE}" = "MULTI" ] && [ "${PHP83}" = "YES" ]; then
         startphp "8.3"
     fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP84}" = "YES" ]; then
+        startphp "8.4"
+    fi
+    if [ "${MODE}" = "MULTI" ] && [ "${PHP85}" = "YES" ]; then
+        startphp "8.5"
+    fi
     if [ "${PHPVERSION}" = "MULTI" ] && [ "${SETPHP}" = 0 ]; then
         echo "[ANGIE] --->"
         echo "[ANGIE] ---> You have obtained the MULTI-PHP version of the Docker, however..."
-        echo "[ANGIE] ---> No environment variable for PHP56, PHP74, PHP80, PHP81, PHP82, or PHP83 has been set"
+        echo "[ANGIE] ---> No environment variable for PHP56, PHP74, PHP80, PHP81, PHP82, PHP83, PHP84, or PHP85 has been set"
         echo "[ANGIE] ---> Uncertain of the next steps, the process will now exit..."
-	echo "[ANGIE] --->"
+        echo "[ANGIE] --->"
         exit
     fi
 fi
 # /PHPBLOCK
 
 if [ -n "${MODULES}" ]; then
-    $NGX_MODULES = ${MODULES};
+    NGX_MODULES="${MODULES}"
 fi
 
 if [ ! -n "${NGX_MODULES}" ]; then

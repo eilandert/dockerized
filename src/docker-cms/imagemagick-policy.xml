@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policymap [
+  <!ELEMENT policymap (policy)*>
+  <!ATTLIST policymap xmlns CDATA #FIXED ''>
+  <!ELEMENT policy EMPTY>
+  <!ATTLIST policy xmlns CDATA #FIXED '' domain NMTOKEN #REQUIRED
+    name NMTOKEN #IMPLIED pattern CDATA #IMPLIED rights NMTOKEN #IMPLIED
+    stealth NMTOKEN #IMPLIED value CDATA #IMPLIED>
+]>
+<!--
+  Hardened ImageMagick policy for CMS hosting.
+  Disables the historically-exploitable coders (Ghostscript-backed, MSL,
+  URL, ephemeral) and caps memory/disk so an upload bomb can't OOM the
+  container.
+
+  Drop in at /etc/ImageMagick-6/policy.xml.
+-->
+<policymap>
+  <!-- Resource caps -->
+  <policy domain="resource" name="memory"  value="256MiB"/>
+  <policy domain="resource" name="map"     value="512MiB"/>
+  <policy domain="resource" name="width"   value="16KP"/>
+  <policy domain="resource" name="height"  value="16KP"/>
+  <policy domain="resource" name="area"    value="128MP"/>
+  <policy domain="resource" name="disk"    value="1GiB"/>
+  <policy domain="resource" name="time"    value="120"/>
+  <policy domain="resource" name="thread"  value="2"/>
+  <policy domain="resource" name="throttle" value="0"/>
+
+  <!-- Disable Ghostscript-backed and other dangerous coders.
+       These have a long CVE history (ImageTragick et al). -->
+  <policy domain="coder" rights="none" pattern="PS"/>
+  <policy domain="coder" rights="none" pattern="PS2"/>
+  <policy domain="coder" rights="none" pattern="PS3"/>
+  <policy domain="coder" rights="none" pattern="EPI"/>
+  <policy domain="coder" rights="none" pattern="EPS"/>
+  <policy domain="coder" rights="none" pattern="EPS2"/>
+  <policy domain="coder" rights="none" pattern="EPS3"/>
+  <policy domain="coder" rights="none" pattern="EPSF"/>
+  <policy domain="coder" rights="none" pattern="EPSI"/>
+  <policy domain="coder" rights="none" pattern="PDF"/>
+  <policy domain="coder" rights="none" pattern="XPS"/>
+  <policy domain="coder" rights="none" pattern="MSL"/>
+  <policy domain="coder" rights="none" pattern="MVG"/>
+  <policy domain="coder" rights="none" pattern="LABEL"/>
+  <policy domain="coder" rights="none" pattern="URL"/>
+  <policy domain="coder" rights="none" pattern="HTTPS"/>
+  <policy domain="coder" rights="none" pattern="HTTP"/>
+  <policy domain="coder" rights="none" pattern="FTP"/>
+  <policy domain="coder" rights="none" pattern="TEXT"/>
+  <policy domain="coder" rights="none" pattern="SHOW"/>
+  <policy domain="coder" rights="none" pattern="WIN"/>
+  <policy domain="coder" rights="none" pattern="PLT"/>
+
+  <!-- Block delegate execution (used by all of the above + EPI etc.) -->
+  <policy domain="delegate" rights="none" pattern="gs"/>
+
+  <!-- Refuse to read indirect paths (file:@/etc/passwd attack). -->
+  <policy domain="path" rights="none" pattern="@*"/>
+
+  <!-- Block ephemeral and other risky filename modules. -->
+  <policy domain="module" rights="none" pattern="EPHEMERAL"/>
+  <policy domain="module" rights="none" pattern="URL"/>
+  <policy domain="module" rights="none" pattern="HTTPS"/>
+  <policy domain="module" rights="none" pattern="HTTP"/>
+  <policy domain="module" rights="none" pattern="FTP"/>
+  <policy domain="module" rights="none" pattern="PS"/>
+  <policy domain="module" rights="none" pattern="PDF"/>
+  <policy domain="module" rights="none" pattern="XPS"/>
+</policymap>

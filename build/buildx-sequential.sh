@@ -37,18 +37,39 @@ format_time() {
     printf "%02d:%02d:%02d" $hours $minutes $secs
 }
 
-# Ensure the push is only initiated on build machine
-PUSH=""
-if [ "$(uname -n)" == "build" ]; then
-    PUSH="--push"
-    log_info "Push enabled for build machine"
+# PUSH gate.
+#   - Explicit override: PUSH=1 / PUSH=0 in the environment wins.
+#   - Default: enabled on the build host (hostname == "build"), disabled elsewhere.
+# Set LOAD=1 (mutually exclusive with PUSH) to load images into the local docker
+# daemon so they can be `docker run` on a dev box.
+PUSH_ARG=""
+if [[ -n "${PUSH:-}" ]]; then
+    if [[ "$PUSH" == "1" || "$PUSH" == "true" ]]; then
+        PUSH_ARG="--push"
+        log_info "Push enabled (PUSH=$PUSH)"
+    else
+        log_info "Push explicitly disabled (PUSH=$PUSH)"
+    fi
+elif [ "$(uname -n)" == "build" ]; then
+    PUSH_ARG="--push"
+    log_info "Push enabled (build host)"
 else
-    log_warning "Running on $(uname -n), push disabled"
+    log_warning "Running on $(uname -n), push disabled (set PUSH=1 to override)"
 fi
 
-# Remote aptly sync
+if [[ -z "$PUSH_ARG" && "${LOAD:-0}" == "1" ]]; then
+    PUSH_ARG="--load"
+    log_info "Load enabled — images will be imported into the local docker daemon"
+fi
+
+# Remote aptly sync — track failure so it shows up in the final summary
+# instead of silently letting the rest of the run use stale packages.
+APTLY_SYNC_OK=1
 log_info "Syncing with remote aptly server..."
-ssh -p 8889 aptly@192.168.178.11 /aptly/scripts/daily.sh || log_warning "Remote sync failed, continuing anyway"
+if ! ssh -p 8889 aptly@192.168.178.11 /aptly/scripts/daily.sh; then
+    log_warning "Remote aptly sync failed — continuing with possibly stale packages"
+    APTLY_SYNC_OK=0
+fi
 
 # Track last run
 date > /tmp/dockerized.lastrun
@@ -72,21 +93,32 @@ CACHE_DIR="${BUILDX_CACHE_DIR:-$DEFAULT_CACHE_ROOT/dockerized-buildx}"
 mkdir -p "$CACHE_DIR"
 log_info "Using build cache: $CACHE_DIR"
 
-# Clean up any existing buildx instances
-log_info "Cleaning up buildx..."
-docker buildx rm 2>/dev/null || true
-docker system prune -f -a 2>/dev/null || true
+# Create (or reuse) a named buildx builder. Named so we can clean up exactly
+# what we created, and so concurrent runs don't trip over each other.
+BUILDER_NAME="${BUILDX_BUILDER:-dockerized-build}"
+log_info "Preparing buildx builder: $BUILDER_NAME"
+if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
+    docker buildx create --name "$BUILDER_NAME" --use >/dev/null
+else
+    docker buildx use "$BUILDER_NAME"
+fi
 
-# Create new buildx instance
-log_info "Creating buildx instance..."
-docker buildx create --use 2>/dev/null || true
+# NOTE: previously this script ran `docker system prune -f -a` before and
+# after the loop. That nukes every image on the host (hostile to anything
+# else running on this machine) and forces a full re-pull of the official
+# ubuntu/debian bases every run. Cache lives in $CACHE_DIR; let buildkit
+# manage its own state. Set DOCKERIZED_PRUNE=1 to opt back in.
+if [[ "${DOCKERIZED_PRUNE:-0}" == "1" ]]; then
+    log_warning "DOCKERIZED_PRUNE=1 — running 'docker system prune -f -a'"
+    docker system prune -f -a 2>/dev/null || true
+fi
 
 # Define build targets organized by dependency layer
 # PHP versions built: 5.6, 7.4, 8.0, 8.2, 8.4, 8.5
 declare -a LAYERS=(
-    # Layer 1: Base images (6 targets) - no dependencies
-    "resolute noble jammy trixie rolling devel"
-    
+    # Layer 1: Base images (2 targets) - FROM official upstream images only
+    "ubuntu-base debian-base"
+
     # Layer 2: PHP-FPM and Databases - depends on base images
     # Includes: 56, 74, 80, 82, 84, 85, multiphp, mariadb, redis, valkey
     "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
@@ -160,10 +192,11 @@ for LAYER in "${LAYERS[@]}"; do
         
         # Build single target (30 minute timeout per target)
         if timeout 1800 docker buildx bake -f "$PROJECT_ROOT/docker-bake.hcl" \
+        --builder "$BUILDER_NAME" \
         --set "*.cache-from=type=local,src=$CACHE_DIR" \
         --set "*.cache-to=type=local,dest=$CACHE_DIR,mode=max" \
         --progress=plain \
-        ${PUSH} $TARGET > "$TARGET_LOG" 2>&1; then
+        ${PUSH_ARG} $TARGET > "$TARGET_LOG" 2>&1; then
             
             SUCCESS=$((SUCCESS+1))
             TARGET_ELAPSED=$(($(date +%s) - TARGET_START_TIME))
@@ -196,10 +229,18 @@ for LAYER in "${LAYERS[@]}"; do
     LAYER_NUM=$((LAYER_NUM+1))
 done
 
-# Cleanup
-log_info "Cleaning up buildx..."
-docker buildx rm 2>/dev/null || true
-docker system prune -f -a 2>/dev/null || true
+# Cleanup — only remove the builder we explicitly created above.
+# Skip the system-wide image prune; the local cache directory is what matters.
+log_info "Cleaning up buildx builder $BUILDER_NAME..."
+docker buildx rm "$BUILDER_NAME" 2>/dev/null || true
+if [[ "${DOCKERIZED_PRUNE:-0}" == "1" ]]; then
+    docker system prune -f -a 2>/dev/null || true
+fi
+
+# Surface aptly-sync failure in the final summary too
+if [[ "$APTLY_SYNC_OK" == "0" ]]; then
+    log_warning "Remote aptly sync FAILED earlier in this run — built packages may be stale."
+fi
 
 # Final Summary
 echo ""

@@ -86,10 +86,13 @@ group "misc" {
        "alpine-letsencrypt", "rbldnsd", "ubuntu-reprepro", "debian-sitewarmup", "alpine-unbound", "aptly", "debian-openssh" ]
 }
 
-target "cms" {
-    dockerfile = "Dockerfile-ubu"
+target "debian-angie-cms" {
+    dockerfile = "Dockerfile-deb"
     context = "src/docker-cms"
-    tags = ["docker.io/eilandert/docker-cms:latest"]
+    tags = ["docker.io/eilandert/angie-cms:debian", "docker.io/eilandert/angie-cms:latest"]
+    contexts = {
+        "docker.io/eilandert/angie:deb-php8.5" = "target:debian-angie-php85"
+    }
 }
 
 target "ubuntu-base" {
@@ -108,7 +111,7 @@ target "ubuntu-phpfpm56" {
     tags = ["docker.io/eilandert/php-fpm:5.6"]
     context = "src/php-fpm"
     dockerfile = "Dockerfile-56-ubu"
-    inherits = ["rolling"]
+    inherits = ["ubuntu-base"]
 }
 
 target "debian-phpfpm56" {
@@ -422,7 +425,7 @@ target "rbldnsd" {
 target "alpine-redis" {
    tags = ["docker.io/eilandert/redis:scratch"]
    context = "src/redis6-scratch"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 
 target "ubuntu-redis" {
@@ -452,13 +455,13 @@ target "debian-valkey" {
 target "ubuntu-reprepro" {
    tags = ["docker.io/eilandert/reprepro"]
    context = "src/reprepro"
-   dockerfile = "Dockerfile"
+   dockerfile = "Dockerfile-ubu"
 }
 
 target "ubuntu-roundcube" {
    tags = ["docker.io/eilandert/roundcube:ubuntu"]
    context = "src/roundcube"
-   dockerfile = "Dockerfile-ubuntu"
+   dockerfile = "Dockerfile-ubu"
 }
 
 target "debian-roundcube" {
@@ -470,18 +473,18 @@ target "debian-roundcube" {
 target "alpine-rspamd" {
    tags = ["docker.io/eilandert/rspamd"]
    context = "src/rspamd"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 
 target "debian-rspamd-git" {
    tags = ["docker.io/eilandert/rspamd-git:latest"]
    context = "src/rspamd-git"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile-deb-git"
 }
 target "debian-rspamd-official" {
    tags = ["docker.io/eilandert/rspamd-git:official"]
    context = "src/rspamd-git"
-   dockerfile = "Dockerfile-official"
+   dockerfile = "Dockerfile-deb-official"
 }
 
 target "debian-rspamd" {
@@ -492,12 +495,12 @@ target "debian-rspamd" {
 target "ubuntu-rspamd" {
    tags = ["docker.io/eilandert/rspamd-git:ubuntu"]
    context = "src/rspamd-git"
-   dockerfile = "Dockerfile-stable"
+   dockerfile = "Dockerfile-ubu"
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]
    context = "src/sitemap_warmup"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile-deb"
 }
 target "alpine-unbound" {
    tags = ["docker.io/eilandert/unbound"]
@@ -507,7 +510,7 @@ target "alpine-unbound" {
 target "alpine-vimbadmin" {
    tags = ["docker.io/eilandert/vimbadmin:alpine"]
    context = "src/vimbadmin"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 target "debian-vimbadmin" {
    tags = ["docker.io/eilandert/vimbadmin:debian", "docker.io/eilandert/vimbadmin:latest"]
@@ -534,7 +537,7 @@ target "debian-openssh" {
 target "aptly" {
    tags = ["docker.io/eilandert/aptly"]
    context = "src/aptly"
-   dockerfile = "Dockerfile-ubu"
+   dockerfile = "Dockerfile"
 }
 
 target "debian-angie" {
@@ -633,34 +636,8 @@ target "debian-angie-multi" {
     dockerfile = "Dockerfile-multi-deb"
 }
 
-# Global cache configuration for docker buildx
-# This enables inline caching and persistent build cache mounts
-variable "DOCKER_REGISTRY" {
-  default = "docker.io"
-}
-
-variable "CACHE_REGISTRY" {
-  default = "docker.io"
-}
-
-# Cache configuration applied to all targets
-# - type=inline: include cache metadata in built image (requires push)
-# - type=local: persist cache to local directory
-variable "CACHE_TO" {
-  default = ""
-}
-
-variable "CACHE_FROM" {
-  default = ""
-}
-
-# Apply cache settings to all targets via common settings
-# Override in buildx.sh: CACHE_TO="type=inline" or CACHE_TO="type=local,dest=/tmp/buildx-cache"
-common {
-  output {
-    # Enable inline cache for faster rebuilds when images are pushed
-    # Add to BUILDX_OPTS in buildx.sh: CACHE_TO="type=inline"
-    cache-to = [ notequal(CACHE_TO, "") ? CACHE_TO : "" ]
-    cache-from = [ notequal(CACHE_FROM, "") ? CACHE_FROM : "" ]
-  }
-}
+# Cache is applied per-invocation by the orchestrator via:
+#   --set "*.cache-from=type=local,src=$CACHE_DIR"
+#   --set "*.cache-to=type=local,dest=$CACHE_DIR,mode=max"
+# The previous `common { output { ... } }` block was not valid bake syntax
+# and silently did nothing — removed to avoid confusion.

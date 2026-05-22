@@ -1,11 +1,11 @@
+# syntax=docker/dockerfile:1.7
 FROM alpine:edge
 LABEL org.opencontainers.image.authors="eilandert"
 LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
 LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-COPY bootstrap.sh /bootstrap.sh
-
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 RUN  apk update && apk upgrade \
   && apk add --no-cache nginx nginx-mod-http-fancyindex tzdata \
   && chmod +x /bootstrap.sh \
@@ -14,7 +14,8 @@ RUN  apk update && apk upgrade \
 
 EXPOSE 80/TCP
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD curl -f http://localhost/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1
 
 CMD "/bootstrap.sh"
 

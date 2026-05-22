@@ -1,0 +1,43 @@
+# syntax=docker/dockerfile:1.7
+FROM    eilandert/ubuntu-base:rolling
+LABEL   org.opencontainers.image.authors="eilandert" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
+    apt-get update ;\
+    apt-get install --no-install-recommends -y \
+        s6 \
+        cron \
+        nginx-light \
+        ca-certificates \
+        reprepro \
+        openssh-server \
+        devscripts \
+        rsync
+
+VOLUME /repo
+
+COPY ./repo /tpl-repo
+COPY ./services /services
+COPY --chmod=0755 ./sh/start.sh /start.sh
+COPY --chmod=0755 ./sh/ssh-createkeys.sh /ssh-createkeys.sh
+
+RUN echo "export PATH=/repo/bin:${PATH}" >> /root/.bashrc ;\
+    chmod +x /services/cron/* /services/nginx/* /services/sshd/* ;\
+    rm /etc/nginx/sites-available/default ;\
+    ln -s /repo/conf/nginx_site /etc/nginx/sites-available/default ;\
+    ln -s /repo/ssh /root/.ssh ;\
+    ln -s /repo/gnupg /root/.gnupg
+
+ENV PATH="/repo/bin:${PATH}"
+EXPOSE 22 80
+
+ENTRYPOINT ["/start.sh"]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD test -f /tmp/healthy && find /tmp/healthy -mmin -10 | grep -q . || exit 1
+
+CMD []

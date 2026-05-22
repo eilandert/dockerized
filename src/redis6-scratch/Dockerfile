@@ -1,16 +1,12 @@
-FROM alpine:latest as build
+# syntax=docker/dockerfile:1.7
+FROM alpine:latest AS build
 
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+LABEL org.opencontainers.image.authors="eilandert" \
+      org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
-# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN apk update && apk upgrade && addgroup -S -g 1000 redis && adduser -S -G redis -u 999 redis
-# alpine already has a gid 999, so we'll use the next id
-
-#ENV REDIS_DOWNLOAD_URL http://download.redis.io/redis-stable.tar.gz
-
-RUN set -eux; \
-    \
+RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
+    apk update && apk upgrade ;\
+    addgroup -S -g 1000 redis && adduser -S -G redis -u 999 redis ;\
     apk add --no-cache --virtual .build-deps \
         coreutils \
         gcc \
@@ -19,9 +15,9 @@ RUN set -eux; \
         musl-dev \
         openssl-dev \
         curl \
-        py-pip \
-    ;\
-    \
+        py-pip
+
+RUN set -eux ;\
     pip install lastversion ;\
     DOWNLOADURL=$(lastversion --source https://github.com/redis/redis) ;\
     mkdir -p /usr/src/redis ;\
@@ -62,7 +58,7 @@ COPY --from=build --chown=999:1000 /data /data
 VOLUME ["/data"]
 EXPOSE 6379
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD redis-cli ping || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD redis-cli ping | grep -q PONG || exit 1
 
 CMD ["/usr/bin/redis-server"]
 

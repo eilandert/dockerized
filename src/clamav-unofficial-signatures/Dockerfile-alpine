@@ -1,32 +1,30 @@
+# syntax=docker/dockerfile:1.7
 FROM alpine:edge
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
-
-LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
+LABEL   org.opencontainers.image.authors="eilandert" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        maintainer="Thijs Eilander <eilander@myguard.nl>"
 
 COPY config.orig /config.orig
-COPY bootstrap.sh /bootstrap.sh
-COPY check.sh /check.sh
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY --chmod=0755 check.sh /check.sh
 
-RUN apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tzdata \
-  && apk update && apk upgrade \
-  && apk del alpine-keys apk-tools \
-  && rm -rf /var/cache/apk/* /lib/apk/db /usr/src/* \
-  && mkdir -p /run/clamav \
-  && chown clamav:clamav -R /run/clamav \
-  && chown clamav:clamav -R /var/lib/clamav \
-  && mkdir -p /usr/local/sbin/ \
-  && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/clamav-unofficial-sigs.sh -o /usr/local/sbin/clamav-unofficial-sigs \
-#  && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/user.conf -o /config.orig/clamav-unofficial-sigs/user.conf \
-  && curl -s https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/master.conf -o /config.orig/clamav-unofficial-sigs/master.conf \
-  && sed -i s/"if \[ -r "/"if \[ -f "/g /usr/local/sbin/clamav-unofficial-sigs \
-  && sed -i s/"if \[ ! -w "/"if \[ -z "/g /usr/local/sbin/clamav-unofficial-sigs \
-  && chmod +x /usr/local/sbin/clamav-unofficial-sigs \
-  && chmod +x /bootstrap.sh && chmod +x /check.sh \
-#  && freshclam --user=clamav --no-warnings --foreground
+RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
+    set -eux ;\
+    apk update && apk upgrade ;\
+    apk add --no-cache bash clamav wget clamav-libunrar curl bind-tools rsync tzdata ;\
+    mkdir -p /run/clamav /usr/local/sbin/ ;\
+    chown -R clamav:clamav /run/clamav /var/lib/clamav ;\
+    curl -fsSL https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/clamav-unofficial-sigs.sh -o /usr/local/sbin/clamav-unofficial-sigs ;\
+    curl -fsSL https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/master.conf -o /config.orig/clamav-unofficial-sigs/master.conf ;\
+    sed -i 's/if \[ -r /if \[ -f /g' /usr/local/sbin/clamav-unofficial-sigs ;\
+    sed -i 's/if \[ ! -w /if \[ -z /g' /usr/local/sbin/clamav-unofficial-sigs ;\
+    chmod +x /usr/local/sbin/clamav-unofficial-sigs ;\
+    apk del alpine-keys apk-tools ;\
+    rm -rf /lib/apk/db /usr/src/*
+
 VOLUME ["/var/lib/clamav"]
 EXPOSE 3310/tcp
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD test -f /var/log/clamav-unofficial-sigs.log && find /var/log/clamav-unofficial-sigs.log -mmin -1440 | grep -q . || exit 1
 
 CMD ["/bootstrap.sh"]
-HEALTHCHECK CMD /check.sh

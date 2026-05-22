@@ -1,33 +1,51 @@
-# This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
+# syntax=docker/dockerfile:1.7
 FROM eilandert/debian-base:stable
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
-LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV     DEBIAN_FRONTEND="noninteractive"
+LABEL org.opencontainers.image.authors="eilandert" \
+      org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+      org.opencontainers.image.url="https://hub.docker.com/r/eilandert/valkey" \
+      org.opencontainers.image.documentation="https://deb.myguard.nl/2026/05/valkey-explained-redis-fork-debian-ubuntu-package/" \
+      org.opencontainers.image.title="Valkey (myguard build, Debian)" \
+      org.opencontainers.image.description="Daily-rebuilt, hardened Valkey — the BSD-licensed Redis fork. Drop-in Redis replacement (via valkey-redis-compat). Packages from https://deb.myguard.nl" \
+      org.opencontainers.image.licenses="BSD-3-Clause" \
+      maintainer="Thijs Eilander <eilander@myguard.nl>"
 
-COPY    bootstrap.sh /bootstrap.sh
-RUN set -ex ;\
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
     apt-get update ;\
     apt-get -y purge libjemalloc2 ;\
     apt-get -y --no-install-recommends install \
-      ca-certificates tzdata openssl syslog-ng \
-      valkey ;\
-    # disable Valkey protected mode and bind as it is unnecessary in context of Docker
-    # Also, run in foreground and write the errorlog to /dev/stdout
-    sed -i s/"^bind\ "/#bind\ / /etc/valkey/valkey.conf ;\
-    sed -i s/"protected-mode yes"/"protected-mode no"/ /etc/valkey/valkey.conf ;\
-    sed -i s/"daemonize yes"/"daemonize no"/ /etc/valkey/valkey.conf ;\
-    sed -i s/"logfile \/var\/log\/valkey\/valkey-server.log"/"logfile \/dev\/stdout"/ /etc/valkey/valkey.conf ;\
+        ca-certificates \
+        tzdata \
+        openssl \
+        syslog-ng-core \
+        valkey-server \
+        valkey-tools \
+        valkey-sentinel \
+        valkey-redis-compat ;\
+    sed -ri \
+        -e 's|^bind\s.*|# &|' \
+        -e 's|^protected-mode\s+yes|protected-mode no|' \
+        -e 's|^daemonize\s+yes|daemonize no|' \
+        -e 's|^logfile\s+/var/log/valkey/valkey-server\.log|logfile /dev/stdout|' \
+        /etc/valkey/valkey.conf ;\
     mv /etc/valkey /etc/valkey.orig ;\
-    apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
-    chmod +x /bootstrap.sh
-VOLUME ["/var/lib/valkey"]
-EXPOSE 6379
-COPY syslog-ng.conf /etc/syslog-ng
+    apt-get -y autoremove --purge ;\
+    rm -rf /var/log/* /tmp/* /var/tmp/*
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD valkey-cli ping || exit 1
+WORKDIR    /var/lib/valkey
+VOLUME     ["/var/lib/valkey"]
+EXPOSE     6379
+STOPSIGNAL SIGTERM
 
-CMD [ "/bootstrap.sh" ]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD valkey-cli ping | grep -q PONG || exit 1
 
-
+CMD ["/bootstrap.sh"]

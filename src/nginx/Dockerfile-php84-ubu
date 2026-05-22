@@ -1,22 +1,33 @@
+# syntax=docker/dockerfile:1.7
 FROM    docker.io/eilandert/php-fpm:8.4
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>" \
         org.opencontainers.image.title="Nginx with ModSecurity & PageSpeed" \
-        org.opencontainers.image.description="High-performance web server with security and optimization modules" \
+        org.opencontainers.image.description="Hardened high-performance web server with security and optimization modules" \
         org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/nginx" \
         org.opencontainers.image.vendor="MyGuard" \
-        org.opencontainers.image.version="#VERSION#"
+        org.opencontainers.image.version="8.4"
 ENV     DEBIAN_FRONTEND="noninteractive"
 
-COPY    bootstrap.sh /bootstrap.sh
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY    healthz.conf /healthz.conf
+COPY    01-hardening.conf     /tmp/security/conf.d/01-hardening.conf
+COPY    02-rate-limits.conf   /tmp/security/conf.d/02-rate-limits.conf
+COPY    security-headers.conf /tmp/security/snippets/security-headers.conf
+COPY    ssl-hardening.conf    /tmp/security/snippets/ssl-hardening.conf
+COPY    deny-hidden-files.conf /tmp/security/snippets/deny-hidden-files.conf
 
-RUN set -ex ;\
+# BuildKit cache mounts: apt lists+archives are kept on cache mounts (not in
+# image layers), so we keep the docker-clean stub removal and skip the
+# rm -rf /var/lib/apt/lists/* at the end — the mount handles it.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
     echo "deb [trusted=yes] http://deb.myguard.nl:8888 ${DIST} main" > /etc/apt/sources.list.d/deb.myguard.nl.list ;\
-    if [ -d /etc/php.orig ]; then cp -rn /etc/php.orig/* /etc/php/ 2>/dev/null || true; fi ;\
     apt-get update ;\
-    apt-get -y upgrade
-
-RUN apt-get -y --no-install-recommends install \
+    apt-get -y upgrade ;\
+    apt-get -y --no-install-recommends install \
       brotli \
       curl \
       fcgiwrap \
@@ -33,22 +44,37 @@ RUN apt-get -y --no-install-recommends install \
       openssl \
       ssl-cert \
       zstd ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/
-
-RUN mv /etc/nginx /etc/nginx.orig ;\
+    mv /etc/nginx /etc/nginx.orig ;\
     mv /etc/modsecurity /etc/modsecurity.orig ;\
-    mkdir -p /etc/nginx ;\
-    mkdir -p /etc/modsecurity ;\
-    chmod +x /bootstrap.sh ;\
-    rm -f /var/spool/nullmailer/trigger
-WORKDIR /etc/nginx
-EXPOSE  443/udp
-EXPOSE  443 443
-EXPOSE  80 80
+    mkdir -p /etc/nginx /etc/modsecurity ;\
+    install -m 0644 /healthz.conf /etc/nginx.orig/sites-enabled/healthz ;\
+    rm -f /healthz.conf /var/spool/nullmailer/trigger ;\
+    # ---- Bundled hardening snippets — drop into .orig so the bootstrap \
+    # picks them up via `cp -r /etc/nginx.orig/* /etc/nginx/` on first run. \
+    mkdir -p /etc/nginx.orig/conf.d /etc/nginx.orig/snippets ;\
+    install -m 0644 /tmp/security/conf.d/01-hardening.conf      /etc/nginx.orig/conf.d/01-hardening.conf ;\
+    install -m 0644 /tmp/security/conf.d/02-rate-limits.conf    /etc/nginx.orig/conf.d/02-rate-limits.conf ;\
+    install -m 0644 /tmp/security/snippets/security-headers.conf /etc/nginx.orig/snippets/security-headers.conf ;\
+    install -m 0644 /tmp/security/snippets/ssl-hardening.conf    /etc/nginx.orig/snippets/ssl-hardening.conf ;\
+    install -m 0644 /tmp/security/snippets/deny-hidden-files.conf /etc/nginx.orig/snippets/deny-hidden-files.conf ;\
+    rm -rf /tmp/security ;\
+    # ---- HARDENING ---- \
+    # Tighten perms on config dirs (master is root; workers drop to www-data) \
+    chown -R root:www-data /etc/nginx.orig /etc/modsecurity.orig ;\
+    chmod -R go-w /etc/nginx.orig /etc/modsecurity.orig ;\
+    # Pre-create writable dirs with restrictive perms \
+    install -d -m 0750 -o www-data -g www-data /var/cache/nginx /var/log/nginx ;\
+    # Drop any setuid/setgid bits the install pulled in \
+    find /usr -xdev \( -perm -4000 -o -perm -2000 \) -type f -exec chmod a-s {} \; 2>/dev/null || true
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+WORKDIR /etc/nginx
+EXPOSE  80
+EXPOSE  443
+EXPOSE  443/udp
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1:8181/healthz || exit 1
+
+STOPSIGNAL SIGQUIT
 
 CMD     ["/bootstrap.sh"]
-

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM    eilandert/debian-base:stable
 LABEL org.opencontainers.image.authors="eilandert"
 LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
@@ -15,5 +16,7 @@ RUN    apt-get -y update \
     && apt-get -y autoclean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /root/.cache
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD test -f /tmp/healthy && find /tmp/healthy -mmin -10 | grep -q . || exit 1
 
 ENTRYPOINT ["/root/warmup_sitemaps/main.py"]

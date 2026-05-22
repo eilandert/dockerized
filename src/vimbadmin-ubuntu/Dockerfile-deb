@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/vimbadmin-ubuntu for a recent one
 
 FROM    eilandert/apache-phpfpm:deb-8.0
@@ -9,8 +10,7 @@ ENV     DEBIAN_FRONTEND="noninteractive"
 ENV    LD_PRELOAD=""
 ENV    INSTALL_PATH=/opt/vimbadmin
 
-COPY    bootstrap.sh /bootstrap.sh
-
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 RUN set -ex ;\
     apt-get update && apt-get -y install --no-install-recommends curl unzip ca-certificates ;\
     mkdir -p ${INSTALL_PATH} ;\
@@ -46,5 +46,9 @@ COPY httpd.conf ${INSTALL_PATH}/application/configs.orig/
 
 WORKDIR /opt/vimbadmin
 EXPOSE 80/TCP
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS --max-time 3 -o /dev/null http://127.0.0.1/ || exit 1
+
 CMD "/bootstrap.sh"
 

@@ -1,4 +1,16 @@
-RUN set -xe ;\
+# Package list source-of-truth. The generator strips lines per PHP version
+# and per distro via build/config.sh:
+#   - #removedinphpXY# markers      -> per-version, both distros
+#   - PHP_VERSION_MISSING_EXTS      -> per-version, both distros
+#   - PHP_UBUNTU_MISSING_EXTS       -> all versions, Ubuntu only
+#   - PHP_UBUNTU_MISSING_CUTOFF     -> from cutoff version, Ubuntu only
+# Do NOT add bare "#" comments inside the apt list: bash treats the joined
+# RUN line as one command and silently drops everything after the first "#".
+# dom/exif are NOT separate packages on any supported distro — they are part
+# of php<ver>-xml / php<ver>-common, so don't add them back.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -xe ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       php#PHPVERSION# \
@@ -7,8 +19,6 @@ RUN set -xe ;\
       php#PHPVERSION#-bcmath \
       php#PHPVERSION#-cli \
       php#PHPVERSION#-curl \
-      php#PHPVERSION#-dom \
-      php#PHPVERSION#-exif \
       php#PHPVERSION#-gd \
       php#PHPVERSION#-gmp \
       php#PHPVERSION#-igbinary \
@@ -34,7 +44,5 @@ RUN set -xe ;\
       php#PHPVERSION#-xml \
       php#PHPVERSION#-zstd \
       php#PHPVERSION#-snuffleupagus \
-      php#PHPVERSION#-zip ;\
-    apt-get -y autoremove && apt-get -y autoclean ;\
-    rm -rf /var/lib/apt/lists/*
+      php#PHPVERSION#-zip
 

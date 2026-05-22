@@ -1,15 +1,19 @@
+# syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
 FROM eilandert/ubuntu-base:rolling
-LABEL org.opencontainers.image.authors="eilandert"
-LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
+LABEL   org.opencontainers.image.authors="eilandert" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        maintainer="Thijs Eilander <eilander@myguard.nl>"
+ENV     DEBIAN_FRONTEND="noninteractive"
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY    syslog-ng.conf /etc/syslog-ng
 
-LABEL maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV DEBIAN_FRONTEND="noninteractive"
-COPY    bootstrap.sh /bootstrap.sh
-
-RUN set -ex ;\
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -ex ;\
+    rm -f /etc/apt/apt.conf.d/docker-clean ;\
     apt-get update ;\
-    apt-get install -y nullmailer mailutils ;\
+    apt-get install -y --no-install-recommends nullmailer mailutils ;\
     apt-get -y --no-install-recommends install \
       dovecot-core \
       dovecot-imapd \
@@ -38,21 +42,18 @@ RUN set -ex ;\
     mkdir -p /opt/scripts/vimbadmin.orig ;\
     curl -fSL https://github.com/gibzer/vimbadmin-perl/archive/master.tar.gz |\
       tar xz --strip-components=1 -C /opt/scripts/vimbadmin.orig ;\
-    rm /opt/scripts/vimbadmin.orig/*.deb ;\
+    rm -f /opt/scripts/vimbadmin.orig/*.deb ;\
     apt-get -y purge curl ;\
-    apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    apt-get -y autoremove ;\
     mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot ;\
     addgroup --gid 5000 vmail ;\
     useradd -u 5000 -g 5000 -s /sbin/nologin vmail ;\
-    chmod +x /bootstrap.sh ;\
     echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
-
-ADD syslog-ng.conf /etc/syslog-ng
 
 WORKDIR /etc/dovecot
 
 EXPOSE 24 143 110 993 995 4190
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD doveadm stats || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD pgrep -x dovecot > /dev/null && doveadm who -1 > /dev/null 2>&1 || exit 1
 
-CMD [ "/bootstrap.sh" ]
+CMD ["/bootstrap.sh"]

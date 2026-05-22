@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM    eilandert/ubuntu-base:focal
 LABEL org.opencontainers.image.authors="eilandert"
 LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
@@ -6,10 +7,11 @@ LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 ENV     TZ=Europe/Amsterdam
 
-COPY bootstrap.sh /bootstrap.sh
-
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 RUN    chmod +x /bootstrap.sh
 WORKDIR /usr/src
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD test -f /tmp/healthy && find /tmp/healthy -mmin -10 | grep -q . || exit 1
 
 CMD     ["/bootstrap.sh"]
 

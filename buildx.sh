@@ -1,7 +1,6 @@
 #!/bin/bash
-# Docker build orchestration wrapper
-# Delegates to build/buildx-sequential.sh (sequential by default)
-# For parallel builds, call: ./build/buildx.sh directly
+# Docker build orchestration wrapper.
+# Delegates to build/buildx-sequential.sh — the only orchestrator.
 
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPTDIR"
