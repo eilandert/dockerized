@@ -87,7 +87,7 @@ LABEL org.opencontainers.image.authors="MariaDB Community" \
 # (https://downloads.mariadb.org/rest-api/mariadb/)
 
 # Allowing overriding of REPOSITORY, a URL that includes suite and component for testing and Enterprise Versions
-ARG REPOSITORY="https://dlm.mariadb.com/repo/mariadb-server/11.8/repo/debian/  main"
+ARG REPOSITORY="https://dlm.mariadb.com/repo/mariadb-server/11.8/repo/debian/ trixie main"
 
 RUN set -e;\
 	echo "deb ${REPOSITORY}" > /etc/apt/sources.list.d/mariadb.list; \

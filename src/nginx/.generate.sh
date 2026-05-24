@@ -35,13 +35,13 @@ process_template "$TEMPLATE" "Dockerfile-multi-deb" \
 log_info "  Nginx base (ubuntu)"
 process_template "$TEMPLATE" "Dockerfile-ubu" \
     "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_UBUNTU_BASE}:${UBUNTU_BASE_TAG}" \
-    "APT_UPGRADE=apt-get -y upgrade" \
+    "APT_UPGRADE=apt-get -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::=--force-confmiss upgrade" \
     "VERSION=base"
 
 log_info "  Nginx base (debian)"
 process_template "$TEMPLATE" "Dockerfile-deb" \
     "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_DEBIAN_BASE}:${DEBIAN_BASE_TAG}" \
-    "APT_UPGRADE=apt-get -y upgrade" \
+    "APT_UPGRADE=apt-get -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::=--force-confmiss upgrade" \
     "VERSION=base"
 
 # PHP versions
@@ -54,13 +54,13 @@ for version in "${PHP_VERSIONS[@]}"; do
     log_info "  Nginx PHP $version (ubuntu)"
     process_template "$TEMPLATE" "$ubuntu_output" \
         "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:${version}" \
-        "APT_UPGRADE=apt-get -y upgrade" \
+        "APT_UPGRADE=apt-get -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::=--force-confmiss upgrade" \
         "VERSION=$version"
 
     log_info "  Nginx PHP $version (debian)"
     process_template "$TEMPLATE" "$debian_output" \
         "FROM=${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:deb-${version}" \
-        "APT_UPGRADE=apt-get -y upgrade" \
+        "APT_UPGRADE=apt-get -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::=--force-confmiss upgrade" \
         "VERSION=$version"
 done
 

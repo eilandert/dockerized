@@ -20,8 +20,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     rm -f /etc/apt/apt.conf.d/docker-clean ;\
     apt-get -y update ;\
     apt-get install -y --no-install-recommends apache2 apache2-utils libjemalloc2 mimalloc ;\
-    a2dismod status mpm_prefork ;\
-    a2enmod mpm_event proxy_fcgi setenvif rewrite expires headers remoteip ;\
+    # autoindex   — silent directory listings when no DirectoryIndex matches \
+    # negotiation — CVE-style file-extension fishing (foo.php.bak surfacing) \
+    # Both are enabled by default on Debian/Ubuntu apache2; turn them off. \
+    a2dismod status mpm_prefork autoindex negotiation ;\
+    # http2: TLS multiplexing → fewer connections, less head-of-line blocking. \
+    a2enmod mpm_event http2 proxy_fcgi setenvif rewrite expires headers remoteip ;\
     cp /tmp/conf-available/php${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\
     a2enconf php${PHPVERSION}-fpm ;\
     mv /etc/apache2 /etc/apache2.orig ;\
