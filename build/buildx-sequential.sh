@@ -120,8 +120,8 @@ declare -a LAYERS=(
     "ubuntu-base debian-base"
 
     # Layer 2: PHP-FPM and Databases - depends on base images
-    # Includes: 56, 74, 80, 82, 84, 85, multiphp, mariadb, redis, valkey
-    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-redis debian-redis ubuntu-valkey debian-valkey"
+    # Includes: 56, 74, 80, 82, 84, 85, multiphp, mariadb, valkey
+    "ubuntu-phpfpm56 debian-phpfpm56 ubuntu-phpfpm74 debian-phpfpm74 ubuntu-phpfpm80 debian-phpfpm80 ubuntu-phpfpm82 debian-phpfpm82 ubuntu-phpfpm84 debian-phpfpm84 ubuntu-phpfpm85 debian-phpfpm85 ubuntu-multiphp debian-multiphp ubuntu-mariadb debian-mariadb ubuntu-valkey debian-valkey"
 
     # Layer 3: Web servers with PHP - depends on PHP-FPM
     # Includes nginx/angie/apache with: 56, 74, 80, 82, 84, 85

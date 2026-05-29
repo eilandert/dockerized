@@ -9,8 +9,11 @@ server {
 
     if ($bad_bot) { return 444; }
 
-    fancyindex on;              # Enable fancy indexes.
-    fancyindex_exact_size off;  # Output human-readable file sizes.
+    fancyindex on;                          # Enable fancy indexes.
+    fancyindex_exact_size off;              # Output human-readable file sizes.
+    fancyindex_header /pages/header.html;   # Themed dark/amber header.
+    fancyindex_footer /pages/footer.html;   # Matching footer.
+    fancyindex_ignore pages;                # Hide the header/footer dir from listings.
 
     root /aptly/repo/public;
 }

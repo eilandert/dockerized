@@ -1,355 +1,146 @@
-# Dockerized - Production-Grade Container Images
+# Dockerized — container images that match the deb.myguard.nl stack
 
-A Docker image repository for high-performance web hosting, mail, caching, and system services. Integrated with [deb.myguard.nl](https://deb.myguard.nl) for optimized Debian packages.
+A monorepo of Dockerfiles and a Buildx orchestrator for the same web/mail/DB stack that powers [deb.myguard.nl](https://deb.myguard.nl). The container images are built against the **same hardened nginx, Angie, ModSecurity, PHP, Postfix, Dovecot, rspamd and openssl-nginx packages** published at [deb.myguard.nl](https://deb.myguard.nl) — so what you run in a container matches what you'd get from `apt install` on a Debian/Ubuntu box pointed at the repo.
 
-Current scope (see `build/config.sh` and `docker-bake.hcl`):
+Want to chat, file bugs, suggest a module? Join the Discord: **[discord.gg/UQNsFg2y](https://discord.gg/UQNsFg2y)**.
 
-- **Base distros**: Ubuntu `noble` and Debian `trixie` (a handful of Alpine targets for specific services)
-- **PHP versions**: 5.6, 7.4, 8.0, 8.2, 8.4, 8.5 (six versions, plus a `multi` stack)
-- **Build targets**: ~106 (`docker buildx bake --print | jq '.target | length'` to confirm)
+## Scope
 
-## 📁 Repository Structure
+Numbers are derived from `build/config.sh` and `docker-bake.hcl` — run the commands yourself to confirm.
+
+- **Base distros:** Ubuntu `resolute` (rolling) and Debian `trixie`, plus a few Alpine targets where it matters (`nginx-alpine`, `redis6-scratch`)
+- **PHP versions:** `5.6`, `7.4`, `8.0`, `8.2`, `8.4`, `8.5` (six branches; see `PHP_VERSIONS` in [build/config.sh](build/config.sh))
+- **Build targets:** **92** — `grep -c '^target ' docker-bake.hcl`
+- **Source components:** **31** subdirectories under [src/](src/)
+- **Registry prefix:** `docker.io/eilandert/<image>` (see `DOCKER_REGISTRY_PREFIX` in `build/config.sh`)
+
+## Repository layout
 
 ```
 dockerized/
-├── buildx.sh                 # Top-level wrapper → build/buildx-sequential.sh
-├── generate.sh               # Top-level wrapper → build/generate.sh
-├── docker-bake.hcl           # Docker Buildx configuration (~106 targets)
-├── build/                    # Build infrastructure
-│   ├── buildx-sequential.sh # The orchestrator (one target at a time)
-│   ├── generate.sh          # Dockerfile generation coordinator
-│   ├── generate-lib.sh      # Shared template helpers
-│   └── config.sh            # Distro versions, PHP versions, registry prefix
-├── src/                      # Dockerfile sources (142+ images)
-│   ├── base/                # Base images (15 distributions)
-│   ├── php-fpm/             # PHP-FPM (9 versions × distros)
-│   ├── nginx/               # Nginx with ModSecurity & PageSpeed
-│   ├── angie/               # Angie (Nginx fork with improvements)
-│   ├── apache-phpfpm/       # Apache with PHP-FPM stack
-│   ├── mariadb/             # MariaDB database server
-│   ├── redis/               # Redis cache store
-│   ├── valkey/              # Valkey (Redis-compatible)
-│   ├── postfix/             # Mail server
-│   ├── dovecot/             # IMAP/POP3 mail services
-│   ├── rspamd/              # Advanced spam filtering
-│   ├── roundcube/           # Webmail client interface
-│   ├── openssh/             # OpenSSH server
-│   ├── unbound/             # DNS resolver
-│   ├── clamav-unofficial-signatures/  # Antivirus engine
-│   └── [30+ additional services]
-├── docs/                     # Project documentation
-└── README.md                # This file
+├── buildx.sh                # wrapper → build/buildx-sequential.sh
+├── generate.sh              # wrapper → build/generate.sh
+├── docker-bake.hcl          # 92 targets + groups (base, phpfpm, nginx, angie, mail, db, …)
+├── build/
+│   ├── buildx-sequential.sh # orchestrator — builds one target at a time, in layer order
+│   ├── generate.sh          # walks src/<component>/.generate.sh in dependency order
+│   ├── generate-lib.sh      # shared template helpers
+│   ├── config.sh            # distro versions, PHP versions, registry prefix, version markers
+│   └── monitor-builds.sh    # tail/inspect helper for long bake runs
+└── src/                     # one directory per component (31 total)
+    ├── base/                       # ubuntu-base + debian-base
+    ├── php-fpm/                    # php-fpm 5.6 … 8.5, both distros
+    ├── nginx/                      # nginx + ModSecurity3 + PageSpeed (matches deb.myguard.nl nginx)
+    ├── nginx-alpine/               # slim alpine variant
+    ├── angie/                      # Angie-nextgen build (matches deb.myguard.nl angie)
+    ├── apache-phpfpm/              # Apache + PHP-FPM
+    ├── mariadb/                    # MariaDB (upstream mariadb-docker, repinnable)
+    ├── redis/  redis6-scratch/     # Redis + a from-scratch redis6 image
+    ├── valkey/                     # Redis-compatible fork
+    ├── postfix/                    # SMTP, paired with the deb.myguard.nl postfix package
+    ├── dovecot/  dovecot-ubuntu/   # IMAP/POP3 (one per distro family)
+    ├── rspamd/  rspamd-git/        # stable + git/HEAD rspamd
+    ├── roundcube/ roundcube-new/ roundcobe-old/   # webmail (current + legacy)
+    ├── vimbadmin/ vimbadmin-ubuntu/                # mail admin UI
+    ├── clamav-unofficial-signatures/   # AV signature feeder
+    ├── unbound/  rbldnsd/                          # recursive DNS + RBL DNS
+    ├── openssh/                                    # ssh daemon image
+    ├── aptly/  reprepro/                           # APT repo tooling
+    ├── letsencrypt/                                # ACME client image
+    ├── docker-cms/                                 # CMS bundle
+    ├── psol-build/                                 # PageSpeed Optimization Library compile env
+    ├── sitemap_warmup/  wosbotv4/                  # support utilities
+    └── …
 ```
 
-## 🚀 Quick Start
+`docker buildx bake --print` will list every target and the groups they belong to.
 
-### Prerequisites
-- Docker & Docker Buildx: `docker buildx version`
-- Linux environment
-- Git (for version tracking)
+## Quick start
 
-### Basic Usage
+Prereqs: Docker with Buildx (`docker buildx version`), Linux, network access to docker.io for base layers. Builds run sequentially so a laptop is fine — they're just slow.
 
-#### Build All Services
 ```bash
-./buildx.sh
-```
-
-#### Build Specific Target
-```bash
-./buildx.sh               # Builds all targets in dependency order
-# Or use docker buildx directly:
-docker buildx bake -f docker-bake.hcl ubuntu-nginx-php84
-```
-
-#### Generate Dockerfiles from Templates
-```bash
+# Regenerate Dockerfiles from templates (after editing src/<component>/Dockerfile-template*)
 ./generate.sh
-```
-This regenerates all Dockerfiles from templates in dependency order:
-1. **Layer 1:** Base images (15 distros)
-2. **Layer 2:** PHP-FPM, Databases, Utilities
-3. **Layer 3:** Webservers (Nginx/Angie/Apache) + Services
-4. **Layer 4:** Complex services (Roundcube, CMS, etc.)
 
-## 🏗️ Service Architecture
+# Build everything, one target at a time, in dependency order
+./buildx.sh
 
-The container ecosystem is organized in dependency layers for efficient building:
+# Build a single target
+docker buildx bake -f docker-bake.hcl ubuntu-nginx-php84
 
-**Layer 1 - Base Images:** Foundation operating system layers (Ubuntu, Debian, Alpine)
-
-**Layer 2 - Runtime & Database:** PHP-FPM, MariaDB, Redis, Valkey
-
-**Layer 3 - Web Servers:** Nginx, Angie, Apache with PHP integration
-
-**Layer 4 - Services:** Mail (Postfix, Dovecot, Rspamd), DNS (Unbound), Webmail (Roundcube)
-
-## 📦 Production Container Images
-
-This repository provides a complete suite of containerized infrastructure components:
-
-### Base Images (Operating System Foundations)
-Optimized base images for Ubuntu (resolute, noble, jammy, focal, xenial, trusty), Debian (trixie, bookworm, bullseye, buster, stretch, jessie), and Alpine distributions. All built with security-hardened configurations aligned with [deb.myguard.nl](https://deb.myguard.nl) standards.
-
-### Web Servers & Application Stacks
-- **PHP-FPM:** 9 versions (5.6 through 8.5) with full distro variants
-- **Nginx:** High-performance web server with ModSecurity3 WAF and PageSpeed optimization
-- **Angie:** Enhanced Nginx fork featuring advanced routing and performance improvements
-- **Apache + PHP-FPM:** Classic LAMP stack with flexible PHP version selection
-
-### Database & Caching Infrastructure
-- **MariaDB 10.11:** Open-source relational database with full feature set
-- **Redis 7:** High-performance in-memory data store
-- **Valkey:** Redis-compatible cache for modern deployments
-
-### Mail Services Infrastructure
-- **Postfix:** Production-grade SMTP mail server
-- **Dovecot:** Complete IMAP and POP3 implementation
-- **Rspamd:** Advanced mail filtering and spam detection system
-- **Roundcube:** Full-featured webmail client
-
-### Security & DNS Services
-- **OpenSSH:** Secure remote shell access
-- **Unbound:** High-performance recursive DNS resolver
-- **ClamAV:** Antivirus engine with community signatures
-
-### Service Overview
-
-| Category | Services | Count | Status |
-|----------|----------|-------|--------|
-| Operating Systems | Ubuntu, Debian, Alpine | 15 | ✅ Production |
-| Web Servers | Nginx, Angie, Apache | 50+ | ✅ Production |
-| PHP Runtime | 9 versions (5.6-8.5) | 40+ | ✅ Production |
-| Databases | MariaDB, Redis, Valkey | 6+ | ✅ Production |
-| Mail Services | Postfix, Dovecot, Rspamd, Roundcube | 8+ | ✅ Production |
-| System Services | SSH, DNS, Antivirus | 6+ | ✅ Production |
-| **Total Images** | **142+ complete containers** | **106 build targets** | ✅ Ready |
-
-## 🔧 Advanced Usage
-
-### Build Specific Layer
-
-```bash
-cd build
-
-# Build all base images
+# Build a group
 docker buildx bake base
-
-# Build all PHP-FPM variants
 docker buildx bake phpfpm
-
-# Build Nginx + Angie with all PHP versions
 docker buildx bake nginx angie
-
-# Build mail services
 docker buildx bake mail
+docker buildx bake db
 ```
 
-### Build Single Target
-```bash
-docker buildx bake ubuntu-nginx-php84
-docker buildx bake debian-phpfpm85
-docker buildx bake ubuntu-mariadb
-```
+### Build layers (the order buildx-sequential.sh walks)
 
-### With Push (requires credentials)
-```bash
-docker buildx bake ubuntu-nginx-php84 --push
-```
+1. **base** — `ubuntu-base`, `debian-base` (one target per distro)
+2. **phpfpm + db + utilities** — every PHP-FPM version against every base, plus `mariadb`, `redis`, `valkey`
+3. **webservers + services** — `nginx-*`, `angie-*`, `apache-phpfpm-*`, mail stack
+4. **composed images** — `roundcube`, `docker-cms`, etc. that need a finished webserver
 
-### Dry Run (show build plan)
-```bash
-docker buildx bake --print ubuntu-nginx-php84
-```
+`build/buildx-sequential.sh` enforces this so a missing base never breaks a downstream build.
 
-## 🔄 Build & Deployment Workflow
-
-### Quick Start: Building Container Images
-
-**Prerequisites:**
-- Docker with Buildx support: `docker buildx version`
-- Linux environment
-- Push credentials (optional, for registry deployment)
-
-**Build Your First Image:**
-```bash
-./buildx.sh                          # Build all images in dependency order
-docker buildx bake -f docker-bake.hcl ubuntu-nginx-php84   # Build single image
-./generate.sh                        # Regenerate from templates (after modifications)
-```
-
-### Building Specific Image Categories
-
-```bash
-# Base operating system images
-docker buildx bake base
-
-# All PHP-FPM versions (5.6 through 8.5)
-docker buildx bake phpfpm
-
-# Complete web server stack
-docker buildx bake nginx angie
-
-# Mail services (Postfix, Dovecot, Rspamd, Roundcube)
-docker buildx bake mail
-
-# Database and caching services
-docker buildx bake mariadb redis valkey
-```
-
-### Building Individual Images
-
-```bash
-# Specific PHP-FPM version
-docker buildx bake ubuntu-phpfpm85 debian-phpfpm84
-
-# Nginx with particular PHP version
-docker buildx bake ubuntu-nginx-php84
-
-# Complete Angie stack
-docker buildx bake ubuntu-angie-php82
-
-# Database servers
-docker buildx bake ubuntu-mariadb debian-redis
-```
-
-### Environment Knobs
+## Environment knobs
 
 | Variable | Default | Effect |
 |---|---|---|
-| `PUSH` | unset → on for hostname `build`, off elsewhere | `PUSH=1` forces `--push`; `PUSH=0` forces it off |
-| `LOAD` | `0` | `LOAD=1` loads images into the local docker daemon (only if PUSH is off) |
+| `PUSH` | on if `hostname == build`, off otherwise | `PUSH=1` forces `--push`; `PUSH=0` forces it off |
+| `LOAD` | `0` | `LOAD=1` loads into the local docker daemon (only when `PUSH` is off) |
 | `BUILDX_CACHE_DIR` | `$XDG_CACHE_HOME/dockerized-buildx` | Persistent local buildkit cache |
 | `BUILDX_BUILDER` | `dockerized-build` | Name of the buildx builder created/used |
-| `DOCKERIZED_PRUNE` | `0` | `1` re-enables the old `docker system prune -a` behaviour |
+| `DOCKERIZED_PRUNE` | `0` | `1` re-enables the old `docker system prune -a` between targets |
 | `GENERATE_COMMIT` | `0` | `1` makes `generate.sh` commit + push regenerated Dockerfiles |
-| `MARIADB_UPSTREAM_REF` | `master` | git ref pulled from MariaDB/mariadb-docker (pin to a tag for reproducibility) |
+| `MARIADB_UPSTREAM_REF` | `master` | git ref pulled from `MariaDB/mariadb-docker` (pin to a tag for reproducibility) |
 | `MARIADB_UPSTREAM_PATH` | `10.11` | directory inside the upstream repo |
 | `MARIADB_TARGET_VERSION` | `11.8` | version string written into the rebuilt Dockerfiles |
 
-### Advanced Build Options
+## Why these images exist
+
+Most public docker images for nginx/Angie ship the upstream binaries with the upstream defaults. These don't — they're built on top of the same Debian/Ubuntu packages published at [deb.myguard.nl](https://deb.myguard.nl), with the same patches and modules. So:
+
+- **HTTP/3 + QUIC + kTLS** out of the box on nginx and Angie. See [Post-Quantum Cryptography with NGINX and Angie](https://deb.myguard.nl/2026/05/post-quantum-cryptography-with-nginx-and-angie-ml-kem-hybrid-tls-and-how-to-configure-it/) for what's actually wired up.
+- **Dedicated OpenSSL build** (`openssl-nginx`) tuned for nginx — RDRAND entropy, EC-NISTP 64-bit GCC backend, OpenResty session yield patch, no legacy ciphers. Background: [OpenSSL-NGINX: A Dedicated OpenSSL Build for NGINX and Angie](https://deb.myguard.nl/2026/05/openssl-nginx-a-dedicated-openssl-build-for-nginx-and-angie/).
+- **Audited dynamic modules.** The full set shipped in the nginx image is documented at [deb.myguard.nl/nginx-modules/](https://deb.myguard.nl/nginx-modules/); zstd in particular went through a deep audit — see [We audited the zstd-nginx-module and found a lot of bugs](https://deb.myguard.nl/2026/05/we-audited-the-zstd-nginx-module-and-found-a-lot-of-bugs/).
+- **ModSecurity3** compiled in, with the same CRS exclusions used on the upstream site.
+
+If you're running these containers in production, the matching server-side context lives in the articles at [deb.myguard.nl/articles/](https://deb.myguard.nl/articles/).
+
+## Adding a new component
+
+1. `mkdir src/<service>/` and add either a static `Dockerfile` or a `Dockerfile-template*` plus a `.generate.sh`.
+2. Add a `target "<service>"` block (and any per-distro variants) to `docker-bake.hcl`.
+3. Add the target name to the appropriate `LAYERS` entry in `build/buildx-sequential.sh` so it builds in the right order.
+4. `./generate.sh && docker buildx bake <service>` to test locally.
+5. Commit, push.
+
+For modifications to existing components, edit the template (not the generated `Dockerfile`) and re-run `./generate.sh` — the per-component `.generate.sh` scripts under `src/<component>/` are also runnable standalone for fast iteration.
+
+## Troubleshooting
 
 ```bash
-# Push directly to registry (requires authentication)
-docker buildx bake ubuntu-nginx-php84 --push
+# Generation
+ls src/php-fpm/Dockerfile-template.*       # template present?
+./build/generate.sh -v                     # verbose generator
+(cd src/nginx && bash ./.generate.sh)      # regenerate one component in isolation
 
-# Load to local Docker daemon (single platform only)
-docker buildx bake ubuntu-nginx-php84 --load
-
-# Dry run - show build plan without executing
-docker buildx bake --print ubuntu-nginx-php84
-
-# View detailed build logs
-docker buildx logs
+# Build
+grep -A 5 'ubuntu-nginx-php84' docker-bake.hcl   # inspect the target
+docker buildx bake --print ubuntu-nginx-php84    # dry-run / show plan
+docker buildx bake ubuntu-nginx-php84            # real build
 ```
 
-## � Build & Deployment Workflow
+If a build fails on a base layer, rebuild that layer first — `buildx-sequential.sh` does this for you on a full run, but a single-target `bake` won't.
 
-### Generation Fails
-```bash
-# Check template exists
-ls src/php-fpm/Dockerfile-template.*
+## Links
 
-# Check generate-lib.sh
-./build/generate.sh -v  # verbose output
-
-# Check individual component
-cd src/nginx && bash ./.generate.sh
-```
-
-### Build Fails for Specific Target
-```bash
-# Inspect Dockerfile
-cat src/nginx/Dockerfile-php84 | head -20
-
-# Check docker-bake.hcl entry
-grep -A 5 "ubuntu-nginx-php84" docker-bake.hcl
-
-# Try manual build
-docker build -t test -f src/nginx/Dockerfile-php84 src/nginx
-```
-
-### Large Image Sizes
-See [MULTISTAGE_ANALYSIS.md](MULTISTAGE_ANALYSIS.md) for multi-stage build recommendations (20-30% reduction potential).
-
-## 📋 Project Statistics
-
-- **Build targets:** ~106 (see `docker-bake.hcl`)
-- **PHP versions:** 6 — 5.6, 7.4, 8.0, 8.2, 8.4, 8.5 (`build/config.sh`)
-- **Base distros:** Ubuntu `noble`, Debian `trixie` (plus a few Alpine-based service targets)
-- **Generator:** Template-driven; per-component `.generate.sh` under `src/<component>/`
-
-## 🔗 Related Resources
-
-- **[deb.myguard.nl](https://deb.myguard.nl)** - Debian package repository with optimized builds aligned with these container images
-- **MULTISTAGE_ANALYSIS.md** - Image optimization strategies
-- **STEP2-5_PLAN.md** - Detailed refactoring and improvement documentation
-
-## 🎯 Key Features & Recent Improvements
-
-✅ **142+ Production Images** - Complete infrastructure suite ready for deployment
-✅ **9 PHP Versions** - Support from legacy PHP 5.6 to modern PHP 8.5
-✅ **15 Linux Distributions** - Ubuntu and Debian variants for maximum compatibility
-✅ **106 Build Targets** - Flexible image combinations via docker-bake.hcl
-✅ **Template-Based Generation** - Consistent, maintainable Dockerfile ecosystem
-✅ **Multi-Stage Builds** - Optimized image sizes and layer efficiency
-✅ **Distro Integration** - Aligned with [deb.myguard.nl](https://deb.myguard.nl) package standards
-✅ **Production Ready** - Security-hardened, fully tested containers
-
-## 📚 Documentation
-
-- **README.md** - Complete guide and reference (this file)
-- **MULTISTAGE_ANALYSIS.md** - Image size optimization strategies
-- **STEP2-5_PLAN.md** - Development roadmap and improvements
-
-## ⚙️ Advanced Configuration
-
-### Extending with New Services
-
-To add a new containerized service:
-
-1. Create service directory: `src/{service}/`
-2. Add Dockerfile or template files
-3. If templated, create `src/{service}/.generate.sh` script
-4. Add build targets to `docker-bake.hcl`
-5. Add the target name to the appropriate LAYERS entry in `build/buildx-sequential.sh`
-6. Run `./generate.sh` and `./buildx.sh`
-7. Commit and publish
-
-### Customizing Existing Images
-
-For modifications to existing containers:
-
-1. Edit template: `src/{service}/Dockerfile-template*`
-2. Regenerate: `./generate.sh` (or service-specific `.generate.sh`)
-3. Rebuild: `./buildx.sh` or specific `docker buildx bake` target
-4. Test in target environment
-5. Commit changes with descriptive message
-
-## 🆘 Support & Troubleshooting
-
-**Generation Issues:**
-```bash
-ls src/php-fpm/Dockerfile-template.*    # Verify template files exist
-./build/generate.sh -v                  # Run with verbose output
-cd src/nginx && bash ./.generate.sh    # Test individual component
-```
-
-**Build Problems:**
-```bash
-cat src/nginx/Dockerfile-php84 | head -20    # Inspect generated Dockerfile
-grep -A 5 "ubuntu-nginx-php84" docker-bake.hcl  # Check config
-docker build -t test -f src/nginx/Dockerfile-php84 .  # Manual build test
-docker buildx logs                      # View build logs
-```
-
-**Image Size Optimization:**
-Refer to MULTISTAGE_ANALYSIS.md for strategies on reducing image sizes by 20-30%.
-
----
-
-**Status:** ✅ Production Ready
-**Version:** May 2026
-**Integration:** [deb.myguard.nl](https://deb.myguard.nl) - Debian package ecosystem
-**Container Count:** 142+
-**Build Targets:** 106
+- Package repo & articles: **[deb.myguard.nl](https://deb.myguard.nl)**
+- Module catalogue: **[deb.myguard.nl/nginx-modules/](https://deb.myguard.nl/nginx-modules/)**
+- All articles: **[deb.myguard.nl/articles/](https://deb.myguard.nl/articles/)**
+- Discord: **[discord.gg/UQNsFg2y](https://discord.gg/UQNsFg2y)**
+- Source: [github.com/eilandert/dockerized](https://github.com/eilandert/dockerized)

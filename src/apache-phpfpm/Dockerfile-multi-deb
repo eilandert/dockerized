@@ -23,11 +23,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # autoindex   — silent directory listings when no DirectoryIndex matches \
     # negotiation — CVE-style file-extension fishing (foo.php.bak surfacing) \
     # Both are enabled by default on Debian/Ubuntu apache2; turn them off. \
-    a2dismod status mpm_prefork autoindex negotiation ;\
+    a2dismod -f status mpm_prefork autoindex negotiation ;\
     # http2: TLS multiplexing → fewer connections, less head-of-line blocking. \
     a2enmod mpm_event http2 proxy_fcgi setenvif rewrite expires headers remoteip ;\
-    cp /tmp/conf-available/php${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\
-    ${PHPVERSION}-fpm ;\
+    cp /tmp/conf-available/php*-fpm.conf /etc/apache2/conf-available/ ;\
     mv /etc/apache2 /etc/apache2.orig ;\
     mv /etc/nullmailer /etc/nullmailer.orig ;\
     mkdir -p /etc/apache2 /etc/php /etc/nullmailer ;\

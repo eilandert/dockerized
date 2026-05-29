@@ -18,6 +18,21 @@ mysql_error() {
 	exit 1
 }
 
+# myguard: identify the build + show the actual installed package versions.
+# Printed exactly once — the MYGUARD_BANNER_SHOWN marker survives the
+# `exec setpriv … mysql` re-exec in _main (exec preserves the environment).
+myguard_banner() {
+	[ -n "${MYGUARD_BANNER_SHOWN:-}" ] && return 0
+	export MYGUARD_BANNER_SHOWN=1
+	local srv bak
+	srv=$(dpkg-query -W -f='${Version}' mariadb-server 2>/dev/null || true)
+	bak=$(dpkg-query -W -f='${Version}' mariadb-backup 2>/dev/null || true)
+	mysql_note "myguard MariaDB build — packages from https://deb.myguard.nl"
+	mysql_note "  mariadb-server  ${srv:-unknown}"
+	[ -n "$bak" ] && mysql_note "  mariadb-backup  ${bak}"
+	mysql_note "  tuned via /etc/mysql/mariadb.conf.d/60-myguard.cnf — audit with: mariadb-myguard-tuner"
+}
+
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
@@ -119,7 +134,11 @@ mysql_get_config() {
 
 # Do a temporary startup of the MariaDB server, for init purposes
 docker_temp_server_start() {
-	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" --wsrep_on=OFF \
+	# NOTE: upstream passes --wsrep_on=OFF here, but the myguard build is
+	# compiled with -DWITH_WSREP=OFF, so the `wsrep_on` system variable does
+	# not exist and that flag aborts with "unknown variable". We omit it —
+	# there is no wsrep to turn off.
+	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" \
 		--expire-logs-days=0 \
 		--skip-slave-start \
 		--loose-innodb_buffer_pool_load_at_startup=0 \
@@ -133,13 +152,17 @@ docker_temp_server_start() {
 	if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 		extraArgs+=( '--dont-use-mysql-root-password' )
 	fi
+	# Poll every 0.1s up to a 30s ceiling (300 tries). A fast SSD temp
+	# server answers in ~200-400ms, so this shaves ~0.6-0.8s of dead
+	# wait off every cold init versus the original 1s-granularity loop,
+	# without changing the timeout budget.
 	local i
-	for i in {30..0}; do
+	for i in {300..0}; do
 		if docker_process_sql "${extraArgs[@]}" --database=mysql \
 			<<<'SELECT 1' &> /dev/null; then
 			break
 		fi
-		sleep 1
+		sleep 0.1
 	done
 	if [ "$i" = 0 ]; then
 		mysql_error "Unable to start server."
@@ -685,16 +708,20 @@ _main() {
 	# skip setup if they aren't running mysqld or want an option that stops mysqld
 	if [ "$1" = 'mariadbd' ] || [ "$1" = 'mysqld' ] && ! _mysql_want_help "$@"; then
 		mysql_note "Entrypoint script for MariaDB Server ${MARIADB_VERSION} started."
+		myguard_banner
 
 		mysql_check_config "$@"
 		# Load various environment variables
 		docker_setup_env "$@"
 		docker_create_db_directories
 
-		# If container is started as root user, restart as dedicated mysql user
+		# If container is started as root user, restart as dedicated mysql user.
+		# setpriv (util-linux, always present) replaces gosu — no extra
+		# downloaded binary. --init-groups loads mysql's supplementary groups
+		# the same way gosu's initgroups did.
 		if [ "$(id -u)" = "0" ]; then
 			mysql_note "Switching to dedicated user 'mysql'"
-			exec gosu mysql "${BASH_SOURCE[0]}" "$@"
+			exec setpriv --reuid=mysql --regid=mysql --init-groups "${BASH_SOURCE[0]}" "$@"
 		fi
 
 		# there's no database, so it needs to be initialized

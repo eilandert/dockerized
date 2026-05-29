@@ -19,6 +19,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     set -eux ;\
     rm -f /etc/apt/apt.conf.d/docker-clean ;\
     echo 'man-db man-db/auto-update boolean false' | debconf-set-selections ;\
+    printf '%s\n' \
+        'path-exclude /usr/share/doc/*' \
+        'path-exclude /usr/share/man/*' \
+        'path-exclude /usr/share/groff/*' \
+        'path-exclude /usr/share/info/*' \
+        'path-exclude /usr/share/lintian/*' \
+        'path-exclude /usr/share/locale/*' \
+        'path-include /usr/share/locale/locale.alias' \
+        > /etc/dpkg/dpkg.cfg.d/01-nodoc ;\
     { \
         echo 'Package: *'; \
         echo 'Pin: release a=trixie-backports'; \
@@ -82,7 +91,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # Drop setuid/setgid from everything still left — containers don't need it. \
     # Child images that install setuid binaries (e.g. openssh's sudo) re-add the \
     # bit explicitly via dpkg or chmod. \
-    find /usr /bin /sbin -xdev \( -perm -4000 -o -perm -2000 \) -type f -exec chmod a-s {} \; 2>/dev/null || true
+    find /usr /bin /sbin -xdev \( -perm -4000 -o -perm -2000 \) -type f -exec chmod a-s {} \; 2>/dev/null || true ;\
+    # ---- DOC / MAN / LOCALE PURGE ---- \
+    # Scrub anything already present in the base layer (path-exclude above only \
+    # affects packages installed afterwards). \
+    rm -rf /usr/share/man/* /usr/share/doc/* /usr/share/info/* \
+           /usr/share/groff/* /usr/share/lintian/* ;\
+    find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'locale.alias' -exec rm -rf {} + 2>/dev/null || true
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD test -f /tmp/healthy && find /tmp/healthy -mmin -10 | grep -q . || exit 1
 

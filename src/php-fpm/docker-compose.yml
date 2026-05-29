@@ -1,14 +1,126 @@
-version: "2.2"
+# ============================================================================
+# Example docker-compose for the myguard PHP-FPM image (eilandert/php-fpm).
+# Packages from https://deb.myguard.nl. Copy this file, adjust the marked
+# values, and `docker compose up -d`.
+#
+# Hardened by default: capabilities dropped to the minimum, no-new-privileges,
+# read-only root filesystem with tmpfs for the few writable paths. Everything
+# optional is commented with WHY so you can opt in.
+#
+# Image facts you don't have to configure (baked into the image):
+#   - FPM master starts as root, then drops [www] workers to phpfpm (uid 1500)
+#     and the [agent] pool to agent (uid 1501). That privsep needs a handful
+#     of caps at startup (see cap_add) — do NOT run the master as a non-root
+#     `user:` or the setuid drop fails.
+#   - Listens on a unix socket /run/php/phpX-fpm.sock (the [www] pool) and
+#     /run/php/phpX-agent.sock (the [agent] pool), NOT a TCP port. No
+#     NET_BIND_SERVICE needed. Uncomment ports: only for legacy 9000/tcp.
+#   - open_basedir confines the [www] pool to /var/www, /tmp, /run/php,
+#     /usr/share/php. The [agent] pool is intentionally unconfined (trusted).
+# ============================================================================
+
 services:
-  php-fpm74:
-    container_name: php-fpm74
-    image: eilandert/php-fpm:7.4
-    restart: always
+  php-fpm:
+    container_name: php-fpm
+    image: eilandert/php-fpm:8.5          # or :7.4 / :8.4 / :multi etc.
+    hostname: php-fpm
+    restart: unless-stopped
+    # FPM finishes in-flight requests on SIGQUIT (the image's STOPSIGNAL).
     stop_grace_period: 10s
-    volumes:
-      - ./config/php:/etc/php:rw
-      - ./config/nullmailer:/etc/nullmailer:rw
+
     environment:
-      - TZ=Europe/Amsterdam
-#    ports:
-#    - 9000:9000
+      - TZ=Europe/Amsterdam              # <-- adjust
+
+    volumes:
+      # Your application code / docroot. The [www] pool reads it as phpfpm;
+      # files are group www-data so the web server can read them too.
+      - ./www:/var/www:rw                # <-- adjust to your app
+
+      # First-run config seed: the image copies its hardened pool configs into
+      # /etc/php on first boot if empty, so you can mount a writable /etc/php
+      # to inspect / override. Mounting :ro freezes the baked-in config (which
+      # already carries all the hardening) — prefer that for production once
+      # you've let it seed once.
+      - ./config/php:/etc/php:rw
+
+      # nullmailer config (defaultdomain / remotes / adminaddr). Seeded from
+      # the image's /etc/nullmailer.orig on first boot. Point `remotes` at your
+      # smarthost so PHP mail() can relay.
+      - ./config/nullmailer:/etc/nullmailer:rw
+
+    # ---- Writable scratch (required when read_only: true) -----------------
+    # FPM writes the worker sockets to /run/php and PHP writes temp/upload/
+    # session files to /tmp. nullmailer needs a writable spool + its trigger
+    # fifo under /var/spool/nullmailer. tmpfs keeps them all off the writable
+    # layer. The /run/php tmpfs is owned by phpfpm (uid 1500) so the master's
+    # startup chown succeeds; gid 33 = www-data so the web server can reach
+    # the socket. The nullmailer tmpfs is owned by the mail user (uid/gid 8).
+    tmpfs:
+      - /run/php:uid=1500,gid=33,mode=0750
+      - /tmp:mode=1777
+      - /var/spool/nullmailer:uid=8,gid=8,mode=0770
+
+    # ---- Read-only root filesystem ----------------------------------------
+    # Everything PHP writes is on the ./www mount or the tmpfs above, so the
+    # rest of the FS is immutable. If you keep /etc/php mounted :rw for the
+    # first-run seed, either pre-seed it once then switch to :ro, or drop
+    # read_only until you have.
+    read_only: true
+
+    # ---- Capabilities -----------------------------------------------------
+    # The FPM master starts as root to (a) chown /run/php and (b) setuid-drop
+    # workers to phpfpm/agent, then runs unprivileged. Drop everything, add
+    # back only what those two steps need:
+    #   CHOWN         chown /run/php to phpfpm:www-data at startup
+    #   DAC_OVERRIDE  write the socket / pid regardless of dir perms
+    #   SETUID/SETGID setuid-drop master -> phpfpm (and agent)
+    # Socket-only (no TCP), so NET_BIND_SERVICE is NOT required.
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      # ---- nullmailer-only — remove once msmtp lands ----
+      # The bootstrap recreates nullmailer's trigger fifo and chowns the spool
+      # at runtime as root:
+      #   mkfifo /var/spool/nullmailer/trigger   -> needs MKNOD
+      #   chown -R mail:mail /var/spool/nullmailer -> needs FOWNER
+      # msmtp has no fifo, no spool, no daemon — drop these two when it does.
+      - MKNOD
+      - FOWNER
+
+    security_opt:
+      # Block privilege escalation via setuid binaries. The base image strips
+      # setuid bits; this enforces it at the kernel. The master's own
+      # setuid-DROP to the worker user is always permitted by the kernel even
+      # with this flag set — it only blocks GAINING privileges.
+      - no-new-privileges:true
+
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+    healthcheck:
+      # Image defines this; repeated so you can tune intervals.
+      test: ["CMD-SHELL", "pgrep -x php-fpm >/dev/null && ([ -S /run/php/php-fpm.sock ] || ss -lnt | grep -q ':9000')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+    # ---- Networking -------------------------------------------------------
+    # FPM speaks FastCGI over the unix socket in /run/php. Share it with the
+    # web server by putting both on the same compose network and mounting the
+    # socket dir, OR uncomment the legacy TCP listener below.
+    # ports:
+    #   - "9000:9000"     # only if a remote web server connects over TCP
+
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1g
+
+volumes: {}

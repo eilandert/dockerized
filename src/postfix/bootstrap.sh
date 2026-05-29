@@ -24,6 +24,7 @@ fi
 FIRSTRUN="/etc/postfix/main.cf"
 if [ ! -f ${FIRSTRUN} ]; then
     echo "[POSTFIX] main.cf not found, populating default configs to /etc/postfix"
+    echo "[POSTFIX] applying myguard hardened defaults (TLSv1.2+, PFS, PQ KEM)"
     mkdir -p /etc/postfix
     cp -r /etc/postfix.orig/* /etc/postfix/
 fi

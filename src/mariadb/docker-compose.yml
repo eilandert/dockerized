@@ -1,0 +1,191 @@
+# ============================================================================
+# Example docker-compose for the myguard MariaDB image (eilandert/mariadb).
+# Packages from https://deb.myguard.nl. Copy this file, adjust the marked
+# values, and `docker compose up -d`.
+#
+# This example is hardened by default: capabilities dropped to the minimum,
+# no-new-privileges, root password via a Docker secret (not an env var).
+# Everything optional/advanced is commented with WHY so you can opt in.
+#
+# Image facts you don't have to configure (baked into the package):
+#   - datadir is /var/lib/mysql (the package pins it; Debian's 11.8.6-5
+#     default of /var/lib/mariadb is overridden) — so the single
+#     /var/lib/mysql mount below is all you need, no dual mount.
+#   - InnoDB lz4 page compression works out of the box: the lz4/lzo/lzma/
+#     bzip2/snappy provider plugins are hard dependencies and auto-load,
+#     and 60-myguard.cnf defaults new COMPRESSED tables to lz4.
+#   - CPU floor: built -march=x86-64-v2 (Nehalem/Westmere, 2009+). Runs on
+#     any x86-64 server CPU from ~2009 on. Older → SIGILL.
+#   - Galera/wsrep is compiled out; no socat, no cluster knobs.
+# ============================================================================
+
+services:
+  mariadb:
+    container_name: mariadb
+    image: eilandert/mariadb:debian          # or :ubuntu / :latest
+    hostname: mariadb
+    restart: unless-stopped
+    # MariaDB flushes + does a clean InnoDB shutdown on SIGTERM. Give it room
+    # on busy instances so the buffer pool flush isn't cut short (data-safe
+    # either way thanks to the redo log, but a clean stop is faster to start).
+    stop_grace_period: 60s
+
+    # ---- Timezone ---------------------------------------------------------
+    # tzdata is in the image; TZ sets the container clock so error-log and
+    # slow-log timestamps are local. To also populate MariaDB's named
+    # timezone tables (so CONVERT_TZ('...','Europe/Amsterdam',...) works),
+    # leave MARIADB_INITDB_SKIP_TZINFO unset — the entrypoint loads them on
+    # first init.
+    environment:
+      - TZ=Europe/Amsterdam                  # <-- adjust
+
+      # Database bootstrap (only used on FIRST init, when the data volume is
+      # empty). Prefer the *_FILE secret variants below over plaintext here.
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/mariadb_root
+      - MARIADB_DATABASE=appdb               # <-- adjust / remove
+      - MARIADB_USER=appuser                 # <-- adjust / remove
+      - MARIADB_PASSWORD_FILE=/run/secrets/mariadb_app
+      # Alternatives (pick ONE root strategy):
+      #   - MARIADB_ROOT_PASSWORD=changeme           # plaintext, simplest
+      #   - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=1      # dev only, never prod
+      #   - MARIADB_RANDOM_ROOT_PASSWORD=1           # printed once in the log
+      # Skip loading tz tables to speed first-init by ~1s if you don't need
+      # named timezones inside SQL:
+      #   - MARIADB_INITDB_SKIP_TZINFO=1
+
+    secrets:
+      - mariadb_root
+      - mariadb_app
+
+    ports:
+      - "3306:3306"                          # drop entirely if only sibling
+                                             # containers connect over the
+                                             # compose network
+
+    # ---- Storage ----------------------------------------------------------
+    volumes:
+      # Datadir — the only mount you strictly need; the image pins
+      # datadir=/var/lib/mysql so this is authoritative. Named volume
+      # survives `compose down`; use a host bind (./data:/var/lib/mysql)
+      # if you want the files on a specific path/filesystem.
+      #
+      # MIGRATION NOTE: if you previously ran an interim build that booted
+      # with datadir=/var/lib/mariadb, your real data may sit there. Move
+      # it back (`mv /path/var/lib/mariadb/* /path/var/lib/mysql/`) or, as
+      # a transitional belt-and-braces, mount the same host dir at BOTH
+      # paths so the server finds it whichever default wins:
+      #   - ./data:/var/lib/mysql
+      #   - ./data:/var/lib/mariadb
+      - mariadb_data:/var/lib/mysql
+
+      # Drop-in config overrides. Anything you put here loads AFTER the
+      # image's 50-server.cnf / 60-myguard.cnf / 70-container.cnf, so name
+      # your file 99-*.cnf and it wins. Mount read-only.
+      - ./config/99-local.cnf:/etc/mysql/mariadb.conf.d/99-local.cnf:ro
+
+      # First-init hooks: *.sql / *.sql.gz / *.sql.xz / *.sql.zst / *.sh run
+      # once when the datadir is empty. Great for schema seeding.
+      - ./initdb.d:/docker-entrypoint-initdb.d:ro
+
+      # Localtime passthrough (optional; TZ env is usually enough):
+      #   - /etc/localtime:/etc/localtime:ro
+
+    # ---- Writable scratch -------------------------------------------------
+    # The socket + pid live here. A tmpfs keeps them off the writable layer
+    # and lets you run the container read-only (see security_opt note).
+    tmpfs:
+      - /run/mysqld:uid=999,gid=999,mode=0755
+
+    # ---- Capabilities -----------------------------------------------------
+    # The entrypoint starts as root (to chown the datadir + run
+    # mariadb-install-db) then setpriv-drops to the mysql user (uid/gid 999)
+    # to run mariadbd. Drop everything, add back only what those steps need:
+    #   CHOWN        chown -R mysql:mysql /var/lib/mysql on first init
+    #   DAC_OVERRIDE read/write datadir files during init regardless of perms
+    #   FOWNER       chmod/utime on files after the chown
+    #   SETUID/SETGID  setpriv drop root -> mysql
+    # 3306 > 1024 so NET_BIND_SERVICE is NOT required.
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETUID
+      - SETGID
+      # - IPC_LOCK        # ONLY if you enable large-pages / memlock in a
+      #                   # 99-local.cnf (large_pages / memlock=1)
+
+    security_opt:
+      # Block privilege escalation via setuid binaries. The image already
+      # strips setuid/setgid bits; this enforces it at the kernel. Compatible
+      # with the entrypoint's setpriv drop (dropping privs is always allowed).
+      - no-new-privileges:true
+
+    # ---- ulimits ----------------------------------------------------------
+    # The image ships a systemd drop-in (LimitNOFILE=1M) but systemd doesn't
+    # run inside the container, so set the fd ceiling here instead. MariaDB
+    # uses ~3 fds/connection plus table-cache entries; the Debian default
+    # 1024 is far too low for a real server.
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+      # memlock: -1        # only with IPC_LOCK + large-pages/memlock
+
+    # ---- sysctls (namespaced — applied per container) ---------------------
+    # Only network sysctls are namespaced and thus settable here. Raises the
+    # listen backlog so connection storms don't get refused before MariaDB's
+    # back_log can accept them.
+    sysctls:
+      net.core.somaxconn: 1024
+      net.ipv4.tcp_keepalive_time: 600
+    #
+    # NOT namespaced — these matter for MariaDB but MUST be set on the *host*
+    # (docker can't set them per-container without --privileged). Put them in
+    # /etc/sysctl.d/60-mariadb.conf on the Docker host and `sysctl --system`:
+    #
+    #   vm.swappiness = 1                  # don't swap out the buffer pool
+    #   vm.max_map_count = 262144          # many tables/partitions (InnoDB mmap)
+    #   fs.aio-max-nr = 1048576            # innodb native AIO with 8 io threads
+    #   vm.overcommit_memory = 1           # avoid fork() OOM on large buffer pools
+    #   # disable transparent hugepages (THP causes latency spikes for InnoDB):
+    #   #   echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+    healthcheck:
+      # Image already defines this; repeated here so you can tune intervals.
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+    # ---- Resource limits (optional; uncomment + tune) ---------------------
+    # Match innodb_buffer_pool_size (60-myguard.cnf default 256M; raise it in
+    # 99-local.cnf) plus headroom for connections, sort buffers, the OS page
+    # cache for the redo/binlog. A rough ceiling of buffer_pool * 1.5 + 512M.
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2g
+    #     reservations:
+    #       memory: 1g
+
+    # ---- Read-only root filesystem (advanced hardening; opt-in) -----------
+    # Everything MariaDB writes is on the data volume or the /run/mysqld
+    # tmpfs, so the rest of the FS can be read-only. Test thoroughly — some
+    # init paths write to /tmp.
+    # read_only: true
+    # tmpfs:
+    #   - /tmp
+    #   - /run/mysqld:uid=999,gid=999,mode=0755
+
+# ============================================================================
+secrets:
+  mariadb_root:
+    file: ./secrets/mariadb_root.txt        # chmod 600; one line: the password
+  mariadb_app:
+    file: ./secrets/mariadb_app.txt
+
+volumes:
+  mariadb_data:

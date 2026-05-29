@@ -294,17 +294,19 @@ while [ $# -gt 0 ]; do
 		--su=*)
 			u="${1#*=}"
 			shift
-			exec gosu "${u}" "${BASH_SOURCE[0]}" "$@"
+			# setpriv (util-linux) replaces gosu; resolve the target user's
+			# primary gid since an arbitrary user's group need not match its name.
+			exec setpriv --reuid="${u}" --regid="$(id -g "${u}")" --init-groups "${BASH_SOURCE[0]}" "$@"
 			;;
 		--su)
 			shift
 			u=$1
 			shift
-			exec gosu "$u" "${BASH_SOURCE[0]}" "$@"
+			exec setpriv --reuid="${u}" --regid="$(id -g "${u}")" --init-groups "${BASH_SOURCE[0]}" "$@"
 			;;
 		--su-mysql)
 			shift
-			exec gosu mysql "${BASH_SOURCE[0]}" "$@"
+			exec setpriv --reuid=mysql --regid=mysql --init-groups "${BASH_SOURCE[0]}" "$@"
 			;;
 		--replication_*=*)
 			# Change the n to what is between _ and = and make lower case

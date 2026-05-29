@@ -6,7 +6,7 @@ FROM    docker.io/eilandert/angie:deb-php8.5
 
 LABEL   maintainer="Thijs Eilander <eilandert@myguard.nl>" \
         org.opencontainers.image.title="MyGuard CMS (Angie + PHP-FPM 8.5)" \
-        org.opencontainers.image.description="Angie + PHP-FPM 8.5 (debian) tuned for WordPress/Drupal/Joomla: composer, wp-cli + extras, drush, git, patch, libvips/imagemagick, image-optim toolchain, restic/rclone, goaccess. PHP isolated from sudo via the phpfpm user." \
+        org.opencontainers.image.description="Angie + PHP-FPM 8.5 (debian) tuned for WordPress/Drupal/Joomla: composer, wp-cli + extras, drush, git, patch, libvips/imagemagick, AVIF/WebP encoders, image-optim toolchain (jpegoptim/optipng/oxipng/pngquant/gifsicle), EXIF + metadata strippers (exiftool/exiv2/mat2/scour), restic/rclone, goaccess. PHP isolated from sudo via the phpfpm user." \
         org.opencontainers.image.url="https://github.com/eilandert/dockerized" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized/tree/master/docker-cms" \
         org.opencontainers.image.vendor="MyGuard" \
@@ -47,6 +47,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update ;\
     apt-get install -y --no-install-recommends \
         cron \
+        exiv2 \
         git \
         gifsicle \
         goaccess \
@@ -54,12 +55,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         jpegoptim \
         jq \
         less \
+        libavif-bin \
+        libimage-exiftool-perl \
         libvips42 \
         mariadb-client \
+        mat2 \
         mc \
         nano \
         openssh-client \
         optipng \
+        oxipng \
         patch \
         php-vips \
         pngquant \
@@ -67,6 +72,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         rclone \
         restic \
         rsync \
+        scour \
         unzip \
         webp \
         wget \

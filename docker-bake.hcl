@@ -53,7 +53,7 @@ group "debian" {
         "debian-nginx-all",
         "debian-angie-all",
         "debian-apache",
-        "debian-mariadb", "debian-redis", "debian-valkey",
+        "debian-mariadb", "debian-valkey",
         "debian-postfix", "debian-dovecot",
         "debian-rspamd", "debian-rspamd-git", "debian-rspamd-official",
         "debian-roundcube", "debian-vimbadmin",
@@ -123,7 +123,7 @@ group "ubuntu" {
         "ubuntu-nginx-all",
         "ubuntu-angie-all",
         "ubuntu-apache",
-        "ubuntu-mariadb", "ubuntu-redis", "ubuntu-valkey",
+        "ubuntu-mariadb", "ubuntu-valkey",
         "ubuntu-postfix", "ubuntu-dovecot",
         "ubuntu-rspamd",
         "ubuntu-roundcube", "ubuntu-vimbadmin",
@@ -194,7 +194,7 @@ group "mail" {
 
 group "db" {
     targets = [
-        "ubuntu-redis", "debian-redis", "ubuntu-valkey", "debian-valkey", "ubuntu-mariadb", "debian-mariadb" ]
+        "ubuntu-valkey", "debian-valkey", "ubuntu-mariadb", "debian-mariadb" ]
 }
 
 group "misc" {
@@ -586,26 +586,6 @@ target "rbldnsd" {
    tags = ["docker.io/eilandert/rbldnsd"]
    context = "src/rbldnsd"
    dockerfile = "Dockerfile"
-}
-
-target "alpine-redis" {
-   tags = ["docker.io/eilandert/redis:scratch"]
-   context = "src/redis6-scratch"
-   dockerfile = "Dockerfile"
-}
-
-target "ubuntu-redis" {
-   tags = ["docker.io/eilandert/redis:ubuntu"]
-   context = "src/redis"
-   dockerfile = "Dockerfile-ubu"
-   contexts = { "eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
-}
-
-target "debian-redis" {
-   tags = ["docker.io/eilandert/redis:debian"]
-   context = "src/redis"
-   dockerfile = "Dockerfile-deb"
-   contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
 }
 
 target "ubuntu-valkey" {

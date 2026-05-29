@@ -100,6 +100,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # group can execute it. Only `agent` is in the sudo group. www-data \
     # (web server) and phpfpm (PHP workers) cannot reach the binary AT \
     # ALL — defense in depth on top of the sudoers entry below. \
+    # `apt-get update` here is required: /var/lib/apt is a buildkit cache \
+    # mount with sharing=locked across all bake targets, so a sibling debian \
+    # build can clobber the ubuntu apt lists between RUN steps, leaving us \
+    # unable to locate sudo. \
+    apt-get -y update ;\
     apt-get install -y --no-install-recommends sudo ;\
     chmod 4750 /usr/bin/sudo ;\
     chown root:sudo /usr/bin/sudo ;\
@@ -164,6 +169,15 @@ RUN rm -rf /tmp/* ;\
                 echo "php_admin_value[expose_php] = Off" ; \
                 echo "php_admin_value[allow_url_fopen] = On" ; \
                 echo "php_admin_value[allow_url_include] = Off" ; \
+                echo "; open_basedir confines this pool to the docroot + the dirs" ; \
+                echo "; PHP legitimately needs (tmp/uploads/sessions, PEAR libs)." ; \
+                echo "; Biggest containment win vs LFI / path traversal: a script" ; \
+                echo "; cannot fopen() /etc/passwd, other tenants' files, or /proc." ; \
+                echo "; Trailing slashes matter — they pin to the dir, not a prefix." ; \
+                echo "php_admin_value[open_basedir] = /var/www/:/tmp/:/run/php/:/usr/share/php/" ; \
+                echo "; Stop PHP advertising its version in the X-PHP/X-Powered-By" ; \
+                echo "; mail header on mail()-sent messages — minor info leak." ; \
+                echo "php_admin_flag[mail.add_x_header] = Off" ; \
                 echo "; cgi.fix_pathinfo=0 is the OWASP-blessed mitigation for" ; \
                 echo "; the classic /uploaded.jpg/anything.php confused-deputy" ; \
                 echo "; vector. nginx/apache configs also limit_extensions but" ; \
@@ -316,6 +330,14 @@ RUN rm -rf /tmp/* ;\
             echo "php_admin_value[disable_functions] = " ; \
             echo "php_admin_value[allow_url_fopen]   = On" ; \
             echo "php_admin_value[expose_php]        = Off" ; \
+            echo "php_admin_flag[mail.add_x_header]  = Off" ; \
+            echo "; NOTE: open_basedir is deliberately NOT set on this pool." ; \
+            echo "; The agent runs WP-CLI / Composer / Imagick / cwebp and writes" ; \
+            echo "; across /var/www, /home/agent and /tmp — pinning it would break" ; \
+            echo "; the very workflows it exists for. Same trust rationale as the" ; \
+            echo "; empty disable_functions above: untrusted HTTP never reaches" ; \
+            echo "; this socket (phpfpm uid 1500 is not in www-data; the proxy only" ; \
+            echo "; forwards allow-listed authenticated MCP paths)." ; \
             echo "; Defense-in-depth even though the proxy never routes" ; \
             echo "; PATH_INFO-styled URLs to the agent socket." ; \
             echo "php_admin_value[cgi.fix_pathinfo]  = 0" ; \

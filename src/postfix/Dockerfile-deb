@@ -7,11 +7,13 @@ LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 LABEL   maintainer="Thijs Eilander <eilander@myguard.nl>"
 ENV     DEBIAN_FRONTEND="noninteractive"
 COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY main.cf /tmp/main.cf
 RUN set -ex ;\
     apt-get update ;\
     apt-get -y --no-install-recommends install \
       ca-certificates tzdata openssl syslog-ng \
       postfix-cdb \
+      postfix-ldap \
       postfix-lmdb \
       postfix-mysql \
       postfix-pcre \
@@ -22,6 +24,10 @@ RUN set -ex ;\
       libjemalloc2 \
       ;\
     apt-get -y autoremove && apt-get -y autoclean && rm -rf /var/lib/apt/lists/* ;\
+    # Replace the apt-postinst main.cf with the myguard hardened overlay
+    # (TLSv1.2+ floor, PFS-only ciphers, hybrid PQ KEM, anti-spoof smtpd
+    # restrictions) before stashing /etc/postfix as the first-run seed.
+    mv /tmp/main.cf /etc/postfix/main.cf ;\
     mv /etc/postfix /etc/postfix.orig ;\
     chmod +x /bootstrap.sh
 VOLUME [ "/var/lib/postfix" ]

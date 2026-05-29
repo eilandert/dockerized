@@ -33,6 +33,16 @@ if [[ ! -f generate-lib.sh ]]; then
     exit 1
 fi
 
+# Pull in distro tags / image prefixes (UBUNTULTS, DEBIANSTABLE, …).
+# Required for the MariaDB block below — without it the REPOSITORY apt line
+# is written with an empty codename and apt rejects the list as malformed.
+if [[ ! -f config.sh ]]; then
+    log_error "config.sh not found next to generate.sh"
+    exit 1
+fi
+# shellcheck disable=SC1091
+source ./config.sh
+
 log_section "Dockerfile Generation"
 
 # Define components in dependency order
@@ -71,86 +81,20 @@ done
 # Handle special/static components that don't regenerate (upstream sources)
 log_section "Handling External/Static Components"
 
-# MariaDB Dockerfiles are pulled from upstream and patched with a chain of
-# sed substitutions. Each substitution is asserted afterwards so an upstream
-# rename fails loudly instead of producing a silently-wrong Dockerfile.
+# MariaDB Dockerfiles are NO LONGER pulled from upstream MariaDB/mariadb-docker
+# and patched. They're locally maintained under src/mariadb/ and packaged
+# against our own mariadb-server build at /opt/packages/deb/mariadb/, served
+# via https://deb.myguard.nl. The image inherits the deb.myguard.nl apt
+# source from eilandert/{debian,ubuntu}-base, so no version pin or upstream
+# repo URL belongs in the Dockerfile.
 #
-# Override the upstream pin via env: MARIADB_UPSTREAM_REF (tag or branch),
-# MARIADB_UPSTREAM_PATH (e.g. "10.11", "11.4").
-MARIADB_UPSTREAM_REF="${MARIADB_UPSTREAM_REF:-master}"
-MARIADB_UPSTREAM_PATH="${MARIADB_UPSTREAM_PATH:-10.11}"
-MARIADB_TARGET_VERSION="${MARIADB_TARGET_VERSION:-11.8}"
-
-log_info "Syncing MariaDB Dockerfiles from upstream (ref=${MARIADB_UPSTREAM_REF}, path=${MARIADB_UPSTREAM_PATH}, target=${MARIADB_TARGET_VERSION})..."
-
-# assert_subst <file> <expected-string-after-edit> <description>
-# Used to verify each sed change actually landed. If upstream renames a
-# label or moves a FROM line, this will fail the run instead of producing
-# a Dockerfile that quietly references the wrong base / wrong repo.
-assert_subst() {
-    local file="$1" needle="$2" desc="$3"
-    if ! grep -qF "$needle" "$file"; then
-        log_error "    MariaDB patch assertion failed in $(basename "$file"): $desc"
-        log_error "    expected to find: $needle"
-        return 1
-    fi
-}
-
-if (
-    set -e
-    BASE_URL="https://raw.githubusercontent.com/MariaDB/mariadb-docker/${MARIADB_UPSTREAM_REF}/${MARIADB_UPSTREAM_PATH}"
-    curl --fail -sSL "${BASE_URL}/Dockerfile"          -o ../src/mariadb/Dockerfile-ubu
-    curl --fail -sSL "${BASE_URL}/docker-entrypoint.sh" -o ../src/mariadb/docker-entrypoint.sh
-    curl --fail -sSL "${BASE_URL}/healthcheck.sh"       -o ../src/mariadb/healthcheck.sh
-
-    cp ../src/mariadb/Dockerfile-ubu ../src/mariadb/Dockerfile-deb
-    chmod +x ../src/mariadb/docker-entrypoint.sh
-
-    UBU=../src/mariadb/Dockerfile-ubu
-    DEB=../src/mariadb/Dockerfile-deb
-
-    # Rewrite FROM (upstream still uses ubuntu:jammy as of this writing)
-    sed -i "s|FROM ubuntu:jammy|FROM eilandert/ubuntu-base:rolling\nCOPY bootstrap.sh /|" "$UBU"
-    sed -i "s|FROM ubuntu:jammy|FROM eilandert/debian-base:stable\nCOPY bootstrap.sh /|"  "$DEB"
-    assert_subst "$UBU" "FROM eilandert/ubuntu-base:rolling" "FROM rewrite (ubuntu)"
-    assert_subst "$DEB" "FROM eilandert/debian-base:stable"  "FROM rewrite (debian)"
-
-    sed -i "s|jammy|${UBUNTULTS}|g"   "$UBU"
-    sed -i "s|jammy|${DEBIANSTABLE}|g" "$DEB"
-    sed -i "s|repo/ubuntu|repo/debian|g" "$DEB"
-
-    # Version label rewrite — upstream value depends on the path we fetched
-    sed -i "s|org.opencontainers.image.version=\"[0-9.]*\"|org.opencontainers.image.version=\"${MARIADB_TARGET_VERSION}\"|" "$UBU"
-    sed -i "s|org.opencontainers.image.version=\"[0-9.]*\"|org.opencontainers.image.version=\"${MARIADB_TARGET_VERSION}\"|" "$DEB"
-    assert_subst "$UBU" "org.opencontainers.image.version=\"${MARIADB_TARGET_VERSION}\"" "version label (ubuntu)"
-    assert_subst "$DEB" "org.opencontainers.image.version=\"${MARIADB_TARGET_VERSION}\"" "version label (debian)"
-
-    sed -i "s|org.opencontainers.image.base.name=\"docker.io/library/ubuntu:${UBUNTULTS}\"|org.opencontainers.image.base.name=\"docker.io/eilandert/ubuntu-base:rolling\"|" "$UBU"
-    sed -i "s|org.opencontainers.image.base.name=\"docker.io/library/ubuntu:${DEBIANSTABLE}\"|org.opencontainers.image.base.name=\"docker.io/eilandert/debian-base:stable\"|" "$DEB"
-
-    sed -i '/^ARG MARIADB_VERSION=/d' "$UBU"
-    sed -i '/^ENV MARIADB_VERSION /d'  "$UBU"
-    sed -i '/^ARG MARIADB_VERSION=/d' "$DEB"
-    sed -i '/^ENV MARIADB_VERSION /d'  "$DEB"
-
-    sed -i "s|ARG REPOSITORY=.*|ARG REPOSITORY=\"https://dlm.mariadb.com/repo/mariadb-server/${MARIADB_TARGET_VERSION}/repo/ubuntu/ ${UBUNTULTS} main\"|" "$UBU"
-    sed -i "s|ARG REPOSITORY=.*|ARG REPOSITORY=\"https://dlm.mariadb.com/repo/mariadb-server/${MARIADB_TARGET_VERSION}/repo/debian/ ${DEBIANSTABLE} main\"|" "$DEB"
-    assert_subst "$UBU" "mariadb-server/${MARIADB_TARGET_VERSION}/repo/ubuntu/ ${UBUNTULTS} main" "REPOSITORY arg (ubuntu)"
-    assert_subst "$DEB" "mariadb-server/${MARIADB_TARGET_VERSION}/repo/debian/ ${DEBIANSTABLE} main" "REPOSITORY arg (debian)"
-
-    sed -i 's|apt-get install -y --no-install-recommends mariadb-server="\$MARIADB_VERSION" mariadb-backup socat|apt-get install -y --no-install-recommends mariadb-server mariadb-backup socat|' "$UBU"
-    sed -i 's|apt-get install -y --no-install-recommends mariadb-server="\$MARIADB_VERSION" mariadb-backup socat|apt-get install -y --no-install-recommends mariadb-server mariadb-backup socat|' "$DEB"
-
-    # Legacy filenames kept in sync for any script still referencing them.
-    cp "$UBU" ../src/mariadb/Dockerfile.ubuntu
-    cp "$DEB" ../src/mariadb/Dockerfile.debian
-); then
-    log_info "  ✓ MariaDB"
-else
-    log_error "  ✗ MariaDB sync failed"
-    FAILED=$((FAILED+1))
-    FAILED_COMPONENTS+=("mariadb-upstream")
-fi
+# If you're tempted to re-add the curl-from-MariaDB/mariadb-docker dance:
+# don't. Edit src/mariadb/Dockerfile-{deb,ubu} directly. The docker-entrypoint.sh
+# and healthcheck.sh in src/mariadb/ are the same vintage as the last upstream
+# sync; refresh them by hand against
+# https://raw.githubusercontent.com/MariaDB/mariadb-docker/master/<series>/
+# if needed, but the Dockerfile-* are ours.
+log_info "  • MariaDB: locally maintained, no upstream sync"
 
 # Get roundcube version if available
 if command -v lastversion &> /dev/null; then

@@ -44,10 +44,18 @@ process_template "$TEMPLATE" "$multi_ubu" "PHPVERSION=multi" "VERSION=multi"
 # Replace registry references
 safe_sed "eilandert/php-fpm:" "${DOCKER_REGISTRY_PREFIX}/${IMAGE_PREFIX_PHP_FPM}:" "$multi_ubu"
 
-# Clean up apache-specific directives for multi (only need one version's apache config)
+# Clean up apache-specific directives for multi: copy ALL per-version php-fpm
+# confs into conf-available (bootstrap.sh's startphp() runs `a2enconf` at
+# container start). The single-version `cp ... php${PHPVERSION}-fpm.conf` and
+# `a2enconf php${PHPVERSION}-fpm` lines from the template don't apply here —
+# PHPVERSION resolves to "MULTI" which is not a real php version.
+multi_cp_line="    cp /tmp/conf-available/php*-fpm.conf /etc/apache2/conf-available/ ;\\\\"
+safe_sed "    cp /tmp/conf-available/php\${PHPVERSION}-fpm.conf /etc/apache2/conf-available ;\\\\" "$multi_cp_line" "$multi_ubu"
+safe_sed "    a2enconf php\${PHPVERSION}-fpm ;\\\\" "" "$multi_ubu"
 safe_sed "libapache2-mod-php" "" "$multi_ubu"
-safe_sed "a2enconf php" "" "$multi_ubu"
-safe_sed "a2dismod php" "" "$multi_ubu"
+# Drop the blank line left behind by the a2enconf deletion (would otherwise
+# break the RUN continuation in some Docker parser versions).
+sed -i '/cp \/tmp\/conf-available\/php\*-fpm\.conf/{n;/^$/d}' "$multi_ubu"
 
 # Create debian variant
 multi_deb="Dockerfile-multi-deb"

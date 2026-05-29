@@ -1,0 +1,143 @@
+# ============================================================================
+# Postfix main.cf — myguard hardened defaults for the eilandert/postfix image.
+#
+# Copied to /etc/postfix/main.cf on first run by bootstrap.sh when the path
+# does not already exist. Existing installs (mounted /etc/postfix volume)
+# are left untouched.
+#
+# To enable inbound TLS, add a cert+key pair via smtpd_tls_chain_files —
+# see the "SMTP server (inbound) TLS" section below.
+# ============================================================================
+
+# See http://www.postfix.org/COMPATIBILITY_README.html
+compatibility_level = 3.9
+
+# Default map types: cdb for newaliases/postmap, lmdb for the verify and
+# postscreen caches.
+default_database_type = cdb
+default_cache_db_type = lmdb
+
+# Origin for locally-originated mail. Containers usually want $myhostname.
+myorigin = $myhostname
+
+# 220 banner — RFC requires $myhostname first.
+smtpd_banner = $myhostname ESMTP $mail_name
+
+# IP family.
+inet_protocols = all
+
+# By default trust only loopback as "internal". Override at runtime via
+# `postconf -e mynetworks="..."` if the container relays for the host.
+mynetworks_style = host
+mynetworks       = 127.0.0.0/8 [::1]/128
+
+# What this host is the final destination for.
+mydestination = $myhostname, localhost.$mydomain, localhost
+
+# Mailbox / delivery defaults — container typically forwards via virtual
+# transport or a relay, not local delivery.
+mailbox_size_limit = 51200000
+mailbox_command    =
+recipient_delimiter =
+relayhost          =
+
+# Aliases.
+alias_maps     = $alias_database
+alias_database = cdb:/etc/aliases
+
+biff = no
+
+# Cyrus SASL config dir (Debian policy).
+cyrus_sasl_config_path = /etc/postfix/sasl
+
+# ============================================================================
+# TLS — hardened defaults (PFS-only, TLS 1.2+, hybrid post-quantum KEM).
+# Requires Postfix >= 3.4 and OpenSSL >= 3.5 for PQ groups; older OpenSSL
+# falls back to classical curves automatically.
+# ============================================================================
+
+# ----- SMTP client (outbound) -----
+# Opportunistic TLS using the system CA bundle. Bump to `dane` once the
+# remote you talk to publishes TLSA records.
+smtp_tls_security_level         = may
+smtp_tls_CAfile                 = /etc/ssl/certs/ca-certificates.crt
+smtp_tls_loglevel               = 1
+smtp_tls_protocols              = >=TLSv1.2
+smtp_tls_mandatory_protocols    = >=TLSv1.2
+smtp_tls_ciphers                = high
+smtp_tls_mandatory_ciphers      = high
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+# ----- SMTP server (inbound) -----
+# Off by default — uncomment and point at a real cert chain to enable.
+#smtpd_tls_security_level         = may
+#smtpd_tls_chain_files            =
+#    /etc/ssl/private/mail.example.com.key,
+#    /etc/ssl/certs/mail.example.com.fullchain.pem
+#smtpd_tls_protocols              = >=TLSv1.2
+#smtpd_tls_mandatory_protocols    = >=TLSv1.2
+#smtpd_tls_ciphers                = high
+#smtpd_tls_mandatory_ciphers      = high
+#smtpd_tls_loglevel               = 1
+#smtpd_tls_received_header        = yes
+#smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+
+# ----- Global TLS hardening -----
+# Compression off (CRIME), renegotiation off (insecure variants),
+# stateful session tickets off (no PFS for tickets).
+tls_preempt_cipherlist = yes
+tls_ssl_options        = NO_COMPRESSION, NO_RENEGOTIATION, NO_TICKET
+
+# PFS-only cipher suite (TLS 1.2; TLS 1.3 picks its own PFS suites).
+# Excludes: anon, null, MD5, RC4, 3DES, SHA1, DSS, EXPORT, PSK, SRP,
+# CAMELLIA, anything without ECDHE/DHE.
+tls_high_cipherlist   = ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:!aNULL:!eNULL:!MD5:!RC4:!3DES:!SHA1:!DSS:!EXP:!PSK:!SRP:!CAMELLIA
+tls_medium_cipherlist = ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:!aNULL:!eNULL:!MD5:!RC4:!3DES:!EXP
+
+# Hybrid post-quantum KEM groups + classical fallback (TLS 1.3).
+# smtpd_tls_eecdh_grade is deprecated in Postfix 3.11 — tls_eecdh_auto_curves
+# supersedes it and gives finer control over the offered list.
+tls_eecdh_auto_curves = X25519MLKEM768 SecP256r1MLKEM768 X25519 prime256v1 secp384r1
+tls_ffdhe_auto_groups = ffdhe3072 ffdhe4096
+
+# ============================================================================
+# smtpd restrictions — RFC-strict, anti-spoof, anti-relay.
+# ============================================================================
+smtpd_helo_required     = yes
+disable_vrfy_command    = yes
+strict_rfc821_envelopes = yes
+smtpd_delay_reject      = yes
+
+smtpd_helo_restrictions =
+    permit_mynetworks,
+    reject_invalid_helo_hostname,
+    reject_non_fqdn_helo_hostname
+
+smtpd_sender_restrictions =
+    permit_mynetworks,
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    reject_non_fqdn_recipient,
+    reject_unknown_recipient_domain,
+    reject_unauth_destination
+
+smtpd_data_restrictions  = reject_unauth_pipelining
+smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination
+
+# ============================================================================
+# Performance — connection caching, sensible concurrency.
+# ============================================================================
+smtp_connection_cache_on_demand       = yes
+smtp_connection_reuse_time_limit      = 300s
+default_destination_concurrency_limit = 20
+smtp_destination_concurrency_limit    = 20
+smtp_destination_rate_delay           = 0s
+ipc_timeout                           = 3600s
+
+# postscreen — only fires if the admin enables postscreen in master.cf.
+# Defines the policy for when it is enabled.
+postscreen_greet_action = enforce
+postscreen_dnsbl_action = enforce
