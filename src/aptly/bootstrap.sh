@@ -39,22 +39,26 @@ mkdir -p /aptly
 chown aptly:aptly /aptly
 
 if [ ! -f /aptly/.aptly.conf ]; then
-    sudo -u aptly aptly config show 1>/dev/null 2>&1
+    runuser -u aptly -- aptly config show 1>/dev/null 2>&1
     sed -i s/"\.aptly"/repo/ /aptly/.aptly.conf
     chown aptly:aptly /aptly/.aptly.conf
 fi
 
 if [ ! -d /aptly/.gnupg ]; then
     mkdir -p /aptly/.gnupg
-    chmod 600 /aptly/.gnupg
     chown aptly:aptly /aptly/.gnupg
 fi
+# gpg refuses to use a homedir that is group/other accessible
+chmod 700 /aptly/.gnupg
 
 if [ ! -d /aptly/.ssh ]; then
     mkdir -p /aptly/.ssh
-    chmod 600 /aptly/.ssh
-    chown aptly:aptly /aptly.ssh
+    chown aptly:aptly /aptly/.ssh
 fi
+# sshd refuses pubkey auth if ~/.ssh is not 0700 and authorized_keys not 0600
+chmod 700 /aptly/.ssh
+chown aptly:aptly /aptly/.ssh
+[ -f /aptly/.ssh/authorized_keys ] && chmod 600 /aptly/.ssh/authorized_keys
 
 if [ ! -d /aptly/repo ]; then
     mkdir -p /aptly/repo
@@ -71,18 +75,35 @@ if [ ! -d /aptly/examples ]; then
 fi
 cp -rp /aptly.orig/examples/* /aptly/examples/
 
-if [ ! -f /aptly/bin/process-incoming.sh ]; then
-    mkdir -p /aptly/bin
-    cp -rp /aptly/examples/process-incoming.sh /aptly/bin/
+# /aptly is a bind mount (survives rebuild), so a `[ ! -f ]` guard would pin the
+# OLD process-incoming.sh forever and silently drop image fixes (e.g. the
+# arch-scoped delete). Refresh unconditionally from the image copy — the image
+# is source of truth. A prior copy is backed up once per boot for rollback.
+mkdir -p /aptly/bin
+if [ -f /aptly/bin/process-incoming.sh ]; then
+    cp -p /aptly/bin/process-incoming.sh "/aptly/bin/process-incoming.sh.bak-boot-$(date +%s)" 2>/dev/null || true
 fi
+cp -rp /aptly/examples/process-incoming.sh /aptly/bin/process-incoming.sh
 chmod +x /aptly/bin/process-incoming.sh
+
+# ensure-queue-worker.sh: the enqueue path calls /aptly/bin/ensure-queue-worker.sh
+# to restart the worker on demand if it died (see includes.sh aptly_process_incoming).
+# Always refresh from the image copy so fixes ship on rebuild.
+mkdir -p /aptly/bin
+cp -p /usr/local/bin/ensure-queue-worker.sh /aptly/bin/ensure-queue-worker.sh
+chmod +x /aptly/bin/ensure-queue-worker.sh
+
+# Queue dir for the serialising worker (one publish at a time — see
+# aptly-queue-worker.sh). Builds drop jobs here; the worker drains them.
+mkdir -p /aptly/queue
+chown aptly:aptly /aptly/queue
 
 chown aptly:aptly -R /aptly &
 
 if [ ! "${CLEANDBONSTART}" = "NO" ];
 then
     echo "[APTLY] Cleaning DB"
-    sudo -u aptly aptly db cleanup
+    runuser -u aptly -- aptly db cleanup
 fi
 
 if [ ! "${STARTNGINX}" = "NO" ];
@@ -93,7 +114,19 @@ fi
 
 service cron start
 
+# Start the aptly queue worker as the unprivileged aptly user. It serialises
+# every repo include + publish so concurrent builds can't produce a
+# half-written index ("File has unexpected size"). setsid detaches it from the
+# bootstrap shell so it survives as a long-running daemon; it self-guards with a
+# flock so a duplicate start is a no-op. Toggle off with STARTQUEUEWORKER=NO.
+if [ ! "${STARTQUEUEWORKER}" = "NO" ]; then
+    echo "[APTLY] Starting queue worker"
+    runuser -u aptly -- setsid bash -c \
+        '/usr/local/bin/aptly-queue-worker.sh >> /aptly/queue-worker.log 2>&1' &
+fi
+
 dockerid=$(hostname)
-echo "[APTLY] For breaking into this docker: docker exec -it $dockerid bash"
+echo "[APTLY] Shell into this docker (drops to aptly): docker exec -it $dockerid bash"
+echo "[APTLY] Need root?  docker exec -it -u root $dockerid bash   (or set APTLY_ROOT_SHELL=1)"
 
 exec /usr/sbin/sshd -D

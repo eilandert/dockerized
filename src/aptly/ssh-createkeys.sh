@@ -2,7 +2,6 @@
 
 host_keys_required() {
     echo /etc/ssh/ssh_host_rsa_key
-    echo /etc/ssh/ssh_host_dsa_key
     echo /etc/ssh/ssh_host_ecdsa_key
     echo /etc/ssh/ssh_host_ed25519_key
 }
@@ -32,10 +31,6 @@ create_keys() {
     if [ ! -f "/etc/ssh/ssh_host_rsa_key" ]; then
         create_key "Creating SSH2 RSA key; this may take some time ..." \
             "$hostkeys" /etc/ssh/ssh_host_rsa_key -t rsa
-    fi
-    if [ ! -f "/etc/ssh/ssh_host_dsa_key" ]; then
-        create_key "Creating SSH2 DSA key; this may take some time ..." \
-            "$hostkeys" /etc/ssh/ssh_host_dsa_key -t dsa
     fi
     if [ ! -f "/etc/ssh/ssh_host_ecdsa_key" ]; then
         create_key "Creating SSH2 ECDSA key; this may take some time ..." \

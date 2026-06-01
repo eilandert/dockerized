@@ -30,7 +30,7 @@ fi
 if [ "${CREATE}" != "YES" ]; then unset CREATE; fi
 if [ "${DELETE}" != "YES" ]; then unset DELETE; fi
 
-if [[ ${DIR} =~ ^/tmp/ ]]; then
+if [[ ${DIR} = /* ]]; then
     WORKDIR="${DIR}"
 else
     WORKDIR="/aptly/incoming/${DIR}"
@@ -162,18 +162,25 @@ if [ "${CREATE:-}" = "YES" ]; then
     fi
 fi
 
-# DELETE-then-IMPORT (restored 2026-05-31). Wipe the whole source package and
-# all its (sub)binaries from the repo FIRST, in a single removal, then import
-# the fresh .changes. This is the original, predictable flow: it does not
-# depend on which arch's debs happen to be in this dir, so dual-arch uploads no
-# longer leave the index in a half-consistent state. The add-first/prune-the-
-# complement variant (May 28 .. May 31) computed its keep-set from only the
-# current invocation's debs and removed by un-arch-qualified Package(name),
-# which is what produced the inconsistent indices + extra republish windows
-# that surfaced as "File has unexpected size" on concurrent builds.
+# DELETE-then-IMPORT, ARCH-SCOPED (fixed 2026-06-01). Dual-arch builds upload
+# each arch's .changes separately (amd64 leg, then arm64 leg). A blanket
+# `repo remove $Source(pkg)` in the arm64 leg also wiped the amd64 binaries the
+# previous leg had just imported, leaving the repo with only the last arch
+# (symptom: amd64 pcre2 vanished, arm64 present). Scope the delete to the
+# arch(es) actually present in THIS .changes so each leg only replaces its own
+# arch. Architecture-independent (all) packages re-import every leg, so
+# removing them per-leg is safe and keeps them fresh.
 if [ "${DELETE:-}" = "YES" ] && [ -n "${SPKG:-}" ]; then
-    echo "Removing ${SPKG} (\$Source ${SPKG}) before import"
-    aptly repo remove "${REPO}" "\$Source (${SPKG})" || true
+    _arches=$(printf '%s\n' ${CHANGES_ARCH} | grep -vx source || true)
+    if [ -z "${_arches}" ]; then
+        echo "WARNING: no binary arch in ${CHANGES_FILE} (Architecture: ${CHANGES_ARCH}); skipping delete" >&2
+    else
+        for _a in ${_arches}; do
+            echo "Removing ${SPKG} (\$Source ${SPKG}) for arch ${_a} before import"
+            aptly repo remove "${REPO}" "\$Source (${SPKG}), \$Architecture (${_a})" || true
+        done
+    fi
+    unset _arches _a
 fi
 
 run_with_conflict_retry repo-include \

@@ -1,0 +1,59 @@
+# Hardened deployment for the aptly container.
+#
+# This image runs multiple root-owned services (sshd privsep, nginx master,
+# cron) so PID 1 must start as root. We do NOT run the container as USER —
+# instead we cage root from the runtime side: drop ALL capabilities and add
+# back only the handful the boot sequence genuinely needs, forbid privilege
+# escalation, and tighten the rest. The actual repo workload (aptly) already
+# drops to the unprivileged uid 1010 via `runuser -u aptly` in bootstrap.sh.
+# (The image ships no setuid binaries, so no-new-privileges has nothing to fight.)
+#
+# Adjust ports, volumes and SYSLOG_HOST to your host before use.
+
+services:
+  aptly:
+    image: eilandert/aptly:stable
+    container_name: aptly
+    hostname: aptly
+    restart: unless-stopped
+
+    # --- Hardening ---------------------------------------------------------
+    security_opt:
+      - no-new-privileges:true        # block setuid escalation past boot
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE              # nginx binds :80
+      - SETUID                        # sshd privsep + `runuser -u aptly`
+      - SETGID                        # drop to aptly group / service
+      - CHOWN                         # bootstrap chown /etc/ssh, /aptly
+      - FOWNER                        # chmod files we don't own as start uid
+      - DAC_OVERRIDE                  # cron/ssh need to read mode-600 files
+      - KILL                          # service nginx restart / cron signals
+      - AUDIT_WRITE                   # sshd PAM login records
+    # Everything else (NET_RAW, SYS_ADMIN, SYS_PTRACE, MKNOD, ...) stays dropped.
+
+    tmpfs:
+      - /run:rw,nosuid,nodev,mode=0755
+      - /tmp:rw,nosuid,nodev,mode=1777
+
+    ports:
+      - "10022:22"                    # ssh upload endpoint
+      - "8889:80"                     # published repo (matches deb.myguard.nl)
+
+    environment:
+      TZ: Europe/Amsterdam
+      # SYSLOG_HOST: 10.0.0.1
+      CLEANDBONSTART: "YES"
+      STARTNGINX: "YES"
+
+    volumes:
+      - ./data/aptly:/aptly           # repo db, public tree, keys, incoming
+      - ./data/ssh:/etc/ssh           # persist host keys across restarts
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --max-time 3 -o /dev/null http://127.0.0.1:80/ || pgrep -x sshd"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
