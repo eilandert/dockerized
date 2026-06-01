@@ -35,53 +35,13 @@ RUN set -ex ;\
     useradd -u 1010 -g 1010 aptly -s /bin/bash -d /aptly ;\
     rm -f /etc/ssh/ssh_host_rsa_key* /etc/ssh/ssh_host_dsa_key* \
           /etc/ssh/ssh_host_ecdsa_key* /etc/ssh/ssh_host_ed25519_key* ;\
-    if [ -f /etc/ssh/sshd_config.d/20-security.conf ]; then \
-        sed -i /^Banner/d /etc/ssh/sshd_config.d/20-security.conf ;\
-    fi ;\
+    # sshd hardening + crypto come from the openssh package's own config (trusted,
+    # maintained upstream) — we do NOT layer our own sshd_config.d here. Also drop
+    # the base image's UNOWNED, stale (2021) 10-algorithms-ciphers.conf: it pinned
+    # KexAlgorithms to diffie-hellman-group-exchange-sha256 only, disabling PQC
+    # (mlkem/sntrup) and curve25519. Removing it lets the package defaults win.
+    rm -f /etc/ssh/sshd_config.d/10-algorithms-ciphers.conf ;\
     addgroup ssh-users && usermod -L -a -G ssh-users aptly ;\
-    # Single consolidated sshd policy: merges the CIS baseline (DenyUsers, \
-    # VERBOSE logging, MaxStartups, RekeyLimit, GSSAPI/Kerberos/Hostbased off, \
-    # ClientAliveCountMax 0) with our extra hardening (PermitTunnel/Gateway/ \
-    # StreamLocal forwarding off, Compression off, tighter LoginGraceTime). \
-    # Key-only, no root, only members of ssh-users. Strictest value wins where \
-    # the two baselines differed. Supersedes any base-shipped 20-security.conf. \
-    rm -f /etc/ssh/sshd_config.d/20-security.conf ;\
-    printf '%s\n' \
-        '# Consolidated aptly sshd hardening (CIS baseline + extra). Key-only.' \
-        'PermitRootLogin no' \
-        'PasswordAuthentication no' \
-        'PermitEmptyPasswords no' \
-        'KbdInteractiveAuthentication no' \
-        'ChallengeResponseAuthentication no' \
-        'HostbasedAuthentication no' \
-        'IgnoreRhosts yes' \
-        'GSSAPIAuthentication no' \
-        'KerberosAuthentication no' \
-        'PubkeyAuthentication yes' \
-        'UsePAM yes' \
-        'PermitUserEnvironment no' \
-        'StrictModes yes' \
-        'X11Forwarding no' \
-        'AllowAgentForwarding no' \
-        'AllowTcpForwarding no' \
-        'AllowStreamLocalForwarding no' \
-        'GatewayPorts no' \
-        'PermitTunnel no' \
-        'Compression no' \
-        'MaxAuthTries 3' \
-        'MaxSessions 10' \
-        'MaxStartups 10:30:60' \
-        'LoginGraceTime 30' \
-        'ClientAliveInterval 300' \
-        'ClientAliveCountMax 0' \
-        'RekeyLimit 512M 6h' \
-        'LogLevel VERBOSE' \
-        'DebianBanner no' \
-        'DenyGroups nobody' \
-        'DenyUsers nobody' \
-        'AllowGroups ssh-users' \
-        > /etc/ssh/sshd_config.d/99-aptly-hardening.conf ;\
-    chmod 644 /etc/ssh/sshd_config.d/99-aptly-hardening.conf ;\
     # Make `docker exec -it <id> bash` land as the unprivileged aptly user
     # instead of root. Guards: only for interactive shells, only once (no
     # re-entry loop), and skippable via APTLY_ROOT_SHELL=1 or `-u root`. \
