@@ -48,9 +48,21 @@ fi
 TMP_FILES=()
 cleanup() {
     local rc=$?
-    if [ "$rc" -eq 0 ] && [ -n "${WORKDIR:-}" ] && [ -d "${WORKDIR}" ]; then
-        rm -rf "${WORKDIR}"
-    fi
+    # On success, remove the work dir — but ONLY for the legacy /aptly/incoming
+    # flow. When the queue worker invokes us it passes DIR=<queue job dir>, and
+    # the WORKER owns that dir's lifecycle (it writes .done/.failed there and the
+    # build reaps it). Deleting it here races the worker's result write: the dir
+    # vanishes before `echo > .done`, the worker logs "result-write skipped", and
+    # the build polls for a .done that never appears until APTLY_QUEUE_WAIT. So
+    # never rm a /aptly/queue/* dir.
+    case "${WORKDIR:-}" in
+        /aptly/queue/*) : ;;   # queue-owned — leave it for the worker
+        *)
+            if [ "$rc" -eq 0 ] && [ -n "${WORKDIR:-}" ] && [ -d "${WORKDIR}" ]; then
+                rm -rf "${WORKDIR}"
+            fi
+            ;;
+    esac
     for f in "${TMP_FILES[@]:-}"; do
         [ -n "$f" ] && [ -e "$f" ] && rm -f -- "$f"
     done
