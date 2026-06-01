@@ -20,10 +20,9 @@ RUN set -ex ;\
       gpg-agent \
       inotify-tools \
       less \
-      libnginx-mod-http-fancyindex \
       libnginx-mod-http-brotli \
+      libnginx-mod-http-fancyindex \
       libnginx-mod-http-zstd \
-      nano \
       nginx-minimal \
       openssh-server \
       rsync \
@@ -38,7 +37,6 @@ RUN set -ex ;\
     useradd -u 1010 -g 1010 aptly -s /bin/bash -d /aptly ;\
     rm -f /etc/ssh/ssh_host_rsa_key* /etc/ssh/ssh_host_dsa_key* \
           /etc/ssh/ssh_host_ecdsa_key* /etc/ssh/ssh_host_ed25519_key* ;\
-    rm -f /etc/nginx/modules-enabled/50-mod-http-echo.conf ;\
     if [ -f /etc/ssh/sshd_config.d/20-security.conf ]; then \
         sed -i /^Banner/d /etc/ssh/sshd_config.d/20-security.conf ;\
     fi ;\
