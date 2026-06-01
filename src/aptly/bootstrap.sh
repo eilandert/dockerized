@@ -14,15 +14,10 @@ if [ -n "${SYSLOG_HOST}" ]; then
 fi
 
 
-if [ ! "${STARTNGINX}" = "NO" ];
-then
-# If there are no configfiles, copy them
-FIRSTRUN="/etc/nginx/nginx.conf"
-if [ ! -f ${FIRSTRUN} ]; then
-    echo "[NGINX] no configs found, populating default configs to /etc/nginx"
-    cp -r /etc/nginx.orig/* /etc/nginx/
-fi
-fi
+# NOTE: /etc/nginx is NOT a volume — our single nginx.conf is baked in by the
+# Dockerfile COPY, so there is no first-run "restore default config" step. (A
+# restore from /etc/nginx.orig would copy the BASE config, dropping fancyindex
+# and the repo server block — so we must never do that here.)
 
 # If you bind /etc/ssh the dir will be empty, so place a new copy
 if [ ! -f "/etc/ssh/sshd_config" ];
@@ -89,7 +84,6 @@ chmod +x /aptly/bin/process-incoming.sh
 # ensure-queue-worker.sh: the enqueue path calls /aptly/bin/ensure-queue-worker.sh
 # to restart the worker on demand if it died (see includes.sh aptly_process_incoming).
 # Always refresh from the image copy so fixes ship on rebuild.
-mkdir -p /aptly/bin
 cp -p /usr/local/bin/ensure-queue-worker.sh /aptly/bin/ensure-queue-worker.sh
 chmod +x /aptly/bin/ensure-queue-worker.sh
 
@@ -98,7 +92,11 @@ chmod +x /aptly/bin/ensure-queue-worker.sh
 mkdir -p /aptly/queue
 chown aptly:aptly /aptly/queue
 
-chown aptly:aptly -R /aptly &
+# Own the top-level + working dirs only. A recursive chown of the whole
+# /aptly/repo/public pool (multi-GB, already aptly-owned) every boot is slow and,
+# backgrounded, would race the queue-worker start below. The dirs created above
+# are already chowned; just fix the top level non-recursively.
+chown aptly:aptly /aptly /aptly/repo /aptly/bin /aptly/queue /aptly/incoming /aptly/examples 2>/dev/null || true
 
 if [ ! "${CLEANDBONSTART}" = "NO" ];
 then
@@ -108,7 +106,13 @@ fi
 
 if [ ! "${STARTNGINX}" = "NO" ];
 then
-    nginx -t
+    # Fail loudly if the config is broken instead of "restarting" into a dead
+    # nginx — the healthcheck's sshd fallback would otherwise mask it and the
+    # repo would silently serve nothing (this bit us with a missing module load).
+    if ! nginx -t; then
+        echo "[NGINX] FATAL: config test failed; not starting nginx" >&2
+        exit 1
+    fi
     service nginx restart 1>/dev/null
 fi
 
