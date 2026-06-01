@@ -20,9 +20,7 @@ RUN set -ex ;\
       gpg-agent \
       inotify-tools \
       less \
-      libnginx-mod-http-brotli \
       libnginx-mod-http-fancyindex \
-      libnginx-mod-http-zstd \
       nginx-minimal \
       openssh-server \
       rsync \
