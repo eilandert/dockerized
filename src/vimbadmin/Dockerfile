@@ -27,7 +27,8 @@ LABEL   org.opencontainers.image.authors="eilandert" \
 ENV     DEBIAN_FRONTEND=noninteractive \
         PHPVERSION=8.5 \
         INSTALL_PATH=/opt/vimbadmin \
-        VIMBADMIN_GIT=https://github.com/eilandert/ViMbAdmin.git
+        VIMBADMIN_GIT=https://github.com/eilandert/ViMbAdmin.git \
+        APPLICATION_ENV=docker
 
 COPY --chmod=0755 bootstrap.sh /bootstrap.sh
 
