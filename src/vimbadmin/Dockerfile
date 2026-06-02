@@ -65,7 +65,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # into the writable var/ volume and injects a per-deployment secret_key, so
     # /etc stays read-only-friendly. The package already loads the extension
     # via mods-available; we only point FPM at the runtime copy.
-    install -D -m 0644 "${INSTALL_PATH}/snuffleupagus/vimbadmin-strict.list" \
+    install -D -m 0644 "${INSTALL_PATH}/contrib/snuffleupagus/vimbadmin-strict.list" \
         /usr/share/vimbadmin/vimbadmin-strict.list ;\
     printf 'sp.configuration_file=%s/var/vimbadmin-strict.list\n' "${INSTALL_PATH}" \
         > /etc/php/8.5/fpm/conf.d/zz-snuffleupagus.ini ;\
@@ -104,8 +104,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
     # ---- strip everything the running image doesn't need -------------
-    # app cruft + the contrib/snuffleupagus sources (now installed elsewhere)
-    rm -rf "${INSTALL_PATH}/.git" "${INSTALL_PATH}/contrib" "${INSTALL_PATH}/snuffleupagus" \
+    # app cruft + the contrib sources (SP ruleset already installed from there)
+    rm -rf "${INSTALL_PATH}/.git" "${INSTALL_PATH}/contrib" \
            "${INSTALL_PATH}/tests" "${INSTALL_PATH}/doc" "${INSTALL_PATH}/docs" \
            "${INSTALL_PATH}/CHANGELOG" "${INSTALL_PATH}"/*.md "${INSTALL_PATH}/.github" ;\
     # vendor docs / tests / VCS / CI metadata
