@@ -17,21 +17,60 @@ the Postfix + Dovecot virtual-mailbox admin panel.
 | Config | one file: [`angie.conf`](angie.conf) |
 | Size | ~320 MB |
 
-### Hardening
+## Security & hardening
+
+This image is defence-in-depth: the **application** is hardened in the fork,
+the **runtime** by Snuffleupagus + the FPM pool, the **edge** by a native
+positive-security Angie vhost, and the **container** by the measures below.
+
+### Container / image
 
 - **Read-only root filesystem** (`read_only: true`). Only the `var` + `configs`
-  volumes and a few tmpfs mounts are writable.
-- **Codebase is root-owned, read-only to the web/PHP users.** Only
-  `var/` (cache, compiled templates, logs, brute-force state, the runtime
-  Snuffleupagus ruleset) and `application/configs/` are writable, and only by
-  the `phpfpm` user.
-- **Per-deployment secrets generated on first run** — the `securitysalt`
-  (encrypts 2FA secrets, seeds CSRF) and the Snuffleupagus `secret_key` are
-  created on first boot and persisted in the volumes; **nothing secret is
-  baked into the image**.
-- **All Linux capabilities dropped** except the few FPM/Angie need; `no-new-privileges`.
-- Docs, man pages, locales, apt repositories, composer and git are removed;
-  setuid/setgid bits stripped.
+  named volumes and three tmpfs mounts (`/run`, `/tmp`, `/var/log/php-fpm`) are
+  writable. Angie temp paths + pid and the FPM master error-log are redirected
+  onto tmpfs so this works.
+- **Codebase is root-owned and read-only to the web/PHP users.** Only `var/`
+  (cache, compiled templates, logs, brute-force state, the runtime Snuffleupagus
+  ruleset) and `application/configs/` are writable, and only by the unprivileged
+  `phpfpm` user. The web/PHP processes cannot modify a single line of code.
+- **No baked secrets.** The `securitysalt` (encrypts 2FA secrets, seeds CSRF)
+  and the Snuffleupagus `secret_key` are generated **on first boot** and
+  persisted in the volumes — unique per deployment, never in an image layer.
+- **All Linux capabilities dropped** (`cap_drop: ALL`) except the few FPM +
+  Angie genuinely need (CHOWN, SETUID, SETGID, NET_BIND_SERVICE, and
+  DAC_OVERRIDE/FOWNER for first-run volume prep); **`no-new-privileges`**.
+- **Minimal attack surface.** `angie-minimal` (no modsecurity/lua/brotli),
+  only the PHP extensions ViMbAdmin uses, dedicated non-login `phpfpm` user.
+- **Stripped:** all apt repositories + lists (no apt at runtime), composer,
+  git, build deps, docs, man pages, info, non-English locales, app docs/tests,
+  vendor docs/tests; every **setuid/setgid bit removed**.
+- **Per-service resource limits** (memory, pids) and a healthcheck.
+- **Composer installer is checksum-verified** at build (SHA-384 vs the
+  published signature).
+
+### Edge (Angie — all in [`angie.conf`](angie.conf))
+
+- **Positive-security gate** — only allow-listed HTTP methods (GET/HEAD/POST),
+  the real route map (controllers + ZF1 `/key/value` URLs + static + ACME), and
+  the app's known argument names reach PHP. Unknown method → 405, route → 404,
+  arg → 403; scanner / empty user-agents → dropped (444).
+- **TLS-ready** strict **CSP** + `X-Frame-Options: DENY`, `nosniff`,
+  Referrer-/Permissions-Policy; **rate-limited** login; dotfile + project-
+  internal path denies; **BREACH mitigation** (gzip off for dynamic HTML,
+  static assets only).
+
+### Runtime + application
+
+Provided by the fork and wired into this image:
+
+- **Snuffleupagus** with the audited `vimbadmin-strict` ruleset (unique
+  `secret_key` per deployment), and a **hardened PHP-FPM pool**
+  (`open_basedir`, strict session cookies, `.php`-only execution).
+- **App-level:** 2FA (TOTP, encrypted secrets, backup codes, replay guard,
+  force-on-login), per-IP brute-force lockout, CSRF on every form + destructive
+  link, Smarty XSS auto-escaping, constant-time password checks, CSPRNG tokens,
+  session-fixation regeneration.
+- Full list: the **fork's [Security section](https://github.com/eilandert/ViMbAdmin#security)**.
 
 ## Deploy
 
