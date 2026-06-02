@@ -43,6 +43,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       angie-minimal \
       php8.5-fpm php8.5-cli php8.5-mysql php8.5-mbstring php8.5-intl \
       php8.5-xml php8.5-gd php8.5-curl php8.5-bcmath php8.5-zip php8.5-gmp \
+      php8.5-apcu \
       php8.5-snuffleupagus \
       git ca-certificates ;\
     # Dedicated unprivileged FPM user (pool runs as phpfpm; socket group
@@ -75,11 +76,33 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # Master FPM error_log -> tmpfs path (ondrej default /var/log/php8.5-fpm.log
     # sits on the read-only rootfs).
     sed -i 's#^error_log = .*#error_log = /var/log/php-fpm/fpm.log#' /etc/php/8.5/fpm/php-fpm.conf ;\
+    # ---- OPcache: the image code is immutable, so skip stat() on every
+    # include (validate_timestamps=0). Pure shared-memory cache (no file_cache)
+    # -> read-only rootfs safe. JIT left OFF (no buffer) on purpose: the panel
+    # is I/O-bound, JIT buys nothing here and has bitten us elsewhere.
+    # (Doctrine maps via XML, not annotations, so docblocks aren't load-bearing;
+    # save_comments left at the default 1 as a harmless safe default.)
+    { echo 'opcache.enable=1' ;\
+      echo 'opcache.enable_cli=0' ;\
+      echo 'opcache.memory_consumption=128' ;\
+      echo 'opcache.interned_strings_buffer=16' ;\
+      echo 'opcache.max_accelerated_files=20000' ;\
+      echo 'opcache.validate_timestamps=0' ;\
+      echo 'opcache.save_comments=1' ; } \
+        > /etc/php/8.5/fpm/conf.d/99-opcache-tuning.ini ;\
+    # ---- APCu: persistent Doctrine metadata/query cache (was ArrayCache =
+    # per-request only). Anonymous mmap (no mmap_file_mask) -> RO-rootfs safe.
+    { echo 'apc.enabled=1' ;\
+      echo 'apc.shm_size=64M' ;\
+      echo 'apc.enable_cli=0' ; } \
+        > /etc/php/8.5/fpm/conf.d/99-apcu-tuning.ini ;\
     # ---- app config template (no secret baked) -----------------------
     cp application/configs/application.ini.dist application/configs/application.ini ;\
-    { echo "" ; echo "[docker : production]" ; echo "resources.smarty.skin = \"dark\"" ; } \
+    { echo "" ; echo "[docker : production]" ;\
+      echo "resources.smarty.skin = \"dark\"" ;\
+      echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
         >> application/configs/application.ini ;\
-    cp -rp application/configs application/configs.orig ;\
+    mv application/configs application/configs.orig ;\
     # ---- strip everything the running image doesn't need -------------
     # app cruft + the contrib/snuffleupagus sources (now installed elsewhere)
     rm -rf "${INSTALL_PATH}/.git" "${INSTALL_PATH}/contrib" "${INSTALL_PATH}/snuffleupagus" \
@@ -114,7 +137,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Our Angie config replaces the package default (copied AFTER install so it
 # doesn't collide with the angie-common conffile during dpkg setup).
 COPY    angie.conf            /etc/angie/angie.conf
-COPY    vimb_fastcgi.inc      /etc/angie/vimb_fastcgi.inc
 
 WORKDIR /opt/vimbadmin
 EXPOSE  80

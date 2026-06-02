@@ -106,6 +106,28 @@ Two named volumes hold everything that must survive a redeploy:
 
 Back these up. Losing `conf` rotates the salt (invalidates stored 2FA secrets).
 
+### Editing the config
+
+The image ships its config defaults inside the image (`configs.orig`); the live
+`application/configs` dir is a **mountable volume** so you can adjust
+`application.ini` without rebuilding. On every start the entrypoint:
+
+- **No `application.ini` yet** (first run / fresh volume) → seeds the whole
+  config dir from the shipped defaults and generates the `securitysalt`.
+- **`application.ini` present** (your config) → leaves it **untouched**, and
+  drops the latest shipped default beside it as **`application.ini.orig`** so
+  you can `diff` after an image bump and pull in any new keys yourself.
+
+```sh
+# inspect what changed in the shipped default after an upgrade
+docker compose exec vimbadmin \
+  diff -u /opt/vimbadmin/application/configs/application.ini.orig \
+          /opt/vimbadmin/application/configs/application.ini
+```
+
+Your edits survive restarts and image upgrades; the image never overwrites a
+config it didn't create.
+
 ### Tunables
 
 Skin, footer toggle, brute-force thresholds + IP allowlist, 2FA reset and the

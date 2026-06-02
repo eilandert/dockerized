@@ -22,11 +22,25 @@ install -d -m 0750 -o www-data -g www-data \
     /tmp/angie/client /tmp/angie/fastcgi /tmp/angie/proxy /tmp/angie/scgi /tmp/angie/uwsgi \
     2>/dev/null || true
 
-# ---- first run: app config (from the image template) -----------------
-INI="${INSTALL_PATH}/application/configs/application.ini"
+# ---- app config dir (mountable so users can adjust application.ini) --
+# The image ships the defaults in configs.orig (the live configs dir is moved
+# there at build time). On start:
+#   * no application.ini yet  -> first run / empty mounted volume: seed the
+#     whole config dir from the shipped defaults.
+#   * application.ini present  -> user's own config: leave it untouched, but
+#     drop the latest shipped default next to it as application.ini.orig so
+#     they can diff after an image bump.
+CONF="${INSTALL_PATH}/application/configs"
+ORIG="${INSTALL_PATH}/application/configs.orig"
+INI="${CONF}/application.ini"
 if [ ! -f "${INI}" ]; then
-    cp -rp "${INSTALL_PATH}/application/configs.orig/." "${INSTALL_PATH}/application/configs/"
-    chown -R phpfpm:www-data "${INSTALL_PATH}/application/configs"
+    cp -rp "${ORIG}/." "${CONF}/"
+    chown -R phpfpm:www-data "${CONF}"
+    echo "[VIMBADMIN] seeded config dir from shipped defaults"
+else
+    cp -p "${ORIG}/application.ini" "${CONF}/application.ini.orig"
+    chown phpfpm:www-data "${CONF}/application.ini.orig"
+    echo "[VIMBADMIN] refreshed application.ini.orig (shipped default, for diffing)"
 fi
 
 # Per-deployment securitysalt: generated once, persisted in the configs
@@ -50,6 +64,12 @@ if [ ! -f "${SP}" ]; then
     chmod 0640 "${SP}"
     echo "[VIMBADMIN] generated Snuffleupagus secret_key"
 fi
+
+# ---- purge stale Smarty compiled templates on every (re)start --------
+# templates_c holds compiled .php from the skin/templates. After an image
+# bump the source templates change but the compiled copies live in the
+# persistent var volume -> wipe them so the new code is recompiled fresh.
+rm -rf "${INSTALL_PATH}/var/templates_c"/* 2>/dev/null || true
 
 # ---- config test -----------------------------------------------------
 php-fpm${PHPVERSION} -t
