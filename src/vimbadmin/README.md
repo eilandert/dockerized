@@ -92,8 +92,30 @@ proxy). The image listens on **:80** only.
 
 ### Wire it to Postfix + Dovecot
 
-ViMbAdmin only maintains the SQL user database. The Postfix `virtual_*` maps,
-Dovecot `sql.conf` and the schema are in [`EXAMPLES/`](EXAMPLES/).
+ViMbAdmin only maintains the SQL user database — it never talks to Postfix or
+Dovecot directly. Both read the **same MariaDB** through their own SQL maps;
+they can live on a different host or container entirely. The Postfix
+`virtual_*` maps, Dovecot `sql.conf` and the schema are in
+[`EXAMPLES/`](EXAMPLES/). Let Dovecot create maildirs on first delivery/login
+(`mail_location` + LMTP/LDA); this image neither sees nor needs them.
+
+> **Password scheme must match.** ViMbAdmin hashes passwords on write; set
+> Dovecot's `default_pass_scheme` to the same scheme or logins fail.
+
+### Archive / quota / disk-delete — run on the mail host
+
+This image is **DB-only and minimal**: no maildir mount, no `tar`/`bzip2`. The
+ViMbAdmin features that touch the mail filesystem — **archive** (the
+`archive.cli-*-pendings` queue), **mailbox size/quota** (`mailbox.cli-get-sizes`)
+and on-disk mailbox deletion — must run **where the maildirs live**, i.e. on the
+Dovecot host (or a sidecar that bind-mounts the mail volume), pointed at the
+same MariaDB.
+
+The web panel works regardless: the "Archive" button just queues a DB row. If
+no filesystem cron processes that queue, rows sit at `PENDING_ARCHIVE` and
+nothing is ever tarred. An example mail-host crontab is in
+[`EXAMPLES/archive-cron.mailhost`](EXAMPLES/archive-cron.mailhost). If you
+don't use archiving, ignore it — the feature degrades to a DB-only delete.
 
 ### Persisted state
 
