@@ -70,6 +70,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # runtime copy (see the sed below).
     install -D -m 0644 "${INSTALL_PATH}/contrib/snuffleupagus/vimbadmin-strict.list" \
         /usr/share/vimbadmin/vimbadmin-strict.list ;\
+    # Point the CLI SAPI's SP at the same runtime ruleset (bootstrap materialises
+    # it on start) so vimbtool/doctrine2-cli don't warn "No configuration
+    # specified via sp.configuration_file".
+    printf 'sp.configuration_file=%s/var/vimbadmin-strict.list\n' "${INSTALL_PATH}" \
+        > /etc/php/8.5/cli/conf.d/zz-snuffleupagus.ini ;\
     # ---- PHP-FPM pool: the fork's hardened pool ----------------------
     rm -f /etc/php/8.5/fpm/pool.d/www.conf ;\
     install -D -m 0644 "${INSTALL_PATH}/contrib/php-fpm/vimbadmin.conf" \
