@@ -45,6 +45,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       php8.5-xml php8.5-gd php8.5-curl php8.5-bcmath php8.5-zip php8.5-gmp \
       php8.5-apcu \
       php8.5-snuffleupagus \
+      bzip2 \
       git ca-certificates ;\
     # Dedicated unprivileged FPM user (pool runs as phpfpm; socket group
     # www-data so Angie can reach it). ondrej packages don't create it.

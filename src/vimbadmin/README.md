@@ -105,12 +105,17 @@ they can live on a different host or container entirely. The Postfix
 
 ### Archive / quota / disk-delete — run on the mail host
 
-This image is **DB-only and minimal**: no maildir mount, no `tar`/`bzip2`. The
-ViMbAdmin features that touch the mail filesystem — **archive** (the
+The ViMbAdmin features that touch the mail filesystem — **archive** (the
 `archive.cli-*-pendings` queue), **mailbox size/quota** (`mailbox.cli-get-sizes`)
-and on-disk mailbox deletion — must run **where the maildirs live**, i.e. on the
-Dovecot host (or a sidecar that bind-mounts the mail volume), pointed at the
-same MariaDB.
+and on-disk mailbox deletion — must run **where the maildirs live**. By default
+the web container has no maildir mount, so they belong on the Dovecot host
+(pointed at the same MariaDB).
+
+The image *is* archive-capable, though: it ships the full ViMbAdmin CLI plus
+`tar`/`bzip2`, so you can also run it as a **sidecar** that bind-mounts the
+maildir tree (read-write) and `archive.path` (e.g. `/srv/archives`), then runs
+`php /opt/vimbadmin/bin/vimbtool.php -a archive.cli-archive-pendings` on a
+schedule. Same image, same DB — just give it the volumes.
 
 The web panel works regardless: the "Archive" button just queues a DB row. If
 no filesystem cron processes that queue, rows sit at `PENDING_ARCHIVE` and
