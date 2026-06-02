@@ -31,6 +31,7 @@ ENV     DEBIAN_FRONTEND=noninteractive \
         APPLICATION_ENV=docker
 
 COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+COPY --chmod=0644 build-config.php local.ini.example /usr/share/vimbadmin/
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \

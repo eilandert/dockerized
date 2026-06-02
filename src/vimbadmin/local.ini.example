@@ -1,0 +1,40 @@
+; =====================================================================
+;  ViMbAdmin -- local.ini  (the ONLY file you edit)
+; =====================================================================
+;  Mount this as /opt/vimbadmin/application/configs/local.ini. On start the
+;  container builds the full application.ini from these values + sane baked
+;  defaults. You never touch the big framework config.
+;
+;  securitysalt is generated automatically on first start and stored here.
+; =====================================================================
+
+; ---- database (required) --------------------------------------------
+db.host     = "mariadb"
+db.name     = "vimbadmin"
+db.user     = "vimbadmin"
+db.password = "change-me"
+
+; ---- where mail is stored (must match your Dovecot config) ----------
+mailbox.maildir = "maildir:/srv/vmail/%d/%u/mail:LAYOUT=fs"
+mailbox.homedir = "/srv/vmail/%d/%u"
+mailbox.uid     = 2000
+mailbox.gid     = 2000
+; password hashing scheme. crypt:sha512 is PHP-native (no doveadm needed)
+; and accepted by Dovecot as {SHA512-CRYPT}. Use "dovecot:BLF-CRYPT" only if
+; doveadm is reachable inside the container.
+mailbox.scheme  = "crypt:sha512"
+
+; ---- identity / outgoing mail ---------------------------------------
+admin.email = "postmaster@example.com"
+site.name   = "ViMbAdmin"
+site.url    = "https://mail.example.com/vimbadmin/"
+
+; ---- deployment knobs -----------------------------------------------
+; If served under a sub-path behind a proxy (e.g. /vimbadmin), set it here:
+base_path         = "/vimbadmin"
+; Real client IP behind a reverse proxy: auto | on | off
+trustedproxy.mode = "auto"
+; MCP JSON-RPC API at /mcp (off by default)
+mcp.enabled       = 0
+
+; securitysalt is auto-generated below on first start -- leave it.

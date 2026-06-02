@@ -22,35 +22,45 @@ install -d -m 0750 -o www-data -g www-data \
     /tmp/angie/client /tmp/angie/fastcgi /tmp/angie/proxy /tmp/angie/scgi /tmp/angie/uwsgi \
     2>/dev/null || true
 
-# ---- app config dir (mountable so users can adjust application.ini) --
-# The image ships the defaults in configs.orig (the live configs dir is moved
-# there at build time). On start:
-#   * no application.ini yet  -> first run / empty mounted volume: seed the
-#     whole config dir from the shipped defaults.
-#   * application.ini present  -> user's own config: leave it untouched, but
-#     drop the latest shipped default next to it as application.ini.orig so
-#     they can diff after an image bump.
+# ---- app config -----------------------------------------------------
+# Two modes, auto-detected:
+#
+#   SIMPLE (recommended): mount a small local.ini with ~15 deployment keys.
+#     On every start we regenerate the full application.ini from the baked
+#     template + local.ini. You never touch the big framework config; the
+#     securitysalt is auto-generated into local.ini.
+#
+#   LEGACY: mount/keep a full application.ini yourself. We leave it untouched
+#     (just refresh application.ini.orig for diffing) and generate the salt.
 CONF="${INSTALL_PATH}/application/configs"
 ORIG="${INSTALL_PATH}/application/configs.orig"
 INI="${CONF}/application.ini"
-if [ ! -f "${INI}" ]; then
-    cp -rp "${ORIG}/." "${CONF}/"
-    chown -R phpfpm:www-data "${CONF}"
-    echo "[VIMBADMIN] seeded config dir from shipped defaults"
-else
-    cp -p "${ORIG}/application.ini" "${CONF}/application.ini.orig"
-    chown phpfpm:www-data "${CONF}/application.ini.orig"
-    echo "[VIMBADMIN] refreshed application.ini.orig (shipped default, for diffing)"
-fi
+LOCAL="${CONF}/local.ini"
 
-# Per-deployment securitysalt: generated once, persisted in the configs
-# volume. Never baked into the image (it encrypts 2FA secrets + seeds CSRF),
-# and must stay stable across restarts -> only written if not already a real
-# value. Appended to the active [docker : production] section (last in file).
-if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
-    printf 'securitysalt = "%s"\n' "$(php -n -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
-    chown phpfpm:www-data "${INI}"
-    echo "[VIMBADMIN] generated securitysalt"
+# Offer the example on an empty mount so the simple path is discoverable.
+[ -f "${LOCAL}" ] || [ -f "${INI}" ] || cp -p /usr/share/vimbadmin/local.ini.example "${CONF}/local.ini.example" 2>/dev/null || true
+
+if [ -f "${LOCAL}" ]; then
+    php -n /usr/share/vimbadmin/build-config.php \
+        "${ORIG}/application.ini" "${LOCAL}" "${INI}"
+    chown phpfpm:www-data "${INI}" "${LOCAL}"
+    echo "[VIMBADMIN] config built from local.ini (simple mode)"
+else
+    if [ ! -f "${INI}" ]; then
+        cp -rp "${ORIG}/." "${CONF}/"
+        chown -R phpfpm:www-data "${CONF}"
+        echo "[VIMBADMIN] seeded config dir from shipped defaults (legacy mode)"
+    else
+        cp -p "${ORIG}/application.ini" "${CONF}/application.ini.orig"
+        chown phpfpm:www-data "${CONF}/application.ini.orig"
+        echo "[VIMBADMIN] legacy mode: application.ini left as-is (refreshed .orig)"
+    fi
+    # Per-deployment securitysalt (legacy mode only; simple mode handles it).
+    if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
+        printf 'securitysalt = "%s"\n' "$(php -n -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
+        chown phpfpm:www-data "${INI}"
+        echo "[VIMBADMIN] generated securitysalt"
+    fi
 fi
 
 # ---- Snuffleupagus ruleset: materialise into the writable var volume -
