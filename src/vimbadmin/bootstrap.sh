@@ -21,9 +21,22 @@ install -D -m 0644 /etc/angie.orig/angie.conf /etc/angie/angie.conf
 [ -f /vimb_fastcgi.inc ] && install -D -m 0644 /vimb_fastcgi.inc /etc/angie/vimb_fastcgi.inc
 
 # ---- first run: app config -------------------------------------------
-if [ ! -f "${INSTALL_PATH}/application/configs/application.ini" ]; then
+INI="${INSTALL_PATH}/application/configs/application.ini"
+if [ ! -f "${INI}" ]; then
     cp -rp "${INSTALL_PATH}/application/configs.orig/." "${INSTALL_PATH}/application/configs/"
     chown -R phpfpm:www-data "${INSTALL_PATH}/var" "${INSTALL_PATH}/application/configs"
+fi
+
+# Generate a unique securitysalt on first run and persist it in the (mounted)
+# configs volume. Never baked into the image -> not shared across deployments.
+# It is appended to the active [docker : production] section, which is the last
+# section in the file. It encrypts 2FA TOTP secrets and seeds CSRF, so it must
+# be stable across restarts (hence: only ever written once).
+if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
+    SALT="$(php -r 'echo bin2hex(random_bytes(32));')"
+    printf 'securitysalt = "%s"\n' "${SALT}" >> "${INI}"
+    chown phpfpm:www-data "${INI}"
+    echo "[VIMBADMIN] generated securitysalt"
 fi
 
 # ---- Snuffleupagus: ensure a unique secret_key -----------------------

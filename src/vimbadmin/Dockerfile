@@ -60,9 +60,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # ---- fetch the modernised fork + install deps ----------------------
     git clone --depth 1 "${VIMBADMIN_GIT}" "${INSTALL_PATH}" ;\
     cd "${INSTALL_PATH}" ;\
+    # Composer's documented install flow: verify the installer against the
+    # published SHA-384 signature before running it.
     php -r "copy('https://getcomposer.org/installer','/tmp/c.php');" ;\
+    EXPECTED="$(php -r "copy('https://composer.github.io/installer.sig','/tmp/c.sig'); echo trim(file_get_contents('/tmp/c.sig'));")" ;\
+    ACTUAL="$(php -r "echo hash_file('sha384','/tmp/c.php');")" ;\
+    [ "${EXPECTED}" = "${ACTUAL}" ] || { echo 'composer installer checksum mismatch' >&2; exit 1; } ;\
     php /tmp/c.php --quiet --install-dir=/usr/local/bin --filename=composer ;\
-    rm -f /tmp/c.php ;\
+    rm -f /tmp/c.php /tmp/c.sig ;\
     composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader ;\
     composer clear-cache ;\
     # ---- Snuffleupagus: install the fork's audited ruleset -------------
@@ -79,11 +84,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     install -d -m 0755 -o phpfpm -g www-data /run/php ;\
     install -d -m 0750 -o phpfpm -g www-data /var/log/php-fpm ;\
     # ---- app config (docker env) -------------------------------------
+    # NOTE: securitysalt is deliberately NOT baked here -- a salt in the image
+    # layer would be shared by every container (it encrypts 2FA secrets and
+    # seeds CSRF). bootstrap.sh generates a unique one per deployment on first
+    # run and persists it in the mounted configs volume.
     cp application/configs/application.ini.dist application/configs/application.ini ;\
     { \
       echo "" ;\
       echo "[docker : production]" ;\
-      echo "securitysalt = \"$(php -r 'echo bin2hex(random_bytes(32));')\"" ;\
       echo "resources.smarty.skin = \"dark\"" ;\
     } >> application/configs/application.ini ;\
     # keep a pristine copy for first-run restore (bootstrap)
