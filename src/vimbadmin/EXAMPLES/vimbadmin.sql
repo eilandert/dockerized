@@ -501,3 +501,23 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2020-04-18 15:46:28
+
+--
+-- MCP adapter API tokens (only the SHA-256 hash of each token is stored).
+-- Fresh installs get this from `doctrine2-cli.php orm:schema-tool:create`;
+-- on an existing DB run `orm:schema-tool:update --force` or apply this.
+--
+DROP TABLE IF EXISTS `mcp_token`;
+CREATE TABLE `mcp_token` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `token_hash` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `scope` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `allowed_ips` longtext COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created` datetime NOT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  `revoked` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQ_mcp_token_hash` (`token_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
