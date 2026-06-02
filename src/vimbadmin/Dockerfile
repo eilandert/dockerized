@@ -2,14 +2,17 @@
 # =====================================================================
 #  ViMbAdmin  --  Debian / Angie-minimal / PHP-FPM 8.5
 # =====================================================================
-#  Single-purpose image for the modernised ViMbAdmin fork
+#  Single-purpose, hardened image for the modernised ViMbAdmin fork
 #  (https://github.com/eilandert/ViMbAdmin):
 #    * FROM eilandert/debian-base (trixie-slim + deb.myguard.nl repo + hardening)
 #    * angie-minimal  (no modsecurity/lua/brotli -- the panel is guarded by a
 #      native positive-security vhost instead)
 #    * php8.5-fpm with only the extensions ViMbAdmin needs
 #    * Snuffleupagus with the app's audited vimbadmin-strict ruleset
+#    * code owned root:root (read-only to the web/php users); only the var/
+#      and configs/ volumes are writable -> runs fine with `read_only: true`
 #  All Angie config lives in one file: angie.conf.
+#  Deploy guide: ./README.md
 # =====================================================================
 
 FROM    docker.io/eilandert/debian-base:stable
@@ -18,6 +21,7 @@ LABEL   org.opencontainers.image.authors="eilandert" \
         org.opencontainers.image.title="ViMbAdmin" \
         org.opencontainers.image.description="ViMbAdmin (modernised fork) on Angie-minimal + PHP-FPM 8.5" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.url="https://hub.docker.com/r/eilandert/vimbadmin" \
         org.opencontainers.image.vendor="MyGuard"
 
 ENV     DEBIAN_FRONTEND=noninteractive \
@@ -26,85 +30,94 @@ ENV     DEBIAN_FRONTEND=noninteractive \
         VIMBADMIN_GIT=https://github.com/eilandert/ViMbAdmin.git
 
 COPY --chmod=0755 bootstrap.sh /bootstrap.sh
-COPY    angie.conf            /etc/angie.orig/angie.conf
-COPY    vimb_fastcgi.inc      /vimb_fastcgi.inc
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ;\
     rm -f /etc/apt/apt.conf.d/docker-clean ;\
-    # PHP 8.5 from the ondrej mirror on our edge repo; angie + php from
-    # deb.myguard.nl (already wired into debian-base).
+    # PHP 8.5 from the ondrej mirror on our edge repo (fleet convention);
+    # angie + php-snuffleupagus from the signed deb.myguard.nl repo (debian-base).
     echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main" > /etc/apt/sources.list.d/ondrej-php.list ;\
     apt-get update ;\
     apt-get install -y --no-install-recommends \
       angie-minimal \
-      php8.5-fpm \
-      php8.5-cli \
-      php8.5-mysql \
-      php8.5-mbstring \
-      php8.5-intl \
-      php8.5-xml \
-      php8.5-gd \
-      php8.5-curl \
-      php8.5-bcmath \
-      php8.5-zip \
-      php8.5-gmp \
+      php8.5-fpm php8.5-cli php8.5-mysql php8.5-mbstring php8.5-intl \
+      php8.5-xml php8.5-gd php8.5-curl php8.5-bcmath php8.5-zip php8.5-gmp \
       php8.5-snuffleupagus \
       git ca-certificates ;\
-    # Dedicated unprivileged FPM user (the fork's pool runs as phpfpm; the
-    # socket group is www-data so Angie can reach it). ondrej packages don't
-    # create this account, so make it here.
+    # Dedicated unprivileged FPM user (pool runs as phpfpm; socket group
+    # www-data so Angie can reach it). ondrej packages don't create it.
     groupadd -r phpfpm 2>/dev/null || true ;\
     useradd  -r -g phpfpm -G www-data -s /usr/sbin/nologin -d /nonexistent phpfpm 2>/dev/null || true ;\
-    # ---- fetch the modernised fork + install deps ----------------------
+    # ---- fetch the modernised fork + install deps ---------------------
     git clone --depth 1 "${VIMBADMIN_GIT}" "${INSTALL_PATH}" ;\
     cd "${INSTALL_PATH}" ;\
-    # Composer's documented install flow: verify the installer against the
-    # published SHA-384 signature before running it.
+    # Composer: verify the installer against the published SHA-384 first.
     php -r "copy('https://getcomposer.org/installer','/tmp/c.php');" ;\
     EXPECTED="$(php -r "copy('https://composer.github.io/installer.sig','/tmp/c.sig'); echo trim(file_get_contents('/tmp/c.sig'));")" ;\
     ACTUAL="$(php -r "echo hash_file('sha384','/tmp/c.php');")" ;\
     [ "${EXPECTED}" = "${ACTUAL}" ] || { echo 'composer installer checksum mismatch' >&2; exit 1; } ;\
     php /tmp/c.php --quiet --install-dir=/usr/local/bin --filename=composer ;\
-    rm -f /tmp/c.php /tmp/c.sig ;\
     composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader ;\
-    composer clear-cache ;\
-    # ---- Snuffleupagus: install the fork's audited ruleset -------------
+    # ---- Snuffleupagus -----------------------------------------------
+    # Keep the ruleset TEMPLATE on a read-only image path. bootstrap copies it
+    # into the writable var/ volume and injects a per-deployment secret_key, so
+    # /etc stays read-only-friendly. The package already loads the extension
+    # via mods-available; we only point FPM at the runtime copy.
     install -D -m 0644 "${INSTALL_PATH}/snuffleupagus/vimbadmin-strict.list" \
-        /etc/php/8.5/php-snuffleupagus/vimbadmin-strict.list ;\
-    # The php8.5-snuffleupagus package already loads the extension via
-    # mods-available; we only point it at our ruleset (loaded last via zz-).
-    printf 'sp.configuration_file=/etc/php/8.5/php-snuffleupagus/vimbadmin-strict.list\n' \
+        /usr/share/vimbadmin/vimbadmin-strict.list ;\
+    printf 'sp.configuration_file=%s/var/vimbadmin-strict.list\n' "${INSTALL_PATH}" \
         > /etc/php/8.5/fpm/conf.d/zz-snuffleupagus.ini ;\
-    # ---- PHP-FPM pool: use the fork's hardened pool -------------------
+    # ---- PHP-FPM pool: the fork's hardened pool ----------------------
     rm -f /etc/php/8.5/fpm/pool.d/www.conf ;\
     install -D -m 0644 "${INSTALL_PATH}/contrib/php-fpm/vimbadmin.conf" \
         /etc/php/8.5/fpm/pool.d/vimbadmin.conf ;\
-    install -d -m 0755 -o phpfpm -g www-data /run/php ;\
-    install -d -m 0750 -o phpfpm -g www-data /var/log/php-fpm ;\
-    # ---- app config (docker env) -------------------------------------
-    # NOTE: securitysalt is deliberately NOT baked here -- a salt in the image
-    # layer would be shared by every container (it encrypts 2FA secrets and
-    # seeds CSRF). bootstrap.sh generates a unique one per deployment on first
-    # run and persists it in the mounted configs volume.
+    # Master FPM error_log -> tmpfs path (ondrej default /var/log/php8.5-fpm.log
+    # sits on the read-only rootfs).
+    sed -i 's#^error_log = .*#error_log = /var/log/php-fpm/fpm.log#' /etc/php/8.5/fpm/php-fpm.conf ;\
+    # ---- app config template (no secret baked) -----------------------
     cp application/configs/application.ini.dist application/configs/application.ini ;\
-    { \
-      echo "" ;\
-      echo "[docker : production]" ;\
-      echo "resources.smarty.skin = \"dark\"" ;\
-    } >> application/configs/application.ini ;\
-    # keep a pristine copy for first-run restore (bootstrap)
+    { echo "" ; echo "[docker : production]" ; echo "resources.smarty.skin = \"dark\"" ; } \
+        >> application/configs/application.ini ;\
     cp -rp application/configs application/configs.orig ;\
-    chown -R phpfpm:www-data var application/configs ;\
-    # ---- prune build-time bits ---------------------------------------
+    # ---- strip everything the running image doesn't need -------------
+    # app cruft + the contrib/snuffleupagus sources (now installed elsewhere)
+    rm -rf "${INSTALL_PATH}/.git" "${INSTALL_PATH}/contrib" "${INSTALL_PATH}/snuffleupagus" \
+           "${INSTALL_PATH}/tests" "${INSTALL_PATH}/doc" "${INSTALL_PATH}/docs" \
+           "${INSTALL_PATH}/CHANGELOG" "${INSTALL_PATH}"/*.md "${INSTALL_PATH}/.github" ;\
+    # vendor docs / tests / VCS / CI metadata
+    find "${INSTALL_PATH}/vendor" -type d \( -iname docs -o -iname doc -o -iname test -o -iname tests -o -iname examples -o -iname '.github' \) -prune -exec rm -rf {} + 2>/dev/null || true ;\
+    find "${INSTALL_PATH}/vendor" -type f \( -iname '*.md' -o -iname '*.dist' -o -iname 'phpunit*' -o -iname '.gitignore' -o -iname '.gitattributes' \) -delete 2>/dev/null || true ;\
+    # composer + build tools no longer needed at runtime
+    rm -f /usr/local/bin/composer ;\
     apt-get -y purge git ;\
-    apt-get -y autoremove ;\
-    rm -rf "${INSTALL_PATH}/.git" /root/.composer /usr/local/bin/composer \
-           /etc/apt/sources.list.d/ondrej-php.list
+    apt-get -y autoremove --purge ;\
+    apt-get -y clean ;\
+    # docs / man / locale / info (belt + braces; debian-base path-excludes most)
+    rm -rf /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/groff/* \
+           /usr/share/lintian/* /usr/share/linda/* ;\
+    find /usr/share/locale -mindepth 1 -maxdepth 1 -type d ! -name 'en*' -exec rm -rf {} + 2>/dev/null || true ;\
+    # ---- remove ALL apt repositories + lists (no apt at runtime) -----
+    rm -rf /etc/apt/sources.list /etc/apt/sources.list.d/* /var/lib/apt/lists/* \
+           /var/cache/apt/* /root/.composer /root/.cache /tmp/* ;\
+    # ---- codebase READ-ONLY to web/php; only var/ + configs writable -
+    chown -R root:root "${INSTALL_PATH}" ;\
+    chmod -R go-w "${INSTALL_PATH}" ;\
+    install -d -m 0750 -o phpfpm -g www-data \
+        "${INSTALL_PATH}/var" "${INSTALL_PATH}/var/templates_c" \
+        "${INSTALL_PATH}/var/cache" "${INSTALL_PATH}/var/log" \
+        "${INSTALL_PATH}/var/bruteforce" "${INSTALL_PATH}/application/configs" ;\
+    chown -R phpfpm:www-data "${INSTALL_PATH}/var" "${INSTALL_PATH}/application/configs" ;\
+    # ---- strip any leftover setuid/setgid bits ----------------------
+    find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -exec chmod -s {} + 2>/dev/null || true
+
+# Our Angie config replaces the package default (copied AFTER install so it
+# doesn't collide with the angie-common conffile during dpkg setup).
+COPY    angie.conf            /etc/angie/angie.conf
+COPY    vimb_fastcgi.inc      /etc/angie/vimb_fastcgi.inc
 
 WORKDIR /opt/vimbadmin
-EXPOSE  80 443
+EXPOSE  80
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD wait-for-it -t 3 127.0.0.1:80 || exit 1
