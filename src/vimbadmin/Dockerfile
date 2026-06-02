@@ -66,14 +66,21 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # Keep the ruleset TEMPLATE on a read-only image path. bootstrap copies it
     # into the writable var/ volume and injects a per-deployment secret_key, so
     # /etc stays read-only-friendly. The package already loads the extension
-    # via mods-available; we only point FPM at the runtime copy.
+    # via mods-available; the FPM pool points sp.configuration_file at the
+    # runtime copy (see the sed below).
     install -D -m 0644 "${INSTALL_PATH}/contrib/snuffleupagus/vimbadmin-strict.list" \
         /usr/share/vimbadmin/vimbadmin-strict.list ;\
-    printf 'sp.configuration_file=%s/var/vimbadmin-strict.list\n' "${INSTALL_PATH}" \
-        > /etc/php/8.5/fpm/conf.d/zz-snuffleupagus.ini ;\
     # ---- PHP-FPM pool: the fork's hardened pool ----------------------
     rm -f /etc/php/8.5/fpm/pool.d/www.conf ;\
     install -D -m 0644 "${INSTALL_PATH}/contrib/php-fpm/vimbadmin.conf" \
+        /etc/php/8.5/fpm/pool.d/vimbadmin.conf ;\
+    # The pool ships sp.configuration_file at the bare-metal path
+    # (/etc/php/8.5/php-snuffleupagus/...). In this image bootstrap materialises
+    # the ruleset (with a per-deploy secret_key) into the writable var/ volume,
+    # so repoint the pool's php_admin_value at that runtime copy. The pool's
+    # php_admin_value overrides any conf.d setting, so it MUST be correct here
+    # -- a wrong path makes SP fatal on every request (worker exit 255).
+    sed -i "s#^php_admin_value\[sp.configuration_file\].*#php_admin_value[sp.configuration_file] = ${INSTALL_PATH}/var/vimbadmin-strict.list#" \
         /etc/php/8.5/fpm/pool.d/vimbadmin.conf ;\
     # Master FPM error_log -> tmpfs path (ondrej default /var/log/php8.5-fpm.log
     # sits on the read-only rootfs).
@@ -102,7 +109,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     cp application/configs/application.ini.dist application/configs/application.ini ;\
     { echo "" ; echo "[docker : production]" ;\
       echo "resources.smarty.skin = \"dark\"" ;\
-      echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
+      echo "resources.doctrine2cache.type = \"ApcuCache\"" ;\
+      # This image ships no Dovecot, so the default dovecot:BLF-CRYPT scheme
+      # (which shells out to doveadm) can't hash passwords. Use a PHP-native
+      # SHA-512 crypt that Dovecot accepts as {SHA512-CRYPT}. Override if you
+      # bind-mount a reachable doveadm.
+      echo "defaults.mailbox.password_scheme = \"crypt:sha512\"" ; } \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
     # ---- strip everything the running image doesn't need -------------
