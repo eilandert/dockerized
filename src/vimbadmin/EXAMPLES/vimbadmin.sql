@@ -415,6 +415,7 @@ CREATE TABLE `mailbox` (
   `modified` datetime DEFAULT NULL,
   `Domain_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `IX_Username_mailbox` (`username`),
   KEY `IDX_A69FE20B93AE8C46` (`Domain_id`),
   CONSTRAINT `FK_A69FE20B93AE8C46` FOREIGN KEY (`Domain_id`) REFERENCES `domain` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
