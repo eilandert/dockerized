@@ -14,7 +14,8 @@ the Postfix + Dovecot virtual-mailbox admin panel.
 | Base | `eilandert/debian-base` (trixie-slim + deb.myguard.nl repo + hardening) |
 | Web | `angie-minimal` — no WAF module needed; a **native positive-security vhost** only lets known methods/routes/args reach PHP |
 | Runtime | `php8.5-fpm`, minimal extension set, **Snuffleupagus** + the app's audited `vimbadmin-strict` ruleset |
-| Config | one file: [`angie.conf`](angie.conf) |
+| Cache | tuned **OPcache** (immutable code → no per-include stat) + **APCu**; Doctrine metadata cache defaults to `ApcuCache` (persistent, not per-request) |
+| Config | all of Angie in one file: [`angie.conf`](angie.conf) (vhost + positive-security gate + fastcgi) |
 | Size | ~320 MB |
 
 ## Security & hardening
