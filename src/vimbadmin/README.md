@@ -113,9 +113,11 @@ same MariaDB.
 
 The web panel works regardless: the "Archive" button just queues a DB row. If
 no filesystem cron processes that queue, rows sit at `PENDING_ARCHIVE` and
-nothing is ever tarred. An example mail-host crontab is in
-[`EXAMPLES/archive-cron.mailhost`](EXAMPLES/archive-cron.mailhost). If you
-don't use archiving, ignore it — the feature degrades to a DB-only delete.
+nothing is ever tarred. Example mail-host scripts + crontab live in the fork:
+[`contrib/cron/`](https://github.com/eilandert/ViMbAdmin/tree/master/contrib/cron)
+(`vimbadmin-archive.sh`, `vimbadmin-sizes.sh`, `crontab.example`) — each with
+its requirements documented inline. If you don't use archiving, ignore them —
+the feature degrades to a DB-only delete.
 
 ### Persisted state
 
