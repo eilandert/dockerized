@@ -36,7 +36,7 @@ fi
 
 # Remote aptly sync
 log_info "Syncing with remote aptly server..."
-ssh -p 8889 aptly@192.168.178.11 /aptly/scripts/daily.sh || log_warning "Remote sync failed, continuing anyway"
+ssh -p 8889 aptly@192.168.178.3 /aptly/scripts/daily.sh || log_warning "Remote sync failed, continuing anyway"
 
 # Track last run
 date > /tmp/dockerized.lastrun

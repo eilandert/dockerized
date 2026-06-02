@@ -66,7 +66,7 @@ fi
 # instead of silently letting the rest of the run use stale packages.
 APTLY_SYNC_OK=1
 log_info "Syncing with remote aptly server..."
-if ! ssh -p 8889 aptly@192.168.178.11 /aptly/scripts/daily.sh; then
+if ! ssh -p 8889 aptly@192.168.178.3 /aptly/scripts/daily.sh; then
     log_warning "Remote aptly sync failed — continuing with possibly stale packages"
     APTLY_SYNC_OK=0
 fi
