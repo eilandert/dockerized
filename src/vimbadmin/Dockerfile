@@ -70,11 +70,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # runtime copy (see the sed below).
     install -D -m 0644 "${INSTALL_PATH}/contrib/snuffleupagus/vimbadmin-strict.list" \
         /usr/share/vimbadmin/vimbadmin-strict.list ;\
-    # Point the CLI SAPI's SP at the same runtime ruleset (bootstrap materialises
-    # it on start) so vimbtool/doctrine2-cli don't warn "No configuration
-    # specified via sp.configuration_file".
-    printf 'sp.configuration_file=%s/var/vimbadmin-strict.list\n' "${INSTALL_PATH}" \
-        > /etc/php/8.5/cli/conf.d/zz-snuffleupagus.ini ;\
+    # NB: do NOT point the CLI SAPI's SP at the runtime ruleset -- bootstrap
+    # generates the SP secret_key with a `php` call, and if that CLI php loaded
+    # the (not-yet-keyed) ruleset it would fatal and leave an empty key. The
+    # harmless "no sp.configuration_file" CLI warning is the lesser evil.
     # ---- PHP-FPM pool: the fork's hardened pool ----------------------
     rm -f /etc/php/8.5/fpm/pool.d/www.conf ;\
     install -D -m 0644 "${INSTALL_PATH}/contrib/php-fpm/vimbadmin.conf" \

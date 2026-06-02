@@ -48,7 +48,7 @@ fi
 # and must stay stable across restarts -> only written if not already a real
 # value. Appended to the active [docker : production] section (last in file).
 if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
-    printf 'securitysalt = "%s"\n' "$(php -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
+    printf 'securitysalt = "%s"\n' "$(php -n -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
     chown phpfpm:www-data "${INI}"
     echo "[VIMBADMIN] generated securitysalt"
 fi
@@ -59,7 +59,7 @@ fi
 SP="${INSTALL_PATH}/var/vimbadmin-strict.list"
 if [ ! -f "${SP}" ]; then
     cp /usr/share/vimbadmin/vimbadmin-strict.list "${SP}"
-    sed -i "s/CHANGE-ME-PER-DEPLOYMENT-0*/$(php -r 'echo bin2hex(random_bytes(32));')/" "${SP}"
+    sed -i "s/CHANGE-ME-PER-DEPLOYMENT-0*/$(php -n -r 'echo bin2hex(random_bytes(32));')/" "${SP}"
     chown phpfpm:www-data "${SP}"
     chmod 0640 "${SP}"
     echo "[VIMBADMIN] generated Snuffleupagus secret_key"
