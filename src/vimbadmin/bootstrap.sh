@@ -1,32 +1,46 @@
 #!/bin/sh
+set -e
 
-echo "[VIMBADMIN] This docker image can be found on https://hub.docker.com/u/eilandert and https://github.com/eilandert/dockerized"
+echo "[VIMBADMIN] Angie-minimal + PHP-FPM ${PHPVERSION} :: https://github.com/eilandert/ViMbAdmin"
 
-WORKDIR="/opt/vimbadmin"
-
-FIRSTRUN="${WORKDIR}/application/configs/application.ini"
-if [ ! -f ${FIRSTRUN} ]; then
-    echo "[VIMBADMIN] application.ini not found, populating default configs to ${WORKDIR}/application/configs/"
-    cp -rp ${WORKDIR}/application/configs.orig/* ${WORKDIR}/application/configs/
-    cp ${WORKDIR}/application/configs/application.ini.dist ${WORKDIR}/application/configs/application.ini
-    chown -R apache:apache ${WORKDIR}/var
-    echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini
-else
-    # 4-6-2020, change existing application.ini after upgrade to 3.2.0, removal from this file far in future.
-    sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Resource"~"/../library/OSS/Resource"~' ${WORKDIR}/application/configs/application.ini
-    sed -i 's~"/../vendor/opensolutions/oss-framework/src/OSS/Smarty/functions"~"/../library/OSS/Smarty/functions"~' ${WORKDIR}/application/configs/application.ini
-
-    #copy new .dist to configs
-    cp ${WORKDIR}/application/configs.orig/application.ini.dist ${WORKDIR}/application/configs/application.ini.dist
-    echo "[docker : production]" >> ${WORKDIR}/application/configs/application.ini.dist
-fi
-
+# ---- timezone --------------------------------------------------------
 if [ -n "${TZ}" ]; then
+    rm -f /etc/timezone /etc/localtime
     echo "${TZ}" > /etc/timezone
+    ln -sf "/usr/share/zoneinfo/${TZ}" /etc/localtime
 fi
 
+# ---- first run: populate writable config trees -----------------------
+if [ ! -f /etc/angie/angie.conf ]; then
+    mkdir -p /etc/angie
+    cp -a /etc/angie.orig/. /etc/angie/ 2>/dev/null || true
+fi
 
-#fix for some apache lockfile problem.
-mkdir -p /tmp && chmod 1777 -R /tmp
+# Place the Angie config + fastcgi include (shipped in the image).
+install -D -m 0644 /etc/angie.orig/angie.conf /etc/angie/angie.conf
+[ -f /vimb_fastcgi.inc ] && install -D -m 0644 /vimb_fastcgi.inc /etc/angie/vimb_fastcgi.inc
 
-exec /usr/sbin/httpd -DFOREGROUND
+# ---- first run: app config -------------------------------------------
+if [ ! -f "${INSTALL_PATH}/application/configs/application.ini" ]; then
+    cp -rp "${INSTALL_PATH}/application/configs.orig/." "${INSTALL_PATH}/application/configs/"
+    chown -R phpfpm:www-data "${INSTALL_PATH}/var" "${INSTALL_PATH}/application/configs"
+fi
+
+# ---- Snuffleupagus: ensure a unique secret_key -----------------------
+SP=/etc/php/${PHPVERSION}/php-snuffleupagus/vimbadmin-strict.list
+if [ -f "${SP}" ] && grep -q 'CHANGE-ME-PER-DEPLOYMENT' "${SP}"; then
+    KEY="$(php -r 'echo bin2hex(random_bytes(32));')"
+    sed -i "s/CHANGE-ME-PER-DEPLOYMENT-0*/${KEY}/" "${SP}"
+    echo "[VIMBADMIN] generated Snuffleupagus secret_key"
+fi
+
+# ---- runtime dirs ----------------------------------------------------
+install -d -m 0750 -o phpfpm -g www-data /run/php /var/log/php-fpm "${INSTALL_PATH}/var/templates_c" "${INSTALL_PATH}/var/cache" "${INSTALL_PATH}/var/log" "${INSTALL_PATH}/var/bruteforce" 2>/dev/null || true
+
+# ---- config test -----------------------------------------------------
+php-fpm${PHPVERSION} -t
+angie -t -c /etc/angie/angie.conf
+
+# ---- run -------------------------------------------------------------
+php-fpm${PHPVERSION} -D
+exec angie -c /etc/angie/angie.conf -g 'daemon off;'

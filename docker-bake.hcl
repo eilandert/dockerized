@@ -126,7 +126,7 @@ group "ubuntu" {
         "ubuntu-mariadb", "ubuntu-valkey",
         "ubuntu-postfix", "ubuntu-dovecot",
         "ubuntu-rspamd",
-        "ubuntu-roundcube", "ubuntu-vimbadmin",
+        "ubuntu-roundcube",
         "ubuntu-reprepro",
     ]
 }
@@ -664,22 +664,11 @@ target "alpine-unbound" {
    context = "src/unbound"
    dockerfile = "Dockerfile"
 }
-target "alpine-vimbadmin" {
-   tags = ["docker.io/eilandert/vimbadmin:alpine"]
-   context = "src/vimbadmin"
-   dockerfile = "Dockerfile"
-}
 target "debian-vimbadmin" {
    tags = ["docker.io/eilandert/vimbadmin:debian", "docker.io/eilandert/vimbadmin:latest"]
-   context = "src/vimbadmin-ubuntu"
-   dockerfile = "Dockerfile-deb"
-   contexts = { "eilandert/apache-phpfpm:deb-8.0" = "target:debian-apache-php80" }
-}
-target "ubuntu-vimbadmin" {
-   tags = ["docker.io/eilandert/vimbadmin:ubuntu"]
-   context = "src/vimbadmin-ubuntu"
-   dockerfile = "Dockerfile-ubu"
-   contexts = { "eilandert/apache-phpfpm:8.0" = "target:ubuntu-apache-php80" }
+   context = "src/vimbadmin"
+   dockerfile = "Dockerfile"
+   contexts = { "docker.io/eilandert/debian-base:stable" = "target:debian-base" }
 }
 target "psol" {
    tags = ["docker.io/eilandert/psol"]

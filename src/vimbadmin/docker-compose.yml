@@ -1,16 +1,28 @@
 services:
-  vimbadmin:
-    container_name: vimbadmin
-    image: eilandert/vimbadmin:latest
-    ports:
-      - mode: host
-        protocol: tcp
-        published: 9000
-        target: 80
-    restart: always
-    volumes:
-      - ./config:/opt/vimbadmin/application/configs/:rw
+  db:
+    image: docker.io/eilandert/mariadb:debian
+    restart: unless-stopped
     environment:
-      - TZ=Europe/Amsterdam
+      MARIADB_DATABASE: vimbadmin
+      MARIADB_USER: vimbadmin
+      MARIADB_PASSWORD: change-me
+      MARIADB_ROOT_PASSWORD: change-me-too
+    volumes:
+      - db:/var/lib/mysql
 
-version: "3.7"
+  vimbadmin:
+    image: docker.io/eilandert/vimbadmin:debian
+    restart: unless-stopped
+    depends_on: [db]
+    environment:
+      TZ: Europe/Amsterdam
+    ports:
+      - "8080:80"      # front with TLS upstream in production
+    volumes:
+      - conf:/opt/vimbadmin/application/configs
+      - var:/opt/vimbadmin/var
+
+volumes:
+  db:
+  conf:
+  var:
