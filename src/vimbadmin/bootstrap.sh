@@ -15,6 +15,7 @@ install -d -m 0750 -o phpfpm -g www-data \
     /run/php /var/log/php-fpm \
     "${INSTALL_PATH}/var" "${INSTALL_PATH}/var/templates_c" \
     "${INSTALL_PATH}/var/cache" "${INSTALL_PATH}/var/log" \
+    "${INSTALL_PATH}/var/session" \
     "${INSTALL_PATH}/var/bruteforce" "${INSTALL_PATH}/application/configs" \
     2>/dev/null || true
 # Angie temp dirs on tmpfs (/tmp) so the rootfs can be read-only.

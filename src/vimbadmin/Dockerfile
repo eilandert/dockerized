@@ -160,8 +160,10 @@ COPY    angie.conf            /etc/angie/angie.conf
 WORKDIR /opt/vimbadmin
 EXPOSE  80
 
+# Dependency-free TCP probe: the image ships no curl/wget/nc and uses dash
+# (no /dev/tcp), but PHP is always present. fsockopen the listening angie.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD wait-for-it -t 3 127.0.0.1:80 || exit 1
+    CMD php -r '$f=@fsockopen("127.0.0.1",80,$e,$s,3);exit($f?0:1);' || exit 1
 
 STOPSIGNAL SIGQUIT
 CMD ["/bootstrap.sh"]

@@ -47,14 +47,16 @@ services:
     networks: [vimb]
 
     # ---- hardening --------------------------------------------------
-    read_only: true        # rootfs is immutable; writes go to tmpfs/volumes
-    tmpfs:
-      - /run:mode=0755
-      - /tmp:mode=1777
-      - /var/log/php-fpm:mode=0770   # bootstrap chowns to phpfpm:www-data
+    read_only: true        # rootfs is immutable; writes go to the volumes below
+    # NOTE: production (mailscreen) uses bind mounts instead of tmpfs for the
+    # writable runtime paths so /run, /tmp and logs survive restarts and are
+    # inspectable from the host. Named volumes work equally well here.
     volumes:
       - conf:/opt/vimbadmin/application/configs   # securitysalt + ini (persist)
-      - var:/opt/vimbadmin/var                    # SP ruleset, cache, logs, bruteforce
+      - var:/opt/vimbadmin/var                    # SP ruleset, cache, logs, bruteforce, session
+      - run:/run                                  # angie.pid + FPM socket dir
+      - tmp:/tmp                                  # angie temp dirs (client/fastcgi/proxy/...)
+      - phplog:/var/log/php-fpm                   # bootstrap chowns to phpfpm:www-data
     security_opt:
       - no-new-privileges:true
     cap_drop: [ALL]
@@ -74,3 +76,6 @@ volumes:
   db:
   conf:
   var:
+  run:
+  tmp:
+  phplog:
