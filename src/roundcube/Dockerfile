@@ -48,6 +48,12 @@ COPY phpfpm.conf /usr/local/share/roundcube/www.conf
 # package is installed, so it overwrites the packaged copy.
 COPY roundcube.rules /usr/local/share/roundcube/roundcube.rules
 
+# Local custom skins (live outside this build context; wired in as named build
+# contexts in docker-bake.hcl). Staged here, installed into skins/ inside the
+# build RUN after Roundcube is extracted. Both `extends: elastic`.
+COPY --from=skin-gmail      . /usr/local/share/roundcube-skins/gmail/
+COPY --from=skin-outlook365 . /usr/local/share/roundcube-skins/outlook365/
+
 # ---------------------------------------------------------------------------
 # Everything in ONE layer: install runtime + transient build tooling, fetch
 # Roundcube + composer deps + pinned plugins, wire config, then purge ALL the
@@ -111,27 +117,34 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # fetch <dir> <url> : grab + extract a release tarball. Runs in the
     # background; all downloads happen concurrently, then we `wait`.
     fetch() { \
-        name="$1" ; url="$2" ; tmp="$(mktemp)" ; mkdir -p "plugins/${name}" ; \
+        name="$1" ; url="$2" ; tmp="$(mktemp)" ; mkdir -p "${name}" ; \
         curl -fSL --retry 5 --retry-all-errors --retry-delay 2 -o "$tmp" "$url" ; \
-        tar xz --strip-components=1 -C "plugins/${name}" -f "$tmp" ; rm -f "$tmp" ; \
+        tar xz --strip-components=1 -C "${name}" -f "$tmp" ; rm -f "$tmp" ; \
     } ;\
-    fetch contextmenu        https://github.com/johndoh/roundcube-contextmenu/archive/refs/tags/3.3.1.tar.gz & \
-    fetch swipe              https://github.com/johndoh/roundcube-swipe/archive/refs/tags/0.6.tar.gz & \
-    fetch show_folder_size   https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/refs/tags/0.7.22.tar.gz & \
-    fetch quota              https://github.com/jfcherng-roundcube/plugin-quota/archive/55c0f3295e4db3c0f4ae6425ce498e58163695a7.tar.gz & \
-    fetch persistent_login   https://github.com/texxasrulez/persistent_login/archive/refs/tags/1.0.3.tar.gz & \
-    fetch advanced_search    https://github.com/texxasrulez/advanced_search/archive/refs/tags/3.7.tar.gz & \
-    fetch account_details    https://github.com/texxasrulez/account_details/archive/refs/tags/5.0.0.tar.gz & \
-    fetch message_highlight  https://github.com/texxasrulez/message_highlight/archive/refs/tags/1.0.5.tar.gz & \
-    fetch authres            https://github.com/pimlie/authres_status/archive/refs/tags/0.7.1.tar.gz & \
-    fetch thunderbird_labels https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/refs/tags/v1.6.2.tar.gz & \
-    fetch responses          https://github.com/random-cuber/responses/archive/refs/tags/1.3.13.tar.gz & \
-    fetch contextmenu_folder https://github.com/random-cuber/contextmenu_folder/archive/refs/tags/2.0.2.tar.gz & \
-    fetch easy_unsubscribe   https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/b3ef43f9211cc32c2738c34e3dc1de60c9fc1aa3.tar.gz & \
-    fetch rcguard            https://github.com/dsoares/roundcube-rcguard/archive/refs/tags/1.3.2.tar.gz & \
+    fetch plugins/contextmenu        https://github.com/johndoh/roundcube-contextmenu/archive/refs/tags/3.3.1.tar.gz & \
+    fetch plugins/swipe              https://github.com/johndoh/roundcube-swipe/archive/refs/tags/0.6.tar.gz & \
+    fetch plugins/show_folder_size   https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/refs/tags/0.7.22.tar.gz & \
+    fetch plugins/quota              https://github.com/jfcherng-roundcube/plugin-quota/archive/55c0f3295e4db3c0f4ae6425ce498e58163695a7.tar.gz & \
+    fetch plugins/persistent_login   https://github.com/texxasrulez/persistent_login/archive/refs/tags/1.0.3.tar.gz & \
+    fetch plugins/advanced_search    https://github.com/texxasrulez/advanced_search/archive/refs/tags/3.7.tar.gz & \
+    fetch plugins/account_details    https://github.com/texxasrulez/account_details/archive/refs/tags/5.0.0.tar.gz & \
+    fetch plugins/message_highlight  https://github.com/texxasrulez/message_highlight/archive/refs/tags/1.0.5.tar.gz & \
+    fetch plugins/authres            https://github.com/pimlie/authres_status/archive/refs/tags/0.7.1.tar.gz & \
+    fetch plugins/thunderbird_labels https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/refs/tags/v1.6.2.tar.gz & \
+    fetch plugins/responses          https://github.com/random-cuber/responses/archive/refs/tags/1.3.13.tar.gz & \
+    fetch plugins/contextmenu_folder https://github.com/random-cuber/contextmenu_folder/archive/refs/tags/2.0.2.tar.gz & \
+    fetch plugins/easy_unsubscribe   https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/b3ef43f9211cc32c2738c34e3dc1de60c9fc1aa3.tar.gz & \
+    fetch plugins/rcguard            https://github.com/dsoares/roundcube-rcguard/archive/refs/tags/1.3.2.tar.gz & \
     fetch skins/larry        https://github.com/roundcube/larry/archive/master.tar.gz & \
     fetch skins/classic      https://github.com/roundcube/classic/archive/master.tar.gz & \
+    fetch skins/elastic-dark https://github.com/tborychowski/elastic-dark/archive/refs/heads/master.tar.gz & \
+    fetch skins/elastic2025  https://github.com/bijanbina/Elastic2025/archive/refs/heads/main.tar.gz & \
     wait ;\
+    # Local custom skins staged by the COPY above (drop README/thumbnail-only
+    # cruft is fine; both extend elastic which is present).
+    cp -a /usr/local/share/roundcube-skins/gmail      skins/gmail ;\
+    cp -a /usr/local/share/roundcube-skins/outlook365 skins/outlook365 ;\
+    rm -rf /usr/local/share/roundcube-skins ;\
     # One optimized autoload generation for the whole install (the per-plugin
     # `composer upgrade` loop was redundant — plugins ship their own deps via
     # the core composer.json, and re-solving 16× was the build's slowest step).

@@ -612,7 +612,11 @@ target "debian-roundcube" {
    tags = ["docker.io/eilandert/roundcube:debian", "docker.io/eilandert/roundcube:latest"]
    context = "src/roundcube"
    dockerfile = "Dockerfile"
-   contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
+   contexts = {
+      "eilandert/debian-base:stable" = "target:debian-base"
+      "skin-gmail"      = "../roundcube-skin-gmail"
+      "skin-outlook365" = "../roundcube-skin-outlook365"
+   }
 }
 
 target "alpine-rspamd" {
