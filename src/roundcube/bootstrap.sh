@@ -183,7 +183,10 @@ log "Ensuring database schema"
 
 if [ -n "${CLEAN_INACTIVE_USERS_DAYS:-}" ]; then
     log "Purging users inactive > ${CLEAN_INACTIVE_USERS_DAYS} days"
-    ( cd "${INSTALLDIR}" && as_rc bin/deluser.sh --age="${CLEAN_INACTIVE_USERS_DAYS}" ) || true
+    # deluser.sh has an upstream PHP 8.x notice ("Undefined array key host")
+    # when invoked without --host; the purge still works. Drop stderr so the
+    # cosmetic notice doesn't spam the container log; keep the deleted list.
+    ( cd "${INSTALLDIR}" && as_rc bin/deluser.sh --age="${CLEAN_INACTIVE_USERS_DAYS}" 2>/dev/null ) || true
 fi
 
 # Healthcheck heartbeat.

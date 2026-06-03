@@ -161,6 +161,18 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         -e 's@^;?\s*pid\s*=.*@;pid = (disabled: --nodaemonize)@' \
         -e 's@^;?\s*daemonize\s*=.*@daemonize = no@' \
         "/etc/php/${PHPVERSION}/fpm/php-fpm.conf" ;\
+    # ---- Snuffleupagus: give the CLI SAPI an empty rulebook ----
+    # The package symlinks the SP extension into BOTH fpm/ and cli/ conf.d, but
+    # only the FPM pool sets sp.configuration_file (via php_admin_value). The CLI
+    # scripts bootstrap runs (initdb/gc/deluser) therefore load SP with no
+    # rulebook -> "No configuration specified via sp.configuration_file" warning.
+    # SP has no on/off flag (only sp.configuration_file), so point the CLI at an
+    # EMPTY rules file: loads cleanly, applies zero rules (CLI is trusted
+    # bootstrap, not request-facing -- it does not need request hardening, and
+    # the request rulebook could block legitimate CLI DB ops).
+    : > "/etc/php/${PHPVERSION}/php-snuffleupagus/cli-empty.rules" ;\
+    printf 'sp.configuration_file=/etc/php/%s/php-snuffleupagus/cli-empty.rules\n' "${PHPVERSION}" \
+        > "/etc/php/${PHPVERSION}/cli/conf.d/99-snuffleupagus-cli.ini" ;\
     # ---- strip cruft: build tooling, app dev/test/docs, vendor tests/docs ----
     cd "${INSTALLDIR}" ;\
     rm -rf installer .ci .tx .git* .travis.yml CHANGELOG.md UPGRADING INSTALL \
