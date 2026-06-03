@@ -63,11 +63,109 @@ docker compose up -d
 ```
 
 An external database is **mandatory** (there is no SQLite fallback). The compose
-file above bundles a hardened MariaDB; point `ROUNDCUBEMAIL_DEFAULT_HOST` /
+file below bundles a hardened MariaDB; point `ROUNDCUBEMAIL_DEFAULT_HOST` /
 `ROUNDCUBEMAIL_SMTP_SERVER` at your own IMAP/SMTP servers. Run it behind TLS in
 production (terminate at your edge proxy, forward the real client IP via
 `X-Forwarded-For` so the brute-force throttle keys on the actual client). The
 container listens on **:8080** only.
+
+### `docker-compose.yml`
+
+```yaml
+services:
+  db:
+    image: docker.io/eilandert/mariadb:debian
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: roundcube
+      MARIADB_USER: roundcube
+      MARIADB_PASSWORD: change-me
+      MARIADB_ROOT_PASSWORD: change-me-too
+    volumes:
+      - db:/var/lib/mysql
+    networks: [rc]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          pids: 256
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  roundcube:
+    image: docker.io/eilandert/roundcube:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # Unprivileged: cap_drop ALL -> the container CANNOT chown, so the config
+    # mount must already be owned 10001:10001 (a named volume inherits it).
+    user: "10001:10001"
+    environment:
+      TZ: Europe/Amsterdam
+      # ---- IMAP (reading mail) ----
+      ROUNDCUBEMAIL_DEFAULT_HOST: ssl://imap.example.org
+      ROUNDCUBEMAIL_DEFAULT_PORT: 993
+      # ---- SMTP (sending mail) ----
+      ROUNDCUBEMAIL_SMTP_SERVER: tls://smtp.example.org
+      ROUNDCUBEMAIL_SMTP_PORT: 587
+      # TLS to your mail server is VERIFIED by default. If the cert won't match:
+      #   pin a CA: ROUNDCUBEMAIL_SSL_CA=/etc/ssl/mail-ca.pem (mount it :ro)
+      #   trusted LAN only (allows MITM): ROUNDCUBEMAIL_SSL_VERIFY: 0
+      # ---- database (points at the bundled `db` service) ----
+      ROUNDCUBEMAIL_DB_TYPE: mysql
+      ROUNDCUBEMAIL_DB_HOST: db
+      ROUNDCUBEMAIL_DB_PORT: 3306
+      ROUNDCUBEMAIL_DB_USER: roundcube
+      ROUNDCUBEMAIL_DB_PASSWORD: change-me      # must match MARIADB_PASSWORD
+      ROUNDCUBEMAIL_DB_NAME: roundcube
+      # ---- app ----
+      ROUNDCUBEMAIL_PLUGINS: archive,zipdownload,managesieve,newmail_notifier,password,new_user_dialog,contextmenu,persistent_login
+      ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE: 25M
+      ROUNDCUBEMAIL_SKIN: elastic
+      CLEAN_INACTIVE_USERS_DAYS: 365
+    ports:
+      - "8080:8080"        # terminate TLS upstream in production
+    networks: [rc]
+    # ---- hardening ----
+    read_only: true        # rootfs is immutable; writes go to the mounts below
+    volumes:
+      - conf:/var/roundcube/config
+    tmpfs:
+      - /tmp:uid=10001,gid=10001,mode=1770
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    cap_drop: [ALL]        # angie binds :8080 -> ZERO capabilities required
+    ulimits:
+      nofile:
+        soft: 10240
+        hard: 10240
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          pids: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  rc:
+
+volumes:
+  db:
+  conf:
+```
 
 ## ⚠️ Mount ownership (because the container can't chown)
 
