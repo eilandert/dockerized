@@ -9,10 +9,11 @@
 #   * httpd  : angie-minimal, single merged config, listens on :8080 so the
 #              container can run with ALL capabilities dropped (no privileged
 #              port bind needed).
-#   * users  : angie httpd runs as `angie`; php-fpm runs as `roundcube`.
-#              Application code + config are owned root:roundcube mode 0640/0750
-#              — readable by php-fpm, writable by nobody. The only writable
-#              paths are the mounted runtime dirs (config, temp, logs, db).
+#   * users  : single unprivileged user `roundcube` (uid 10001) for both the
+#              angie master and php-fpm. The container runs `USER roundcube`,
+#              cap_drop ALL, read-only rootfs. Application code is owned
+#              roundcube:roundcube 0440/0550 (read-only to the runtime user);
+#              the only writable paths are the mounted runtime dirs.
 
 FROM    eilandert/debian-base:stable
 LABEL   org.opencontainers.image.authors="eilandert" \
@@ -191,16 +192,21 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     find "${INSTALLDIR}" -type f -exec chmod 0440 {} + ;\
     chmod 0550 "${INSTALLDIR}"/bin/*.sh ;\
     chmod 0750 /var/roundcube/config ;\
-    chmod -R u+rX,go-rwx /etc/angie "/etc/php/${PHPVERSION}/fpm"
+    chmod -R u+rX,go-rwx /etc/angie "/etc/php/${PHPVERSION}/fpm" ;\
+    # ---- strip any leftover setuid/setgid bits (defence in depth) ----
+    find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -exec chmod -s {} + 2>/dev/null || true
 
 WORKDIR ${INSTALLDIR}
 
-# Entrypoint runs as root so angie can bind :80 and setuid workers to
-# `roundcube`, and bootstrap can chown the mounted config dir. angie + php-fpm
-# workers still drop to the unprivileged `roundcube` user.
-EXPOSE 80
+# Run UNPRIVILEGED. PID1 (bootstrap -> fpm master + angie master) is the
+# roundcube uid; angie binds :8080 (>=1024, no CAP_NET_BIND_SERVICE), FPM/angie
+# workers inherit this identity (no setuid). The container needs NO root and
+# runs with cap_drop: [ALL]. Writable mounts MUST be pre-owned roundcube:roundcube.
+USER roundcube:roundcube
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD test -f /tmp/healthy && find /tmp/healthy -mmin -2 | grep -q . || exit 1
 
+STOPSIGNAL SIGQUIT
 ENTRYPOINT ["/bootstrap.sh"]

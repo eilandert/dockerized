@@ -2,10 +2,15 @@
 # =============================================================================
 # Roundcube container entrypoint.
 #
-# Runs as root so angie can bind :80 and setuid its workers to `roundcube`,
-# php-fpm's master can setuid its workers to `roundcube`, and we can chown the
-# mounted config dir (root-owned host bind) to the runtime user. The actual
-# worker processes (angie, php-fpm) drop to the unprivileged roundcube uid.
+# Runs UNPRIVILEGED (compose user: roundcube, cap_drop ALL + no-new-privileges,
+# read-only rootfs, angie on :8080). PID1 (bootstrap -> fpm master + angie
+# master) is the roundcube uid; angie binds :8080 (>=1024, no
+# CAP_NET_BIND_SERVICE), no runtime setuid/chown -> ZERO capabilities required.
+#
+# Because the container has NO root and CANNOT chown, every writable mount must
+# already be owned by the roundcube uid (10001). Named volumes inherit the
+# image dir's owner automatically; for host bind mounts / tmpfs set the owner
+# yourself (host: chown -R 10001:10001 <dir>; tmpfs: uid=10001,gid=10001).
 #
 # Writable locations: /tmp (sockets, pid, RC temp), /var/roundcube/config
 # (generated config.inc.php + override). External DB (mariadb/pgsql) mandatory.
@@ -23,21 +28,32 @@ INSTALLDIR="${INSTALLDIR:-/var/www/html}"
 export RCUBE_CONFIG_PATH="/var/roundcube/config/:config/"
 
 log() { echo "[ROUNDCUBE] $*"; }
-log "Image: https://hub.docker.com/u/eilandert — source: https://github.com/eilandert/dockerized"
+log "Image src: https://github.com/eilandert/dockerized/tree/master/src/roundcube"
+log "Docker Hub: https://hub.docker.com/r/eilandert/roundcube"
+log "Write-up  : https://deb.myguard.nl/2026/06/hardened-roundcube-docker-image/"
+log "---------------------------------------------------------------------------"
+log "Security profile: runs UNPRIVILEGED (no root), cap_drop ALL +"
+log "  no-new-privileges + AppArmor, read-only rootfs, Angie on :8080."
+log "Because the container has NO root and CANNOT chown, every WRITABLE mount"
+log "  must already be owned by uid 10001 (roundcube) on the host:"
+log "    named volume : nothing to do (inherits the image dir owner)"
+log "    host bind dir : sudo chown -R 10001:10001 <your bind dir>"
+log "    tmpfs        : --tmpfs /tmp:uid=10001,gid=10001,mode=1770"
+log "  A 'Permission denied' on boot = a writable mount not owned 10001:10001."
+log "---------------------------------------------------------------------------"
 
 # ---------------------------------------------------------------------------
 # Writable runtime dirs (all under the /tmp tmpfs or the config/db volumes)
 # ---------------------------------------------------------------------------
 : "${ROUNDCUBEMAIL_TEMP_DIR:=/tmp/roundcube-temp}"
 
+# We run UNPRIVILEGED as roundcube and CANNOT chown. We only create subdirs
+# here -- as their owner -- so no CHOWN/DAC_OVERRIDE is needed. The writable
+# mounts (/var/roundcube/config, /tmp) MUST already be owned by the roundcube
+# uid (named volumes inherit it; pre-chown bind mounts / tmpfs to 10001:10001).
 mkdir -p /tmp/run \
          /tmp/angie/client-body /tmp/angie/proxy /tmp/angie/fastcgi \
          "${ROUNDCUBEMAIL_TEMP_DIR}" /var/roundcube/config
-
-# We run as root, so fix ownership on the writable mounts (the config bind
-# mount is typically root-owned on the host) and the tmpfs scratch dirs, so
-# the roundcube-uid workers and CLI scripts can write.
-chown -R roundcube:roundcube /var/roundcube/config "${ROUNDCUBEMAIL_TEMP_DIR}" /tmp/run /tmp/angie
 
 # ---------------------------------------------------------------------------
 # Database wiring (secrets > env). An external DB (mysql/mariadb or pgsql) is
@@ -142,12 +158,10 @@ if [ -n "${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE:-}" ]; then
     } >> /var/roundcube/config/phpfpm.conf.override
 fi
 
-# We generated these as root — hand them to the runtime user.
-chown -R roundcube:roundcube /var/roundcube/config
-
 # ---------------------------------------------------------------------------
-# Start php-fpm in the background. Master runs as root (we are root) and
-# setuids its workers down to `roundcube` per the pool's user/group.
+# Start php-fpm in the background. The master runs unprivileged (we ARE
+# roundcube); workers inherit our identity -- no setuid (pool user/group are
+# commented out, as a non-root master cannot setuid).
 # ---------------------------------------------------------------------------
 log "Starting php-fpm ${PHPVERSION}"
 "/usr/sbin/php-fpm${PHPVERSION}" \
@@ -158,9 +172,9 @@ FPM_PID=$!
 # Wait for the socket before touching the DB / serving traffic.
 for _ in $(seq 1 30); do [ -S /tmp/run/php-fpm.sock ] && break; sleep 0.5; done
 
-# Initialise / migrate the schema as the runtime user (so any cache/temp it
-# writes is roundcube-owned, not root).
-as_rc() { runuser -u roundcube -- env "RCUBE_CONFIG_PATH=${RCUBE_CONFIG_PATH}" "$@"; }
+# Initialise / migrate the schema. We already run as roundcube, so just call
+# the CLI scripts directly (RCUBE_CONFIG_PATH is exported above).
+as_rc() { "$@"; }
 log "Ensuring database schema"
 ( cd "${INSTALLDIR}" && as_rc bin/initdb.sh --dir=SQL --create >/dev/null 2>&1 \
     || as_rc bin/updatedb.sh --dir=SQL --package=roundcube >/dev/null 2>&1 ) \
@@ -178,5 +192,5 @@ fi
     sleep 30
   done ) &
 
-log "Starting angie on :80"
+log "Starting angie on :8080"
 exec /usr/sbin/angie -c /etc/angie/angie.conf -g 'daemon off;'

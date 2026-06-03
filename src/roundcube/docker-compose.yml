@@ -1,67 +1,125 @@
 # =============================================================================
-# Roundcube deployment.
-#
-# The container entrypoint runs as root: angie binds :80 and setuids its
-# workers to `roundcube`, php-fpm setuids its workers to `roundcube`, and
-# bootstrap chowns the mounted config dir to the runtime user. The worker
-# processes themselves run unprivileged. Snuffleupagus (strict rulebook) is the
-# in-app hardening layer. Terminate TLS at an upstream reverse proxy.
+#  Roundcube — hardened, fully-unprivileged deployment
 # =============================================================================
+#  - non-root PID1 (uid 10001 `roundcube`), cap_drop ALL, no-new-privileges,
+#    AppArmor, read-only rootfs, angie on :8080 (no privileged-port bind)
+#  - Snuffleupagus strict rulebook + hardened PHP-FPM pool + Angie WAF
+#  Change EVERY password before deploying. Front with TLS in production
+#  (terminate at your edge proxy, forward the real client IP via X-Forwarded-For).
+#
+#  Because cap_drop:[ALL] removes CAP_CHOWN, every WRITABLE mount must already
+#  be owned by uid 10001 on the host. Named volumes inherit it automatically;
+#  pre-chown host bind mounts (sudo chown -R 10001:10001 <dir>); set tmpfs owner
+#  in the mount options (uid=10001,gid=10001).
+# =============================================================================
+
 services:
-
-  roundcube:
-    container_name: roundcube
-    image: eilandert/roundcube:latest
-    restart: always
-    depends_on:
-      - mariadb-mail
-      - redis-roundcube
-
-    volumes:
-      # Writable config dir (generated config.inc.php + override). bootstrap
-      # chowns it to the roundcube uid on start, so no host prep is needed.
-      - ./roundcube/config:/var/roundcube/config
-
-    ports:
-      - "80:80"          # TLS terminated at an upstream proxy
-
+  db:
+    image: docker.io/eilandert/mariadb:debian
+    restart: unless-stopped
     environment:
-      - ROUNDCUBEMAIL_DEFAULT_HOST=ssl://10.0.0.227
-      - ROUNDCUBEMAIL_DEFAULT_PORT=993
-      - ROUNDCUBEMAIL_SMTP_SERVER=tls://postfix
-      - ROUNDCUBEMAIL_SMTP_PORT=587
-      # IMAP/SMTP TLS is VERIFIED by default. The reference DEFAULT_HOST above is
-      # an internal IP whose cert likely won't match — fix it the secure way,
-      # pick ONE:
-      #   - point DEFAULT_HOST at a name in the cert's SAN (best), or
-      #   - pin your CA:   ROUNDCUBEMAIL_SSL_CA=/etc/ssl/mail-ca.pem
-      #                    (mount it:  ./mail-ca.pem:/etc/ssl/mail-ca.pem:ro)
-      # Only as a last resort on a trusted LAN, disabling verification (MITM
-      # possible) — uncomment:
-      #   - ROUNDCUBEMAIL_SSL_VERIFY=0
-      - ROUNDCUBEMAIL_DB_TYPE=mysql
-      - ROUNDCUBEMAIL_DB_HOST=172.30.0.100
-      - ROUNDCUBEMAIL_DB_USER=roundcube
-      - ROUNDCUBEMAIL_DB_PASSWORD          # defined in .env
-      - ROUNDCUBEMAIL_DB_NAME=roundcube
-      - ROUNDCUBEMAIL_PLUGINS=archive,zipdownload,managesieve,newmail_notifier,password,new_user_dialog,contextmenu,persistent_login
-      - ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE=25M
-      - TZ=Europe/Amsterdam
-      - CLEAN_INACTIVE_USERS_DAYS=365
-
-    ulimits:
-      nofile:
-        soft: 10240
-        hard: 10240
-
+      MARIADB_DATABASE: roundcube
+      MARIADB_USER: roundcube
+      MARIADB_PASSWORD: change-me
+      MARIADB_ROOT_PASSWORD: change-me-too
+    volumes:
+      - db:/var/lib/mysql
+    networks: [rc]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE]
     deploy:
       resources:
         limits:
           memory: 512M
           pids: 256
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
+  roundcube:
+    image: docker.io/eilandert/roundcube:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # Run unprivileged (matches USER roundcube:roundcube in the Dockerfile).
+    # cap_drop ALL -> the container CANNOT chown, so the config mount must
+    # already be owned 10001:10001. A named volume inherits the image dir's
+    # owner; a host bind mount must be pre-chowned (sudo chown -R 10001:10001).
+    user: "10001:10001"
+
+    environment:
+      TZ: Europe/Amsterdam
+      # ---- IMAP (reading mail) ----
+      ROUNDCUBEMAIL_DEFAULT_HOST: ssl://imap.example.org
+      ROUNDCUBEMAIL_DEFAULT_PORT: 993
+      # ---- SMTP (sending mail) ----
+      ROUNDCUBEMAIL_SMTP_SERVER: tls://smtp.example.org
+      ROUNDCUBEMAIL_SMTP_PORT: 587
+      # IMAP/SMTP TLS is VERIFIED by default. If your mail server's cert won't
+      # match the host above, fix it the secure way (pick ONE):
+      #   - point DEFAULT_HOST/SMTP at a name in the cert's SAN (best), or
+      #   - pin the CA: ROUNDCUBEMAIL_SSL_CA=/etc/ssl/mail-ca.pem
+      #                 (mount it: ./mail-ca.pem:/etc/ssl/mail-ca.pem:ro)
+      # Last resort on a trusted LAN only (allows MITM):
+      #   ROUNDCUBEMAIL_SSL_VERIFY: 0
+      # ---- database (points at the bundled `db` service) ----
+      ROUNDCUBEMAIL_DB_TYPE: mysql
+      ROUNDCUBEMAIL_DB_HOST: db
+      ROUNDCUBEMAIL_DB_PORT: 3306
+      ROUNDCUBEMAIL_DB_USER: roundcube
+      ROUNDCUBEMAIL_DB_PASSWORD: change-me      # must match MARIADB_PASSWORD
+      ROUNDCUBEMAIL_DB_NAME: roundcube
+      # ---- app ----
+      ROUNDCUBEMAIL_PLUGINS: archive,zipdownload,managesieve,newmail_notifier,password,new_user_dialog,contextmenu,persistent_login
+      ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE: 25M
+      ROUNDCUBEMAIL_SKIN: elastic
+      CLEAN_INACTIVE_USERS_DAYS: 365
+
+    ports:
+      - "8080:8080"        # terminate TLS upstream in production
+    networks: [rc]
+
+    # ---- hardening --------------------------------------------------
+    read_only: true        # rootfs is immutable; writes go to the mounts below
+    volumes:
+      # Writable config dir (generated config.inc.php + override). A named
+      # volume inherits the 10001 owner; a host bind mount must be pre-chowned.
+      - conf:/var/roundcube/config
+    tmpfs:
+      # angie sockets/pid/temp + RC attachment temp live on tmpfs (rootfs is RO).
+      # Owned by the runtime uid so the unprivileged process can write.
+      - /tmp:uid=10001,gid=10001,mode=1770
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    # Fully unprivileged: PID1 is non-root, angie binds :8080 (no low-port
+    # bind), no runtime setuid/chown -> ZERO capabilities required.
+    cap_drop: [ALL]
+
+    ulimits:
+      nofile:
+        soft: 10240
+        hard: 10240
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          pids: 256
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+
+networks:
+  rc:
+
+volumes:
+  db:
+  conf:
