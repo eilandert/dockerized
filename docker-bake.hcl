@@ -126,7 +126,6 @@ group "ubuntu" {
         "ubuntu-mariadb", "ubuntu-valkey",
         "ubuntu-postfix", "ubuntu-dovecot",
         "ubuntu-rspamd",
-        "ubuntu-roundcube",
         "ubuntu-reprepro",
     ]
 }
@@ -609,17 +608,10 @@ target "ubuntu-reprepro" {
    contexts = { "eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
 }
 
-target "ubuntu-roundcube" {
-   tags = ["docker.io/eilandert/roundcube:ubuntu"]
-   context = "src/roundcube"
-   dockerfile = "Dockerfile-ubu"
-   contexts = { "eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
-}
-
 target "debian-roundcube" {
    tags = ["docker.io/eilandert/roundcube:debian", "docker.io/eilandert/roundcube:latest"]
    context = "src/roundcube"
-   dockerfile = "Dockerfile-deb"
+   dockerfile = "Dockerfile"
    contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
 }
 

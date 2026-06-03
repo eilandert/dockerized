@@ -1,0 +1,193 @@
+# syntax=docker/dockerfile:1.7
+# This file might be outdated, see https://github.com/eilandert/dockerized/tree/master/roundcube for a recent one
+#
+# Roundcube webmail, hardened.
+#   * base   : eilandert/debian-base:stable (Debian trixie, already hardened,
+#              already carries the deb.myguard.nl apt repo + GPG key)
+#   * php    : 8.5 FPM from the ondrej PPA mirror (edge.deb.myguard.nl)
+#   * waf    : php8.5-snuffleupagus from the myguard repo (strict roundcube.rules)
+#   * httpd  : angie-minimal, single merged config, listens on :8080 so the
+#              container can run with ALL capabilities dropped (no privileged
+#              port bind needed).
+#   * users  : angie httpd runs as `angie`; php-fpm runs as `roundcube`.
+#              Application code + config are owned root:roundcube mode 0640/0750
+#              — readable by php-fpm, writable by nobody. The only writable
+#              paths are the mounted runtime dirs (config, temp, logs, db).
+
+FROM    eilandert/debian-base:stable
+LABEL   org.opencontainers.image.authors="eilandert" \
+        org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.title="Roundcube" \
+        org.opencontainers.image.description="Hardened Roundcube webmail (PHP 8.5 FPM + Snuffleupagus + Angie)" \
+        maintainer="Thijs Eilander <eilander@myguard.nl>"
+
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        INSTALLDIR="/var/www/html" \
+        PHPVERSION="8.5" \
+        COMPOSER_ALLOW_SUPERUSER=1 \
+        LD_PRELOAD=""
+
+# version is generated into .lastversion by the docker build script
+COPY    .lastversion /tmp/lastversion
+COPY --chmod=0755 bootstrap.sh /
+
+# ---------------------------------------------------------------------------
+# 1. APT repos + runtime packages
+#    The myguard repo (php8.5-snuffleupagus, angie) is inherited from the base
+#    image. We only need to add the ondrej PHP mirror for the php8.5-* stack.
+#    opcache ships inside php8.5-common (ondrej), so it is NOT a separate dep.
+# ---------------------------------------------------------------------------
+# Baked configs staged outside the package conffile paths — moved into place
+# INSIDE the build RUN, after apt install, so dpkg never sees a pre-existing
+# /etc/angie/angie.conf or pool.d/www.conf and never raises a conffile prompt.
+COPY angie.conf  /usr/local/share/roundcube/angie.conf
+COPY phpfpm.conf /usr/local/share/roundcube/www.conf
+# Strict, source-audited Roundcube Snuffleupagus rulebook. Shipped here so the
+# image carries it even before the php-snuffleupagus .deb (which also ships it)
+# is rebuilt+republished. Moved into place inside the build RUN, after the
+# package is installed, so it overwrites the packaged copy.
+COPY roundcube.rules /usr/local/share/roundcube/roundcube.rules
+
+# ---------------------------------------------------------------------------
+# Everything in ONE layer: install runtime + transient build tooling, fetch
+# Roundcube + composer deps + pinned plugins, wire config, then purge ALL the
+# build tooling and caches and chown — all before the layer is committed, so
+# nothing transient (git/curl/composer/apt lists/composer cache) survives into
+# the image. Single user model: angie + php-fpm both run as `roundcube`.
+# ---------------------------------------------------------------------------
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/root/.composer/cache,sharing=locked \
+    set -eux ;\
+    LASTVERSION="$(cat /tmp/lastversion)" ;\
+    export COMPOSER_ROOT_VERSION="${LASTVERSION}" COMPOSER_NO_INTERACTION=1 ;\
+    # ---- repos + packages (runtime + transient build tooling) ----
+    echo "deb [trusted=yes] http://edge.deb.myguard.nl:8888/mirror/ondrej-php ${DIST} main" \
+        > /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    apt-get update ;\
+    apt-get install -y --no-install-recommends \
+        angie-minimal \
+        php${PHPVERSION}-fpm php${PHPVERSION}-apcu php${PHPVERSION}-bz2 \
+        php${PHPVERSION}-curl \
+        php${PHPVERSION}-gd php${PHPVERSION}-gmp php${PHPVERSION}-imap \
+        php${PHPVERSION}-intl php${PHPVERSION}-ldap php${PHPVERSION}-mbstring \
+        php${PHPVERSION}-mysql php${PHPVERSION}-readline php${PHPVERSION}-redis \
+        php${PHPVERSION}-snuffleupagus php${PHPVERSION}-xml php${PHPVERSION}-zip \
+        aspell aspell-en aspell-nl hunspell-en-us \
+        dictionaries-common enchant-2 libonig5 dbconfig-no-thanks \
+        git unzip curl ca-certificates locales ;\
+    # ---- composer (transient) ----
+    php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" ;\
+    php /tmp/composer-setup.php --filename=composer --install-dir=/usr/bin ;\
+    rm -f /tmp/composer-setup.php ;\
+    # ---- move baked configs into place now that the packages are installed ----
+    mv /usr/local/share/roundcube/angie.conf /etc/angie/angie.conf ;\
+    mv /usr/local/share/roundcube/www.conf  "/etc/php/${PHPVERSION}/fpm/pool.d/www.conf" ;\
+    mv /usr/local/share/roundcube/roundcube.rules \
+       "/etc/php/${PHPVERSION}/php-snuffleupagus/roundcube.rules" ;\
+    rmdir /usr/local/share/roundcube ;\
+    # ---- Roundcube core + composer deps ----
+    rm -rf "${INSTALLDIR}" ; mkdir -p "${INSTALLDIR}" ;\
+    curl -fSL --retry 5 --retry-all-errors --retry-delay 2 \
+        "https://github.com/roundcube/roundcubemail/releases/download/${LASTVERSION}/roundcubemail-${LASTVERSION}-complete.tar.gz" \
+        | tar xz --strip-components=1 -C "${INSTALLDIR}" ;\
+    cd "${INSTALLDIR}" ;\
+    # RC <=1.6 ships composer.json-dist; RC 1.7+ ships composer.json directly.
+    [ -f composer.json-dist ] && mv composer.json-dist composer.json || true ;\
+    composer config -g secure-http false ;\
+    composer -n update --no-dev --no-scripts --no-autoloader ;\
+    # All extra deps in ONE require: a single dependency solve instead of six.
+    # (-W lets transitive constraints upgrade; --no-scripts skips package post
+    # hooks; --no-autoloader is NOT a require option, so the authoritative
+    # classmap is generated once at the end instead.)
+    composer -n require -W --no-scripts \
+        roundcube/elastic4mobile:dev-master \
+        kolab/kolab_2fa \
+        endroid/qr-code \
+        spomky-labs/otphp \
+        enygma/yubikey \
+        roundcube/carddav ;\
+    # ---- pinned third-party plugins (downloaded in parallel) ----
+    # fetch <dir> <url> : grab + extract a release tarball. Runs in the
+    # background; all downloads happen concurrently, then we `wait`.
+    fetch() { \
+        name="$1" ; url="$2" ; tmp="$(mktemp)" ; mkdir -p "plugins/${name}" ; \
+        curl -fSL --retry 5 --retry-all-errors --retry-delay 2 -o "$tmp" "$url" ; \
+        tar xz --strip-components=1 -C "plugins/${name}" -f "$tmp" ; rm -f "$tmp" ; \
+    } ;\
+    fetch contextmenu        https://github.com/johndoh/roundcube-contextmenu/archive/refs/tags/3.3.1.tar.gz & \
+    fetch swipe              https://github.com/johndoh/roundcube-swipe/archive/refs/tags/0.6.tar.gz & \
+    fetch show_folder_size   https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/refs/tags/0.7.22.tar.gz & \
+    fetch quota              https://github.com/jfcherng-roundcube/plugin-quota/archive/55c0f3295e4db3c0f4ae6425ce498e58163695a7.tar.gz & \
+    fetch persistent_login   https://github.com/texxasrulez/persistent_login/archive/refs/tags/1.0.3.tar.gz & \
+    fetch advanced_search    https://github.com/texxasrulez/advanced_search/archive/refs/tags/3.7.tar.gz & \
+    fetch account_details    https://github.com/texxasrulez/account_details/archive/refs/tags/5.0.0.tar.gz & \
+    fetch message_highlight  https://github.com/texxasrulez/message_highlight/archive/refs/tags/1.0.5.tar.gz & \
+    fetch authres            https://github.com/pimlie/authres_status/archive/refs/tags/0.7.1.tar.gz & \
+    fetch thunderbird_labels https://github.com/mike-kfed/rcmail-thunderbird-labels/archive/refs/tags/v1.6.2.tar.gz & \
+    fetch responses          https://github.com/random-cuber/responses/archive/refs/tags/1.3.13.tar.gz & \
+    fetch contextmenu_folder https://github.com/random-cuber/contextmenu_folder/archive/refs/tags/2.0.2.tar.gz & \
+    fetch easy_unsubscribe   https://github.com/SS88UK/roundcube-easy-unsubscribe/archive/b3ef43f9211cc32c2738c34e3dc1de60c9fc1aa3.tar.gz & \
+    fetch rcguard            https://github.com/dsoares/roundcube-rcguard/archive/refs/tags/1.3.2.tar.gz & \
+    fetch skins/larry        https://github.com/roundcube/larry/archive/master.tar.gz & \
+    fetch skins/classic      https://github.com/roundcube/classic/archive/master.tar.gz & \
+    wait ;\
+    # One optimized autoload generation for the whole install (the per-plugin
+    # `composer upgrade` loop was redundant — plugins ship their own deps via
+    # the core composer.json, and re-solving 16× was the build's slowest step).
+    # Authoritative classmap: best runtime perf on a read-only image where the
+    # code never changes (no per-request filesystem stat; -a implies --optimize).
+    composer -n dump-autoload --classmap-authoritative --no-dev ;\
+    # ---- wire php-fpm config ----
+    rm -f "/etc/php/${PHPVERSION}/fpm/pool.d/www.conf.dpkg-dist" ;\
+    printf '\ninclude=/var/roundcube/config/phpfpm.conf.override\n' \
+        >> "/etc/php/${PHPVERSION}/fpm/pool.d/www.conf" ;\
+    sed -ri \
+        -e 's@^;?\s*error_log\s*=.*@error_log = /proc/self/fd/2@' \
+        -e 's@^;?\s*pid\s*=.*@;pid = (disabled: --nodaemonize)@' \
+        -e 's@^;?\s*daemonize\s*=.*@daemonize = no@' \
+        "/etc/php/${PHPVERSION}/fpm/php-fpm.conf" ;\
+    # ---- strip cruft: build tooling, app dev/test/docs, vendor tests/docs ----
+    cd "${INSTALLDIR}" ;\
+    rm -rf installer .ci .tx .git* .travis.yml CHANGELOG.md UPGRADING INSTALL \
+           LICENSE README.md SECURITY.md tests public_html/index.html index.html \
+           plugins/*/.git* plugins/*/tests plugins/*/.github ;\
+    # `|| true`: -prune+rm makes find revisit deleted dirs and exit non-zero,
+    # which would trip `set -e`; the deletion still happens.
+    find vendor -type d \( -iname tests -o -iname test -o -iname doc -o -iname docs \
+           -o -iname examples -o -iname '.github' \) -prune -exec rm -rf {} + || true ;\
+    find vendor plugins -type f \( -iname '*.md' -o -iname '*.dist' -o -iname '.gitignore' \
+           -o -iname '.gitattributes' -o -iname 'phpunit*.xml*' -o -iname '*.map' \) -delete || true ;\
+    apt-get purge -y git git-man unzip curl ;\
+    apt-get autoremove -y ;\
+    rm -f /usr/bin/composer ;\
+    # NB: /root/.composer/cache is a BuildKit cache MOUNT — removing the
+    # mountpoint itself errors "Device or resource busy", and it never lands in
+    # the image anyway. Only clear what is actually on the layer.
+    rm -rf /root/.cache /var/lib/apt/lists/* /tmp/* \
+           /etc/apt/sources.list.d/ondrej-ppa.list ;\
+    # ---- single non-root runtime user + ownership (one chown pass) ----
+    addgroup --system --gid 10001 roundcube ;\
+    adduser  --system --uid 10001 --gid 10001 --no-create-home \
+             --disabled-login --home "${INSTALLDIR}" roundcube ;\
+    mkdir -p /var/roundcube/config ;\
+    : > /var/roundcube/config/phpfpm.conf.override ;\
+    chown -R roundcube:roundcube "${INSTALLDIR}" /var/roundcube /etc/angie \
+             "/etc/php/${PHPVERSION}" ;\
+    find "${INSTALLDIR}" -type d -exec chmod 0550 {} + ;\
+    find "${INSTALLDIR}" -type f -exec chmod 0440 {} + ;\
+    chmod 0550 "${INSTALLDIR}"/bin/*.sh ;\
+    chmod 0750 /var/roundcube/config ;\
+    chmod -R u+rX,go-rwx /etc/angie "/etc/php/${PHPVERSION}/fpm"
+
+WORKDIR ${INSTALLDIR}
+
+# Entrypoint runs as root so angie can bind :80 and setuid workers to
+# `roundcube`, and bootstrap can chown the mounted config dir. angie + php-fpm
+# workers still drop to the unprivileged `roundcube` user.
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD test -f /tmp/healthy && find /tmp/healthy -mmin -2 | grep -q . || exit 1
+
+ENTRYPOINT ["/bootstrap.sh"]
