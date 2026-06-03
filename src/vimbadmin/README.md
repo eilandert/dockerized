@@ -4,6 +4,7 @@ Hardened Docker image for the modernised **[ViMbAdmin fork](https://github.com/e
 the Postfix + Dovecot virtual-mailbox admin panel.
 
 - 🐳 **Docker Hub:** <https://hub.docker.com/r/eilandert/vimbadmin>
+- 📦 **Image source (this dir):** <https://github.com/eilandert/dockerized/tree/master/src/vimbadmin>
 - 🔧 **App source (fork):** <https://github.com/eilandert/ViMbAdmin>
 - 📖 **Write-up / guided tour:** <https://deb.myguard.nl/2026/06/vimbadmin-postfix-dovecot-mailbox-admin-panel/>
 
@@ -26,28 +27,42 @@ positive-security Angie vhost, and the **container** by the measures below.
 
 ### Container / image
 
+- **Runs fully unprivileged — no root, anywhere.** PID 1 (the Angie master),
+  every Angie worker and the whole PHP-FPM tree run as the unprivileged
+  `phpfpm` user (`USER phpfpm:www-data` in the image; `user: "997:33"` in
+  compose). There is no root process in the container at any point.
+- **Zero Linux capabilities** — `cap_drop: [ALL]` with **no `cap_add` at all**.
+  Verified at runtime: `CapEff = CapPrm = CapBnd = 0000000000000000`. This is
+  possible because nothing in the container ever needs root: Angie binds a
+  high port (**:8080**, no `CAP_NET_BIND_SERVICE`), and nothing does runtime
+  `setuid`/`chown` (the FPM master is already unprivileged, so it never drops
+  privileges, and the writable mounts are pre-owned — see *Mount ownership*).
+- **`no-new-privileges`** — blocks any setuid/setgid escalation.
+- **AppArmor** confined (`apparmor=docker-default`).
 - **Read-only root filesystem** (`read_only: true`). Only the `var` + `configs`
-  named volumes and three tmpfs mounts (`/run`, `/tmp`, `/var/log/php-fpm`) are
-  writable. Angie temp paths + pid and the FPM master error-log are redirected
-  onto tmpfs so this works.
-- **Codebase is root-owned and read-only to the web/PHP users.** Only `var/`
+  volumes and the writable runtime mounts (`/run`, `/tmp`, `/var/log/php-fpm`)
+  can be written. Angie temp paths + pid and the FPM master error-log are
+  redirected onto those mounts so the rest of the rootfs stays immutable.
+- **Codebase is root-owned and read-only to the web/PHP user.** Only `var/`
   (cache, compiled templates, logs, brute-force state, the runtime Snuffleupagus
-  ruleset) and `application/configs/` are writable, and only by the unprivileged
-  `phpfpm` user. The web/PHP processes cannot modify a single line of code.
+  ruleset) and `application/configs/` are writable, and only by `phpfpm`. The
+  web/PHP processes cannot modify a single line of code.
 - **No baked secrets.** The `securitysalt` (encrypts 2FA secrets, seeds CSRF)
   and the Snuffleupagus `secret_key` are generated **on first boot** and
   persisted in the volumes — unique per deployment, never in an image layer.
-- **All Linux capabilities dropped** (`cap_drop: ALL`) except the few FPM +
-  Angie genuinely need (CHOWN, SETUID, SETGID, NET_BIND_SERVICE, and
-  DAC_OVERRIDE/FOWNER for first-run volume prep); **`no-new-privileges`**.
 - **Minimal attack surface.** `angie-minimal` (no modsecurity/lua/brotli),
   only the PHP extensions ViMbAdmin uses, dedicated non-login `phpfpm` user.
 - **Stripped:** all apt repositories + lists (no apt at runtime), composer,
   git, build deps, docs, man pages, info, non-English locales, app docs/tests,
   vendor docs/tests; every **setuid/setgid bit removed**.
-- **Per-service resource limits** (memory, pids) and a healthcheck.
+- **Per-service resource limits** (memory, pids, nofile) and a healthcheck.
 - **Composer installer is checksum-verified** at build (SHA-384 vs the
   published signature).
+
+> **Heads-up — because the container has no root and cannot `chown`, any
+> writable mount you provide must already be owned by the runtime user
+> (`phpfpm` = uid `997`, group `www-data` = gid `33`).** Named volumes get this
+> for free; bind mounts and tmpfs do not. See *[Mount ownership](#mount-ownership-important)* below.
 
 ### Edge (Angie — all in [`angie.conf`](angie.conf))
 
@@ -65,8 +80,10 @@ positive-security Angie vhost, and the **container** by the measures below.
 Provided by the fork and wired into this image:
 
 - **Snuffleupagus** with the audited `vimbadmin-strict` ruleset (unique
-  `secret_key` per deployment), and a **hardened PHP-FPM pool**
-  (`open_basedir`, strict session cookies, `.php`-only execution).
+  `secret_key` per deployment), and a **hardened PHP-FPM pool** (`open_basedir`
+  confined to the app + runtime dirs, `expose_php` off, `display_errors` off,
+  strict session cookies — `HttpOnly` + `Secure` + `SameSite=Lax`,
+  `.php`-only execution, `disable_functions` delegated to Snuffleupagus).
 - **App-level:** 2FA (TOTP, encrypted secrets, backup codes, replay guard,
   force-on-login), per-IP brute-force lockout, CSRF on every form + destructive
   link, Smarty XSS auto-escaping, constant-time password checks, CSPRNG tokens,
@@ -89,7 +106,47 @@ docker compose up -d
 
 Run it behind TLS in production (terminate at your edge proxy and forward the
 real client IP as `REMOTE_ADDR`, or the brute-force limiter + logs will see the
-proxy). The image listens on **:80** only.
+proxy). The container listens on **:8080** only (a high port, so it needs no
+`CAP_NET_BIND_SERVICE` — part of running with zero capabilities). The shipped
+compose publishes `8080:8080`; point your reverse proxy's upstream at the
+container's `:8080`.
+
+### Mount ownership (IMPORTANT)
+
+The container runs unprivileged with **`cap_drop: [ALL]`**, so it **cannot
+`chown`**. Every writable mount must already be owned by the runtime user
+before you start it:
+
+| | uid | gid |
+|---|---|---|
+| `phpfpm` (runtime user) | **997** | — |
+| `www-data` (socket / group) | — | **33** |
+
+- **Named volumes** (the default in the shipped compose) — **nothing to do.**
+  Docker initialises a fresh named volume with the owner of the image directory
+  it shadows, and those are already `phpfpm:www-data`.
+- **Host bind mounts** — you **must** pre-own them once:
+
+  ```sh
+  sudo install -d -o 997 -g 33 -m 0750 \
+      /srv/vimbadmin/{config,var,run,log-phpfpm}
+  sudo install -d -o 997 -g 33 -m 0770 /srv/vimbadmin/tmp
+  # if the dirs already exist with the wrong owner:
+  sudo chown -R 997:33 /srv/vimbadmin/{config,var,run,tmp,log-phpfpm}
+  ```
+
+- **tmpfs** — pass the uid/gid in the mount options, e.g. in compose:
+
+  ```yaml
+  tmpfs:
+    - /run:uid=997,gid=33,mode=0770
+    - /tmp:uid=997,gid=33,mode=0770
+  ```
+
+If a writable mount is owned by `root` (or anything other than uid 997), the
+entrypoint cannot create its runtime dirs and the container exits on boot with
+a *Permission denied*. The fix is always the `chown` above — never add a
+capability back.
 
 ### Wire it to Postfix + Dovecot
 

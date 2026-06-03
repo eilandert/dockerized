@@ -1,7 +1,19 @@
 #!/bin/sh
 set -e
 
-echo "[VIMBADMIN] Angie-minimal + PHP-FPM ${PHPVERSION} :: https://github.com/eilandert/ViMbAdmin"
+echo "[VIMBADMIN] Angie-minimal + PHP-FPM ${PHPVERSION}"
+echo "[VIMBADMIN] App fork : https://github.com/eilandert/ViMbAdmin"
+echo "[VIMBADMIN] Image src: https://github.com/eilandert/dockerized/tree/master/src/vimbadmin"
+echo "[VIMBADMIN] ---------------------------------------------------------------"
+echo "[VIMBADMIN] Security profile: runs UNPRIVILEGED (no root), cap_drop ALL +"
+echo "[VIMBADMIN]   no-new-privileges + AppArmor, read-only rootfs, Angie on :8080."
+echo "[VIMBADMIN] Because the container has NO root and CANNOT chown, every writable"
+echo "[VIMBADMIN]   mount must already be owned by uid 997 (phpfpm) : gid 33 (www-data)."
+echo "[VIMBADMIN]   Named volumes inherit this automatically. For bind mounts / tmpfs:"
+echo "[VIMBADMIN]     host : sudo chown -R 997:33 <your bind dir>"
+echo "[VIMBADMIN]     tmpfs: --tmpfs /run:uid=997,gid=33,mode=0770 (and likewise /tmp)"
+echo "[VIMBADMIN]   A 'Permission denied' on boot = a writable mount not owned 997:33."
+echo "[VIMBADMIN] ---------------------------------------------------------------"
 
 # ---- timezone (best-effort; /etc may be read-only) -------------------
 if [ -n "${TZ}" ] && [ -w /etc ]; then
