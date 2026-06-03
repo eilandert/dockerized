@@ -42,27 +42,37 @@ services:
         condition: service_healthy
     environment:
       TZ: Europe/Amsterdam
+    # Run unprivileged (matches USER phpfpm:www-data in the Dockerfile). With
+    # cap_drop: [ALL] the container CANNOT chown, so every writable mount must
+    # already be owned by this uid:gid. Named volumes (below) inherit the
+    # image dir's phpfpm:www-data owner automatically on first mount; for
+    # tmpfs or host bind mounts you must set the owner yourself (see tmpfs ex).
+    user: "phpfpm:www-data"
     ports:
-      - "8080:80"          # terminate TLS upstream in production
+      - "8080:8080"        # terminate TLS upstream in production
     networks: [vimb]
 
     # ---- hardening --------------------------------------------------
     read_only: true        # rootfs is immutable; writes go to the volumes below
-    # NOTE: production (mailscreen) uses bind mounts instead of tmpfs for the
-    # writable runtime paths so /run, /tmp and logs survive restarts and are
-    # inspectable from the host. Named volumes work equally well here.
+    # NOTE: production (mailscreen) uses bind mounts instead of named volumes
+    # for the writable runtime paths so /run, /tmp and logs survive restarts
+    # and are inspectable from the host (pre-chown them phpfpm:www-data). For a
+    # stricter, disk-less runtime, swap /run + /tmp to tmpfs instead:
+    #   tmpfs:
+    #     - /run:uid=997,gid=33,mode=0770   # phpfpm:www-data
+    #     - /tmp:uid=997,gid=33,mode=0770
     volumes:
       - conf:/opt/vimbadmin/application/configs   # securitysalt + ini (persist)
       - var:/opt/vimbadmin/var                    # SP ruleset, cache, logs, bruteforce, session
       - run:/run                                  # angie.pid + FPM socket dir
       - tmp:/tmp                                  # angie temp dirs (client/fastcgi/proxy/...)
-      - phplog:/var/log/php-fpm                   # bootstrap chowns to phpfpm:www-data
+      - phplog:/var/log/php-fpm                   # FPM master log
     security_opt:
       - no-new-privileges:true
+      - apparmor=docker-default
+    # Fully unprivileged: PID1 is non-root, angie binds :8080 (no low-port
+    # bind), no runtime setuid/chown -> ZERO capabilities required.
     cap_drop: [ALL]
-    # CHOWN/SETUID/SETGID: drop to phpfpm + www-data; NET_BIND_SERVICE: bind :80;
-    # DAC_OVERRIDE/FOWNER: prep volume perms on first run.
-    cap_add: [CHOWN, SETUID, SETGID, NET_BIND_SERVICE, DAC_OVERRIDE, FOWNER]
     deploy:
       resources:
         limits:

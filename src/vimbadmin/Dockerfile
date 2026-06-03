@@ -87,6 +87,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # -- a wrong path makes SP fatal on every request (worker exit 255).
     sed -i "s#^php_admin_value\[sp.configuration_file\].*#php_admin_value[sp.configuration_file] = ${INSTALL_PATH}/var/vimbadmin-strict.list#" \
         /etc/php/8.5/fpm/pool.d/vimbadmin.conf ;\
+    # The container runs UNPRIVILEGED (compose user: phpfpm:www-data, cap_drop
+    # ALL). A non-root FPM master cannot setuid/setgid, and php-fpm errors if a
+    # pool sets user/group while the master isn't root. Comment them out -- the
+    # workers inherit the container's phpfpm:www-data identity. The listen.*
+    # socket-ownership lines stay (chown of the socket to the same uid is a
+    # no-op and does not need CAP_CHOWN).
+    sed -i -E "s#^([[:space:]]*(user|group)[[:space:]]*=)#; \1#" \
+        /etc/php/8.5/fpm/pool.d/vimbadmin.conf ;\
     # Master FPM error_log -> tmpfs path (ondrej default /var/log/php8.5-fpm.log
     # sits on the read-only rootfs).
     sed -i 's#^error_log = .*#error_log = /var/log/php-fpm/fpm.log#' /etc/php/8.5/fpm/php-fpm.conf ;\
@@ -150,6 +158,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         "${INSTALL_PATH}/var/cache" "${INSTALL_PATH}/var/log" \
         "${INSTALL_PATH}/var/bruteforce" "${INSTALL_PATH}/application/configs" ;\
     chown -R phpfpm:www-data "${INSTALL_PATH}/var" "${INSTALL_PATH}/application/configs" ;\
+    # ---- make the shared template dir traversable by the unprivileged
+    # runtime user. `COPY --chmod=0644` created /usr/share/vimbadmin as 0644
+    # (no execute bit), so non-root (USER phpfpm) cannot traverse it to read
+    # build-config.php / the SP ruleset template -> bootstrap failed with
+    # "Permission denied". Set 0755 on the dir, 0644 on the files.
+    chmod 0755 /usr/share/vimbadmin ;\
+    chmod 0644 /usr/share/vimbadmin/* ;\
     # ---- strip any leftover setuid/setgid bits ----------------------
     find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -exec chmod -s {} + 2>/dev/null || true
 
@@ -158,12 +173,19 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 COPY    angie.conf            /etc/angie/angie.conf
 
 WORKDIR /opt/vimbadmin
-EXPOSE  80
+EXPOSE  8080
+
+# Run UNPRIVILEGED. PID1 (bootstrap -> fpm master + angie master) is phpfpm,
+# gid www-data, so the container needs NO root and runs with cap_drop: [ALL].
+# Angie binds :8080 (>=1024, no CAP_NET_BIND_SERVICE); FPM/angie workers
+# inherit this identity (no setuid). The writable volumes MUST be pre-owned
+# phpfpm:www-data on the host (compose/README).
+USER    phpfpm:www-data
 
 # Dependency-free TCP probe: the image ships no curl/wget/nc and uses dash
 # (no /dev/tcp), but PHP is always present. fsockopen the listening angie.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD php -r '$f=@fsockopen("127.0.0.1",80,$e,$s,3);exit($f?0:1);' || exit 1
+    CMD php -r '$f=@fsockopen("127.0.0.1",8080,$e,$s,3);exit($f?0:1);' || exit 1
 
 STOPSIGNAL SIGQUIT
 CMD ["/bootstrap.sh"]

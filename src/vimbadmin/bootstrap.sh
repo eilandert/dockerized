@@ -11,7 +11,13 @@ if [ -n "${TZ}" ] && [ -w /etc ]; then
 fi
 
 # ---- writable runtime dirs (var/ + configs are volumes; rest tmpfs) --
-install -d -m 0750 -o phpfpm -g www-data \
+# The container runs UNPRIVILEGED (compose `user: phpfpm:www-data`, cap_drop
+# ALL), so we cannot chown: the writable volumes (var, configs, run, tmp,
+# php-log) MUST be pre-owned by the runtime uid/gid on the host. We only
+# create subdirs here -- as their owner -- so no CHOWN/DAC_OVERRIDE is needed.
+# `install` without -o/-g inherits the current (phpfpm) user; failures on an
+# already-correct dir are harmless, so keep them non-fatal.
+install -d -m 0750 \
     /run/php /var/log/php-fpm \
     "${INSTALL_PATH}/var" "${INSTALL_PATH}/var/templates_c" \
     "${INSTALL_PATH}/var/cache" "${INSTALL_PATH}/var/log" \
@@ -19,7 +25,7 @@ install -d -m 0750 -o phpfpm -g www-data \
     "${INSTALL_PATH}/var/bruteforce" "${INSTALL_PATH}/application/configs" \
     2>/dev/null || true
 # Angie temp dirs on tmpfs (/tmp) so the rootfs can be read-only.
-install -d -m 0750 -o www-data -g www-data \
+install -d -m 0750 \
     /tmp/angie/client /tmp/angie/fastcgi /tmp/angie/proxy /tmp/angie/scgi /tmp/angie/uwsgi \
     2>/dev/null || true
 
@@ -41,25 +47,24 @@ LOCAL="${CONF}/local.ini"
 # Offer the example on an empty mount so the simple path is discoverable.
 [ -f "${LOCAL}" ] || [ -f "${INI}" ] || cp -p /usr/share/vimbadmin/local.ini.example "${CONF}/local.ini.example" 2>/dev/null || true
 
+# NB: no chown anywhere below -- the process already runs as phpfpm:www-data,
+# so every file it creates is correctly owned. The container has cap_drop ALL
+# and could not chown even if it wanted to.
 if [ -f "${LOCAL}" ]; then
     php -n /usr/share/vimbadmin/build-config.php \
         "${ORIG}/application.ini" "${LOCAL}" "${INI}"
-    chown phpfpm:www-data "${INI}" "${LOCAL}"
     echo "[VIMBADMIN] config built from local.ini (simple mode)"
 else
     if [ ! -f "${INI}" ]; then
         cp -rp "${ORIG}/." "${CONF}/"
-        chown -R phpfpm:www-data "${CONF}"
         echo "[VIMBADMIN] seeded config dir from shipped defaults (legacy mode)"
     else
         cp -p "${ORIG}/application.ini" "${CONF}/application.ini.orig"
-        chown phpfpm:www-data "${CONF}/application.ini.orig"
         echo "[VIMBADMIN] legacy mode: application.ini left as-is (refreshed .orig)"
     fi
     # Per-deployment securitysalt (legacy mode only; simple mode handles it).
     if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
         printf 'securitysalt = "%s"\n' "$(php -n -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
-        chown phpfpm:www-data "${INI}"
         echo "[VIMBADMIN] generated securitysalt"
     fi
 fi
@@ -71,7 +76,6 @@ SP="${INSTALL_PATH}/var/vimbadmin-strict.list"
 if [ ! -f "${SP}" ]; then
     cp /usr/share/vimbadmin/vimbadmin-strict.list "${SP}"
     sed -i "s/CHANGE-ME-PER-DEPLOYMENT-0*/$(php -n -r 'echo bin2hex(random_bytes(32));')/" "${SP}"
-    chown phpfpm:www-data "${SP}"
     chmod 0640 "${SP}"
     echo "[VIMBADMIN] generated Snuffleupagus secret_key"
 fi
