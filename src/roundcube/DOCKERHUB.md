@@ -188,6 +188,53 @@ A *Permission denied* on boot means a writable mount isn't owned `10001:10001`.
 The fix is always the `chown` above — never add a capability back. (The
 container prints these same instructions in its startup logs.)
 
+## Bundled plugins & skins
+
+The image ships these pre-installed; enable the ones you want with
+`ROUNDCUBEMAIL_PLUGINS` (comma-separated). Nothing is loaded unless you list it.
+
+### Plugins
+
+| Plugin | Version | What it does |
+|---|---|---|
+| `contextmenu` | 3.3.1 | Right-click context menus on the message list / folders |
+| `contextmenu_folder` | 2.0.2 | Folder management context menu (create/rename/move) |
+| `swipe` | 0.6 | Touch swipe gestures (mobile) |
+| `show_folder_size` | 0.7.22 | Folder size column in the folder manager |
+| `quota` | git | Mailbox quota display / IMAP quota support |
+| `persistent_login` | 1.0.3 | "Keep me logged in" persistent sessions |
+| `advanced_search` | 3.7 | Extended search form (date ranges, flags, headers) |
+| `account_details` | 5.0.0 | Per-account info pane |
+| `message_highlight` | 1.0.5 | Colour-highlight messages by rule |
+| `authres` (authres_status) | 0.7.1 | Show SPF/DKIM/DMARC authentication results |
+| `thunderbird_labels` | 1.6.2 | Thunderbird-compatible coloured labels/tags |
+| `responses` | 1.3.13 | Canned-response templates |
+| `easy_unsubscribe` | git | One-click List-Unsubscribe button |
+| `rcguard` | 1.3.2 | reCAPTCHA after failed logins (extra brute-force defence) |
+| `kolab_2fa` | composer | Two-factor auth (TOTP / Yubikey / U2F) |
+| `carddav` | composer | CardDAV address-book sync |
+
+2FA support libraries (`endroid/qr-code`, `spomky-labs/otphp`,
+`enygma/yubikey`) are bundled for `kolab_2fa`. Roundcube core plugins
+(`archive`, `zipdownload`, `managesieve`, `newmail_notifier`, `password`,
+`new_user_dialog`) ship with Roundcube itself and are enabled in the default
+`ROUNDCUBEMAIL_PLUGINS`.
+
+### Skins
+
+Set one with `ROUNDCUBEMAIL_SKIN` (default `elastic`).
+
+| Skin | Source | Notes |
+|---|---|---|
+| `elastic` | Roundcube core | Default, responsive |
+| `elastic4mobile` | roundcube/elastic4mobile | Mobile-tuned elastic variant |
+| `elastic-dark` | tborychowski/elastic-dark | Dark theme (extends elastic) |
+| `elastic2025` | bijanbina/Elastic2025 | Refreshed elastic look |
+| `gmail` | bundled (this image) | Gmail look-alike (extends elastic) |
+| `outlook365` | bundled (this image) | Outlook 365 look-alike (extends elastic) |
+| `larry` | roundcube/larry | The classic RC 1.x skin |
+| `classic` | roundcube/classic | Minimal classic skin |
+
 ## Configuration
 
 Everything is driven by `ROUNDCUBEMAIL_*` environment variables (IMAP/SMTP
