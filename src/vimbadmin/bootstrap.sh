@@ -42,43 +42,28 @@ install -d -m 0750 \
     2>/dev/null || true
 
 # ---- app config -----------------------------------------------------
-# Two modes, auto-detected:
-#
-#   SIMPLE (recommended): mount a small local.ini with ~15 deployment keys.
-#     On every start we regenerate the full application.ini from the baked
-#     template + local.ini. You never touch the big framework config; the
-#     securitysalt is auto-generated into local.ini.
-#
-#   LEGACY: mount/keep a full application.ini yourself. We leave it untouched
-#     (just refresh application.ini.orig for diffing) and generate the salt.
+# Mount/keep a full application.ini yourself (start from the shipped
+# application.ini.dist). On an empty mount we seed it from the baked defaults;
+# otherwise we leave it untouched and only refresh application.ini.orig for
+# diffing. A per-deployment securitysalt is appended if one isn't present.
 CONF="${INSTALL_PATH}/application/configs"
 ORIG="${INSTALL_PATH}/application/configs.orig"
 INI="${CONF}/application.ini"
-LOCAL="${CONF}/local.ini"
-
-# Offer the example on an empty mount so the simple path is discoverable.
-[ -f "${LOCAL}" ] || [ -f "${INI}" ] || cp -p /usr/share/vimbadmin/local.ini.example "${CONF}/local.ini.example" 2>/dev/null || true
 
 # NB: no chown anywhere below -- the process already runs as phpfpm:www-data,
 # so every file it creates is correctly owned. The container has cap_drop ALL
 # and could not chown even if it wanted to.
-if [ -f "${LOCAL}" ]; then
-    php -n /usr/share/vimbadmin/build-config.php \
-        "${ORIG}/application.ini" "${LOCAL}" "${INI}"
-    echo "[VIMBADMIN] config built from local.ini (simple mode)"
+if [ ! -f "${INI}" ]; then
+    cp -rp "${ORIG}/." "${CONF}/"
+    echo "[VIMBADMIN] seeded config dir from shipped defaults"
 else
-    if [ ! -f "${INI}" ]; then
-        cp -rp "${ORIG}/." "${CONF}/"
-        echo "[VIMBADMIN] seeded config dir from shipped defaults (legacy mode)"
-    else
-        cp -p "${ORIG}/application.ini" "${CONF}/application.ini.orig"
-        echo "[VIMBADMIN] legacy mode: application.ini left as-is (refreshed .orig)"
-    fi
-    # Per-deployment securitysalt (legacy mode only; simple mode handles it).
-    if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
-        printf 'securitysalt = "%s"\n' "$(php -n -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
-        echo "[VIMBADMIN] generated securitysalt"
-    fi
+    cp -p "${ORIG}/application.ini" "${CONF}/application.ini.orig"
+    echo "[VIMBADMIN] application.ini left as-is (refreshed .orig)"
+fi
+# Per-deployment securitysalt.
+if ! grep -qE '^[[:space:]]*securitysalt[[:space:]]*=[[:space:]]*"[0-9a-f]{16,}"' "${INI}"; then
+    printf 'securitysalt = "%s"\n' "$(php -n -r 'echo bin2hex(random_bytes(32));')" >> "${INI}"
+    echo "[VIMBADMIN] generated securitysalt"
 fi
 
 # ---- Snuffleupagus ruleset: materialise into the writable var volume -
@@ -97,6 +82,17 @@ fi
 # bump the source templates change but the compiled copies live in the
 # persistent var volume -> wipe them so the new code is recompiled fresh.
 rm -rf "${INSTALL_PATH}/var/templates_c"/* 2>/dev/null || true
+
+# ---- database schema auto-migrate -----------------------------------
+# Apply any pending additive Doctrine schema changes on every start, so a code
+# bump that adds a table/column goes live without a manual "Update schema" click.
+# Idempotent (no pending SQL == no-op) and non-fatal: if the DB is not reachable
+# yet, the app still boots and the next restart (or the Maintenance button)
+# applies it. Records the DBVERSION in the database_version table.
+echo "[VIMBADMIN] checking database schema..."
+php "${INSTALL_PATH}/bin/vimbtool.php" -a maintenance.cli-schema-update --verbose 2>&1 \
+    | sed 's/^/[VIMBADMIN][schema] /' \
+    || echo "[VIMBADMIN] schema auto-migrate skipped (DB not ready?) — retries next start"
 
 # ---- config test -----------------------------------------------------
 php-fpm${PHPVERSION} -t

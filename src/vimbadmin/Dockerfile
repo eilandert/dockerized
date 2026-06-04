@@ -31,7 +31,6 @@ ENV     DEBIAN_FRONTEND=noninteractive \
         APPLICATION_ENV=docker
 
 COPY --chmod=0755 bootstrap.sh /bootstrap.sh
-COPY --chmod=0644 build-config.php local.ini.example /usr/share/vimbadmin/
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -71,10 +70,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # runtime copy (see the sed below).
     install -D -m 0644 "${INSTALL_PATH}/contrib/snuffleupagus/vimbadmin-strict.list" \
         /usr/share/vimbadmin/vimbadmin-strict.list ;\
-    # NB: do NOT point the CLI SAPI's SP at the runtime ruleset -- bootstrap
-    # generates the SP secret_key with a `php` call, and if that CLI php loaded
-    # the (not-yet-keyed) ruleset it would fatal and leave an empty key. The
-    # harmless "no sp.configuration_file" CLI warning is the lesser evil.
+    # Disable Snuffleupagus for the CLI SAPI entirely. SP only needs to harden
+    # the web (FPM) surface; the CLI runs trusted local scripts (vimbtool,
+    # bootstrap, cron queue runner). Leaving the extension enabled in CLI
+    # without a rulebook emits a "no sp.configuration_file" warning on every
+    # invocation, and pointing it at the runtime ruleset would fatal during the
+    # bootstrap secret_key generation. Removing the CLI conf.d symlink avoids
+    # both: no warning, no fatal, FPM protection unchanged.
+    rm -f /etc/php/8.5/cli/conf.d/*snuffleupagus*.ini ;\
     # ---- PHP-FPM pool: the fork's hardened pool ----------------------
     rm -f /etc/php/8.5/fpm/pool.d/www.conf ;\
     install -D -m 0644 "${INSTALL_PATH}/contrib/php-fpm/vimbadmin.conf" \
@@ -156,8 +159,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # ---- make the shared template dir traversable by the unprivileged
     # runtime user. `COPY --chmod=0644` created /usr/share/vimbadmin as 0644
     # (no execute bit), so non-root (USER phpfpm) cannot traverse it to read
-    # build-config.php / the SP ruleset template -> bootstrap failed with
-    # "Permission denied". Set 0755 on the dir, 0644 on the files.
+    # the SP ruleset template -> bootstrap failed with "Permission denied".
+    # Set 0755 on the dir, 0644 on the files.
     chmod 0755 /usr/share/vimbadmin ;\
     chmod 0644 /usr/share/vimbadmin/* ;\
     # ---- strip any leftover setuid/setgid bits ----------------------
