@@ -1,13 +1,29 @@
-version: "2.2"
 services:
-  nginx:
+  angie:
     container_name: angie
-    image: eilandert/angie:deb-latest
+    image: docker.io/eilandert/angie:deb-latest
     stop_grace_period: 3s
     ports:
       - 80:80
       - 443:443
+      - 443:443/udp
     restart: always
+    # ---- hardening ----
+    # Master starts as root (binds :80/:443, then workers drop to www-data),
+    # so a small capability set is required — NOT the full default set.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add:
+      - NET_BIND_SERVICE   # bind :80 / :443
+      - SETUID             # master spawns www-data workers
+      - SETGID
+      - CHOWN              # chown cache/log/run dirs to www-data on boot
+      - DAC_OVERRIDE       # read certs / write runtime dirs across owners
+    ulimits:
+      nofile:
+        soft: 65535        # matches worker_rlimit_nofile in angie.conf
+        hard: 65535
     volumes:
       - ./config/angie:/etc/angie:rw
 #      - ./config/modsecurity/:/etc/modsecurity:rw
@@ -24,6 +40,7 @@ services:
 
     environment:
       - TZ=Europe/Amsterdam
+      - MALLOC=jemalloc
 # if pulled with tag :multi
 #      - PHP56=YES
 #      - PHP74=YES

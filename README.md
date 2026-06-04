@@ -8,10 +8,10 @@ Want to chat, file bugs, suggest a module? Join the Discord: **[discord.gg/UQNsF
 
 Numbers are derived from `build/config.sh` and `docker-bake.hcl` — run the commands yourself to confirm.
 
-- **Base distros:** Ubuntu `resolute` (rolling) and Debian `trixie`, plus a few Alpine targets where it matters (`nginx-alpine`, `redis6-scratch`)
+- **Base distros:** Ubuntu `resolute` (rolling) and Debian `trixie`, plus a few Alpine targets where it matters (rspamd, letsencrypt, unbound)
 - **PHP versions:** `5.6`, `7.4`, `8.0`, `8.2`, `8.4`, `8.5` (six branches; see `PHP_VERSIONS` in [build/config.sh](build/config.sh))
-- **Build targets:** **92** — `grep -c '^target ' docker-bake.hcl`
-- **Source components:** **31** subdirectories under [src/](src/)
+- **Build targets:** **85** — `grep -c '^target ' docker-bake.hcl`
+- **Source components:** **21** subdirectories under [src/](src/)
 - **Registry prefix:** `docker.io/eilandert/<image>` (see `DOCKER_REGISTRY_PREFIX` in `build/config.sh`)
 
 ## Repository layout
@@ -20,37 +20,33 @@ Numbers are derived from `build/config.sh` and `docker-bake.hcl` — run the com
 dockerized/
 ├── buildx.sh                # wrapper → build/buildx-sequential.sh
 ├── generate.sh              # wrapper → build/generate.sh
-├── docker-bake.hcl          # 92 targets + groups (base, phpfpm, nginx, angie, mail, db, …)
+├── docker-bake.hcl          # 85 targets + groups (base, phpfpm, nginx, angie, mail, db, …)
 ├── build/
 │   ├── buildx-sequential.sh # orchestrator — builds one target at a time, in layer order
 │   ├── generate.sh          # walks src/<component>/.generate.sh in dependency order
 │   ├── generate-lib.sh      # shared template helpers
 │   ├── config.sh            # distro versions, PHP versions, registry prefix, version markers
 │   └── monitor-builds.sh    # tail/inspect helper for long bake runs
-└── src/                     # one directory per component (31 total)
+└── src/                     # one directory per component (21 total)
     ├── base/                       # ubuntu-base + debian-base
     ├── php-fpm/                    # php-fpm 5.6 … 8.5, both distros
     ├── nginx/                      # nginx + ModSecurity3 + PageSpeed (matches deb.myguard.nl nginx)
-    ├── nginx-alpine/               # slim alpine variant
     ├── angie/                      # Angie-nextgen build (matches deb.myguard.nl angie)
     ├── apache-phpfpm/              # Apache + PHP-FPM
     ├── mariadb/                    # MariaDB (upstream mariadb-docker, repinnable)
-    ├── redis/  redis6-scratch/     # Redis + a from-scratch redis6 image
     ├── valkey/                     # Redis-compatible fork
     ├── postfix/                    # SMTP, paired with the deb.myguard.nl postfix package
-    ├── dovecot/  dovecot-ubuntu/   # IMAP/POP3 (one per distro family)
-    ├── rspamd/  rspamd-git/        # stable + git/HEAD rspamd
-    ├── roundcube/ roundcube-new/ roundcobe-old/   # webmail (current + legacy)
-    ├── vimbadmin/ vimbadmin-ubuntu/                # mail admin UI
-    ├── clamav-unofficial-signatures/   # AV signature feeder
-    ├── unbound/  rbldnsd/                          # recursive DNS + RBL DNS
-    ├── openssh/                                    # ssh daemon image
-    ├── aptly/  reprepro/                           # APT repo tooling
-    ├── letsencrypt/                                # ACME client image
-    ├── docker-cms/                                 # CMS bundle
-    ├── psol-build/                                 # PageSpeed Optimization Library compile env
-    ├── sitemap_warmup/  wosbotv4/                  # support utilities
-    └── …
+    ├── dovecot-ubuntu/             # IMAP/POP3 (debian-dovecot target)
+    ├── rspamd-git/                 # rspamd (git/HEAD + stable variants)
+    ├── roundcube/                  # webmail
+    ├── vimbadmin/                  # mail admin UI
+    ├── unbound/  rbldnsd/          # recursive DNS + RBL DNS
+    ├── openssh/                    # ssh daemon image
+    ├── aptly/  reprepro/           # APT repo tooling
+    ├── letsencrypt/                # ACME client image
+    ├── docker-cms/                 # CMS bundle
+    ├── psol-build/                 # PageSpeed Optimization Library compile env
+    └── sitemap_warmup/             # support utility
 ```
 
 `docker buildx bake --print` will list every target and the groups they belong to.

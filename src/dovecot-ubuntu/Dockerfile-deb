@@ -1,20 +1,72 @@
 # syntax=docker/dockerfile:1.7
 # This file might be outdated, see https://github.com/eilandert/dockerized for a recent one
-FROM eilandert/debian-base:stable
+#
+# Dovecot + Sieve, hardened.
+#   * base   : eilandert/debian-base:stable (Debian trixie, already hardened,
+#              already carries the deb.myguard.nl apt repo + GPG key, so the
+#              dovecot-* packages come straight from https://deb.myguard.nl).
+#   * users  : keeps Dovecot's native PRIVILEGE SEPARATION. The root master
+#              drops the internet-facing pre-auth login processes to the
+#              unprivileged `dovenull`, and the mail processes to `vmail` (uid
+#              5000). Root never parses hostile input. The container is caged
+#              around that root: cap_drop ALL + only the few caps the master
+#              needs, no-new-privileges, every setuid bit stripped, read-only
+#              rootfs (see docker-compose.yml).
+#   * ports  : every listener is moved to a >1024 port
+#              (conf.d/99-unprivileged-ports.conf) so the container does not
+#              even need CAP_NET_BIND_SERVICE; the compose maps the real public
+#              ports (24/110/143/993/995/4190) down to them host-side.
+#   * malloc : LD_PRELOAD is selected at runtime, architecture-independently
+#              (multiarch lib dir resolved in bootstrap.sh) so the image runs
+#              unchanged on amd64 and arm64.
+#   * mail   : no local MTA. Sieve outbound (redirect/vacation/notify) is sent
+#              by SMTP to the Postfix container via `submission_host` (set in
+#              conf.d/99-unprivileged-ports.conf), not a local sendmail.
+#              Spam-reporting clients (rspamc, spamc, pyzor, razor) are present
+#              for sieve/learn pipelines.
+
+FROM    eilandert/debian-base:stable
 LABEL   org.opencontainers.image.authors="eilandert" \
         org.opencontainers.image.source="https://github.com/eilandert/dockerized" \
+        org.opencontainers.image.title="Dovecot" \
+        org.opencontainers.image.description="Hardened Dovecot + Sieve IMAP/POP3/LMTP/ManageSieve server (packages from deb.myguard.nl)" \
         maintainer="Thijs Eilander <eilander@myguard.nl>"
-ENV     DEBIAN_FRONTEND="noninteractive"
-COPY --chmod=0755 bootstrap.sh /bootstrap.sh
-COPY    syslog-ng.conf /etc/syslog-ng
 
+ENV     DEBIAN_FRONTEND="noninteractive" \
+        LD_PRELOAD=""
+
+COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+# Staged OUTSIDE the package conffile path; moved into place INSIDE the build
+# RUN after syslog-ng-core is installed, so dpkg never sees a pre-existing
+# /etc/syslog-ng/syslog-ng.conf and never raises a conffile prompt (which,
+# under DEBIAN_FRONTEND=noninteractive, would abort the configure step).
+COPY    syslog-ng.conf /usr/local/share/dovecot/syslog-ng.conf
+# High-port listener override, baked outside the seed tree; bootstrap drops it
+# into the seeded conf.d/ on first run (loaded last -> overrides 10-master.conf).
+COPY    99-unprivileged-ports.conf /usr/local/share/dovecot/99-unprivileged-ports.conf
+
+# Everything in ONE layer: install runtime packages, then purge apt lists
+# before the layer is committed. The dovecot-* packages resolve against the
+# deb.myguard.nl repo inherited from the base image.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    set -ex ;\
+    set -eux ;\
     rm -f /etc/apt/apt.conf.d/docker-clean ;\
     apt-get update ;\
-    apt-get install -y --no-install-recommends nullmailer mailutils ;\
-    apt-get -y --no-install-recommends install \
+    # dovecot-core 2.4's postinst runs `systemd-sysusers dovecot-core.conf` to
+    # create the dovecot/dovenull system users. Two things must hold or the
+    # configure step aborts the whole install:
+    #   1. a `systemd-sysusers` binary must exist (the base ships no systemd) ->
+    #      systemd-standalone-sysusers provides just that, no init.
+    #   2. /usr/lib/sysusers.d/dovecot-core.conf must exist. The currently
+    #      PUBLISHED dovecot-core .deb ships it under the wrong name
+    #      (dovecot.conf) — fixed in deb/dovecot/debian/rules, but until that
+    #      rebuild lands we recover below: install allowing dovecot to fail to
+    #      configure, alias the file to the name the postinst expects, then
+    #      finish with `dpkg --configure -a`. Harmless once the package is fixed.
+    apt-get install -y --no-install-recommends \
+      systemd-standalone-sysusers ;\
+    apt-get install -y --no-install-recommends \
       dovecot-core \
       dovecot-imapd \
       dovecot-lmtpd \
@@ -36,24 +88,81 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       razor \
       rspamd \
       spamc \
-      curl \
       mimalloc \
-      libjemalloc2 ;\
-    mkdir -p /opt/scripts/vimbadmin.orig ;\
-    curl -fSL https://github.com/gibzer/vimbadmin-perl/archive/master.tar.gz |\
-      tar xz --strip-components=1 -C /opt/scripts/vimbadmin.orig ;\
-    rm -f /opt/scripts/vimbadmin.orig/*.deb ;\
-    apt-get -y purge curl ;\
-    apt-get -y autoremove ;\
+      libjemalloc2 \
+      || true ;\
+    if [ -f /usr/lib/sysusers.d/dovecot.conf ] \
+       && [ ! -f /usr/lib/sysusers.d/dovecot-core.conf ]; then \
+        cp /usr/lib/sysusers.d/dovecot.conf /usr/lib/sysusers.d/dovecot-core.conf ;\
+    fi ;\
+    dpkg --configure -a ;\
+    apt-get -y install -f --no-install-recommends ;\
+    # vimbadmin maildir-scan accounting scripts removed: quota usage is tracked
+    # live by the quota-clone plugin (dovecot_quota table); no helper scripts.
+    apt-get -y autoremove --purge ;\
+    # ---- syslog-ng: make /etc/syslog-ng a symlink to the /tmp tmpfs so the
+    #      config (and the runtime-generated conf.d/remote.conf) is writable
+    #      even under a read-only rootfs. The real default config is stashed in
+    #      the seed template; bootstrap copies it into /tmp/syslog-ng on first
+    #      run (only if absent). The symlink target is created at runtime. ----
+    rm -rf /etc/syslog-ng ;\
+    ln -s /tmp/syslog-ng /etc/syslog-ng ;\
+    # ---- stash the packaged config as a restorable template ----
     mv /etc/dovecot /etc/dovecot.orig && mkdir -p /etc/dovecot ;\
+    # ---- syslog-ng default config into the seed template (AFTER the mv, which
+    #      would fail if /etc/dovecot.orig already existed) ----
+    install -D -m 0644 /usr/local/share/dovecot/syslog-ng.conf \
+        /etc/dovecot.orig/syslog-ng/syslog-ng.conf ;\
+    # ---- vmail: the unprivileged user the root master drops MAIL processes to.
+    #      (Pre-auth login processes drop to the packaged `dovenull`; both are
+    #      created by the dovecot-core postinst sysusers step above.) ----
     addgroup --gid 5000 vmail ;\
-    useradd -u 5000 -g 5000 -s /sbin/nologin vmail ;\
-    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf
+    useradd -u 5000 -g 5000 -s /usr/sbin/nologin -d /nonexistent vmail ;\
+    # ---- self-signed bootstrap cert -----------------------------------------
+    # The packaged config points ssl_server_{cert,key}_file at
+    # /etc/dovecot/private/dovecot.{pem,key}, which symlink to the system
+    # ssl-cert snakeoil — a key the dovecot processes can't read. Replace the
+    # symlinks with a real self-signed cert so the image boots TLS-ready. The
+    # ROOT master loads the SSL context before dropping privilege, so the key
+    # stays root:root 0400 (defence in depth — no dropped process can read it).
+    # Operators override the paths with a real cert via
+    # conf.d/99-unprivileged-ports.conf (see README).
+    rm -f /etc/dovecot.orig/private/dovecot.pem /etc/dovecot.orig/private/dovecot.key ;\
+    openssl req -x509 -newkey rsa:2048 -days 3650 -nodes \
+        -subj "/CN=dovecot.local" \
+        -keyout /etc/dovecot.orig/private/dovecot.key \
+        -out    /etc/dovecot.orig/private/dovecot.pem ;\
+    chown root:root /etc/dovecot.orig/private/dovecot.key /etc/dovecot.orig/private/dovecot.pem ;\
+    chmod 0400 /etc/dovecot.orig/private/dovecot.key ;\
+    chmod 0444 /etc/dovecot.orig/private/dovecot.pem ;\
+    # The packaged 10-ssl.conf ships `ssl_server_prefer_ciphers = yes`, an
+    # invalid value in dovecot 2.4 (it takes client|server) — a fatal parse
+    # error. Fix it in the template so the seeded config is valid out of box.
+    sed -ri 's/^(\s*ssl_server_prefer_ciphers\s*=\s*)yes\s*$/\1server/' \
+        /etc/dovecot.orig/conf.d/10-ssl.conf ;\
+    # ---- jemalloc tuning (read by libjemalloc when selected at runtime) ----
+    echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf ;\
+    # ---- strip every setuid/setgid bit (defence in depth). Dovecot does its
+    #      privilege drops from the root master itself, not via setuid helpers,
+    #      so nothing here needs the bits; clearing them removes the escalation
+    #      primitive (su, mount, passwd, chsh, ...). With no-new-privileges set
+    #      in compose, a dropped process can never regain privilege. ----
+    find / -xdev -type f -perm /6000 -exec chmod -s {} + 2>/dev/null || true ;\
+    # ---- mail storage owned by vmail (the user mail processes drop to). A
+    #      named volume mounted at /var/vmail inherits this owner. /run/dovecot
+    #      is recreated as a root-owned tmpfs at runtime; the root master chowns
+    #      its per-service sockets to dovenull/dovecot/vmail itself. ----
+    mkdir -p /var/vmail ;\
+    chown -R 5000:5000 /var/vmail ;\
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /etc/dovecot
 
-EXPOSE 24 143 110 993 995 4190
+# High-port listeners (host-mapped to 24/110/143/993/995/4190).
+# LMTP 10024  POP3 10110  IMAP 10143  IMAPS 10993  POP3S 10995  Sieve 14190
+EXPOSE 10024 10110 10143 10993 10995 14190
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD pgrep -x dovecot > /dev/null && doveadm who -1 > /dev/null 2>&1 || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD pgrep -x dovecot >/dev/null && doveadm who -1 >/dev/null 2>&1 || exit 1
 
 CMD ["/bootstrap.sh"]

@@ -1,3 +1,18 @@
+# Provenance / supply-chain build args. Override from the environment, e.g.:
+#   VCS_REF=$(git rev-parse --short HEAD) BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+#     docker buildx bake nginx --push
+variable "VCS_REF"    { default = "unknown" }
+variable "BUILD_DATE" { default = "unknown" }
+
+# Shared metadata args. Targets inherit this to receive VCS_REF / BUILD_DATE
+# without repeating the args block.
+target "_meta" {
+    args = {
+        VCS_REF    = "${VCS_REF}"
+        BUILD_DATE = "${BUILD_DATE}"
+    }
+}
+
 group "default" {
     targets = ["ubuntu-base", "debian-base"]
 }
@@ -124,7 +139,7 @@ group "ubuntu" {
         "ubuntu-angie-all",
         "ubuntu-apache",
         "ubuntu-mariadb", "ubuntu-valkey",
-        "ubuntu-postfix", "ubuntu-dovecot",
+        "ubuntu-postfix",
         "ubuntu-rspamd",
         "ubuntu-reprepro",
     ]
@@ -188,7 +203,7 @@ group "apache-misc" {
 
 group "mail" {
     targets = [
-       "ubuntu-postfix", "debian-postfix", "alpine-rspamd", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "ubuntu-dovecot", "debian-dovecot" ]
+       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-dovecot" ]
 }
 
 group "db" {
@@ -336,6 +351,7 @@ target "ubuntu-mariadb" {
 }
 
 target "debian-nginx" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-latest", "docker.io/eilandert/nginx:deb-latest"]
     context = "src/nginx"
     dockerfile = "Dockerfile-deb"
@@ -343,20 +359,23 @@ target "debian-nginx" {
 }
 
 target "ubuntu-nginx" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:latest"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:latest", "docker.io/eilandert/nginx:latest"]
     context = "src/nginx"
     dockerfile = "Dockerfile-ubu"
     contexts = { "docker.io/eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
 }
 
 target "ubuntu-nginx-php56" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php5.6"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php5.6", "docker.io/eilandert/nginx:php5.6"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php56-ubu"
     contexts = { "docker.io/eilandert/php-fpm:5.6" = "target:ubuntu-phpfpm56" }
 }
 
 target "debian-nginx-php56" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php5.6", "docker.io/eilandert/nginx:deb-php5.6"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php56-deb"
@@ -364,13 +383,15 @@ target "debian-nginx-php56" {
 }
 
 target "ubuntu-nginx-php74" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php7.4"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php7.4", "docker.io/eilandert/nginx:php7.4"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php74-ubu"
     contexts = { "docker.io/eilandert/php-fpm:7.4" = "target:ubuntu-phpfpm74" }
 }
 
 target "debian-nginx-php74" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php7.4", "docker.io/eilandert/nginx:deb-php7.4"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php74-deb"
@@ -378,13 +399,15 @@ target "debian-nginx-php74" {
 }
 
 target "ubuntu-nginx-php80" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.0"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.0", "docker.io/eilandert/nginx:php8.0"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php80-ubu"
     contexts = { "docker.io/eilandert/php-fpm:8.0" = "target:ubuntu-phpfpm80" }
 }
 
 target "debian-nginx-php80" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.0", "docker.io/eilandert/nginx:deb-php8.0"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php80-deb"
@@ -392,13 +415,15 @@ target "debian-nginx-php80" {
 }
 
 target "ubuntu-nginx-php82" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.2"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.2", "docker.io/eilandert/nginx:php8.2"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php82-ubu"
     contexts = { "docker.io/eilandert/php-fpm:8.2" = "target:ubuntu-phpfpm82" }
 }
 
 target "debian-nginx-php82" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.2", "docker.io/eilandert/nginx:deb-php8.2"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php82-deb"
@@ -406,13 +431,15 @@ target "debian-nginx-php82" {
 }
 
 target "ubuntu-nginx-php84" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.4"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.4", "docker.io/eilandert/nginx:php8.4"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php84-ubu"
     contexts = { "docker.io/eilandert/php-fpm:8.4" = "target:ubuntu-phpfpm84" }
 }
 
 target "debian-nginx-php84" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.4", "docker.io/eilandert/nginx:deb-php8.4"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php84-deb"
@@ -420,13 +447,15 @@ target "debian-nginx-php84" {
 }
 
 target "ubuntu-nginx-php85" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.5"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:php8.5", "docker.io/eilandert/nginx:php8.5"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php85-ubu"
     contexts = { "docker.io/eilandert/php-fpm:8.5" = "target:ubuntu-phpfpm85" }
 }
 
 target "debian-nginx-php85" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-php8.5", "docker.io/eilandert/nginx:deb-php8.5"]
     context = "src/nginx"
     dockerfile = "Dockerfile-php85-deb"
@@ -434,13 +463,15 @@ target "debian-nginx-php85" {
 }
 
 target "ubuntu-nginx-multi" {
-    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:multi"]
+    inherits = ["_meta"]
+    tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:multi", "docker.io/eilandert/nginx:multi"]
     context = "src/nginx"
     dockerfile = "Dockerfile-multi-ubu"
     contexts = { "docker.io/eilandert/php-fpm:multi" = "target:ubuntu-multiphp" }
 }
 
 target "debian-nginx-multi" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/nginx-modsecurity3-pagespeed:deb-multi", "docker.io/eilandert/nginx:deb-multi"]
     context = "src/nginx"
     dockerfile = "Dockerfile-multi-deb"
@@ -547,15 +578,8 @@ target "ubuntu-apache-multiphp" {
 
 
 
-target "ubuntu-dovecot" {
-   tags = ["docker.io/eilandert/dovecot:ubuntu", "docker.io/eilandert/dovecot:latest"]
-   context = "src/dovecot-ubuntu"
-   dockerfile = "Dockerfile-ubu"
-   contexts = { "eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
-}
-
 target "debian-dovecot" {
-   tags = ["docker.io/eilandert/dovecot:debian"]
+   tags = ["docker.io/eilandert/dovecot:debian", "docker.io/eilandert/dovecot:latest"]
    context = "src/dovecot-ubuntu"
    dockerfile = "Dockerfile-deb"
    contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
@@ -617,12 +641,6 @@ target "debian-roundcube" {
       "skin-gmail"      = "../roundcube-skin-gmail"
       "skin-outlook365" = "../roundcube-skin-outlook365"
    }
-}
-
-target "alpine-rspamd" {
-   tags = ["docker.io/eilandert/rspamd"]
-   context = "src/rspamd"
-   dockerfile = "Dockerfile"
 }
 
 target "debian-rspamd-git" {
@@ -687,6 +705,7 @@ target "aptly" {
 }
 
 target "debian-angie" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-latest"]
     context = "src/angie"
     dockerfile = "Dockerfile-deb"
@@ -694,6 +713,7 @@ target "debian-angie" {
 }
 
 target "ubuntu-angie" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:latest"]
     context = "src/angie"
     dockerfile = "Dockerfile-ubu"
@@ -701,6 +721,7 @@ target "ubuntu-angie" {
 }
 
 target "ubuntu-angie-php56" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:php5.6"]
     context = "src/angie"
     dockerfile = "Dockerfile-php56-ubu"
@@ -708,6 +729,7 @@ target "ubuntu-angie-php56" {
 }
 
 target "debian-angie-php56" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-php5.6"]
     context = "src/angie"
     dockerfile = "Dockerfile-php56-deb"
@@ -715,6 +737,7 @@ target "debian-angie-php56" {
 }
 
 target "ubuntu-angie-php74" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:php7.4"]
     context = "src/angie"
     dockerfile = "Dockerfile-php74-ubu"
@@ -722,6 +745,7 @@ target "ubuntu-angie-php74" {
 }
 
 target "debian-angie-php74" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-php7.4"]
     context = "src/angie"
     dockerfile = "Dockerfile-php74-deb"
@@ -729,6 +753,7 @@ target "debian-angie-php74" {
 }
 
 target "ubuntu-angie-php80" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:php8.0"]
     context = "src/angie"
     dockerfile = "Dockerfile-php80-ubu"
@@ -736,6 +761,7 @@ target "ubuntu-angie-php80" {
 }
 
 target "debian-angie-php80" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-php8.0"]
     context = "src/angie"
     dockerfile = "Dockerfile-php80-deb"
@@ -743,6 +769,7 @@ target "debian-angie-php80" {
 }
 
 target "ubuntu-angie-php82" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:php8.2"]
     context = "src/angie"
     dockerfile = "Dockerfile-php82-ubu"
@@ -750,6 +777,7 @@ target "ubuntu-angie-php82" {
 }
 
 target "debian-angie-php82" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-php8.2"]
     context = "src/angie"
     dockerfile = "Dockerfile-php82-deb"
@@ -757,6 +785,7 @@ target "debian-angie-php82" {
 }
 
 target "ubuntu-angie-php84" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:php8.4"]
     context = "src/angie"
     dockerfile = "Dockerfile-php84-ubu"
@@ -764,6 +793,7 @@ target "ubuntu-angie-php84" {
 }
 
 target "debian-angie-php84" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-php8.4"]
     context = "src/angie"
     dockerfile = "Dockerfile-php84-deb"
@@ -771,6 +801,7 @@ target "debian-angie-php84" {
 }
 
 target "ubuntu-angie-php85" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:php8.5"]
     context = "src/angie"
     dockerfile = "Dockerfile-php85-ubu"
@@ -778,6 +809,7 @@ target "ubuntu-angie-php85" {
 }
 
 target "debian-angie-php85" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-php8.5"]
     context = "src/angie"
     dockerfile = "Dockerfile-php85-deb"
@@ -785,6 +817,7 @@ target "debian-angie-php85" {
 }
 
 target "ubuntu-angie-multi" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:multi"]
     context = "src/angie"
     dockerfile = "Dockerfile-multi-ubu"
@@ -792,6 +825,7 @@ target "ubuntu-angie-multi" {
 }
 
 target "debian-angie-multi" {
+    inherits = ["_meta"]
     tags = ["docker.io/eilandert/angie:deb-multi"]
     context = "src/angie"
     dockerfile = "Dockerfile-multi-deb"

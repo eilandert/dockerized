@@ -1,7 +1,5 @@
 #!/bin/sh
 
-chmod 777 /dev/stdout
-
 echo "[ANGIE] Find documentation for this Docker image at https://deb.myguard.nl/angie-dockerized/"
 echo "[ANGIE] For information about the ANGIE packages, please visit https://deb.myguard.nl/angie-modules/"
 
@@ -20,6 +18,16 @@ if [ ! -f ${FIRSTRUN} ]; then
 fi
 
 cp -r /etc/modsecurity.orig/* /etc/modsecurity/
+
+# Snakeoil fallback: the bundled default vhost listens on :443 using the
+# self-signed snakeoil cert so the container serves HTTPS out-of-the-box with
+# no certs mounted. Regenerate it if the ssl-cert package didn't (or a
+# read-only layer dropped it). Mount real certs + your own vhost for production.
+if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ] || [ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then
+    if command -v make-ssl-cert >/dev/null 2>&1; then
+        make-ssl-cert generate-default-snakeoil --force-overwrite 2>/dev/null || true
+    fi
+fi
 
 #check if PHP is installed, else skip the whole block
 if [ -n "${PHPVERSION}" ]; then
@@ -157,28 +165,60 @@ if [ ! -n "${NGX_MODULES}" ]; then
 	echo "[ANGIE] ---> Removing mod-http-lua.conf and mod-stream-lua.conf, as those requires additional configuration to start"
         echo "[ANGIE] ---> To suppress this message and behaviour please touch /etc/angie/modules-enabled/.quiet"
         echo "[ANGIE] --->"
-        rm /etc/angie/modules-enabled/50-mod-http-lua.conf
-        rm /etc/angie/modules-enabled/50-mod-stream-lua.conf
+        rm -f /etc/angie/modules-enabled/50-mod-http-lua.conf
+        rm -f /etc/angie/modules-enabled/50-mod-stream-lua.conf
     fi
 fi
 
 angie -V 2>&1 | grep -v configure | grep -v SNI
 echo "[ANGIE] Verifying configurations using the command angie -t"
-angie -t
+# Fatal: a broken config must abort the boot with a clear message rather than
+# letting `exec angie` crash into a cryptic restart loop.
+if ! angie -t; then
+    echo "[ANGIE] --->"
+    echo "[ANGIE] ---> FATAL: angie -t failed — the configuration is invalid (see the error above)."
+    echo "[ANGIE] ---> Fix your mounted /etc/angie config and restart the container. Aborting boot."
+    echo "[ANGIE] --->"
+    exit 1
+fi
 
-echo "[ANGIE] This docker is set to reload every 24 hours to pick up new SSL certificates."
-while [ 1 ]; do sleep 1d; /usr/sbin/angie -s reload; done &
+# ---- TLS session-ticket key rotation (forward secrecy) -------------------
+# angie.conf enables ssl_session_tickets; without a rotating key the ticket
+# key is fixed for the life of the master, weakening forward secrecy. Generate
+# one now and rotate it in the 24h loop below. Only relevant if a server block
+# references it via `ssl_session_ticket_key /run/angie/ticket.key;`.
+TICKET_KEY=/run/angie/ticket.key
+mkdir -p /run/angie 2>/dev/null || true
+if [ ! -f "${TICKET_KEY}" ]; then
+    openssl rand 80 > "${TICKET_KEY}" 2>/dev/null && chmod 0600 "${TICKET_KEY}" || true
+fi
+
+echo "[ANGIE] This docker is set to reload every 24 hours to pick up new SSL certificates and rotate the TLS ticket key."
+# Test the config before each reload — never reload a broken config over a
+# running master (that would either fail silently or leave stale state).
+while [ 1 ]; do
+    sleep 1d
+    # Rotate the TLS session-ticket key (forward secrecy) before the reload.
+    [ -d /run/angie ] && openssl rand 80 > "${TICKET_KEY}.tmp" 2>/dev/null \
+        && chmod 0600 "${TICKET_KEY}.tmp" && mv -f "${TICKET_KEY}.tmp" "${TICKET_KEY}" || true
+    if /usr/sbin/angie -t 2>/dev/null; then
+        /usr/sbin/angie -s reload
+    else
+        echo "[ANGIE] ---> 24h reload SKIPPED: angie -t failed, config is broken; keeping the running config. Fix it and reload manually."
+        /usr/sbin/angie -t 2>&1 | sed 's/^/[ANGIE] ---> /'
+    fi
+done &
 
 # Setup the MALLOC of choice.
 case ${MALLOC} in
-    *|jemalloc)
-        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
-        ;;
     mimalloc)
         export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libmimalloc-secure.so
         ;;
     none)
         unset LD_PRELOAD
+        ;;
+    *|jemalloc)
+        export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
         ;;
 esac
 

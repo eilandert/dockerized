@@ -1,0 +1,56 @@
+# Example default vhost — static + (optional) PHP, HTTP/2 + HTTP/3, snakeoil
+# fallback cert. Shipped ENABLED so the container serves HTTPS out-of-the-box
+# with no certs mounted. For production: mount real certs, copy this to
+# /etc/nginx/sites-available/<your-site>.conf, set server_name + cert paths,
+# and remove this file from sites-enabled.
+
+# --- HTTP: redirect to HTTPS (keep ACME challenge reachable) ---
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type text/plain;
+    }
+    location / { return 301 https://$host$request_uri; }
+}
+
+# --- HTTPS ---
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    # HTTP/3 / QUIC — requires `http3 on;` in nginx.conf (commented by default)
+    # and the udp 443 port published. Uncomment both lines to enable:
+    #listen 443 quic reuseport default_server;
+    #listen [::]:443 quic reuseport default_server;
+    http2 on;
+    server_name _;
+
+    # Snakeoil fallback (self-signed). Replace with your real fullchain/key.
+    ssl_certificate     /etc/ssl/certs/ssl-cert-snakeoil.pem;
+    ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+
+    # Package-shipped hardening snippets (see /etc/nginx/snippets/):
+    include snippets/ssl-labs-aplus.conf;
+    include snippets/security.conf;
+    # include snippets/cloudflare.conf;   # if behind Cloudflare (real_ip)
+
+    # Advertise HTTP/3 when enabled.
+    #add_header Alt-Svc 'h3=":443"; ma=86400' always;
+
+    root  /var/www/html;
+    index index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # ---- PHP (only on PHP-enabled image tags). Uncomment to enable. ----
+    #location ~ \.php$ {
+    #    include snippets/fastcgi-php.conf;
+    #    # Match the socket your php-fpm pool listens on (see /run/php/):
+    #    fastcgi_pass unix:/run/php/php-fpm.sock;
+    #}
+}
