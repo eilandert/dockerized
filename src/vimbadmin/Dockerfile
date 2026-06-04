@@ -122,12 +122,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     cp application/configs/application.ini.dist application/configs/application.ini ;\
     { echo "" ; echo "[docker : production]" ;\
       echo "resources.smarty.skin = \"dark\"" ;\
-      echo "resources.doctrine2cache.type = \"ApcuCache\"" ;\
-      # This image ships no Dovecot, so the default dovecot:BLF-CRYPT scheme
-      # (which shells out to doveadm) can't hash passwords. Use a PHP-native
-      # SHA-512 crypt that Dovecot accepts as {SHA512-CRYPT}. Override if you
-      # bind-mount a reachable doveadm.
-      echo "defaults.mailbox.password_scheme = \"crypt:sha512\"" ; } \
+      echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
     # ---- strip everything the running image doesn't need -------------
