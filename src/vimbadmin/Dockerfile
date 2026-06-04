@@ -128,6 +128,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
+    # ---- bake the build commit so the app can show it at runtime -----
+    # The image ships no .git (stripped just below) and var/ is a writable
+    # volume at runtime (would shadow a baked file), so write the HEAD SHA to a
+    # read-only file at the APP ROOT. ViMbAdmin_Version::gitCommit() reads it
+    # for the Maintenance tab + the "newer commit?" check.
+    git -C "${INSTALL_PATH}" rev-parse HEAD > "${INSTALL_PATH}/GIT_COMMIT" 2>/dev/null || true ;\
     # ---- strip everything the running image doesn't need -------------
     # app cruft + the contrib sources (SP ruleset already installed from there)
     rm -rf "${INSTALL_PATH}/.git" "${INSTALL_PATH}/contrib" \
