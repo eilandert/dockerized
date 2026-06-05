@@ -62,6 +62,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     [ "${EXPECTED}" = "${ACTUAL}" ] || { echo 'composer installer checksum mismatch' >&2; exit 1; } ;\
     php /tmp/c.php --quiet --install-dir=/usr/local/bin --filename=composer ;\
     composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader ;\
+    # ---- Doctrine proxies --------------------------------------------
+    # Prod runs autogen_proxies=0 on a read-only rootfs, so the proxy classes
+    # must be present on disk before the first request. They are no longer
+    # committed to the fork (they drifted from the entities); generate them
+    # here from the XML mappings. The script needs no database.
+    php bin/generate-proxies.php ;\
     # ---- Snuffleupagus -----------------------------------------------
     # Keep the ruleset TEMPLATE on a read-only image path. bootstrap copies it
     # into the writable var/ volume and injects a per-deployment secret_key, so
