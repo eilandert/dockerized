@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM alpine:3.12
+FROM alpine:3.21
 LABEL org.opencontainers.image.authors="eilandert"
 LABEL org.opencontainers.image.source="https://github.com/eilandert/dockerized"
 
@@ -11,6 +11,10 @@ RUN  apk update && apk upgrade \
   && chmod 775 /etc/unbound \
   && /usr/sbin/unbound-anchor -a /etc/unbound/trusted-key.key | true \
   && rm -rf /var/cache/apk/* /usr/src/*
+
+# alpine's unbound pkg stopped bundling root.hints (was present on 3.12);
+# our unbound.conf has an explicit root-hints: line, so ship it ourselves.
+COPY --chmod=0644 named.root /etc/unbound/root.hints
 
 EXPOSE 53/udp
 EXPOSE 53/tcp
