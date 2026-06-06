@@ -15,11 +15,16 @@ all-in-one web+PHP container.
 
 ## Links
 
-- 📦 **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/angie>
-- 🐳 **Docker Hub:** <https://hub.docker.com/r/eilandert/angie>
-- 📖 **Write-up / guided tour:** <https://deb.myguard.nl/angie-dockerized/>
-- 🧩 **angie packages / module list:** <https://deb.myguard.nl/angie-modules/>
-- 🏠 **deb.myguard.nl:** <https://deb.myguard.nl/>
+- **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/angie>
+- **Docker Hub:** <https://hub.docker.com/r/eilandert/angie>
+- **Write-up / guided tour:** <https://deb.myguard.nl/angie-dockerized/>
+- **angie packages / module list:** <https://deb.myguard.nl/angie-modules/>
+- **deb.myguard.nl:** <https://deb.myguard.nl/>
+- **Post-quantum TLS on NGINX & Angie (ML-KEM):** <https://deb.myguard.nl/2026/05/post-quantum-cryptography-with-nginx-and-angie-ml-kem-hybrid-tls-and-how-to-configure-it/>
+- **Dedicated openssl-nginx build:** <https://deb.myguard.nl/2026/05/openssl-nginx-a-dedicated-openssl-build-for-nginx-and-angie/>
+- **We audited the zstd-nginx-module:** <https://deb.myguard.nl/2026/05/we-audited-the-zstd-nginx-module-and-found-a-lot-of-bugs/>
+- **Docker hardening guide:** <https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/>
+- **Discord:** <https://discord.gg/UQNsFg2y>
 
 ## Tags
 
@@ -70,7 +75,7 @@ legacy app you swear you'll rewrite "next quarter."
   and disables `mod-http-lua` / `mod-stream-lua` (they need hand-holding). **Set
   `NGX_MODULES`** to only what you use. `touch
   /etc/angie/modules-enabled/.quiet` to keep all modules and silence the nag.
-- **Boot config test is fatal:** `angie -t` runs before launch. Broken config →
+- **Boot config test is fatal:** `angie -t` runs before launch. Broken config
   loud, specific error and a clean `exit 1`. No cryptic restart loop, no
   guessing, no "works on my machine."
 - **24 h reload loop** picks up renewed certs and rotates the TLS session-ticket

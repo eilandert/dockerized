@@ -1,58 +1,60 @@
-# Apache + PHP-FPM
+# Apache + PHP-FPM — hardened web + PHP image (Debian, PHP 5.6 → 8.5)
 
-A docker I created for serving wordpress, opencart and magento behind a reverse nginx proxy, but all functionality is there so you should be able to use it any way you want
+`eilandert/apache-phpfpm` bundles the **Apache HTTP Server** with **PHP-FPM** over
+`mod_proxy_fcgi`, built from the packages on
+**[deb.myguard.nl](https://deb.myguard.nl)**. It's the drop-in choice for PHP
+applications that expect Apache semantics — `.htaccess`, `mod_rewrite`,
+per-directory overrides — across six PHP branches (`5.6`, `7.4`, `8.0`, `8.2`,
+`8.4`, `8.5`).
 
-An Ubuntu:rolling (or debian:stable) docker with PHP packages from [Ondrej](https://launchpad.net/~ondrej/+archive/ubuntu/php)
+Where available, PHP is hardened at runtime with **Snuffleupagus**.
 
-This docker can be found on [Github](https://github.com/eilandert/dockerized/tree/master/apache-phpfpm) and [Dockerhub](https://hub.docker.com/r/eilandert/apache-phpfpm)
+## Why run Apache + PHP-FPM in Docker
 
-Complete Apache packages are on my own [repo](https://launchpad.net/~eilander/+archive/ubuntu/apache2)
+- **Legacy-friendly** — many off-the-shelf PHP apps assume Apache + `.htaccess`;
+  this image serves them without rewriting config for nginx.
+- **FPM process isolation** — PHP runs in its own pool, not in the web-server
+  process, so a crash or leak is contained.
+- **Pin the PHP version** per app and run several side-by-side.
+- **Hardened by default.** See
+  [Docker Hardening for Self-Hosters](https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/).
 
-Bind /etc/php and /etc/apache2 for configfiles, those dirs will be populated if they are empty
+## Hardened `docker-compose.yml`
 
+```yaml
+services:
+  web:
+    image: eilandert/apache-phpfpm:deb-8.4
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - ./app:/var/www/html:ro
+      - apache-logs:/var/log/apache2
+    ports:
+      - "443:443"
+      - "80:80"
 
-Features:
+volumes:
+  apache-logs:
+```
 
-- Updated rebuild and backport of the Ubuntu-20.10 Groovy Apache2 Package
-- Apache compiled with -O3 -flto to squeeze some extra % performance.
-- Linked apache against against OpenSSL 1.1.1h so there is ALPN and TLS1.3 support
-- Nullmailer for easy mailing from within e.g. wordpress
-- Latest Composer installed
-- Automatic population of /etc/apache2 /etc/php and /etc/nullmailer if configs are not found (e.g. first run on mounted empty dir)
-- Most php-modules from the Ondrej PPA are included
-- Daily rebuilds of the docker
-- Daily reload of configs when mod_ssl is enabled (for reloading e.g. letsencrypt certificates)
+## Tags
 
+Distro + PHP version, e.g. `deb-8.4`, `deb-5.6`, `ubu-8.5`. Pin one in production.
 
-ENVIRONMENT:
+## Links
 
-- use CACHE=yes to enable apache caching
-- use TZ=Europe/Amsterdam (for example) to set timezone
-- MALLOC=jemalloc or mimalloc or none (default: jemalloc)
-- variables A2ENMOD A2DISMOD A2ENCONF A2DISCONF (changes are persistent if you mount /etc/apache2)
-- use MODE=MOD for using mod_php instead of php-fpm. Apache2 will be set to mpm_prefork.
-- in multimode (tag :multi) set PHP56=YES PHP72=YES PHP74=YES PHP80=YES to enable specific versions.
-- in multimode (tag: multi) you have to create the handler per vhost manually, examples in apache2/conf-available/php\*-fpm.conf
-
-See [docker-compose.yml](https://github.com/eilandert/dockerized/blob/master/apache-phpfpm/docker-compose.yml) for examples.
-
-TAGS:
-Ubuntu:
-- eilandert/apache-phpfpm:latest defaults to 7.4 at this time
-- eilandert/apache-phpfpm:multi for all php versions
-- eilandert/apache-phpfpm:5.6
-- eilandert/apache-phpfpm:7.2
-- eilandert/apache-phpfpm:7.4
-- eilandert/apache-phpfpm:8.0
-Debian:
-- eilandert/apache-phpfpm:deblatest defaults to 7.4 at this time
-- eilandert/apache-phpfpm:debmulti for all php versions
-- eilandert/apache-phpfpm:deb5.6
-- eilandert/apache-phpfpm:deb7.2
-- eilandert/apache-phpfpm:deb7.4
-- eilandert/apache-phpfpm:deb8.0
-
-
-TODO
-
-I am open for suggestions..
+- **PHP hardening with Snuffleupagus:** [Enhancing Web Security with PHP Snuffleupagus for PHP-FPM](https://deb.myguard.nl/2024/01/enhancing-web-security-with-php-snuffleupagus-for-php-fpm/)
+- **All Docker images:** https://deb.myguard.nl/nginx-dockerized/
+- **Package repo & articles:** https://deb.myguard.nl
+- **Docker hardening guide:** https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/
+- **Source:** https://github.com/eilandert/dockerized
+- **Discord:** https://discord.gg/UQNsFg2y

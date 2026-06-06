@@ -8,11 +8,11 @@ front of PHP.
 
 ## Links
 
-- 📦 **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/roundcube>
-- 🐳 **Docker Hub:** <https://hub.docker.com/r/eilandert/roundcube>
-- 🔧 **App source (upstream):** <https://github.com/roundcube/roundcubemail>
-- 📖 **Write-up / guided tour:** <https://deb.myguard.nl/2026/06/hardened-roundcube-docker-image/>
-- 🏠 **deb.myguard.nl:** <https://deb.myguard.nl/>
+- **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/roundcube>
+- **Docker Hub:** <https://hub.docker.com/r/eilandert/roundcube>
+- **App source (upstream):** <https://github.com/roundcube/roundcubemail>
+- **Write-up / guided tour:** <https://deb.myguard.nl/2026/06/hardened-roundcube-docker-image/>
+- **deb.myguard.nl:** <https://deb.myguard.nl/>
 
 ## What's in the image
 
@@ -32,7 +32,7 @@ the **edge** by an Angie WAF, and the **container** by the measures below.
 
 ### Container / image
 
-- **Runs fully unprivileged — no root, anywhere.** PID 1 (bootstrap → the Angie
+- **Runs fully unprivileged — no root, anywhere.** PID 1 (bootstrap  the Angie
   and PHP-FPM masters), every worker, all of it runs as the unprivileged
   `roundcube` user (`USER roundcube:roundcube` in the image; `user:
   "10001:10001"` in compose). No root process at any point.
@@ -65,7 +65,7 @@ the **edge** by an Angie WAF, and the **container** by the measures below.
   side-channel on CSRF-token-bearing HTML.
 - **`real_ip`** from the trusted private proxy ranges (reads `X-Forwarded-For`)
   so the throttle + RC's failed-login tracking see the real client.
-- **Scanner / empty-UA gate** → `return 444` (nikto/sqlmap/nmap/nuclei/wpscan/…).
+- **Scanner / empty-UA gate**  `return 444` (nikto/sqlmap/nmap/nuclei/wpscan/…).
 - **Login brute-force throttle** (`limit_req`, 12 r/min + burst) keyed on the
   real client IP, applied to login POSTs only (an empty-key map keeps normal
   browsing through `index.php` un-throttled).
@@ -232,7 +232,7 @@ The compose file bundles a hardened MariaDB; point `ROUNDCUBEMAIL_DEFAULT_HOST`
 production (terminate at your edge proxy, forward the real client IP via
 `X-Forwarded-For`). The container listens on **:8080** only.
 
-## ⚠️ Mount ownership (because the container can't chown)
+##  Mount ownership (because the container can't chown)
 
 `cap_drop: [ALL]` removes `CAP_CHOWN`, so any **writable** mount must already be
 owned by **uid `10001`**:

@@ -1,37 +1,63 @@
-dockerized postfix based on debian:trixie and ubuntu:rolling with packages
-from http://deb.myguard.nl
+# Postfix — hardened SMTP mail transfer agent Docker image (Debian)
 
-First-run behaviour: if `/etc/postfix/main.cf` does not exist, the image
-populates `/etc/postfix/` from the baked-in `/etc/postfix.orig/`. When the
-myguard postfix package ships `main.cf.proto` / `master.cf.proto`, those
-are applied as the active config — that gives you:
+`eilandert/postfix` is a security-hardened Docker image of **Postfix**, the fast,
+secure MTA that moves your mail. It is built from the Postfix package on
+**[deb.myguard.nl](https://deb.myguard.nl)** and is designed to pair with the
+`dovecot`, `rspamd`, `roundcube` and `vimbadmin` images in this stack to form a
+complete, modern, self-hosted mail server.
 
-- TLSv1.2+ floor (SSLv2/v3, TLSv1.0/v1.1 disabled)
-- PFS-only cipher list (ECDHE/DHE + AEAD, no RSA-kex, RC4, 3DES, SHA1, etc.)
-- Hybrid post-quantum KEM groups (X25519MLKEM768, SecP256r1MLKEM768) via
-  `tls_eecdh_auto_curves` — requires OpenSSL ≥ 3.5; falls back to
-  classical X25519 / P-256 / P-384 automatically
-- `tls_ssl_options = NO_COMPRESSION, NO_RENEGOTIATION, NO_TICKET`
-- smtpd anti-spoof + RFC-strict envelope restrictions
-- connection cache + sensible concurrency defaults
+The build targets the **modern MTA feature set**: post-quantum-ready TLS,
+TLSRPT/MTA-STS, milter integration (rspamd, OpenDKIM) and SNI.
 
-To enable inbound TLS, add to `/etc/postfix/main.cf`:
+## Why run Postfix in Docker
 
-    smtpd_tls_security_level = may
-    smtpd_tls_chain_files = /path/to/key.pem, /path/to/fullchain.pem
+- **A reproducible MTA** — the same configuration and binaries on every host,
+  versioned alongside the rest of your mail stack.
+- **Clean milter wiring** — Postfix, rspamd and Dovecot as separate containers on
+  one internal network, each upgradable on its own.
+- **Hardened by default** — dropped capabilities, read-only root filesystem,
+  no-new-privileges. See
+  [Docker Hardening for Self-Hosters](https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/).
 
-See `/usr/share/postfix/main.cf.tls` (inside the image) for a complete
-reference snippet with submission/SMTPS examples.
+## Hardened `docker-compose.yml`
 
-## Environment variables
+```yaml
+services:
+  postfix:
+    image: eilandert/postfix:latest
+    hostname: mail.example.com
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE     # bind 25/587
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /run
+    volumes:
+      - postfix-spool:/var/lib/postfix
+      - ./postfix/main.cf:/etc/postfix/main.cf:ro
+      - ./tls:/etc/ssl/mail:ro
+    ports:
+      - "25:25"              # inbound SMTP
+      - "587:587"            # submission (STARTTLS, authenticated)
 
-| Variable      | Effect                                                   |
-| ------------- | -------------------------------------------------------- |
-| `TZ`          | container timezone (e.g. `Europe/Amsterdam`)             |
-| `SYSLOG_HOST` | forward maillog to a remote syslog (UDP); stdout if unset |
-| `MALLOC`      | `mimalloc` (default), `jemalloc`, or `none`              |
+volumes:
+  postfix-spool:
+```
 
-## Daily reload
+> Pair `587` with SASL auth over TLS only, publish valid SPF/DKIM/DMARC, and route
+> mail through the `rspamd` milter for scoring.
 
-A 24-hour `postfix reload` loop is started in the background so the
-container picks up renewed certs / config drops without restart.
+## Links
+
+- **The modern MTA stack:** [Postfix 3.11 — Post-Quantum TLS, TLSRPT, Milters and the Modern MTA Stack](https://deb.myguard.nl/2026/05/postfix-3-11-post-quantum-tls-tlsrpt-milters-and-the-modern-mta-stack)
+- **All Docker images:** https://deb.myguard.nl/nginx-dockerized/
+- **Package repo & articles:** https://deb.myguard.nl
+- **Docker hardening guide:** https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/
+- **Source:** https://github.com/eilandert/dockerized
+- **Discord:** https://discord.gg/UQNsFg2y

@@ -1,24 +1,47 @@
-Stolen from https://github.com/ernestova/sitemap_warmup to rebuild with modern libs/python and maybe make some improvements
+# sitemap_warmup — cache + index warmup utility Docker image
 
-# Sitemap WarmUp
+`eilandert/sitemap_warmup` is a small utility image that reads a site's XML
+sitemap and **warms it** — fetching every URL so the server-side cache (WP Fastest
+Cache, nginx/Angie cache, PageSpeed) is primed and pages serve hot. It's a support
+tool in the **[deb.myguard.nl](https://deb.myguard.nl)** stack, run on a schedule
+after deploys or content updates.
 
-Sitemap Validation, Checker and CDN Warmup
+## Why run it in Docker
 
-This tool will crawl any sitemap.xml, validate, parse and check each URL, if a sitemap index is found it will added for processing.
+- **A scheduled, single-purpose crawler** — drop it in a `cron`/timer or CI step;
+  no Python/venv to maintain on the host.
+- **Cache stays warm** — first-visitor latency disappears because the cache is
+  already populated.
+- **Pairs with indexing automation** — warm the cache, then ping search engines
+  (see the Instant Indexing article below).
+- **Hardened, minimal base.** See
+  [Docker Hardening for Self-Hosters](https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/).
 
-It validate that each sitemaps.xml follows the XML schemas for sitemaps http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd and for Sitemap index files http://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd
+## Hardened `docker-compose.yml`
 
-Then it check each URL and return its HTTP response code, Time, Meta Robots, Cache Control.
-
-# Docker
-
+```yaml
+services:
+  sitemap-warmup:
+    image: eilandert/sitemap_warmup:latest
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    command: ["https://example.com/sitemap_index.xml"]
+    restart: "no"        # run on demand / from a scheduler
 ```
-docker run -v ${PWD}:/tmp/ eilandert/sitemap_warmup -s "https://www.domain.com/sitemap.xml"  -c 5 -d 1 -o -q
+
+Run it from cron after a deploy:
+
+```bash
+docker run --rm eilandert/sitemap_warmup:latest https://example.com/sitemap_index.xml
 ```
 
-# Parameters
+## Links
 
-- -c to set the concurrency of workers.
-- -d to set maximum sitemaps to process
-- -o to output the results of each sitemap index into its own CSV file.
-- -q to display only failed results.
+- **Pair it with search-engine pinging:** [Google Instant Indexing API for WordPress](https://deb.myguard.nl/2026/05/google-instant-indexing-api-wordpress)
+- **All Docker images:** https://deb.myguard.nl/nginx-dockerized/
+- **Package repo & articles:** https://deb.myguard.nl
+- **Docker hardening guide:** https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/
+- **Source:** https://github.com/eilandert/dockerized
+- **Discord:** https://discord.gg/UQNsFg2y

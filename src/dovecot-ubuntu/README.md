@@ -9,10 +9,10 @@ IMAP and POP3 — plus LMTP (local delivery from your MTA), ManageSieve
 
 ## See also
 
-- 📦 **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/dovecot-ubuntu>
-- 🐳 **Docker Hub:** <https://hub.docker.com/r/eilandert/dovecot>
-- 📦 **Packages:** <https://deb.myguard.nl>
-- 📖 **Write-up / guided tour:** _TODO — link the deb.myguard.nl article once published._
+- **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/dovecot-ubuntu>
+- **Docker Hub:** <https://hub.docker.com/r/eilandert/dovecot>
+- **Packages:** <https://deb.myguard.nl>
+- **Write-up / guided tour:** _TODO — link the deb.myguard.nl article once published._
 
 Companion images in the same fleet: **[Roundcube](../roundcube/)** (webmail
 front-end), **[Postfix](../postfix/)** (the MTA that hands mail to Dovecot

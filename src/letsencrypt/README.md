@@ -1,30 +1,58 @@
-A simple letsencrypt container (beta)
+# Let's Encrypt — hardened ACME certificate client Docker image (Alpine)
 
-Just run the container, it tries to update the certs and waits one day to do a renew again.
+`eilandert/letsencrypt` is a tiny, security-hardened **ACME client** image for
+issuing and renewing free TLS certificates from Let's Encrypt (and any ACME CA).
+It is the certificate-automation piece of the
+**[deb.myguard.nl](https://deb.myguard.nl)** container stack, feeding fresh certs
+to the `nginx`, `angie`, `postfix` and `dovecot` images.
 
-See the docker-compose.yml for some examples
+## Why run an ACME client in Docker
 
-To request a new certificate
-docker exec -it letsencrypt certbot certonly
+- **Automated renewals** as a small, single-purpose sidecar — no cron-on-the-host,
+  no certbot sprawl across machines.
+- **Shared cert volume** — issue once, mount read-only into every service that
+  needs TLS.
+- **Hardened, minimal Alpine base** — non-root, dropped capabilities, read-only
+  root filesystem. See
+  [Docker Hardening for Self-Hosters](https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/).
 
-if choosing webroot, choose /var/www/html
+## Hardened `docker-compose.yml`
 
-Two ways to use letsencrypt in normal mode:
+```yaml
+services:
+  acme:
+    image: eilandert/letsencrypt:latest
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - certs:/etc/letsencrypt          # issued certs (shared, read-only elsewhere)
+      - ./acme-webroot:/var/www/acme     # HTTP-01 challenge dir
+    environment:
+      - ACME_EMAIL=admin@example.com
+      - ACME_DOMAINS=example.com,www.example.com
 
-1. as webroot.
+  web:
+    image: eilandert/angie:latest
+    depends_on: [acme]
+    volumes:
+      - certs:/etc/letsencrypt:ro        # consume certs read-only
+    ports: ["443:443", "80:80", "443:443/udp"]
 
-mount a common dir for the certs in both the letsencryptcontainer and a webserver.
-mount a common dir in both the letsencryptcontainer (/var/www/html) and a webserver for the webrequests. Make sure your webservers has a locationblock for letsencrypt like this:
+volumes:
+  certs:
+```
 
-nginx:
-location ^~ /.well-known/acme-challenge/ {
-default_type "text/plain";
-root /var/www/html;
-return 404;  
-}
+> Once you have certs, serve them with the post-quantum-ready TLS stack — see the
+> article below.
 
-2. as standalone.
+## Links
 
-Use the ports 80 and 443. If you run a webserver you have to shut that down first and restart it when letsencrypt is finished
-
-mount a common dir for the certs in both the letsencryptcontainer and a webserver.
+- **What the certs feed (PQ-ready TLS):** [Post-Quantum Cryptography with NGINX and Angie](https://deb.myguard.nl/2026/05/post-quantum-cryptography-with-nginx-and-angie-ml-kem-hybrid-tls-and-how-to-configure-it/)
+- **All Docker images:** https://deb.myguard.nl/nginx-dockerized/
+- **Package repo & articles:** https://deb.myguard.nl
+- **Docker hardening guide:** https://deb.myguard.nl/2026/05/docker-hardening-rootless-readonly-distroless/
+- **Source:** https://github.com/eilandert/dockerized
+- **Discord:** https://discord.gg/UQNsFg2y

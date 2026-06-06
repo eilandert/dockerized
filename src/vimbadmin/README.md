@@ -3,10 +3,10 @@
 Hardened Docker image for the modernised **[ViMbAdmin fork](https://github.com/eilandert/ViMbAdmin)** —
 the Postfix + Dovecot virtual-mailbox admin panel.
 
-- 🐳 **Docker Hub:** <https://hub.docker.com/r/eilandert/vimbadmin>
-- 📦 **Image source (this dir):** <https://github.com/eilandert/dockerized/tree/master/src/vimbadmin>
-- 🔧 **App source (fork):** <https://github.com/eilandert/ViMbAdmin>
-- 📖 **Write-up / guided tour:** <https://deb.myguard.nl/2026/06/vimbadmin-postfix-dovecot-mailbox-admin-panel/>
+- **Docker Hub:** <https://hub.docker.com/r/eilandert/vimbadmin>
+- **Image source (this dir):** <https://github.com/eilandert/dockerized/tree/master/src/vimbadmin>
+- **App source (fork):** <https://github.com/eilandert/ViMbAdmin>
+- **Write-up / guided tour:** <https://deb.myguard.nl/2026/06/vimbadmin-postfix-dovecot-mailbox-admin-panel/>
 
 ## What's in the image
 
@@ -15,7 +15,7 @@ the Postfix + Dovecot virtual-mailbox admin panel.
 | Base | `eilandert/debian-base` (trixie-slim + deb.myguard.nl repo + hardening) |
 | Web | `angie-minimal` — no WAF module needed; a **native positive-security vhost** only lets known methods/routes/args reach PHP |
 | Runtime | `php8.5-fpm`, minimal extension set, **Snuffleupagus** + the app's audited `vimbadmin-strict` ruleset |
-| Cache | tuned **OPcache** (immutable code → no per-include stat) + **APCu**; Doctrine metadata cache defaults to `ApcuCache` (persistent, not per-request) |
+| Cache | tuned **OPcache** (immutable code  no per-include stat) + **APCu**; Doctrine metadata cache defaults to `ApcuCache` (persistent, not per-request) |
 | Config | all of Angie in one file: [`angie.conf`](angie.conf) (vhost + positive-security gate + fastcgi) |
 | Size | ~320 MB |
 
@@ -68,8 +68,8 @@ positive-security Angie vhost, and the **container** by the measures below.
 
 - **Positive-security gate** — only allow-listed HTTP methods (GET/HEAD/POST),
   the real route map (controllers + ZF1 `/key/value` URLs + static + ACME), and
-  the app's known argument names reach PHP. Unknown method → 405, route → 404,
-  arg → 403; scanner / empty user-agents → dropped (444).
+  the app's known argument names reach PHP. Unknown method  405, route  404,
+  arg  403; scanner / empty user-agents  dropped (444).
 - **TLS-ready** strict **CSP** + `X-Frame-Options: DENY`, `nosniff`,
   Referrer-/Permissions-Policy; **rate-limited** login; dotfile + project-
   internal path denies; **BREACH mitigation** (gzip off for dynamic HTML,
@@ -199,9 +199,9 @@ The image ships its config defaults inside the image (`configs.orig`); the live
 `application/configs` dir is a **mountable volume** so you can adjust
 `application.ini` without rebuilding. On every start the entrypoint:
 
-- **No `application.ini` yet** (first run / fresh volume) → seeds the whole
+- **No `application.ini` yet** (first run / fresh volume)  seeds the whole
   config dir from the shipped defaults and generates the `securitysalt`.
-- **`application.ini` present** (your config) → leaves it **untouched**, and
+- **`application.ini` present** (your config)  leaves it **untouched**, and
   drops the latest shipped default beside it as **`application.ini.orig`** so
   you can `diff` after an image bump and pull in any new keys yourself.
 
