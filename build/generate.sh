@@ -99,7 +99,11 @@ log_info "  • MariaDB: locally maintained, no upstream sync"
 # Get roundcube version if available
 if command -v lastversion &> /dev/null; then
     log_info "Checking Roundcube version..."
-    if LASTVERSION=$(lastversion -b 1.6 https://github.com/roundcube/roundcubemail/ 2>/dev/null); then
+    # Track the 1.7.x branch. The live DB schema (mariadb-web) has been migrated
+    # to 1.7 -- pinning -b 1.6 here rewrote .lastversion back to 1.6.16 every run,
+    # and building that downgrades the code under a newer schema -> "Unknown column
+    # 'changed' in session" / Oops. See reference-roundcube-lastversion-downgrade-footgun.
+    if LASTVERSION=$(lastversion -b 1.7 https://github.com/roundcube/roundcubemail/ 2>/dev/null); then
         if [[ -n "$LASTVERSION" ]]; then
             echo "$LASTVERSION" > ../src/roundcube/.lastversion
             log_info "  Roundcube version: $LASTVERSION"
