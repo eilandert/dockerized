@@ -129,8 +129,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         > /etc/php/8.5/fpm/conf.d/99-apcu-tuning.ini ;\
     # ---- app config template (no secret baked) -----------------------
     cp application/configs/application.ini.dist application/configs/application.ini ;\
+    # baseurl: the image always sits behind the mail.myguard.nl proxy at the
+    # /vimbadmin/ sub-path, which strips the prefix before it reaches PHP, so
+    # the app can't infer the mount from SCRIPT_NAME -> set it explicitly or
+    # every asset/link resolves to the proxy root (unstyled page). Override at
+    # runtime via a mounted application.ini if mounted elsewhere.
     { echo "" ; echo "[docker : production]" ;\
       echo "resources.smarty.skin = \"dark\"" ;\
+      echo "resources.frontcontroller.baseurl = \"/vimbadmin\"" ;\
       echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
