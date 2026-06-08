@@ -134,10 +134,17 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # the app can't infer the mount from SCRIPT_NAME -> set it explicitly or
     # every asset/link resolves to the proxy root (unstyled page). Override at
     # runtime via a mounted application.ini if mounted elsewhere.
+    # Server-side pagination ON for every list: large installs never ship the
+    # whole table (the log table is unbounded). The DataTables query args are
+    # allowlisted in angie.conf + the edge CRS plugin.
     { echo "" ; echo "[docker : production]" ;\
       echo "resources.smarty.skin = \"dark\"" ;\
       echo "resources.frontController.baseUrl = \"/vimbadmin\"" ;\
-      echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
+      echo "resources.doctrine2cache.type = \"ApcuCache\"" ;\
+      echo "defaults.server_side.pagination.enable = true" ;\
+      echo "defaults.server_side.pagination.domain.enable = true" ;\
+      echo "defaults.server_side.pagination.log.enable = true" ;\
+      echo "defaults.server_side.pagination.archive.enable = true" ; } \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
     # ---- bake the build commit so the app can show it at runtime -----
