@@ -77,11 +77,21 @@ if [ ! -f "${SP}" ]; then
     echo "[VIMBADMIN] generated Snuffleupagus secret_key"
 fi
 
-# ---- purge stale Smarty compiled templates on every (re)start --------
-# templates_c holds compiled .php from the skin/templates. After an image
-# bump the source templates change but the compiled copies live in the
-# persistent var volume -> wipe them so the new code is recompiled fresh.
-rm -rf "${INSTALL_PATH}/var/templates_c"/* 2>/dev/null || true
+# ---- purge stale Smarty compiled templates ONLY when the code changed ----
+# templates_c holds compiled .php from the skin/templates and lives in the
+# persistent var volume. After an image bump the sources change, so wipe them
+# (recompiled fresh + reheated by the warmup below). On a plain restart the code
+# is identical -> keep the compiled copies so the first request isn't cold
+# (recompiling every template on every restart was a self-inflicted cold start).
+LASTCOMMIT="${INSTALL_PATH}/var/.last_commit"
+THISCOMMIT="$(cat "${INSTALL_PATH}/GIT_COMMIT" 2>/dev/null || echo unknown)"
+if [ "$(cat "${LASTCOMMIT}" 2>/dev/null || echo none)" != "${THISCOMMIT}" ]; then
+    rm -rf "${INSTALL_PATH}/var/templates_c"/* 2>/dev/null || true
+    echo "${THISCOMMIT}" > "${LASTCOMMIT}" 2>/dev/null || true
+    echo "[VIMBADMIN] purged compiled templates (code changed -> ${THISCOMMIT})"
+else
+    echo "[VIMBADMIN] kept compiled templates (no code change)"
+fi
 
 # ---- database schema auto-migrate -----------------------------------
 # Apply any pending additive Doctrine schema changes on every start, so a code
@@ -94,9 +104,41 @@ php "${INSTALL_PATH}/bin/vimbtool.php" -a maintenance.cli-schema-update --verbos
     | sed 's/^/[VIMBADMIN][schema] /' \
     || echo "[VIMBADMIN] schema auto-migrate skipped (DB not ready?) — retries next start"
 
+# ---- queue: drain on start ------------------------------------------
+# On container start, kick the mailbox-task queue once so any work left PENDING
+# from before a restart starts draining immediately (respecting
+# queue.runner.max_concurrent via the DB lease). Backgrounded + non-fatal — a
+# cron is still the guaranteed periodic runner.
+echo "[VIMBADMIN] triggering queue runner on start..."
+( php "${INSTALL_PATH}/bin/vimbtool.php" -a queue.cli-run >/dev/null 2>&1 || true ) &
+
 # ---- config test -----------------------------------------------------
 php-fpm${PHPVERSION} -t
 angie -t -c /etc/angie/angie.conf
+
+# ---- warm the FPM workers (opcache + APCu + Smarty + Doctrine bootstrap) --
+# Only HTTP requests to FPM warm its per-SAPI opcache/APCu, so without this the
+# first real user pays the full cold start (compile the framework, parse the
+# Doctrine XML metadata, compile the chrome templates). Hitting /auth/login
+# exercises the whole bootstrap (Container, EM+metadata, Smarty, autoload) +
+# the login/header/footer templates. Backgrounded; waits for Angie (started by
+# the exec below) to listen, then warms a few entry points. Non-fatal.
+( php -r '
+    $base = "http://127.0.0.1:8080";
+    $ctx  = stream_context_create(["http" => ["timeout" => 15, "ignore_errors" => true]]);
+    for ($i = 0; $i < 40; $i++) {                 // wait for Angie to come up
+        if (@file_get_contents("$base/auth/login", false, $ctx) !== false) { break; }
+        usleep(500000);
+    }
+    // /auth/login warms the bootstrap + chrome templates; the controller entry
+    // points (even when they 302 to login unauthenticated) make the dispatcher
+    // autoload + opcache-compile every controller, so the first authed click is
+    // not cold.
+    $urls = ["/auth/login", "/",
+             "/mailbox/list", "/domain/list", "/alias/list", "/log/list",
+             "/archive/list", "/admin/list", "/queue", "/maintenance"];
+    foreach ($urls as $u) { @file_get_contents($base . $u, false, $ctx); }
+  ' >/dev/null 2>&1 && echo "[VIMBADMIN] FPM warmup done" || echo "[VIMBADMIN] FPM warmup skipped" ) &
 
 # ---- run -------------------------------------------------------------
 php-fpm${PHPVERSION} -D
