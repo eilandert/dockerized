@@ -161,6 +161,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         -e 's@^;?\s*pid\s*=.*@;pid = (disabled: --nodaemonize)@' \
         -e 's@^;?\s*daemonize\s*=.*@daemonize = no@' \
         "/etc/php/${PHPVERSION}/fpm/php-fpm.conf" ;\
+    # ---- php.ini upload limits (match phpfpm.conf pool settings) ----
+    sed -ri \
+        -e 's@^upload_max_filesize\s*=.*@upload_max_filesize = 25M@' \
+        -e 's@^post_max_size\s*=.*@post_max_size = 32M@' \
+        "/etc/php/${PHPVERSION}/fpm/php.ini" ;\
     # ---- Snuffleupagus: give the CLI SAPI an empty rulebook ----
     # The package symlinks the SP extension into BOTH fpm/ and cli/ conf.d, but
     # only the FPM pool sets sp.configuration_file (via php_admin_value). The CLI
