@@ -136,7 +136,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # runtime via a mounted application.ini if mounted elsewhere.
     { echo "" ; echo "[docker : production]" ;\
       echo "resources.smarty.skin = \"dark\"" ;\
-      echo "resources.frontcontroller.baseurl = \"/vimbadmin\"" ;\
+      echo "resources.frontController.baseUrl = \"/vimbadmin\"" ;\
       echo "resources.doctrine2cache.type = \"ApcuCache\"" ; } \
         >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
