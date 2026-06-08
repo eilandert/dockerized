@@ -61,7 +61,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     ACTUAL="$(php -r "echo hash_file('sha384','/tmp/c.php');")" ;\
     [ "${EXPECTED}" = "${ACTUAL}" ] || { echo 'composer installer checksum mismatch' >&2; exit 1; } ;\
     php /tmp/c.php --quiet --install-dir=/usr/local/bin --filename=composer ;\
-    composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader ;\
+    composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader --apcu-autoloader ;\
     # ---- Doctrine proxies --------------------------------------------
     # Prod runs autogen_proxies=0 on a read-only rootfs, so the proxy classes
     # must be present on disk before the first request. They are no longer
