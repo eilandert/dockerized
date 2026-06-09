@@ -124,20 +124,30 @@ angie -t -c /etc/angie/angie.conf
 # the login/header/footer templates. Backgrounded; waits for Angie (started by
 # the exec below) to listen, then warms a few entry points. Non-fatal.
 ( php -r '
-    $base = "http://127.0.0.1:8080";
-    $ctx  = stream_context_create(["http" => ["timeout" => 15, "ignore_errors" => true]]);
-    for ($i = 0; $i < 40; $i++) {                 // wait for Angie to come up
-        if (@file_get_contents("$base/auth/login", false, $ctx) !== false) { break; }
+    // Raw fsockopen, NOT file_get_contents: the hardened image blocks the http
+    // stream wrapper (Snuffleupagus / allow_url_fopen), but a socket is fine
+    // (same call the HEALTHCHECK uses). A GET drives a full FPM request.
+    $hit = function (string $path): bool {
+        $fp = @fsockopen("127.0.0.1", 8080, $e, $s, 5);
+        if (!$fp) { return false; }
+        fwrite($fp, "GET {$path} HTTP/1.0\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        while (!feof($fp)) { fread($fp, 16384); }   // drain -> FPM runs to completion
+        fclose($fp);
+        return true;
+    };
+    for ($i = 0; $i < 40; $i++) {                    // wait for Angie to listen
+        if ($hit("/auth/login")) { break; }
         usleep(500000);
     }
     // /auth/login warms the bootstrap + chrome templates; the controller entry
     // points (even when they 302 to login unauthenticated) make the dispatcher
     // autoload + opcache-compile every controller, so the first authed click is
     // not cold.
-    $urls = ["/auth/login", "/",
-             "/mailbox/list", "/domain/list", "/alias/list", "/log/list",
-             "/archive/list", "/admin/list", "/queue", "/maintenance"];
-    foreach ($urls as $u) { @file_get_contents($base . $u, false, $ctx); }
+    foreach (["/auth/login", "/",
+              "/mailbox/list", "/domain/list", "/alias/list", "/log/list",
+              "/archive/list", "/admin/list", "/queue", "/maintenance"] as $u) {
+        $hit($u);
+    }
   ' >/dev/null 2>&1 && echo "[VIMBADMIN] FPM warmup done" || echo "[VIMBADMIN] FPM warmup skipped" ) &
 
 # ---- run -------------------------------------------------------------
