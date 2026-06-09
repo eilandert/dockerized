@@ -77,21 +77,10 @@ if [ ! -f "${SP}" ]; then
     echo "[VIMBADMIN] generated Snuffleupagus secret_key"
 fi
 
-# ---- purge stale Smarty compiled templates ONLY when the code changed ----
-# templates_c holds compiled .php from the skin/templates and lives in the
-# persistent var volume. After an image bump the sources change, so wipe them
-# (recompiled fresh + reheated by the warmup below). On a plain restart the code
-# is identical -> keep the compiled copies so the first request isn't cold
-# (recompiling every template on every restart was a self-inflicted cold start).
-LASTCOMMIT="${INSTALL_PATH}/var/.last_commit"
-THISCOMMIT="$(cat "${INSTALL_PATH}/GIT_COMMIT" 2>/dev/null || echo unknown)"
-if [ "$(cat "${LASTCOMMIT}" 2>/dev/null || echo none)" != "${THISCOMMIT}" ]; then
-    rm -rf "${INSTALL_PATH}/var/templates_c"/* 2>/dev/null || true
-    echo "${THISCOMMIT}" > "${LASTCOMMIT}" 2>/dev/null || true
-    echo "[VIMBADMIN] purged compiled templates (code changed -> ${THISCOMMIT})"
-else
-    echo "[VIMBADMIN] kept compiled templates (no code change)"
-fi
+# NB: we do NOT wipe var/templates_c. Smarty's compile_check (on by default)
+# recompiles any template whose source mtime changed, so an image bump
+# recompiles only what changed, lazily — wiping them all just forced a cold
+# recompile of every template on each restart.
 
 # ---- database schema auto-migrate -----------------------------------
 # Apply any pending additive Doctrine schema changes on every start, so a code
@@ -115,42 +104,6 @@ echo "[VIMBADMIN] triggering queue runner on start..."
 # ---- config test -----------------------------------------------------
 php-fpm${PHPVERSION} -t
 angie -t -c /etc/angie/angie.conf
-
-# ---- warm the FPM workers (opcache + APCu + Smarty + Doctrine bootstrap) --
-# Only HTTP requests to FPM warm its per-SAPI opcache/APCu, so without this the
-# first real user pays the full cold start (compile the framework, parse the
-# Doctrine XML metadata, compile the chrome templates). Hitting /auth/login
-# exercises the whole bootstrap (Container, EM+metadata, Smarty, autoload) +
-# the login/header/footer templates. Backgrounded; waits for Angie (started by
-# the exec below) to listen, then warms a few entry points. Non-fatal.
-( php -r '
-    // Raw fsockopen, NOT file_get_contents: the hardened image blocks the http
-    // stream wrapper (Snuffleupagus / allow_url_fopen), but a socket is fine
-    // (same call the HEALTHCHECK uses). A GET drives a full FPM request.
-    $hit = function (string $path): bool {
-        $fp = @fsockopen("127.0.0.1", 8080, $e, $s, 5);
-        if (!$fp) { return false; }
-        // A User-Agent is REQUIRED: the vhost 444s empty-UA requests (scanner
-        // block), which would close the socket before FPM ever runs.
-        fwrite($fp, "GET {$path} HTTP/1.0\r\nHost: 127.0.0.1\r\nUser-Agent: vimbadmin-warmup\r\nConnection: close\r\n\r\n");
-        while (!feof($fp)) { fread($fp, 16384); }   // drain -> FPM runs to completion
-        fclose($fp);
-        return true;
-    };
-    for ($i = 0; $i < 40; $i++) {                    // wait for Angie to listen
-        if ($hit("/auth/login")) { break; }
-        usleep(500000);
-    }
-    // /auth/login warms the bootstrap + chrome templates; the controller entry
-    // points (even when they 302 to login unauthenticated) make the dispatcher
-    // autoload + opcache-compile every controller, so the first authed click is
-    // not cold.
-    foreach (["/auth/login", "/",
-              "/mailbox/list", "/domain/list", "/alias/list", "/log/list",
-              "/archive/list", "/admin/list", "/queue", "/maintenance"] as $u) {
-        $hit($u);
-    }
-  ' >/dev/null 2>&1 && echo "[VIMBADMIN] FPM warmup done" || echo "[VIMBADMIN] FPM warmup skipped" ) &
 
 # ---- run -------------------------------------------------------------
 php-fpm${PHPVERSION} -D
