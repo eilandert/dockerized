@@ -113,18 +113,28 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # is I/O-bound, JIT buys nothing here and has bitten us elsewhere.
     # (Doctrine maps via XML, not annotations, so docblocks aren't load-bearing;
     # save_comments left at the default 1 as a harmless safe default.)
+    # Sizing measured on the warm image (preload set = ~1977 scripts, ~61 MB
+    # opcode + ~12 MB interned). memory_consumption 112 / interned 16 leaves
+    # headroom for the runtime stragglers + compiled Smarty templates;
+    # max_accelerated_files 6007 (prime) >> the ~2050 real scripts (20000 just
+    # wasted hash-table memory). preload compiles the whole tree into SHM at FPM
+    # master start so workers never compile on the first request.
     { echo 'opcache.enable=1' ;\
       echo 'opcache.enable_cli=0' ;\
-      echo 'opcache.memory_consumption=128' ;\
+      echo 'opcache.memory_consumption=112' ;\
       echo 'opcache.interned_strings_buffer=16' ;\
-      echo 'opcache.max_accelerated_files=20000' ;\
+      echo 'opcache.max_accelerated_files=6007' ;\
       echo 'opcache.validate_timestamps=0' ;\
-      echo 'opcache.save_comments=1' ; } \
+      echo 'opcache.save_comments=1' ;\
+      echo 'opcache.preload=/opt/vimbadmin/preload.php' ;\
+      echo 'opcache.preload_user=phpfpm' ; } \
         > /etc/php/8.5/fpm/conf.d/99-opcache-tuning.ini ;\
     # ---- APCu: persistent Doctrine metadata/query cache (was ArrayCache =
     # per-request only). Anonymous mmap (no mmap_file_mask) -> RO-rootfs safe.
+    # Measured real use ~0.4 MB metadata + classmap/result caches (a few MB
+    # peak); 16M is ample (64M was ~15x over).
     { echo 'apc.enabled=1' ;\
-      echo 'apc.shm_size=64M' ;\
+      echo 'apc.shm_size=16M' ;\
       echo 'apc.enable_cli=0' ; } \
         > /etc/php/8.5/fpm/conf.d/99-apcu-tuning.ini ;\
     # ---- app config template (no secret baked) -----------------------
