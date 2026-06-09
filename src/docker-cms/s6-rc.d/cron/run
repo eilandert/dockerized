@@ -1,0 +1,11 @@
+#!/bin/sh
+# cron longrun (CMS image: wpcron etc). Foreground so s6 supervises + restarts.
+# Only meaningful if there is at least one /etc/cron.d entry; otherwise idle so
+# s6 doesn't crash-loop an empty cron.
+exec 2>&1
+if [ ! -d /etc/cron.d ] || [ -z "$(ls -A /etc/cron.d 2>/dev/null)" ]; then
+    echo "[CMS] no /etc/cron.d entries; cron idle"
+    exec sleep infinity
+fi
+echo "[CMS] starting cron in foreground (s6-supervised)"
+exec /usr/sbin/cron -f

@@ -135,13 +135,21 @@ Drop-in compatible with the official image. Common ones:
 
 ## CPU baseline / SIGILL caveat
 
-The build uses `-march=x86-64-v2` (Nehalem/Westmere, 2009+ — needs SSE4.2 +
-POPCNT). It runs on every x86-64 server CPU from ~2009 onward. On an older host
-`docker run` hits `SIGILL`; rebuild `deb/mariadb/debian/rules` with the `-march=`
-line dropped (generic baseline). Do **not** raise to `x86-64-v3`
-(Haswell/AVX2) unless your whole fleet is Haswell-or-newer — there are Westmere
-Xeon hosts that v3 would `SIGILL` on (verify with
-`ld.so --help | grep x86-64-v3`).
+The image is compiled with `-march=x86-64-v2` (Nehalem/Westmere, 2009+ — needs
+SSE4.2 + POPCNT). This is a compile-time choice baked into the binary; you
+cannot change it at runtime. We pick v2 because it lets the compiler tune past
+the generic x86-64 baseline for a free performance bump while still running on
+every x86-64 server CPU from ~2009 onward — which in practice means every host
+you are likely to run this on.
+
+So this **shouldn't be a problem**. The only failure mode is a pre-2009 CPU
+(missing SSE4.2/POPCNT), where `docker run` hits `SIGILL`. If that happens to
+you, please report it (open an issue at the repo below) — we want to know the
+v2 baseline bit someone, and can ship a generic-baseline rebuild.
+
+(We deliberately do **not** raise to `x86-64-v3` (Haswell/AVX2): there are
+Westmere Xeon hosts that v3 would `SIGILL` on. Check a host with
+`ld.so --help | grep x86-64-v3`.)
 
 ## Links
 

@@ -1,0 +1,7 @@
+#!/bin/sh
+# angie longrun (web edge). Foreground; s6 supervises. Graceful stop via SIGQUIT
+# configured in ./down-signal to match the image STOPSIGNAL. Applies the MALLOC
+# LD_PRELOAD chosen by init-bootstrap.
+exec 2>&1
+[ -s /run/angie/ld_preload ] && export LD_PRELOAD="$(cat /run/angie/ld_preload)"
+exec /usr/sbin/angie -g "daemon off;"

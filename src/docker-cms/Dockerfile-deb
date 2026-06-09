@@ -29,7 +29,12 @@ COPY snippets-drupal.conf     /etc/angie.orig/snippets/drupal.conf
 COPY imagemagick-policy.xml   /etc/ImageMagick-6/policy.xml.cms
 COPY --chmod=0755 cms-backup.sh /usr/local/bin/cms-backup
 COPY wpcron.crontab           /etc/cron.d/cms-wpcron
-COPY --chmod=0755 bootstrap.sh /bootstrap-cms.sh
+# CMS-specific s6 services layered on top of the s6-supervised angie base:
+# cms-init (oneshot: runtime ~/.my.cnf) + cron (longrun: wpcron). The old
+# bootstrap-cms.sh wrapper is gone — the base image is now PID1 s6 (/init), so
+# we add services instead of chaining a wrapper that exec'd the old bootstrap.
+COPY s6-rc.d/ /etc/s6-overlay/s6-rc.d/
+COPY --chmod=0755 s6-scripts/cms-init.sh /etc/s6-overlay/scripts/cms-init.sh
 
 # CMS tooling on top of the angie+php-fpm base.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -64,7 +69,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         nano \
         openssh-client \
         optipng \
-        oxipng \
         patch \
         php-vips \
         pngquant \
@@ -134,7 +138,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         mkdir -p /etc/php ; \
     fi
 
+RUN chmod 0755 /etc/s6-overlay/s6-rc.d/cron/run /etc/s6-overlay/scripts/cms-init.sh
+
 WORKDIR /var/www
 
-# Inherits EXPOSE 80/443/443udp + HEALTHCHECK from the angie base.
-CMD ["/bootstrap-cms.sh"]
+# Inherits EXPOSE 80/443/443udp + HEALTHCHECK + ENTRYPOINT ["/init"] (s6) +
+# STOPSIGNAL SIGTERM from the angie base. cms-init + cron run as s6 services.
+

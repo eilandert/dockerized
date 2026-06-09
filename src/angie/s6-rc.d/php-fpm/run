@@ -1,0 +1,48 @@
+#!/bin/sh
+# php-fpm longrun. s6 respawns this whole service on exit.
+#
+# SINGLE-PHP (MODE=FPM): exec the one master in the foreground; s6 supervises it
+# directly — a kill -9'd master is respawned in ~1s.
+#
+# MULTI (MODE=MULTI): one s6 service can supervise only one process, so we run a
+# small foreground monitor that (re)starts every enabled master and re-launches
+# any that die. Less precise than per-version s6 services but keeps MULTI
+# self-healing without generating service dirs at runtime.
+exec 2>&1
+[ -s /run/angie/ld_preload ] && export LD_PRELOAD="$(cat /run/angie/ld_preload)"
+
+# A SIGKILL'd master cannot unlink its unix socket; the stale inode then makes a
+# respawn fail with "Another FPM instance seems to already listen on ...sock".
+# Clear stale pool sockets first (real sockets only — never the healthz-fpm.sock
+# symlink the healthz vhost points at). Safe: s6 only runs this with no master.
+for s in /run/php/*.sock; do
+    [ -S "$s" ] && [ ! -L "$s" ] && rm -f "$s"
+done 2>/dev/null || true
+
+if [ "${MODE}" = "MULTI" ]; then
+    # Build the list of enabled versions from the PHPnn=YES env vars.
+    set --
+    for v in 5.6:PHP56 7.2:PHP72 7.4:PHP74 8.0:PHP80 8.1:PHP81 \
+             8.2:PHP82 8.3:PHP83 8.4:PHP84 8.5:PHP85; do
+        ver="${v%%:*}"; var="${v##*:}"
+        eval "val=\${$var:-}"
+        [ "${val}" = "YES" ] && set -- "$@" "${ver}"
+    done
+    [ "$#" -gt 0 ] || { echo "[php-fpm] MULTI but no PHPnn=YES set" >&2; sleep 5; exit 1; }
+    # Start each master daemonized, then monitor + respawn.
+    for ver in "$@"; do php-fpm${ver} 2>&1 || true; done
+    while true; do
+        sleep 5
+        for ver in "$@"; do
+            pgrep -f "php-fpm${ver}: master" >/dev/null 2>&1 || {
+                echo "[php-fpm] ${ver} master gone; restarting" >&2
+                rm -f /run/php/php${ver}-fpm.sock 2>/dev/null || true
+                php-fpm${ver} 2>&1 || true
+            }
+        done
+    done
+fi
+
+# SINGLE-PHP: foreground master, directly supervised by s6.
+php-fpm${PHPVERSION} -v 2>&1 | grep -v Zend | grep -v Copy || true
+exec /usr/sbin/php-fpm${PHPVERSION} -F

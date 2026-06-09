@@ -12,3 +12,7 @@ src/*/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Scratch / prototype dirs — never commit (contain prod vhost dumps, dhparam, backups)
+.s6-proto-PROVEN/
+PLAN-*.md

@@ -1,0 +1,8 @@
+#!/bin/sh
+# nullmailer-send as a supervised longrun (was `... &` in bootstrap). Runs as the
+# mail user. The trigger fifo + perms are set up in init-bootstrap. Only relevant
+# on PHP images (PHPVERSION set); on non-PHP images nullmailer isn't installed, so
+# back off quietly instead of crash-looping.
+exec 2>&1
+[ -n "${PHPVERSION:-}" ] && [ -x /usr/sbin/nullmailer-send ] || { sleep 86400; exit 0; }
+exec s6-setuidgid mail /usr/sbin/nullmailer-send

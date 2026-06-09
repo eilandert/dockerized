@@ -53,6 +53,11 @@ if [ ! -f /etc/dovecot/dovecot.conf ]; then
            /etc/dovecot/conf.d/99-unprivileged-ports.conf
         log "Installed high-port listener override (LMTP 10024 IMAP 10143 IMAPS 10993 POP3 10110 POP3S 10995 Sieve 14190)"
     fi
+    if [ -f /usr/local/share/dovecot/90-fts-flatcurve.conf ]; then
+        cp /usr/local/share/dovecot/90-fts-flatcurve.conf \
+           /etc/dovecot/conf.d/90-fts-flatcurve.conf
+        log "Installed FTS flatcurve config"
+    fi
 fi
 
 # ---------------------------------------------------------------------------

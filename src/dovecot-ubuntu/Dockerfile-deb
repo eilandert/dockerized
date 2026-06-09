@@ -44,6 +44,7 @@ COPY    syslog-ng.conf /usr/local/share/dovecot/syslog-ng.conf
 # High-port listener override, baked outside the seed tree; bootstrap drops it
 # into the seeded conf.d/ on first run (loaded last -> overrides 10-master.conf).
 COPY    99-unprivileged-ports.conf /usr/local/share/dovecot/99-unprivileged-ports.conf
+COPY    90-fts-flatcurve.conf /usr/local/share/dovecot/90-fts-flatcurve.conf
 
 # Everything in ONE layer: install runtime packages, then purge apt lists
 # before the layer is committed. The dovecot-* packages resolve against the
@@ -73,7 +74,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       dovecot-managesieved \
       dovecot-mysql \
       dovecot-pgsql \
+      dovecot-sqlite \
       dovecot-pop3d \
+      dovecot-ldap \
+      dovecot-gssapi \
+      dovecot-auth-lua \
+      dovecot-flatcurve \
+      dovecot-solr \
       dovecot-sieve \
       dovecot-submissiond \
       syslog-ng-core \

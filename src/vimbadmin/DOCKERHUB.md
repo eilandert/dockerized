@@ -7,6 +7,7 @@ aliases, quotas, archiving, 2FA).
 
 ## Links
 
+- 🚀 **Live demo:** <https://vimbadmin.myguard.nl> — try the panel before you pull
 - 📦 **Image source / full README:** <https://github.com/eilandert/dockerized/tree/master/src/vimbadmin>
 - 🔧 **App source (fork):** <https://github.com/eilandert/ViMbAdmin>
 - 📖 **Write-up / guided tour:** <https://deb.myguard.nl/2026/06/vimbadmin-postfix-dovecot-mailbox-admin-panel/>

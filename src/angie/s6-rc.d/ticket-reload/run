@@ -1,0 +1,18 @@
+#!/bin/sh
+# 24h loop: rotate the TLS session-ticket key, then reload angie IFF the config
+# still tests clean. Lifted from the old bootstrap.sh tail; now a supervised
+# longrun instead of a backgrounded `&`.
+exec 2>&1
+TICKET_KEY=/run/angie/ticket.key
+echo "[ANGIE] 24h reload + TLS ticket-key rotation loop started (s6-supervised)."
+while true; do
+    sleep 1d
+    [ -d /run/angie ] && openssl rand 80 > "${TICKET_KEY}.tmp" 2>/dev/null \
+        && chmod 0600 "${TICKET_KEY}.tmp" && mv -f "${TICKET_KEY}.tmp" "${TICKET_KEY}" || true
+    if /usr/sbin/angie -t 2>/dev/null; then
+        /usr/sbin/angie -s reload
+    else
+        echo "[ANGIE] ---> 24h reload SKIPPED: angie -t failed; keeping running config."
+        /usr/sbin/angie -t 2>&1 | sed 's/^/[ANGIE] ---> /'
+    fi
+done

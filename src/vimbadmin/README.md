@@ -3,6 +3,7 @@
 Hardened Docker image for the modernised **[ViMbAdmin fork](https://github.com/eilandert/ViMbAdmin)** —
 the Postfix + Dovecot virtual-mailbox admin panel.
 
+- **Live demo:** <https://vimbadmin.myguard.nl> — try the panel before you pull
 - **Docker Hub:** <https://hub.docker.com/r/eilandert/vimbadmin>
 - **Image source (this dir):** <https://github.com/eilandert/dockerized/tree/master/src/vimbadmin>
 - **App source (fork):** <https://github.com/eilandert/ViMbAdmin>
