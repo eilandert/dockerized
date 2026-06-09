@@ -130,7 +130,9 @@ angie -t -c /etc/angie/angie.conf
     $hit = function (string $path): bool {
         $fp = @fsockopen("127.0.0.1", 8080, $e, $s, 5);
         if (!$fp) { return false; }
-        fwrite($fp, "GET {$path} HTTP/1.0\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        // A User-Agent is REQUIRED: the vhost 444s empty-UA requests (scanner
+        // block), which would close the socket before FPM ever runs.
+        fwrite($fp, "GET {$path} HTTP/1.0\r\nHost: 127.0.0.1\r\nUser-Agent: vimbadmin-warmup\r\nConnection: close\r\n\r\n");
         while (!feof($fp)) { fread($fp, 16384); }   // drain -> FPM runs to completion
         fclose($fp);
         return true;
