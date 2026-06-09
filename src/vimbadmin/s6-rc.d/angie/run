@@ -1,0 +1,6 @@
+#!/bin/sh
+# angie longrun (web edge, :8080). Foreground; s6 supervises. Graceful stop via
+# SIGQUIT (./down-signal) to match the image STOPSIGNAL. Depends on php-fpm so
+# the FastCGI upstream socket exists before angie starts accepting.
+exec 2>&1
+exec /usr/sbin/angie -c /etc/angie/angie.conf -g "daemon off;"

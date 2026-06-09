@@ -1,12 +1,21 @@
 #!/bin/sh
+# s6 oneshot: one-time setup BEFORE the php-fpm + angie longruns start.
+# Split out of the old bootstrap.sh; the serve tail (php-fpm -D; exec angie) is
+# now the php-fpm and angie longrun run scripts, supervised by s6 so a dead FPM
+# master is respawned in ~1s instead of staying dead silently.
+#
+# Runs UNPRIVILEGED (uid 997 phpfpm : gid 33 www-data) under a read-only rootfs;
+# every write target is a pre-owned writable mount (/run, /tmp, var/, configs).
+# Each step is idempotent + non-fatal so a transient DB outage can't block boot.
 set -e
 
-echo "[VIMBADMIN] Angie-minimal + PHP-FPM ${PHPVERSION}"
+echo "[VIMBADMIN] Angie-minimal + PHP-FPM ${PHPVERSION} (s6-supervised)"
 echo "[VIMBADMIN] App fork : https://github.com/eilandert/ViMbAdmin"
 echo "[VIMBADMIN] Image src: https://github.com/eilandert/dockerized/tree/master/src/vimbadmin"
 echo "[VIMBADMIN] ---------------------------------------------------------------"
 echo "[VIMBADMIN] Security profile: runs UNPRIVILEGED (no root), cap_drop ALL +"
 echo "[VIMBADMIN]   no-new-privileges + AppArmor, read-only rootfs, Angie on :8080."
+echo "[VIMBADMIN]   PID1 is s6-svscan (also unprivileged); it supervises FPM+Angie."
 echo "[VIMBADMIN] Because the container has NO root and CANNOT chown, every writable"
 echo "[VIMBADMIN]   mount must already be owned by uid 997 (phpfpm) : gid 33 (www-data)."
 echo "[VIMBADMIN]   Named volumes inherit this automatically. For bind mounts / tmpfs:"
@@ -14,13 +23,6 @@ echo "[VIMBADMIN]     host : sudo chown -R 997:33 <your bind dir>"
 echo "[VIMBADMIN]     tmpfs: --tmpfs /run:uid=997,gid=33,mode=0770 (and likewise /tmp)"
 echo "[VIMBADMIN]   A 'Permission denied' on boot = a writable mount not owned 997:33."
 echo "[VIMBADMIN] ---------------------------------------------------------------"
-
-# ---- timezone (best-effort; /etc may be read-only) -------------------
-if [ -n "${TZ}" ] && [ -w /etc ]; then
-    rm -f /etc/timezone /etc/localtime
-    echo "${TZ}" > /etc/timezone
-    ln -sf "/usr/share/zoneinfo/${TZ}" /etc/localtime
-fi
 
 # ---- writable runtime dirs (var/ + configs are volumes; rest tmpfs) --
 # The container runs UNPRIVILEGED (compose `user: phpfpm:www-data`, cap_drop
@@ -77,11 +79,6 @@ if [ ! -f "${SP}" ]; then
     echo "[VIMBADMIN] generated Snuffleupagus secret_key"
 fi
 
-# NB: we do NOT wipe var/templates_c. Smarty's compile_check (on by default)
-# recompiles any template whose source mtime changed, so an image bump
-# recompiles only what changed, lazily — wiping them all just forced a cold
-# recompile of every template on each restart.
-
 # ---- database schema auto-migrate -----------------------------------
 # Apply any pending additive Doctrine schema changes on every start, so a code
 # bump that adds a table/column goes live without a manual "Update schema" click.
@@ -103,17 +100,15 @@ php "${INSTALL_PATH}/bin/vimbtool.php" -a maintenance.cli-precompile-templates -
     || echo "[VIMBADMIN] template precompile skipped"
 
 # ---- queue: drain on start ------------------------------------------
-# On container start, kick the mailbox-task queue once so any work left PENDING
-# from before a restart starts draining immediately (respecting
-# queue.runner.max_concurrent via the DB lease). Backgrounded + non-fatal — a
-# cron is still the guaranteed periodic runner.
+# Kick the mailbox-task queue once so any work left PENDING from before a restart
+# starts draining immediately (respecting queue.runner.max_concurrent via the DB
+# lease). Backgrounded + non-fatal — a cron is still the guaranteed periodic
+# runner, so a one-shot fire here (not an s6 longrun) matches the old behaviour.
 echo "[VIMBADMIN] triggering queue runner on start..."
 ( php "${INSTALL_PATH}/bin/vimbtool.php" -a queue.cli-run >/dev/null 2>&1 || true ) &
 
-# ---- config test -----------------------------------------------------
+# ---- config test (fail the oneshot early on a broken config) ---------
 php-fpm${PHPVERSION} -t
 angie -t -c /etc/angie/angie.conf
 
-# ---- run -------------------------------------------------------------
-php-fpm${PHPVERSION} -D
-exec angie -c /etc/angie/angie.conf -g 'daemon off;'
+echo "[VIMBADMIN] init-bootstrap complete — handing off to php-fpm + angie longruns"

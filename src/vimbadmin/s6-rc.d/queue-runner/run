@@ -1,0 +1,21 @@
+#!/bin/sh
+# queue-runner longrun — the in-image replacement for the `*/5 * * * *` cron.
+# This image runs non-root (997:33) under a read-only rootfs with cap_drop ALL,
+# where a real cron daemon (root + writable spool) does not fit. s6 already
+# supervises everything as PID1, so we drain the mailbox-task queue on a simple
+# sleep loop instead. Concurrency is still capped by queue.runner.max_concurrent
+# (a DB lease in application.ini), so overlapping ticks never double-run.
+#
+# If s6 restarts this service (it exits / is killed), the loop simply resumes —
+# a missed tick at worst delays a queue drain by one interval, never loses work
+# (the panel also fires trigger-checks on login / Maintenance / MCP / start).
+exec 2>&1
+
+INTERVAL=300   # seconds — matches the requested */5 cron cadence
+
+# One tick immediately is already done by init-bootstrap; start by sleeping so we
+# don't double-fire right after boot.
+while true; do
+    sleep "${INTERVAL}"
+    php "${INSTALL_PATH}/bin/vimbtool.php" -a queue.cli-run >/dev/null 2>&1 || true
+done

@@ -30,7 +30,14 @@ ENV     DEBIAN_FRONTEND=noninteractive \
         VIMBADMIN_GIT=https://github.com/eilandert/ViMbAdmin.git \
         APPLICATION_ENV=docker
 
-COPY --chmod=0755 bootstrap.sh /bootstrap.sh
+# s6-overlay (PID1 process supervisor) — supervises php-fpm + angie so a dead
+# FPM master is respawned in ~1s instead of staying dead silently. Runs ROOTLESS
+# here (the container is USER 997:33, read-only rootfs, cap_drop ALL): the
+# S6_* env below disables the root-only init stages (fix-attrs / user creation)
+# and points s6's scratch at the writable /run mount.
+ARG     S6_OVERLAY_VERSION=3.2.1.0
+COPY    s6-rc.d/ /etc/s6-overlay/s6-rc.d/
+COPY --chmod=0755 s6-scripts/init-bootstrap.sh /etc/s6-overlay/scripts/init-bootstrap.sh
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -46,8 +53,29 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       php8.5-xml php8.5-gd php8.5-curl php8.5-bcmath php8.5-zip php8.5-gmp \
       php8.5-apcu \
       php8.5-snuffleupagus \
-      bzip2 \
+      bzip2 xz-utils \
       git ca-certificates ;\
+    # ---- s6-overlay (PID1 supervisor) — fetch noarch + this build's arch ----
+    # deb images build dual-arch (amd64+arm64); pick the matching tarball.
+    case "$(dpkg --print-architecture)" in \
+      amd64) S6_ARCH=x86_64 ;; \
+      arm64) S6_ARCH=aarch64 ;; \
+      *) echo "unsupported arch for s6-overlay" >&2 ; exit 1 ;; \
+    esac ;\
+    # No curl/wget in this image (it ships none on purpose — the healthcheck
+    # uses PHP fsockopen). PHP is always present, so fetch the tarballs with it.
+    # S6_OVERLAY_VERSION is a build ARG and S6_ARCH a shell var; interpolate both
+    # into the URL in the shell, before PHP sees the string.
+    S6_BASE="https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}" ;\
+    php -r "copy('${S6_BASE}/s6-overlay-noarch.tar.xz','/tmp/s6-noarch.tar.xz') or exit(1);" ;\
+    php -r "copy('${S6_BASE}/s6-overlay-${S6_ARCH}.tar.xz','/tmp/s6-arch.tar.xz') or exit(1);" ;\
+    tar -C / -Jxpf /tmp/s6-noarch.tar.xz ;\
+    tar -C / -Jxpf /tmp/s6-arch.tar.xz ;\
+    rm -f /tmp/s6-noarch.tar.xz /tmp/s6-arch.tar.xz ;\
+    chmod 0755 /etc/s6-overlay/s6-rc.d/php-fpm/run \
+               /etc/s6-overlay/s6-rc.d/angie/run \
+               /etc/s6-overlay/s6-rc.d/queue-runner/run \
+               /etc/s6-overlay/scripts/init-bootstrap.sh ;\
     # Dedicated unprivileged FPM user (pool runs as phpfpm; socket group
     # www-data so Angie can reach it). ondrej packages don't create it.
     groupadd -r phpfpm 2>/dev/null || true ;\
@@ -138,24 +166,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       echo 'apc.enable_cli=0' ; } \
         > /etc/php/8.5/fpm/conf.d/99-apcu-tuning.ini ;\
     # ---- app config template (no secret baked) -----------------------
+    # Seed the runtime config verbatim from the app's flat application.ini.dist.
+    # The image bakes NO overrides: the fork's .dist already carries the sane
+    # container defaults (dark skin, server-side pagination ON, doctrine2cache
+    # 'auto' → picks APcu since ext-apcu is installed). It is served at the
+    # domain root; if you proxy the panel on a sub-path that strips its prefix
+    # (e.g. /vimbadmin/), set resources.frontController.baseUrl in YOUR mounted
+    # application.ini, else assets/links resolve to the proxy root (unstyled).
     cp application/configs/application.ini.dist application/configs/application.ini ;\
-    # baseurl: the image always sits behind the mail.myguard.nl proxy at the
-    # /vimbadmin/ sub-path, which strips the prefix before it reaches PHP, so
-    # the app can't infer the mount from SCRIPT_NAME -> set it explicitly or
-    # every asset/link resolves to the proxy root (unstyled page). Override at
-    # runtime via a mounted application.ini if mounted elsewhere.
-    # Server-side pagination ON for every list: large installs never ship the
-    # whole table (the log table is unbounded). The DataTables query args are
-    # allowlisted in angie.conf + the edge CRS plugin.
-    { echo "" ; echo "[docker : production]" ;\
-      echo "resources.smarty.skin = \"dark\"" ;\
-      echo "resources.frontController.baseUrl = \"/vimbadmin\"" ;\
-      echo "resources.doctrine2cache.type = \"ApcuCache\"" ;\
-      echo "defaults.server_side.pagination.enable = true" ;\
-      echo "defaults.server_side.pagination.domain.enable = true" ;\
-      echo "defaults.server_side.pagination.log.enable = true" ;\
-      echo "defaults.server_side.pagination.archive.enable = true" ; } \
-        >> application/configs/application.ini ;\
     mv application/configs application/configs.orig ;\
     # ---- bake the build commit so the app can show it at runtime -----
     # The image ships no .git (stripped just below) and var/ is a writable
@@ -215,10 +233,30 @@ EXPOSE  8080
 # phpfpm:www-data on the host (compose/README).
 USER    phpfpm:www-data
 
+# s6-overlay rootless config. The container runs as USER 997:33 with a read-only
+# rootfs and cap_drop ALL, so s6's default root-only init stages must be off:
+#   S6_READ_ONLY_ROOT   — copy the run-time scratch into the writable /run mount
+#                         instead of trying to write the read-only rootfs.
+#   *_USER=0 / *_GROUPS — s6 makes no chown/chmod (fix-attrs) calls it can't do.
+#   S6_KEEP_ENV         — pass PHPVERSION/INSTALL_PATH/APPLICATION_ENV through to
+#                         the run scripts + init-bootstrap.
+#   MAXTIME=0           — never time out waiting for the (DB-dependent) oneshot.
+#   STAGE2_FAILS=2      — a failed init aborts the container (don't serve broken).
+ENV     S6_KEEP_ENV=1 \
+        S6_READ_ONLY_ROOT=1 \
+        S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
+        S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+        S6_FIX_ATTRS_HIDDEN=1 \
+        S6_VERBOSITY=1
+
 # Dependency-free TCP probe: the image ships no curl/wget/nc and uses dash
-# (no /dev/tcp), but PHP is always present. fsockopen the listening angie.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+# (no /dev/tcp), but PHP is always present. fsockopen the listening angie. With
+# s6 supervising FPM, a respawning master keeps angie:8080 answering; a master
+# that cannot recover (broken config) lets angie 502 and ages the pool out.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD php -r '$f=@fsockopen("127.0.0.1",8080,$e,$s,3);exit($f?0:1);' || exit 1
 
-STOPSIGNAL SIGQUIT
-CMD ["/bootstrap.sh"]
+# s6-svscan is PID1 (handles SIGTERM → ordered shutdown; it forwards SIGQUIT to
+# angie via s6-rc.d/angie/down-signal). Container STOPSIGNAL is therefore SIGTERM.
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["/init"]

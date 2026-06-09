@@ -1,0 +1,15 @@
+#!/bin/sh
+# php-fpm longrun. s6 supervises the foreground master directly; a kill -9'd
+# master is respawned in ~1s instead of the old `php-fpm -D` (daemonised,
+# unsupervised → silent permanent outage on master death).
+exec 2>&1
+
+# A SIGKILL'd master cannot unlink its unix socket; the stale inode then makes a
+# respawn fail with "Another FPM instance seems to already listen on ...sock".
+# Clear stale pool sockets first (real sockets only). Safe: s6 only runs this
+# with no master alive.
+for s in /run/php/*.sock; do
+    [ -S "$s" ] && [ ! -L "$s" ] && rm -f "$s"
+done 2>/dev/null || true
+
+exec /usr/sbin/php-fpm${PHPVERSION} -F
