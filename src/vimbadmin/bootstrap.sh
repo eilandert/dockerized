@@ -93,6 +93,15 @@ php "${INSTALL_PATH}/bin/vimbtool.php" -a maintenance.cli-schema-update --verbos
     | sed 's/^/[VIMBADMIN][schema] /' \
     || echo "[VIMBADMIN] schema auto-migrate skipped (DB not ready?) — retries next start"
 
+# ---- precompile Smarty templates ------------------------------------
+# Compile every template up front into the persistent var/templates_c (shared
+# CLI<->FPM filesystem), so the first web request never pays the per-template
+# Smarty compile. Non-fatal (a template error must not block boot).
+echo "[VIMBADMIN] precompiling templates..."
+php "${INSTALL_PATH}/bin/vimbtool.php" -a maintenance.cli-precompile-templates --verbose 2>&1 \
+    | sed 's/^/[VIMBADMIN][tpl] /' \
+    || echo "[VIMBADMIN] template precompile skipped"
+
 # ---- queue: drain on start ------------------------------------------
 # On container start, kick the mailbox-task queue once so any work left PENDING
 # from before a restart starts draining immediately (respecting
