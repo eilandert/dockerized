@@ -81,6 +81,22 @@ if [ -n "${PHPVERSION:-}" ]; then
             mkdir -p "/etc/php/${_v}"
             cp -r "/etc/php.orig/${_v}/"* "/etc/php/${_v}" 2>/dev/null || true
         fi
+        # Enforce a bounded master shutdown/reload wait, idempotently, EVERY boot
+        # (even on a bind-mounted/pre-existing config copy_php_cfg leaves intact).
+        # Without process_control_timeout (default 0) the master waits FOREVER for
+        # a worker stuck in a syscall (e.g. a hung DNS recvfrom) to exit on a
+        # reload/SIGTERM — the master then never respawns the pool and s6 cannot
+        # restart it either (the down-signal is ignored). 10s lets a healthy
+        # worker drain, then the master SIGKILLs stragglers and proceeds.
+        # See [[reference-s6-fpm-supervision]] (2026-06-10 outage).
+        _conf="/etc/php/${_v}/fpm/php-fpm.conf"
+        if [ -f "${_conf}" ]; then
+            if grep -qE '^[[:space:]]*process_control_timeout' "${_conf}"; then
+                sed -i -E 's|^[[:space:]]*;?[[:space:]]*process_control_timeout.*|process_control_timeout = 10s|' "${_conf}"
+            else
+                sed -i '/^\[global\]/a process_control_timeout = 10s' "${_conf}"
+            fi
+        fi
         php-fpm${_v} -t || { echo "[ANGIE] ---> FATAL: php-fpm${_v} -t failed."; exit 1; }
     }
     if [ "${MODE:-}" = "MULTI" ]; then
