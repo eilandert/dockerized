@@ -1,0 +1,75 @@
+#!/bin/sh
+# fpm-watch — early wedge detector for the php-fpm www pool.
+#
+# Polls the loopback /fpm-status vhost every 10s and logs to a PERSISTENT file
+# (/var/log/nginx is bind-mounted) the instant the pool looks wedged, instead
+# of waiting ~90s for the docker HEALTHCHECK to flip the container unhealthy.
+# Catches the 2026-06-10 failure mode (www workers stuck in a hung DNS recvfrom
+# -> active workers drain to 0 / listen queue backs up) with timestamped metrics
+# you can correlate against the fpm slowlog backtrace. See
+# [[reference-s6-fpm-supervision]]. This only OBSERVES — recovery is handled by
+# process_control_timeout + s6 timeout-kill + the autoheal label.
+exec 2>&1
+
+LOG=/var/log/nginx/fpm-watch.log
+URL=http://127.0.0.1:8181/fpm-status
+INTERVAL=10
+# Listen-queue threshold: any backlog means the pool can't accept fast enough.
+QUEUE_WARN=1
+
+# PHP images only. On a non-PHP build there is no pool to watch — idle forever
+# (s6 still supervises us; exiting would loop-respawn).
+if [ -z "${PHPVERSION:-}" ] && [ "${MODE:-}" != "MULTI" ]; then
+    while true; do sleep 3600; done
+fi
+
+log() { echo "$(date '+%Y-%m-%dT%H:%M:%S%z') $*" >> "$LOG"; }
+
+log "fpm-watch started (interval=${INTERVAL}s, url=${URL})"
+prev_state=""
+miss=0
+
+while true; do
+    sleep "$INTERVAL"
+
+    body="$(curl -fsS --max-time 5 "$URL" 2>/dev/null)"
+    if [ -z "$body" ]; then
+        # /fpm-status itself not answering = master/pool not accepting. This is
+        # the wedge the docker healthcheck would catch 90s later; log it now.
+        miss=$((miss + 1))
+        log "WARN /fpm-status unreachable (consecutive=${miss}) — pool may be wedged (master dead / no workers / stuck accept)"
+        continue
+    fi
+    [ "$miss" -gt 0 ] && { log "INFO /fpm-status reachable again after ${miss} miss(es)"; miss=0; }
+
+    # Plain-text status format: "key: value" lines.
+    active="$(printf '%s\n'  "$body" | sed -n 's/^active processes:[[:space:]]*//p')"
+    total="$(printf '%s\n'   "$body" | sed -n 's/^total processes:[[:space:]]*//p')"
+    idle="$(printf '%s\n'    "$body" | sed -n 's/^idle processes:[[:space:]]*//p')"
+    lqueue="$(printf '%s\n'  "$body" | sed -n 's/^listen queue:[[:space:]]*//p')"
+    maxq="$(printf '%s\n'    "$body" | sed -n 's/^max listen queue:[[:space:]]*//p')"
+    slow="$(printf '%s\n'    "$body" | sed -n 's/^slow requests:[[:space:]]*//p')"
+
+    state="a=${active} i=${idle} t=${total} lq=${lqueue} slow=${slow}"
+
+    # Anomaly conditions — log each occurrence (these precede an outage):
+    #  * total>0 but active+idle accounting collapsed (no workers serving)
+    #  * listen queue backing up (clients waiting, no worker accepting)
+    if [ -n "$lqueue" ] && [ "$lqueue" -ge "$QUEUE_WARN" ] 2>/dev/null; then
+        log "WARN listen queue=${lqueue} (max=${maxq}) backing up — workers not accepting fast enough | ${state}"
+    fi
+    if [ -n "$total" ] && [ "$total" = "0" ] 2>/dev/null; then
+        log "ALERT total processes=0 — pool has NO workers (wedge) | ${state}"
+    fi
+
+    # Heartbeat once a minute on state change so the log shows the trend without
+    # spamming. (active count changes constantly under load; only log transitions
+    # of the interesting buckets.)
+    bucket="ok"
+    [ -n "$lqueue" ] && [ "$lqueue" -ge "$QUEUE_WARN" ] 2>/dev/null && bucket="queue"
+    [ -n "$total" ]  && [ "$total" = "0" ]            2>/dev/null && bucket="empty"
+    if [ "$bucket" != "$prev_state" ]; then
+        log "STATE ${prev_state:-init} -> ${bucket} | ${state}"
+        prev_state="$bucket"
+    fi
+done

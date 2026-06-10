@@ -89,13 +89,22 @@ if [ -n "${PHPVERSION:-}" ]; then
         # restart it either (the down-signal is ignored). 10s lets a healthy
         # worker drain, then the master SIGKILLs stragglers and proceeds.
         # See [[reference-s6-fpm-supervision]] (2026-06-10 outage).
+        # emergency_restart_*: if 10 children die abnormally (SIGSEGV/SIGBUS)
+        # within 1m the master restarts itself — catches a crash-storm that
+        # would otherwise leave a degraded pool. Complements the timeout above
+        # (which handles HANGS); together they cover both worker failure modes.
         _conf="/etc/php/${_v}/fpm/php-fpm.conf"
         if [ -f "${_conf}" ]; then
-            if grep -qE '^[[:space:]]*process_control_timeout' "${_conf}"; then
-                sed -i -E 's|^[[:space:]]*;?[[:space:]]*process_control_timeout.*|process_control_timeout = 10s|' "${_conf}"
-            else
-                sed -i '/^\[global\]/a process_control_timeout = 10s' "${_conf}"
-            fi
+            _set_global() {  # _set_global KEY VALUE — idempotent, in [global]
+                if grep -qE "^[[:space:]]*;?[[:space:]]*$1[[:space:]]*=" "${_conf}"; then
+                    sed -i -E "s|^[[:space:]]*;?[[:space:]]*$1[[:space:]]*=.*|$1 = $2|" "${_conf}"
+                else
+                    sed -i "/^\[global\]/a $1 = $2" "${_conf}"
+                fi
+            }
+            _set_global process_control_timeout 10s
+            _set_global emergency_restart_threshold 10
+            _set_global emergency_restart_interval 1m
         fi
         php-fpm${_v} -t || { echo "[ANGIE] ---> FATAL: php-fpm${_v} -t failed."; exit 1; }
     }
