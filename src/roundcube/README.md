@@ -96,13 +96,14 @@ loads unless you list it.
 | `responses` | 1.3.13 | Canned-response templates |
 | `easy_unsubscribe` | git | One-click List-Unsubscribe |
 | `rcguard` | 1.3.2 | reCAPTCHA after failed logins |
-| `kolab_2fa` | composer | Two-factor auth (TOTP / Yubikey / U2F) |
+| `twofactor_gauthenticator` | composer | Two-factor auth (TOTP / Google Authenticator) |
+| `scheduled_sending` | composer | Queue messages for later delivery |
+| `customizr` | composer | Custom logo / watermark / stylesheets via config |
+| `dovecot_client_ip` | composer | Forward client IP to Dovecot on IMAP connect |
 | `carddav` | composer | CardDAV address-book sync |
 
-2FA libs (`endroid/qr-code`, `spomky-labs/otphp`, `enygma/yubikey`) are bundled
-for `kolab_2fa`. Roundcube core plugins (`archive`, `zipdownload`,
-`managesieve`, `password`, `newmail_notifier`, `new_user_dialog`) ship with RC
-and are on by default.
+Roundcube core plugins (`archive`, `zipdownload`, `managesieve`, `password`,
+`newmail_notifier`, `new_user_dialog`) ship with RC and are on by default.
 
 ### Skins
 
@@ -111,7 +112,7 @@ Pick one with `ROUNDCUBEMAIL_SKIN` (default `elastic`).
 | Skin | Source | Notes |
 |---|---|---|
 | `elastic` | Roundcube core | Default, responsive |
-| `elastic4mobile` | roundcube/elastic4mobile | Mobile-tuned elastic |
+| `elastic4mobile` | eilandert/roundcube-elastic4mobile (fork) | Mobile-tuned elastic |
 | `elastic-dark` | tborychowski/elastic-dark | Dark theme |
 | `elastic2025` | bijanbina/Elastic2025 | Refreshed elastic look |
 | `gmail` | bundled (this image) | Gmail look-alike |

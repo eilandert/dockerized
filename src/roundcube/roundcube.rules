@@ -150,7 +150,7 @@ sp.disable_function.function("ini_set").param("option").value("allow_url_fopen")
 # ==== STRICT additions (2026-06-03 source audit) ====
 # This block hardens beyond the baseline above. Everything here was verified
 # against the RC 1.6.16 source tree to NOT break the default feature set
-# (GD imaging, sql password driver, managesieve over socket, kolab_2fa).
+# (GD imaging, sql password driver, managesieve over socket, twofactor_gauthenticator).
 
 # ---- Block the remaining subprocess + privilege primitives ----
 # proc_close/proc_get_status/proc_terminate/proc_nice are only meaningful

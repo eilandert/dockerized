@@ -102,6 +102,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # RC <=1.6 ships composer.json-dist; RC 1.7+ ships composer.json directly.
     [ -f composer.json-dist ] && mv composer.json-dist composer.json || true ;\
     composer config -g secure-http false ;\
+    # Pull elastic4mobile from the eilandert fork, NOT upstream. The fork keeps
+    # the upstream composer name `roundcube/elastic4mobile`, so without this VCS
+    # repo composer would resolve it off plugins.roundcube.net (upstream). A repo
+    # entry sources it from the fork git; dev-master then comes from the fork.
+    composer config repositories.elastic4mobile vcs \
+        https://github.com/eilandert/roundcube-elastic4mobile ;\
     composer -n update --no-dev --no-scripts --no-autoloader ;\
     # All extra deps in ONE require: a single dependency solve instead of six.
     # (-W lets transitive constraints upgrade; --no-scripts skips package post
@@ -109,10 +115,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # classmap is generated once at the end instead.)
     composer -n require -W --no-scripts \
         roundcube/elastic4mobile:dev-master \
-        kolab/kolab_2fa \
-        endroid/qr-code \
-        spomky-labs/otphp \
-        enygma/yubikey \
+        alexandregz/twofactor_gauthenticator:dev-master \
+        texxasrulez/scheduled_sending \
+        roundcube/customizr \
+        foorschtbar/dovecot_client_ip \
         roundcube/carddav ;\
     # ---- pinned third-party plugins (downloaded in parallel) ----
     # fetch <dir> <url> : grab + extract a release tarball. Runs in the
