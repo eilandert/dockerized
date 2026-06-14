@@ -684,7 +684,7 @@ target "ubuntu-rspamd" {
 # `git submodule update --init` builds it). Builds FROM the debian-base target.
 target "debian-rspamd-drp" {
    tags = ["docker.io/eilandert/rspamd-dcc-razor-pyzor:debian", "docker.io/eilandert/rspamd-dcc-razor-pyzor:latest"]
-   context = "src/rspamd-dcc-razor-pyzor"
+   context = "src/rspamd-dcc-razor-pyzor/docker"
    dockerfile = "Dockerfile-deb"
    contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
 }
