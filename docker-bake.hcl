@@ -71,7 +71,8 @@ group "debian" {
         "debian-mariadb", "debian-valkey",
         "debian-postfix", "debian-dovecot",
         "debian-rspamd", "debian-rspamd-git", "debian-rspamd-official",
-        "debian-roundcube", "debian-vimbadmin",
+        "debian-rspamd-drp",
+        "debian-roundcube", "debian-webtest", "debian-vimbadmin",
         "debian-sitewarmup", "debian-openssh",
     ]
 }
@@ -203,7 +204,7 @@ group "apache-misc" {
 
 group "mail" {
     targets = [
-       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-dovecot" ]
+       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot" ]
 }
 
 group "db" {
@@ -213,7 +214,7 @@ group "db" {
 
 group "misc" {
     targets = [
-       "alpine-letsencrypt", "rbldnsd", "ubuntu-reprepro", "debian-sitewarmup", "alpine-unbound", "aptly", "debian-openssh" ]
+       "alpine-letsencrypt", "rbldnsd", "ubuntu-reprepro", "debian-sitewarmup", "alpine-unbound", "aptly", "debian-openssh", "debian-webtest" ]
 }
 
 target "debian-angie-cms" {
@@ -643,6 +644,16 @@ target "debian-roundcube" {
    }
 }
 
+# Website-tester. Standalone project (own git repo at ../webtester), builds
+# FROM debian:trixie-slim directly (no base-image target dependency). Pushes to
+# the PRIVATE eilandert/webtest repo. Context lives outside the repo, so the
+# build relies on BUILDX_BAKE_ENTITLEMENTS_FS=0 (set in buildx-sequential.sh).
+target "debian-webtest" {
+   tags = ["docker.io/eilandert/webtest:debian", "docker.io/eilandert/webtest:latest"]
+   context = "../webtester"
+   dockerfile = "Dockerfile"
+}
+
 target "debian-rspamd-git" {
    tags = ["docker.io/eilandert/rspamd-git:latest"]
    context = "src/rspamd-git"
@@ -666,6 +677,16 @@ target "ubuntu-rspamd" {
    context = "src/rspamd-git"
    dockerfile = "Dockerfile-ubu"
    contexts = { "eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
+}
+
+# rspamd + DCC/Razor/Pyzor collaborative filters. Own git repo, vendored here as
+# a submodule at src/rspamd-dcc-razor-pyzor (so a standalone dockerized clone +
+# `git submodule update --init` builds it). Builds FROM the debian-base target.
+target "debian-rspamd-drp" {
+   tags = ["docker.io/eilandert/rspamd-dcc-razor-pyzor:debian", "docker.io/eilandert/rspamd-dcc-razor-pyzor:latest"]
+   context = "src/rspamd-dcc-razor-pyzor"
+   dockerfile = "Dockerfile-deb"
+   contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]

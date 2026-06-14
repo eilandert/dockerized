@@ -4,6 +4,14 @@
 
 set -e
 
+# Disable buildx fs entitlement prompt. roundcube is the only target with
+# external named build-contexts (../roundcube-skin-*); without this, buildx
+# prompts "grant requested privileges? [y/N]" on the tty, which backgrounds the
+# proc (SIGTTIN) when stdout/stderr are redirected to per-target logs and the
+# build fails non-interactively with "ERROR: additional privileges requested".
+# See memory/eilandert/dockerized/issues.md (2026-06-11).
+export BUILDX_BAKE_ENTITLEMENTS_FS=0
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -128,7 +136,7 @@ declare -a LAYERS=(
     "ubuntu-nginx-php56 debian-nginx-php56 ubuntu-nginx-php74 debian-nginx-php74 ubuntu-nginx-php80 debian-nginx-php80 ubuntu-nginx-php82 debian-nginx-php82 ubuntu-nginx-php84 debian-nginx-php84 ubuntu-nginx-php85 debian-nginx-php85 ubuntu-nginx-multi debian-nginx-multi ubuntu-angie-php56 debian-angie-php56 ubuntu-angie-php74 debian-angie-php74 ubuntu-angie-php80 debian-angie-php80 ubuntu-angie-php82 debian-angie-php82 ubuntu-angie-php84 debian-angie-php84 ubuntu-angie-php85 debian-angie-php85 ubuntu-angie-multi debian-angie-multi debian-apache-php56 debian-apache-php74 debian-apache-php80 debian-apache-php82 debian-apache-php84 debian-apache-php85 debian-apache-multiphp ubuntu-apache-php56 ubuntu-apache-php74 ubuntu-apache-php80 ubuntu-apache-php82 ubuntu-apache-php84 ubuntu-apache-php85 ubuntu-apache-multiphp"
     
     # Layer 4: Other web servers and services - depends on base images
-    "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd debian-dovecot debian-roundcube debian-vimbadmin ubuntu-reprepro debian-sitewarmup alpine-letsencrypt rbldnsd alpine-unbound aptly debian-openssh"
+    "debian-nginx ubuntu-nginx debian-angie ubuntu-angie ubuntu-postfix debian-postfix debian-rspamd-git debian-rspamd debian-rspamd-official ubuntu-rspamd debian-rspamd-drp debian-dovecot debian-roundcube debian-webtest debian-vimbadmin ubuntu-reprepro debian-sitewarmup alpine-letsencrypt rbldnsd alpine-unbound aptly debian-openssh"
 )
 
 echo ""

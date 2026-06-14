@@ -58,6 +58,11 @@ if [ ! -f /etc/dovecot/dovecot.conf ]; then
            /etc/dovecot/conf.d/90-fts-flatcurve.conf
         log "Installed FTS flatcurve config"
     fi
+    if [ -f /usr/local/share/dovecot/90-drp-sieve.conf ]; then
+        cp /usr/local/share/dovecot/90-drp-sieve.conf \
+           /etc/dovecot/conf.d/90-drp-sieve.conf
+        log "Installed DCC/Razor/Pyzor reporting sieve (Junk-move -> report/revoke)"
+    fi
 fi
 
 # ---------------------------------------------------------------------------

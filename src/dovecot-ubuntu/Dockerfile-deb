@@ -45,6 +45,13 @@ COPY    syslog-ng.conf /usr/local/share/dovecot/syslog-ng.conf
 # into the seeded conf.d/ on first run (loaded last -> overrides 10-master.conf).
 COPY    99-unprivileged-ports.conf /usr/local/share/dovecot/99-unprivileged-ports.conf
 COPY    90-fts-flatcurve.conf /usr/local/share/dovecot/90-fts-flatcurve.conf
+# DCC/Razor/Pyzor reporting via the rspamd-dcc-razor-pyzor shim. The conf drop-in
+# is staged like the others (bootstrap copies it into conf.d on first run); the
+# sieve scripts + the curl bridge are baked into the read-only rootfs and
+# compiled (sievec) in the RUN below.
+COPY    90-drp-sieve.conf /usr/local/share/dovecot/90-drp-sieve.conf
+COPY    sieve/report-spam.sieve sieve/report-ham.sieve /usr/lib/dovecot/sieve/
+COPY --chmod=0755 sieve/drp-report /usr/lib/dovecot/sieve-pipe/drp-report
 
 # Everything in ONE layer: install runtime packages, then purge apt lists
 # before the layer is committed. The dovecot-* packages resolve against the
@@ -95,6 +102,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       razor \
       rspamd \
       spamc \
+      curl \
       mimalloc \
       libjemalloc2 \
       || true ;\
@@ -107,6 +115,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # vimbadmin maildir-scan accounting scripts removed: quota usage is tracked
     # live by the quota-clone plugin (dovecot_quota table); no helper scripts.
     apt-get -y autoremove --purge ;\
+    # ---- compile the DRP imapsieve scripts to .svbin. The rootfs is read-only
+    #      at runtime, so dovecot cannot compile them on first use; pre-compile
+    #      here. The vnd.dovecot.pipe extension is provided by sieve_extprograms
+    #      (pulled in by dovecot-sieve). ----
+    mkdir -p /usr/lib/dovecot/sieve-pipe ;\
+    sievec /usr/lib/dovecot/sieve/report-spam.sieve ;\
+    sievec /usr/lib/dovecot/sieve/report-ham.sieve ;\
     # ---- syslog-ng: make /etc/syslog-ng a symlink to the /tmp tmpfs so the
     #      config (and the runtime-generated conf.d/remote.conf) is writable
     #      even under a read-only rootfs. The real default config is stashed in
