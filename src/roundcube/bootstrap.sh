@@ -174,11 +174,136 @@ for _ in $(seq 1 30); do [ -S /tmp/run/php-fpm.sock ] && break; sleep 0.5; done
 
 # Initialise / migrate the schema. We already run as roundcube, so just call
 # the CLI scripts directly (RCUBE_CONFIG_PATH is exported above).
+#
+# Why this is more than `initdb || updatedb`: that chain MASKS failures. On a
+# fresh MariaDB the TCP port opens BEFORE the database/user are ready, so the
+# old code's `initdb` failed, the `|| updatedb` "succeeded" on the empty DB
+# WITHOUT creating the base tables (db_update assumes a baseline version and
+# only applies deltas), the outer `|| log WARN` never fired, and both legs were
+# `>/dev/null 2>&1` — net result: no tables, no warning, broken forever
+# (github.com/eilandert/dockerized#81). Roundcube's CLI tools also only accept
+# `initdb.sh --dir[/--update]` (NO --create/--package) and `updatedb.sh --dir
+# --package`; the previous `initdb.sh --dir=SQL --create` silently dropped the
+# bogus flag and always ran the DESTRUCTIVE db_init().
+#
+# So: probe through Roundcube's own DB layer (real readiness, driver-agnostic),
+# run the destructive initial-create ONLY when the schema is genuinely absent,
+# migrate otherwise, and LOG the output instead of discarding it.
 as_rc() { "$@"; }
-log "Ensuring database schema"
-( cd "${INSTALLDIR}" && as_rc bin/initdb.sh --dir=SQL --create >/dev/null 2>&1 \
-    || as_rc bin/updatedb.sh --dir=SQL --package=roundcube >/dev/null 2>&1 ) \
-    || log "WARN: schema init/update failed — run bin/initdb.sh manually"
+
+case "${ROUNDCUBEMAIL_DB_TYPE}" in
+    pgsql) db_driver_file="postgres" ;;
+    *)     db_driver_file="mysql" ;;
+esac
+
+# rc_core_state: 0 = DB up AND core schema present, 1 = DB up but no schema,
+# 2 = DB unreachable. Uses Roundcube's configured DSN (handles mysql + pgsql).
+rc_core_state() {
+    ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
+        define("INSTALL_PATH", getcwd()."/");
+        require_once INSTALL_PATH."program/include/clisetup.php";
+        $db = rcube::get_instance()->get_dbh();
+        $db->db_connect("w");
+        if (!$db->is_connected()) { exit(2); }
+        $db->query("SELECT 1 FROM ".$db->table_name("session")." LIMIT 1");
+        exit($db->is_error() ? 1 : 0);
+    ' ) >/dev/null 2>&1
+}
+
+# rc_pkg_versioned <package>: 0 if the package already has a recorded schema
+# version in the `system` table (so its initial create has run); else non-zero.
+rc_pkg_versioned() {
+    ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
+        define("INSTALL_PATH", getcwd()."/");
+        require_once INSTALL_PATH."program/include/clisetup.php";
+        $db = rcube::get_instance()->get_dbh();
+        $db->db_connect("w");
+        if (!$db->is_connected()) { exit(2); }
+        $r = $db->query("SELECT value FROM ".$db->table_name("system")." WHERE name=?", $argv[1]."-version");
+        if ($db->is_error()) { exit(1); }
+        exit($db->fetch_assoc($r) ? 0 : 1);
+    ' "$1" ) >/dev/null 2>&1
+}
+
+# rc_set_pkg_version <package> <version>: stamp the `system` table so a plugin
+# whose initial.sql does not self-register a version is still recorded as
+# installed — otherwise a reboot would re-run the DESTRUCTIVE initial create.
+rc_set_pkg_version() {
+    ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
+        define("INSTALL_PATH", getcwd()."/");
+        require_once INSTALL_PATH."program/include/clisetup.php";
+        $db = rcube::get_instance()->get_dbh();
+        $db->db_connect("w");
+        if (!$db->is_connected()) { exit(1); }
+        $t = $db->table_name("system");
+        $db->query("DELETE FROM $t WHERE name=?", $argv[1]."-version");
+        $db->query("INSERT INTO $t (name, value) VALUES (?, ?)", $argv[1]."-version", $argv[2]);
+        exit($db->is_error() ? 1 : 0);
+    ' "$1" "$2" ) >/dev/null 2>&1
+}
+
+# Wait until the database is genuinely reachable — not just the TCP port, which
+# wait-for-it already checked. Up to ~60s; proceed either way but log loudly.
+log "Waiting for database to become ready"
+db_ready=0
+for _ in $(seq 1 60); do
+    st=0; rc_core_state || st=$?
+    if [ "$st" != 2 ]; then db_ready=1; break; fi
+    sleep 1
+done
+[ "$db_ready" = 1 ] || log "WARN: database still unreachable after 60s — schema step may fail"
+
+# --- Core schema: create when absent, migrate when present (output LOGGED) ---
+st=0; rc_core_state || st=$?
+case "$st" in
+    1)
+        log "Core schema absent — initialising (bin/initdb.sh --dir=SQL)"
+        if ! ( cd "${INSTALLDIR}" && as_rc bin/initdb.sh --dir=SQL ) 2>&1 \
+                | sed 's/^/[ROUNDCUBE][initdb] /'; then
+            log "ERROR: core schema init FAILED — Roundcube will not work until 'bin/initdb.sh --dir=SQL' succeeds"
+        fi
+        ;;
+    0)
+        log "Core schema present — applying migrations (bin/updatedb.sh)"
+        ( cd "${INSTALLDIR}" && as_rc bin/updatedb.sh --dir=SQL --package=roundcube ) 2>&1 \
+            | sed 's/^/[ROUNDCUBE][updatedb] /' || true
+        ;;
+    *)
+        log "ERROR: database unreachable — SKIPPING schema step (no tables will be created)"
+        ;;
+esac
+
+# --- Enabled-plugin schemas ----------------------------------------------------
+# Roundcube core init does NOT migrate third-party plugin tables. For every
+# enabled plugin that ships SQL/<driver>.initial.sql we create-on-first-boot
+# (initdb on the plugin dir + stamp the version so it is never re-dropped) and
+# migrate thereafter. Set ROUNDCUBEMAIL_PLUGIN_DB_INIT=0 to opt out entirely.
+if [ "$st" != 2 ] && [ "${ROUNDCUBEMAIL_PLUGIN_DB_INIT:-1}" != "0" ]; then
+    IFS=',' read -ra _plugins <<< "${ROUNDCUBEMAIL_PLUGINS}"
+    for _p in "${_plugins[@]}"; do
+        _p="$(echo "$_p" | tr -d '[:space:]')"
+        [ -n "$_p" ] || continue
+        _sqldir="${INSTALLDIR}/plugins/${_p}/SQL"
+        [ -f "${_sqldir}/${db_driver_file}.initial.sql" ] || continue
+        if rc_pkg_versioned "$_p"; then
+            log "Plugin '${_p}': schema present — migrating"
+            ( cd "${INSTALLDIR}" && as_rc bin/updatedb.sh --dir="plugins/${_p}/SQL" --package="${_p}" ) 2>&1 \
+                | sed "s/^/[ROUNDCUBE][${_p}] /" || true
+        else
+            log "Plugin '${_p}': schema absent — initialising"
+            if ( cd "${INSTALLDIR}" && as_rc bin/initdb.sh --dir="plugins/${_p}/SQL" ) 2>&1 \
+                    | sed "s/^/[ROUNDCUBE][${_p}] /"; then
+                # The initial.sql reflects the latest schema; stamp the newest
+                # delta version (or 0) so updatedb does not re-apply deltas.
+                _ver="$(ls "${_sqldir}/${db_driver_file}/" 2>/dev/null | sed -n 's/\.sql$//p' | sort -n | tail -1)"
+                rc_set_pkg_version "$_p" "${_ver:-0}" \
+                    || log "WARN: plugin '${_p}' schema created but version stamp failed (reboot may re-init)"
+            else
+                log "ERROR: plugin '${_p}' schema init FAILED — see [${_p}] lines above"
+            fi
+        fi
+    done
+fi
 ( cd "${INSTALLDIR}" && as_rc bin/gc.sh >/dev/null 2>&1 ) || true
 
 if [ -n "${CLEAN_INACTIVE_USERS_DAYS:-}" ]; then
