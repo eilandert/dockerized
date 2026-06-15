@@ -134,7 +134,7 @@ cat > /var/roundcube/config/config.inc.php <<PHP
 \$config['smtp_port']    = '${ROUNDCUBEMAIL_SMTP_PORT}';
 \$config['des_key']      = '${ROUNDCUBEMAIL_DES_KEY}';
 \$config['temp_dir']     = '${ROUNDCUBEMAIL_TEMP_DIR}';
-\$config['plugins']      = ['${ROUNDCUBEMAIL_PLUGINS_PHP}'];
+\$config['plugins']      = getenv('RCUBE_NO_PLUGINS') === '1' ? [] : ['${ROUNDCUBEMAIL_PLUGINS_PHP}'];
 \$config['skin']         = '${ROUNDCUBEMAIL_SKIN}';
 \$config['zipdownload_selection'] = true;
 \$config['log_driver']   = 'stdout';
@@ -190,6 +190,18 @@ for _ in $(seq 1 30); do [ -S /tmp/run/php-fpm.sock ] && break; sleep 0.5; done
 # run the destructive initial-create ONLY when the schema is genuinely absent,
 # migrate otherwise, and LOG the output instead of discarding it.
 as_rc() { "$@"; }
+
+# Run every CLI bootstrap step (schema probes, initdb, updatedb, gc, deluser)
+# with plugins DISABLED. Roundcube's `clisetup.php` instantiates rcmail, which
+# loads and init()s every enabled plugin — and request-time plugins are not
+# CLI-safe: e.g. identity_switch's init() calls get_cfg(0, $user->get_identity()
+# ['email']) and there is NO logged-in user in CLI, so $email is null and its
+# `string $email` type hint throws a fatal TypeError that aborts the schema step
+# (github.com/eilandert/dockerized#81). Plugin SQL is applied via initdb/updatedb
+# `--dir`, which does NOT need the plugin's PHP loaded, so disabling plugins here
+# is safe and correct. config.inc.php reads this env (getenv) — php-fpm started
+# earlier without it, so web requests still load the full plugin set.
+export RCUBE_NO_PLUGINS=1
 
 case "${ROUNDCUBEMAIL_DB_TYPE}" in
     pgsql) db_driver_file="postgres" ;;
