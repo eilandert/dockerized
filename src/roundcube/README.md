@@ -88,6 +88,7 @@ loads unless you list it.
 | `show_folder_size` | 0.7.22 | Folder size column |
 | `quota` | git | Mailbox/IMAP quota display |
 | `persistent_login` | 1.0.3 | "Keep me logged in" |
+| `identity_switch` | 3.0.5 | Switch between separate IMAP/SMTP accounts (toteph42 fork) |
 | `advanced_search` | 3.7 | Extended search form |
 | `account_details` | 5.0.0 | Per-account info pane |
 | `message_highlight` | 1.0.5 | Colour-highlight messages by rule |

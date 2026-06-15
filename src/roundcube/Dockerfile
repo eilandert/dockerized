@@ -133,6 +133,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     fetch plugins/show_folder_size   https://github.com/jfcherng-roundcube/plugin-show-folder-size/archive/refs/tags/0.7.22.tar.gz & \
     fetch plugins/quota              https://github.com/jfcherng-roundcube/plugin-quota/archive/55c0f3295e4db3c0f4ae6425ce498e58163695a7.tar.gz & \
     fetch plugins/persistent_login   https://github.com/texxasrulez/persistent_login/archive/refs/tags/1.0.3.tar.gz & \
+    fetch plugins/identity_switch    https://github.com/toteph42/identity_switch/archive/refs/tags/3.0.5.tar.gz & \
     fetch plugins/advanced_search    https://github.com/texxasrulez/advanced_search/archive/refs/tags/3.7.tar.gz & \
     fetch plugins/account_details    https://github.com/texxasrulez/account_details/archive/refs/tags/5.0.0.tar.gz & \
     fetch plugins/message_highlight  https://github.com/texxasrulez/message_highlight/archive/refs/tags/1.0.5.tar.gz & \

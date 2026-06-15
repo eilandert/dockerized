@@ -51,6 +51,26 @@ log "---------------------------------------------------------------------------
 # here -- as their owner -- so no CHOWN/DAC_OVERRIDE is needed. The writable
 # mounts (/var/roundcube/config, /tmp) MUST already be owned by the roundcube
 # uid (named volumes inherit it; pre-chown bind mounts / tmpfs to 10001:10001).
+#
+# Writable-mount probe: the banner above *explains* this requirement; here we
+# actually TEST it. A wrong-owner bind mount / tmpfs otherwise surfaces as a
+# cryptic "mkdir: Permission denied" (or a failed config write) under set -e and
+# the container just exits. Probe the writable ROOTS (mount points, not every
+# leaf) and emit a clear, actionable warning naming the path + the chown fix.
+RC_UID="$(id -u)"
+for _w in /var/roundcube/config /tmp "${ROUNDCUBEMAIL_TEMP_DIR}"; do
+    [ -d "$_w" ] || continue
+    _probe="${_w}/.rc-write-test.$$"
+    if touch "$_probe" 2>/dev/null; then
+        rm -f "$_probe"
+    else
+        log "WARNING: '${_w}' is NOT writable by uid ${RC_UID} (roundcube)."
+        log "  Host bind dir : sudo chown -R 10001:10001 <that dir>"
+        log "  tmpfs mount   : --tmpfs ${_w}:uid=10001,gid=10001,mode=1770"
+        log "  Roundcube will fail to start until this mount is writable."
+    fi
+done
+
 mkdir -p /tmp/run \
          /tmp/angie/client-body /tmp/angie/proxy /tmp/angie/fastcgi \
          "${ROUNDCUBEMAIL_TEMP_DIR}" /var/roundcube/config
@@ -146,6 +166,27 @@ if [ -f /var/roundcube/config/config.inc.php.user ]; then
     echo "// ---- operator overrides ----"            >> /var/roundcube/config/config.inc.php
     sed '1{/^<?php/d}' /var/roundcube/config/config.inc.php.user >> /var/roundcube/config/config.inc.php
 fi
+
+# ---------------------------------------------------------------------------
+# Enabled-plugin presence check. An enabled plugin with no
+# plugins/<p>/<p>.php makes Roundcube fatal at REQUEST time ("Failed to load
+# plugin file ...") — a silent, confusing failure: the container boots, but
+# every web request 500s and nothing in the boot log says why. Warn loudly at
+# boot instead so a typo'd / not-bundled plugin is obvious (core plugins live at
+# plugins/<p>/<p>.php too, so one check covers both core + third-party).
+# github.com/eilandert/dockerized#81: identity_switch was enabled but not
+# bundled in the image.
+# ---------------------------------------------------------------------------
+IFS=',' read -ra _enabled <<< "${ROUNDCUBEMAIL_PLUGINS}"
+for _p in "${_enabled[@]}"; do
+    _p="$(echo "$_p" | tr -d '[:space:]')"
+    [ -n "$_p" ] || continue
+    [ -f "${INSTALLDIR}/plugins/${_p}/${_p}.php" ] && continue
+    log "WARNING: plugin '${_p}' is enabled but NOT installed in this image"
+    log "  (missing ${INSTALLDIR}/plugins/${_p}/${_p}.php) — Roundcube will 500 on"
+    log "  every request. Remove it from ROUNDCUBEMAIL_PLUGINS, mount it into"
+    log "  plugins/${_p}/, or use an image that bundles it."
+done
 
 # ---------------------------------------------------------------------------
 # Runtime php-fpm override driven by env (baked pool include targets this)
