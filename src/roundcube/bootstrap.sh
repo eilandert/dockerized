@@ -208,18 +208,21 @@ case "${ROUNDCUBEMAIL_DB_TYPE}" in
     *)     db_driver_file="mysql" ;;
 esac
 
-# rc_core_state: 0 = DB up AND core schema present, 1 = DB up but no schema,
-# 2 = DB unreachable. Uses Roundcube's configured DSN (handles mysql + pgsql).
-rc_core_state() {
+# rc_obj_exists <table> [column]: 0 = DB up AND the object exists (the table, or
+# the given column on that table), 1 = DB up but object absent, 2 = DB
+# unreachable. Driver-agnostic (mysql + pgsql). This ACTUAL-schema signal (not a
+# recorded version) is what lets the schema steps self-heal partial states.
+rc_obj_exists() {
     ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
         define("INSTALL_PATH", getcwd()."/");
         require_once INSTALL_PATH."program/include/clisetup.php";
         $db = rcube::get_instance()->get_dbh();
         $db->db_connect("w");
         if (!$db->is_connected()) { exit(2); }
-        $db->query("SELECT 1 FROM ".$db->table_name("session")." LIMIT 1");
+        $col = (isset($argv[2]) && $argv[2] !== "") ? $db->quote_identifier($argv[2]) : "1";
+        $db->query("SELECT $col FROM ".$db->table_name($argv[1])." LIMIT 1");
         exit($db->is_error() ? 1 : 0);
-    ' ) >/dev/null 2>&1
+    ' "$1" "${2:-}" ) >/dev/null 2>&1
 }
 
 # rc_pkg_versioned <package>: 0 if the package already has a recorded schema
@@ -259,14 +262,14 @@ rc_set_pkg_version() {
 log "Waiting for database to become ready"
 db_ready=0
 for _ in $(seq 1 60); do
-    st=0; rc_core_state || st=$?
+    st=0; rc_obj_exists session || st=$?
     if [ "$st" != 2 ]; then db_ready=1; break; fi
     sleep 1
 done
 [ "$db_ready" = 1 ] || log "WARN: database still unreachable after 60s — schema step may fail"
 
 # --- Core schema: create when absent, migrate when present (output LOGGED) ---
-st=0; rc_core_state || st=$?
+st=0; rc_obj_exists session || st=$?
 case "$st" in
     1)
         log "Core schema absent — initialising (bin/initdb.sh --dir=SQL)"
@@ -285,29 +288,63 @@ case "$st" in
         ;;
 esac
 
-# --- Enabled-plugin schemas ----------------------------------------------------
+# --- Enabled-plugin schemas (self-healing) -------------------------------------
 # Roundcube core init does NOT migrate third-party plugin tables. For every
-# enabled plugin that ships SQL/<driver>.initial.sql we create-on-first-boot
-# (initdb on the plugin dir + stamp the version so it is never re-dropped) and
-# migrate thereafter. Set ROUNDCUBEMAIL_PLUGIN_DB_INIT=0 to opt out entirely.
+# enabled plugin shipping SQL/<driver>.initial.sql we reconcile the ACTUAL
+# schema against the recorded version, so a partial/aborted previous run repairs
+# itself instead of looping or destroying data. The schema marker is the first
+# object the initial.sql establishes — a CREATE TABLE, or (for ALTER-only
+# plugins like identity_switch, whose real schema is just an added column) an
+# ALTER TABLE ... ADD <column>:
+#   marker present + version   -> migrate (updatedb)
+#   marker present, no version -> record version only — NEVER re-run initdb,
+#                                 which would DROP a table / duplicate-ADD a column
+#   marker absent              -> (re)create (initdb) + stamp (clears stale version)
+# Plugin SQL is applied via --dir; the plugin's PHP is not loaded (RCUBE_NO_PLUGINS).
+# Set ROUNDCUBEMAIL_PLUGIN_DB_INIT=0 to opt out entirely.
 if [ "$st" != 2 ] && [ "${ROUNDCUBEMAIL_PLUGIN_DB_INIT:-1}" != "0" ]; then
     IFS=',' read -ra _plugins <<< "${ROUNDCUBEMAIL_PLUGINS}"
     for _p in "${_plugins[@]}"; do
         _p="$(echo "$_p" | tr -d '[:space:]')"
         [ -n "$_p" ] || continue
         _sqldir="${INSTALLDIR}/plugins/${_p}/SQL"
-        [ -f "${_sqldir}/${db_driver_file}.initial.sql" ] || continue
-        if rc_pkg_versioned "$_p"; then
+        _initial="${_sqldir}/${db_driver_file}.initial.sql"
+        [ -f "$_initial" ] || continue
+
+        # newest delta version = what a fresh initial.sql already corresponds to
+        _ver="$(ls "${_sqldir}/${db_driver_file}/" 2>/dev/null | sed -n 's/\.sql$//p' | sort -n | tail -1)"
+
+        # schema marker: a created table, else an added column (table + column)
+        _mtable="$(sed -n -E 's/.*CREATE TABLE([[:space:]]+IF NOT EXISTS)?[[:space:]]+`?([A-Za-z0-9_]+)`?.*/\2/Ip' "$_initial" | head -1)"
+        _mcol=""
+        if [ -z "$_mtable" ]; then
+            _alter="$(sed -n -E 's/.*ALTER TABLE[[:space:]]+`?([A-Za-z0-9_]+)`?[[:space:]]+ADD[[:space:]]+(COLUMN[[:space:]]+)?`?([A-Za-z0-9_]+)`?.*/\1 \3/Ip' "$_initial" | head -1)"
+            case "$_alter" in *" "*) _mtable="${_alter%% *}"; _mcol="${_alter#* }" ;; esac
+        fi
+
+        if rc_pkg_versioned "$_p"; then _has_ver=0; else _has_ver=1; fi
+        if [ -n "$_mtable" ]; then
+            if rc_obj_exists "$_mtable" "$_mcol"; then _has_obj=0; else _has_obj=1; fi
+        else
+            _has_obj=$_has_ver   # no detectable marker -> fall back to version row
+        fi
+
+        if [ "$_has_obj" = 0 ] && [ "$_has_ver" = 0 ]; then
             log "Plugin '${_p}': schema present — migrating"
             ( cd "${INSTALLDIR}" && as_rc bin/updatedb.sh --dir="plugins/${_p}/SQL" --package="${_p}" ) 2>&1 \
                 | sed "s/^/[ROUNDCUBE][${_p}] /" || true
+        elif [ "$_has_obj" = 0 ]; then
+            log "Plugin '${_p}': schema present but unversioned — recording version (self-heal, no re-create)"
+            rc_set_pkg_version "$_p" "${_ver:-0}" \
+                || log "WARN: plugin '${_p}' version stamp failed"
         else
-            log "Plugin '${_p}': schema absent — initialising"
+            if [ "$_has_ver" = 0 ]; then
+                log "Plugin '${_p}': recorded but schema missing — re-initialising (self-heal)"
+            else
+                log "Plugin '${_p}': schema absent — initialising"
+            fi
             if ( cd "${INSTALLDIR}" && as_rc bin/initdb.sh --dir="plugins/${_p}/SQL" ) 2>&1 \
                     | sed "s/^/[ROUNDCUBE][${_p}] /"; then
-                # The initial.sql reflects the latest schema; stamp the newest
-                # delta version (or 0) so updatedb does not re-apply deltas.
-                _ver="$(ls "${_sqldir}/${db_driver_file}/" 2>/dev/null | sed -n 's/\.sql$//p' | sort -n | tail -1)"
                 rc_set_pkg_version "$_p" "${_ver:-0}" \
                     || log "WARN: plugin '${_p}' schema created but version stamp failed (reboot may re-init)"
             else
