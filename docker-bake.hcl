@@ -679,14 +679,14 @@ target "ubuntu-rspamd" {
    contexts = { "eilandert/ubuntu-base:rolling" = "target:ubuntu-base" }
 }
 
-# rspamd + DCC/Razor/Pyzor collaborative filters. Own git repo, vendored here as
-# a submodule at src/rspamd-dcc-razor-pyzor (so a standalone dockerized clone +
-# `git submodule update --init` builds it). Builds FROM the debian-base target.
+# DCC/Razor/Pyzor collaborative-filter backend for rspamd. Own git repo, vendored
+# here as a submodule at src/rspamd-dcc-razor-pyzor (so a standalone dockerized
+# clone + `git submodule update --init` builds it). A single static Go binary on
+# a distroless base — no debian-base dependency.
 target "debian-rspamd-drp" {
    tags = ["docker.io/eilandert/rspamd-dcc-razor-pyzor:debian", "docker.io/eilandert/rspamd-dcc-razor-pyzor:latest"]
    context = "src/rspamd-dcc-razor-pyzor/docker"
    dockerfile = "Dockerfile-deb"
-   contexts = { "eilandert/debian-base:stable" = "target:debian-base" }
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]
