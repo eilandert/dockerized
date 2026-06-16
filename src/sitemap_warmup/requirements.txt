@@ -1,5 +1,5 @@
 aiodns
-aiohttp>=3.14.0
+aiohttp>=3.14.1
 lxml
 requests>=2.34.0
 urllib3>=2.7.0
