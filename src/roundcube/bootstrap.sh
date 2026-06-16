@@ -129,7 +129,26 @@ wait-for-it.sh -q "${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}" -t 30
 : "${ROUNDCUBEMAIL_SSL_CA:=}"
 
 ROUNDCUBEMAIL_PLUGINS_PHP="$(echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g")"
-ROUNDCUBEMAIL_DES_KEY="$(test -f /run/secrets/roundcube_des_key && cat /run/secrets/roundcube_des_key || head -c 24 /dev/urandom | base64 | head -c 24)"
+# des_key MUST stay stable across restarts: Roundcube encrypts the IMAP
+# password into the (DB-backed) session with it. A fresh key on every boot makes
+# every pre-existing session undecryptable -> "Server Error: Empty password" /
+# "Connection to storage server failed" after `docker compose restart`.
+# Resolution order:
+#   1. Docker secret  /run/secrets/roundcube_des_key   (explicit, best)
+#   2. env            ROUNDCUBEMAIL_DES_KEY            (explicit operator value)
+#   3. persisted      <config>/.des_key               (generated once, reused)
+#   4. generate a new 24-char key and persist it to (3)
+DES_KEY_FILE=/var/roundcube/config/.des_key
+if [ -f /run/secrets/roundcube_des_key ]; then
+    ROUNDCUBEMAIL_DES_KEY="$(cat /run/secrets/roundcube_des_key)"
+elif [ -n "${ROUNDCUBEMAIL_DES_KEY:-}" ]; then
+    : # honour operator-supplied env var
+elif [ -f "${DES_KEY_FILE}" ]; then
+    ROUNDCUBEMAIL_DES_KEY="$(cat "${DES_KEY_FILE}")"
+else
+    ROUNDCUBEMAIL_DES_KEY="$(head -c 24 /dev/urandom | base64 | head -c 24)"
+    ( umask 077; printf '%s' "${ROUNDCUBEMAIL_DES_KEY}" > "${DES_KEY_FILE}" )
+fi
 
 if [ -n "${ROUNDCUBEMAIL_SSL_CA}" ]; then
     # CA pinning — verification stays ON, against the supplied CA bundle.
