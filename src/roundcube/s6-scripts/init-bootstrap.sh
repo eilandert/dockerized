@@ -1,30 +1,32 @@
 #!/bin/bash
 # =============================================================================
-# Roundcube container entrypoint.
+# Roundcube — s6 init-bootstrap oneshot.
 #
-# Runs UNPRIVILEGED (compose user: roundcube, cap_drop ALL + no-new-privileges,
-# read-only rootfs, angie on :8080). PID1 (bootstrap -> fpm master + angie
-# master) is the roundcube uid; angie binds :8080 (>=1024, no
-# CAP_NET_BIND_SERVICE), no runtime setuid/chown -> ZERO capabilities required.
+# s6-overlay is PID1 (process supervisor); this oneshot runs FIRST and does all
+# one-time setup, then the php-fpm and angie longruns start (and are supervised
+# + restarted by s6). Everything here is CLI-only — it does NOT need php-fpm
+# running (schema work uses the `php` CLI directly), so it completes before the
+# pool comes up.
+#
+# Runs UNPRIVILEGED as the roundcube uid (10001): s6-overlay itself runs rootless
+# (S6_READ_ONLY_ROOT=1), cap_drop ALL + no-new-privileges + AppArmor, read-only
+# rootfs, angie on :8080. No runtime setuid/chown -> ZERO capabilities required.
 #
 # Because the container has NO root and CANNOT chown, every writable mount must
-# already be owned by the roundcube uid (10001). Named volumes inherit the
-# image dir's owner automatically; for host bind mounts / tmpfs set the owner
-# yourself (host: chown -R 10001:10001 <dir>; tmpfs: uid=10001,gid=10001).
+# already be owned by uid 10001. Named volumes inherit the image dir's owner; for
+# host bind mounts / tmpfs set the owner yourself (host: chown -R 10001:10001;
+# tmpfs: uid=10001,gid=10001).
 #
-# Writable locations: /tmp (sockets, pid, RC temp), /var/roundcube/config
-# (generated config.inc.php + override). External DB (mariadb/pgsql) mandatory.
+# Writable locations: /run (s6 scratch, tmpfs), /tmp (sockets, RC temp, tmpfs),
+# /var/roundcube/config (generated config + override). External DB mandatory.
 # =============================================================================
 set -euo pipefail
 
 PHPVERSION="${PHPVERSION:-8.5}"
 INSTALLDIR="${INSTALLDIR:-/var/www/html}"
 
-# Roundcube config search path. php-fpm workers get this from the pool's
-# env[RCUBE_CONFIG_PATH], but the CLI bin/*.sh scripts we run below are NOT
-# php-fpm children — they need it exported here or they read only the empty
-# install config/ dir, find no db_dsnw, and fall back to a localhost socket
-# ([2002] No such file or directory). Export it for the whole script.
+# Roundcube config search path — exported so the CLI bin/*.sh scripts run below
+# find the generated config (not just the empty install config/ dir).
 export RCUBE_CONFIG_PATH="/var/roundcube/config/:config/"
 
 log() { echo "[ROUNDCUBE] $*"; }
@@ -32,31 +34,34 @@ log "Image src: https://github.com/eilandert/dockerized/tree/master/src/roundcub
 log "Docker Hub: https://hub.docker.com/r/eilandert/roundcube"
 log "Write-up  : https://deb.myguard.nl/2026/06/hardened-roundcube-docker-image/"
 log "---------------------------------------------------------------------------"
-log "Security profile: runs UNPRIVILEGED (no root), cap_drop ALL +"
-log "  no-new-privileges + AppArmor, read-only rootfs, Angie on :8080."
+log "Security profile: s6-overlay PID1, runs UNPRIVILEGED (no root), cap_drop ALL"
+log "  + no-new-privileges + AppArmor, read-only rootfs, Angie on :8080."
 log "Because the container has NO root and CANNOT chown, every WRITABLE mount"
 log "  must already be owned by uid 10001 (roundcube) on the host:"
 log "    named volume : nothing to do (inherits the image dir owner)"
 log "    host bind dir : sudo chown -R 10001:10001 <your bind dir>"
-log "    tmpfs        : --tmpfs /tmp:uid=10001,gid=10001,mode=1770"
+log "    tmpfs        : --tmpfs <path>:uid=10001,gid=10001"
 log "  A 'Permission denied' on boot = a writable mount not owned 10001:10001."
 log "---------------------------------------------------------------------------"
+
+# --- escaping helpers -------------------------------------------------------
+# php_sq: make an arbitrary string safe inside a '...' single-quoted PHP literal
+# in the generated config.inc.php — escape backslash first, then the quote. A DB
+# password containing ' or \ would otherwise break the config (or inject into it).
+php_sq() { local s=$1; s=${s//\\/\\\\}; s=${s//\'/\\\'}; printf '%s' "$s"; }
+# urlenc: percent-encode a DSN credential (user/password) so reserved chars
+# (@ : / ? # …) in a password don't corrupt the type://user:pass@host/db DSN.
+urlenc() { php -d error_reporting=0 -r 'echo rawurlencode($argv[1]);' "$1"; }
 
 # ---------------------------------------------------------------------------
 # Writable runtime dirs (all under the /tmp tmpfs or the config/db volumes)
 # ---------------------------------------------------------------------------
 : "${ROUNDCUBEMAIL_TEMP_DIR:=/tmp/roundcube-temp}"
 
-# We run UNPRIVILEGED as roundcube and CANNOT chown. We only create subdirs
-# here -- as their owner -- so no CHOWN/DAC_OVERRIDE is needed. The writable
-# mounts (/var/roundcube/config, /tmp) MUST already be owned by the roundcube
-# uid (named volumes inherit it; pre-chown bind mounts / tmpfs to 10001:10001).
-#
-# Writable-mount probe: the banner above *explains* this requirement; here we
-# actually TEST it. A wrong-owner bind mount / tmpfs otherwise surfaces as a
-# cryptic "mkdir: Permission denied" (or a failed config write) under set -e and
-# the container just exits. Probe the writable ROOTS (mount points, not every
-# leaf) and emit a clear, actionable warning naming the path + the chown fix.
+# We run UNPRIVILEGED and CANNOT chown. We only create subdirs here -- as their
+# owner. The writable mounts (/var/roundcube/config, /tmp) MUST already be owned
+# by the roundcube uid. Probe the writable ROOTS and emit a clear, actionable
+# warning naming the path + the chown fix.
 RC_UID="$(id -u)"
 for _w in /var/roundcube/config /tmp "${ROUNDCUBEMAIL_TEMP_DIR}"; do
     [ -d "$_w" ] || continue
@@ -102,7 +107,10 @@ if [ -z "${ROUNDCUBEMAIL_DB_USER:-}" ] || [ -z "${ROUNDCUBEMAIL_DB_PASSWORD:-}" 
     log "FATAL: ROUNDCUBEMAIL_DB_USER / ROUNDCUBEMAIL_DB_PASSWORD must be set"
     exit 1
 fi
-: "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}://${ROUNDCUBEMAIL_DB_USER}:${ROUNDCUBEMAIL_DB_PASSWORD}@${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}/${ROUNDCUBEMAIL_DB_NAME}}"
+# URL-encode user+password when assembling the default DSN so special chars in
+# the password don't corrupt it. An operator-supplied ROUNDCUBEMAIL_DSNW is used
+# verbatim (they own the encoding). The :=word is only evaluated when DSNW is unset.
+: "${ROUNDCUBEMAIL_DSNW:=${ROUNDCUBEMAIL_DB_TYPE}://$(urlenc "${ROUNDCUBEMAIL_DB_USER}"):$(urlenc "${ROUNDCUBEMAIL_DB_PASSWORD}")@${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}/${ROUNDCUBEMAIL_DB_NAME}}"
 wait-for-it.sh -q "${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}" -t 30
 
 # ---------------------------------------------------------------------------
@@ -115,29 +123,21 @@ wait-for-it.sh -q "${ROUNDCUBEMAIL_DB_HOST}:${ROUNDCUBEMAIL_DB_PORT}" -t 30
 : "${ROUNDCUBEMAIL_SMTP_SERVER:=localhost}"
 : "${ROUNDCUBEMAIL_SMTP_PORT:=587}"
 : "${ROUNDCUBEMAIL_PLUGINS:=archive,zipdownload,managesieve,newmail_notifier,password,new_user_dialog}"
+# Plugin names are identifiers — strip anything that isn't [A-Za-z0-9_,] so a
+# stray value can't break out of the '...' PHP array literal generated below.
+ROUNDCUBEMAIL_PLUGINS="$(printf '%s' "${ROUNDCUBEMAIL_PLUGINS}" | tr -cd 'A-Za-z0-9_,')"
 : "${ROUNDCUBEMAIL_SKIN:=elastic}"
 # IMAP/SMTP TLS handling. Verification is ON by default (secure transport).
-# Three ways to deal with an internal mail server:
-#   1. (best) Point DEFAULT_HOST/SMTP at a name covered by the cert's SAN, keep
-#      verification on — nothing to set here.
-#   2. Pin the issuing CA: set ROUNDCUBEMAIL_SSL_CA=/path/to/ca.pem (mount it).
-#      Verification stays ON, just against your own CA.
-#   3. (last resort, insecure) ROUNDCUBEMAIL_SSL_VERIFY=0 disables peer
-#      verification — only for a trusted LAN segment; it allows MITM. Must be
-#      set explicitly; it is NOT the default.
+#   1. (best) Point DEFAULT_HOST/SMTP at a name covered by the cert's SAN.
+#   2. Pin the issuing CA: ROUNDCUBEMAIL_SSL_CA=/path/to/ca.pem (mount it).
+#   3. (last resort, insecure) ROUNDCUBEMAIL_SSL_VERIFY=0 disables verification.
 : "${ROUNDCUBEMAIL_SSL_VERIFY:=1}"
 : "${ROUNDCUBEMAIL_SSL_CA:=}"
 
-ROUNDCUBEMAIL_PLUGINS_PHP="$(echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g")"
-# des_key MUST stay stable across restarts: Roundcube encrypts the IMAP
-# password into the (DB-backed) session with it. A fresh key on every boot makes
-# every pre-existing session undecryptable -> "Server Error: Empty password" /
-# "Connection to storage server failed" after `docker compose restart`.
-# Resolution order:
-#   1. Docker secret  /run/secrets/roundcube_des_key   (explicit, best)
-#   2. env            ROUNDCUBEMAIL_DES_KEY            (explicit operator value)
-#   3. persisted      <config>/.des_key               (generated once, reused)
-#   4. generate a new 24-char key and persist it to (3)
+# des_key MUST stay stable across restarts: RC encrypts the IMAP password into
+# the (DB-backed) session with it. A fresh key on every boot makes every
+# pre-existing session undecryptable -> "Server Error: Empty password".
+# Resolution: Docker secret > env > persisted <config>/.des_key > generate+persist.
 DES_KEY_FILE=/var/roundcube/config/.des_key
 if [ -f /run/secrets/roundcube_des_key ]; then
     ROUNDCUBEMAIL_DES_KEY="$(cat /run/secrets/roundcube_des_key)"
@@ -150,10 +150,28 @@ else
     ( umask 077; printf '%s' "${ROUNDCUBEMAIL_DES_KEY}" > "${DES_KEY_FILE}" )
 fi
 
+# Snuffleupagus secret_key — keys SP's cookie encryption. Like des_key it MUST be
+# stable across restarts (a changed key invalidates SP-encrypted cookies, logging
+# users out) and unique per deployment (the baked rulebook ships only a public
+# placeholder). Same resolution order as des_key. The key is substituted into a
+# per-deployment copy of the rulebook in the php-fpm override block below.
+SP_SECRET_FILE=/var/roundcube/config/.sp_secret
+if [ -f /run/secrets/roundcube_sp_secret ]; then
+    SP_SECRET="$(cat /run/secrets/roundcube_sp_secret)"
+elif [ -n "${ROUNDCUBEMAIL_SP_SECRET:-}" ]; then
+    SP_SECRET="${ROUNDCUBEMAIL_SP_SECRET}"
+elif [ -f "${SP_SECRET_FILE}" ]; then
+    SP_SECRET="$(cat "${SP_SECRET_FILE}")"
+else
+    SP_SECRET="$(head -c 32 /dev/urandom | sha256sum | cut -d' ' -f1)"
+    ( umask 077; printf '%s' "${SP_SECRET}" > "${SP_SECRET_FILE}" )
+fi
+
 if [ -n "${ROUNDCUBEMAIL_SSL_CA}" ]; then
     # CA pinning — verification stays ON, against the supplied CA bundle.
-    SSL_OPTS_PHP="\$config['imap_conn_options'] = ['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'cafile' => '${ROUNDCUBEMAIL_SSL_CA}']];
-\$config['smtp_conn_options'] = ['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'cafile' => '${ROUNDCUBEMAIL_SSL_CA}']];"
+    _e_ca=$(php_sq "${ROUNDCUBEMAIL_SSL_CA}")
+    SSL_OPTS_PHP="\$config['imap_conn_options'] = ['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'cafile' => '${_e_ca}']];
+\$config['smtp_conn_options'] = ['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'cafile' => '${_e_ca}']];"
 elif [ "${ROUNDCUBEMAIL_SSL_VERIFY}" = "0" ] || [ "${ROUNDCUBEMAIL_SSL_VERIFY}" = "false" ]; then
     log "WARNING: ROUNDCUBEMAIL_SSL_VERIFY=0 — IMAP/SMTP TLS peer verification DISABLED (MITM possible). Prefer a matching cert or ROUNDCUBEMAIL_SSL_CA."
     SSL_OPTS_PHP="\$config['imap_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
@@ -162,19 +180,33 @@ else
     SSL_OPTS_PHP="// TLS peer verification enabled (default). Use ROUNDCUBEMAIL_SSL_CA to pin a private CA, or ROUNDCUBEMAIL_SSL_VERIFY=0 to disable (insecure)."
 fi
 
+ROUNDCUBEMAIL_PLUGINS_PHP="$(echo "${ROUNDCUBEMAIL_PLUGINS}" | sed -E "s/[, ]+/', '/g")"
+
+# Escape every scalar interpolated into the single-quoted PHP literals below so a
+# special char (notably a ' in the DB password / DSN) can't corrupt or inject
+# into config.inc.php. Plugin names are pre-sanitised to [A-Za-z0-9_,] above.
+_e_dsnw=$(php_sq "${ROUNDCUBEMAIL_DSNW}")
+_e_dh=$(php_sq "${ROUNDCUBEMAIL_DEFAULT_HOST}")
+_e_dp=$(php_sq "${ROUNDCUBEMAIL_DEFAULT_PORT}")
+_e_ss=$(php_sq "${ROUNDCUBEMAIL_SMTP_SERVER}")
+_e_sp=$(php_sq "${ROUNDCUBEMAIL_SMTP_PORT}")
+_e_dk=$(php_sq "${ROUNDCUBEMAIL_DES_KEY}")
+_e_td=$(php_sq "${ROUNDCUBEMAIL_TEMP_DIR}")
+_e_skin=$(php_sq "${ROUNDCUBEMAIL_SKIN}")
+
 umask 077
 cat > /var/roundcube/config/config.inc.php <<PHP
 <?php
 \$config = [];
-\$config['db_dsnw']      = '${ROUNDCUBEMAIL_DSNW}';
-\$config['default_host'] = '${ROUNDCUBEMAIL_DEFAULT_HOST}';
-\$config['default_port'] = '${ROUNDCUBEMAIL_DEFAULT_PORT}';
-\$config['smtp_server']  = '${ROUNDCUBEMAIL_SMTP_SERVER}';
-\$config['smtp_port']    = '${ROUNDCUBEMAIL_SMTP_PORT}';
-\$config['des_key']      = '${ROUNDCUBEMAIL_DES_KEY}';
-\$config['temp_dir']     = '${ROUNDCUBEMAIL_TEMP_DIR}';
+\$config['db_dsnw']      = '${_e_dsnw}';
+\$config['default_host'] = '${_e_dh}';
+\$config['default_port'] = '${_e_dp}';
+\$config['smtp_server']  = '${_e_ss}';
+\$config['smtp_port']    = '${_e_sp}';
+\$config['des_key']      = '${_e_dk}';
+\$config['temp_dir']     = '${_e_td}';
 \$config['plugins']      = getenv('RCUBE_NO_PLUGINS') === '1' ? [] : ['${ROUNDCUBEMAIL_PLUGINS_PHP}'];
-\$config['skin']         = '${ROUNDCUBEMAIL_SKIN}';
+\$config['skin']         = '${_e_skin}';
 \$config['zipdownload_selection'] = true;
 \$config['log_driver']   = 'stdout';
 \$config['session_storage'] = 'db';
@@ -187,14 +219,9 @@ if [ -f /var/roundcube/config/config.inc.php.user ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Enabled-plugin presence check. An enabled plugin with no
-# plugins/<p>/<p>.php makes Roundcube fatal at REQUEST time ("Failed to load
-# plugin file ...") — a silent, confusing failure: the container boots, but
-# every web request 500s and nothing in the boot log says why. Warn loudly at
-# boot instead so a typo'd / not-bundled plugin is obvious (core plugins live at
-# plugins/<p>/<p>.php too, so one check covers both core + third-party).
-# github.com/eilandert/dockerized#81: identity_switch was enabled but not
-# bundled in the image.
+# Enabled-plugin presence check. An enabled plugin with no plugins/<p>/<p>.php
+# makes Roundcube fatal at REQUEST time — a silent, confusing failure. Warn
+# loudly at boot instead (core plugins live at plugins/<p>/<p>.php too).
 # ---------------------------------------------------------------------------
 IFS=',' read -ra _enabled <<< "${ROUNDCUBEMAIL_PLUGINS}"
 for _p in "${_enabled[@]}"; do
@@ -218,49 +245,41 @@ if [ -n "${ROUNDCUBEMAIL_UPLOAD_MAX_FILESIZE:-}" ]; then
     } >> /var/roundcube/config/phpfpm.conf.override
 fi
 
-# ---------------------------------------------------------------------------
-# Start php-fpm in the background. The master runs unprivileged (we ARE
-# roundcube); workers inherit our identity -- no setuid (pool user/group are
-# commented out, as a non-root master cannot setuid).
-# ---------------------------------------------------------------------------
-log "Starting php-fpm ${PHPVERSION}"
-"/usr/sbin/php-fpm${PHPVERSION}" \
-    --fpm-config "/etc/php/${PHPVERSION}/fpm/php-fpm.conf" \
-    --nodaemonize &
-FPM_PID=$!
+# Snuffleupagus: write a per-deployment copy of the rulebook onto the writable
+# config volume with the real secret_key substituted, then point the FPM pool at
+# it through this override include — which is parsed AFTER the baked
+# sp.configuration_file in www.conf, so it wins. The baked rulebook lives on the
+# read-only rootfs and only carries a placeholder, so it cannot be edited in place.
+SP_RULES_SRC="/etc/php/${PHPVERSION}/php-snuffleupagus/roundcube.rules"
+SP_RULES_DST="/var/roundcube/config/roundcube.rules"
+if [ -f "${SP_RULES_SRC}" ]; then
+    if ( umask 077; sed -E \
+            "s|^sp\\.global\\.secret_key\\(.*|sp.global.secret_key(\"${SP_SECRET}\");|" \
+            "${SP_RULES_SRC}" > "${SP_RULES_DST}" ); then
+        echo "php_admin_value[sp.configuration_file]=${SP_RULES_DST}" \
+            >> /var/roundcube/config/phpfpm.conf.override
+    else
+        log "WARNING: could not write ${SP_RULES_DST} — Snuffleupagus falls back to the baked rulebook (placeholder secret_key)"
+    fi
+fi
 
-# Wait for the socket before touching the DB / serving traffic.
-for _ in $(seq 1 30); do [ -S /tmp/run/php-fpm.sock ] && break; sleep 0.5; done
-
-# Initialise / migrate the schema. We already run as roundcube, so just call
-# the CLI scripts directly (RCUBE_CONFIG_PATH is exported above).
-#
-# Why this is more than `initdb || updatedb`: that chain MASKS failures. On a
-# fresh MariaDB the TCP port opens BEFORE the database/user are ready, so the
-# old code's `initdb` failed, the `|| updatedb` "succeeded" on the empty DB
-# WITHOUT creating the base tables (db_update assumes a baseline version and
-# only applies deltas), the outer `|| log WARN` never fired, and both legs were
-# `>/dev/null 2>&1` — net result: no tables, no warning, broken forever
-# (github.com/eilandert/dockerized#81). Roundcube's CLI tools also only accept
-# `initdb.sh --dir[/--update]` (NO --create/--package) and `updatedb.sh --dir
-# --package`; the previous `initdb.sh --dir=SQL --create` silently dropped the
-# bogus flag and always ran the DESTRUCTIVE db_init().
-#
-# So: probe through Roundcube's own DB layer (real readiness, driver-agnostic),
-# run the destructive initial-create ONLY when the schema is genuinely absent,
-# migrate otherwise, and LOG the output instead of discarding it.
+# ---------------------------------------------------------------------------
+# Schema: initialise / migrate the DB. CLI-only (PHP CLI through Roundcube's own
+# DB layer) — does NOT need php-fpm, so it runs here in the oneshot, before the
+# pool comes up. See github.com/eilandert/dockerized#81 for why this is more than
+# `initdb || updatedb` (that masked failures and could run the destructive init
+# on a half-ready DB). We probe the ACTUAL schema, create-when-absent /
+# migrate-when-present, and LOG the output.
+# ---------------------------------------------------------------------------
 as_rc() { "$@"; }
 
-# Run every CLI bootstrap step (schema probes, initdb, updatedb, gc, deluser)
-# with plugins DISABLED. Roundcube's `clisetup.php` instantiates rcmail, which
-# loads and init()s every enabled plugin — and request-time plugins are not
-# CLI-safe: e.g. identity_switch's init() calls get_cfg(0, $user->get_identity()
-# ['email']) and there is NO logged-in user in CLI, so $email is null and its
-# `string $email` type hint throws a fatal TypeError that aborts the schema step
-# (github.com/eilandert/dockerized#81). Plugin SQL is applied via initdb/updatedb
-# `--dir`, which does NOT need the plugin's PHP loaded, so disabling plugins here
-# is safe and correct. config.inc.php reads this env (getenv) — php-fpm started
-# earlier without it, so web requests still load the full plugin set.
+# Every CLI bootstrap step runs with plugins DISABLED: clisetup.php instantiates
+# rcmail and init()s every enabled plugin, and request-time plugins are not
+# CLI-safe (e.g. identity_switch's init() needs a logged-in user -> fatal
+# TypeError). Plugin SQL applies via initdb/updatedb --dir, which does NOT load
+# the plugin's PHP, so disabling plugins here is safe. config.inc.php reads this
+# via getenv(); only THIS process tree sees it — the php-fpm longrun (a separate
+# s6 service with clear_env=yes) keeps the full plugin set for web requests.
 export RCUBE_NO_PLUGINS=1
 
 case "${ROUNDCUBEMAIL_DB_TYPE}" in
@@ -268,10 +287,8 @@ case "${ROUNDCUBEMAIL_DB_TYPE}" in
     *)     db_driver_file="mysql" ;;
 esac
 
-# rc_obj_exists <table> [column]: 0 = DB up AND the object exists (the table, or
-# the given column on that table), 1 = DB up but object absent, 2 = DB
-# unreachable. Driver-agnostic (mysql + pgsql). This ACTUAL-schema signal (not a
-# recorded version) is what lets the schema steps self-heal partial states.
+# rc_obj_exists <table> [column]: 0 = DB up AND object exists, 1 = DB up but
+# object absent, 2 = DB unreachable. Driver-agnostic.
 rc_obj_exists() {
     ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
         define("INSTALL_PATH", getcwd()."/");
@@ -285,8 +302,7 @@ rc_obj_exists() {
     ' "$1" "${2:-}" ) >/dev/null 2>&1
 }
 
-# rc_pkg_versioned <package>: 0 if the package already has a recorded schema
-# version in the `system` table (so its initial create has run); else non-zero.
+# rc_pkg_versioned <package>: 0 if a recorded schema version exists in `system`.
 rc_pkg_versioned() {
     ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
         define("INSTALL_PATH", getcwd()."/");
@@ -300,9 +316,8 @@ rc_pkg_versioned() {
     ' "$1" ) >/dev/null 2>&1
 }
 
-# rc_set_pkg_version <package> <version>: stamp the `system` table so a plugin
-# whose initial.sql does not self-register a version is still recorded as
-# installed — otherwise a reboot would re-run the DESTRUCTIVE initial create.
+# rc_set_pkg_version <package> <version>: stamp `system` so a plugin whose
+# initial.sql doesn't self-register a version is still recorded as installed.
 rc_set_pkg_version() {
     ( cd "${INSTALLDIR}" && php -d error_reporting=0 -r '
         define("INSTALL_PATH", getcwd()."/");
@@ -317,8 +332,7 @@ rc_set_pkg_version() {
     ' "$1" "$2" ) >/dev/null 2>&1
 }
 
-# Wait until the database is genuinely reachable — not just the TCP port, which
-# wait-for-it already checked. Up to ~60s; proceed either way but log loudly.
+# Wait until the database is genuinely reachable (not just the TCP port).
 log "Waiting for database to become ready"
 db_ready=0
 for _ in $(seq 1 60); do
@@ -350,17 +364,8 @@ esac
 
 # --- Enabled-plugin schemas (self-healing) -------------------------------------
 # Roundcube core init does NOT migrate third-party plugin tables. For every
-# enabled plugin shipping SQL/<driver>.initial.sql we reconcile the ACTUAL
-# schema against the recorded version, so a partial/aborted previous run repairs
-# itself instead of looping or destroying data. The schema marker is the first
-# object the initial.sql establishes — a CREATE TABLE, or (for ALTER-only
-# plugins like identity_switch, whose real schema is just an added column) an
-# ALTER TABLE ... ADD <column>:
-#   marker present + version   -> migrate (updatedb)
-#   marker present, no version -> record version only — NEVER re-run initdb,
-#                                 which would DROP a table / duplicate-ADD a column
-#   marker absent              -> (re)create (initdb) + stamp (clears stale version)
-# Plugin SQL is applied via --dir; the plugin's PHP is not loaded (RCUBE_NO_PLUGINS).
+# enabled plugin shipping SQL/<driver>.initial.sql we reconcile the ACTUAL schema
+# against the recorded version, so a partial/aborted previous run repairs itself.
 # Set ROUNDCUBEMAIL_PLUGIN_DB_INIT=0 to opt out entirely.
 if [ "$st" != 2 ] && [ "${ROUNDCUBEMAIL_PLUGIN_DB_INIT:-1}" != "0" ]; then
     IFS=',' read -ra _plugins <<< "${ROUNDCUBEMAIL_PLUGINS}"
@@ -371,13 +376,8 @@ if [ "$st" != 2 ] && [ "${ROUNDCUBEMAIL_PLUGIN_DB_INIT:-1}" != "0" ]; then
         _initial="${_sqldir}/${db_driver_file}.initial.sql"
         [ -f "$_initial" ] || continue
 
-        # newest delta version = what a fresh initial.sql already corresponds to.
-        # The SQL/<driver>/ delta dir is OPTIONAL: a plugin may ship only
-        # <driver>.initial.sql with no deltas (e.g. persistent_login). Guard the
-        # ls — on a missing dir it exits 2, which `set -o pipefail` turns into a
-        # non-zero pipeline -> the `_ver=$(...)` assignment exits non-zero ->
-        # `set -e` kills PID1 and the container restart-loops, silently, before
-        # any per-plugin log line (github.com/eilandert/dockerized#81).
+        # newest delta version. The SQL/<driver>/ delta dir is OPTIONAL; guard the
+        # ls so an absent dir doesn't trip set -o pipefail and kill the script.
         _ver=""
         [ -d "${_sqldir}/${db_driver_file}" ] && \
             _ver="$(ls "${_sqldir}/${db_driver_file}/" 2>/dev/null | sed -n 's/\.sql$//p' | sort -n | tail -1)"
@@ -425,17 +425,7 @@ fi
 
 if [ -n "${CLEAN_INACTIVE_USERS_DAYS:-}" ]; then
     log "Purging users inactive > ${CLEAN_INACTIVE_USERS_DAYS} days"
-    # deluser.sh has an upstream PHP 8.x notice ("Undefined array key host")
-    # when invoked without --host; the purge still works. Drop stderr so the
-    # cosmetic notice doesn't spam the container log; keep the deleted list.
     ( cd "${INSTALLDIR}" && as_rc bin/deluser.sh --age="${CLEAN_INACTIVE_USERS_DAYS}" 2>/dev/null ) || true
 fi
 
-# Healthcheck heartbeat.
-( while kill -0 "$FPM_PID" 2>/dev/null; do
-    [ -S /tmp/run/php-fpm.sock ] && touch /tmp/healthy
-    sleep 30
-  done ) &
-
-log "Starting angie on :8080"
-exec /usr/sbin/angie -c /etc/angie/angie.conf -g 'daemon off;'
+log "init-bootstrap complete — handing off to s6 (php-fpm, angie)"

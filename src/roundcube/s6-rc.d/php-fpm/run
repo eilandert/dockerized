@@ -1,0 +1,15 @@
+#!/bin/sh
+# php-fpm longrun — foreground master, directly supervised by s6 (a kill -9'd
+# master is respawned in ~1s). We ARE the unprivileged roundcube uid; the pool
+# user/group are commented out (a non-root master cannot setuid) so workers
+# inherit our identity. Socket lives on the /tmp tmpfs.
+exec 2>&1
+PHPVERSION="${PHPVERSION:-8.5}"
+
+# A SIGKILL'd master can't unlink its socket; the stale inode then makes the
+# respawn fail ("Another FPM instance seems to already listen ..."). Clear it
+# first — safe, s6 only (re)runs this with no live master.
+[ -S /tmp/run/php-fpm.sock ] && rm -f /tmp/run/php-fpm.sock
+
+exec "/usr/sbin/php-fpm${PHPVERSION}" \
+    --fpm-config "/etc/php/${PHPVERSION}/fpm/php-fpm.conf" -F

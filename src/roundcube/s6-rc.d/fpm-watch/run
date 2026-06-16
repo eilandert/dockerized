@@ -1,0 +1,30 @@
+#!/bin/sh
+# fpm-watch — early wedge detector for the php-fpm www pool. Polls the loopback
+# healthz /fpm-status every 10s and logs to the container stderr the instant the
+# pool looks wedged (no workers / listen queue backing up), instead of waiting
+# ~90s for the docker HEALTHCHECK to flip. Observation only; recovery is handled
+# by request_terminate_timeout + s6 respawn. See the angie image's fpm-watch for
+# the fuller version (persistent log + more metrics).
+exec 2>&1
+URL=http://127.0.0.1:8181/fpm-status
+INTERVAL=10
+log() { echo "$(date '+%Y-%m-%dT%H:%M:%S%z') [fpm-watch] $*"; }
+
+log "started (interval=${INTERVAL}s url=${URL})"
+miss=0
+while true; do
+    sleep "$INTERVAL"
+    body="$(curl -fsS --max-time 5 "$URL" 2>/dev/null)" || body=""
+    if [ -z "$body" ]; then
+        miss=$((miss + 1))
+        log "WARN /fpm-status unreachable (consecutive=${miss}) — pool may be wedged"
+        continue
+    fi
+    [ "$miss" -gt 0 ] && { log "INFO /fpm-status reachable again after ${miss} miss(es)"; miss=0; }
+    lqueue="$(printf '%s\n' "$body" | sed -n 's/^listen queue:[[:space:]]*//p')"
+    total="$(printf '%s\n'  "$body" | sed -n 's/^total processes:[[:space:]]*//p')"
+    [ -n "$lqueue" ] && [ "$lqueue" -ge 1 ] 2>/dev/null && \
+        log "WARN listen queue=${lqueue} backing up — workers not accepting fast enough"
+    [ -n "$total" ] && [ "$total" = "0" ] 2>/dev/null && \
+        log "ALERT total processes=0 — pool has NO workers (wedge)"
+done

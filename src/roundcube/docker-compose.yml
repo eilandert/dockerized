@@ -82,7 +82,10 @@ services:
       CLEAN_INACTIVE_USERS_DAYS: 365
 
     ports:
-      - "8080:8080"        # terminate TLS upstream in production
+      # Bind to loopback: the container trusts X-Forwarded-For from private
+      # ranges, so :8080 must NOT be exposed to an untrusted network. Terminate
+      # TLS at your edge proxy and forward to 127.0.0.1:8080.
+      - "127.0.0.1:8080:8080"
     networks: [rc]
 
     # ---- hardening --------------------------------------------------
@@ -93,8 +96,14 @@ services:
       - conf:/var/roundcube/config
     tmpfs:
       # angie sockets/pid/temp + RC attachment temp live on tmpfs (rootfs is RO).
-      # Owned by the runtime uid so the unprivileged process can write.
-      - /tmp:uid=10001,gid=10001,mode=1770
+      # Owned by the runtime uid so the unprivileged process can write. noexec/
+      # nosuid/nodev: nothing under /tmp is ever executed (opcache uses SHM, JIT
+      # uses anonymous executable memory — not tmpfs), so deny exec there.
+      - /tmp:uid=10001,gid=10001,mode=1770,noexec,nosuid,nodev
+      # s6-overlay rootless scratch (its supervision tree + compiled s6-rc db).
+      # s6 EXECUTES from here, so `exec` is REQUIRED (Docker tmpfs defaults to
+      # noexec; without explicit exec, s6 stage0 dies "Permission denied").
+      - /run:uid=10001,gid=10001,mode=0750,exec,nosuid,nodev
     security_opt:
       - no-new-privileges:true
       - apparmor=docker-default

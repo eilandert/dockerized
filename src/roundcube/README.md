@@ -23,7 +23,8 @@ front of PHP.
 | Runtime | `php8.5-fpm`, minimal extension set, **Snuffleupagus** + a strict source-audited Roundcube ruleset |
 | Cache | tuned **OPcache** + **APCu** |
 | DB | external **MariaDB/MySQL or PostgreSQL** (mandatory; no SQLite) |
-| Config | one file each: [`angie.conf`](angie.conf), [`phpfpm.conf`](phpfpm.conf), [`bootstrap.sh`](bootstrap.sh) |
+| Init | **rootless s6-overlay** PID1 — [`init-bootstrap.sh`](s6-scripts/init-bootstrap.sh) oneshot (setup + DB schema) then php-fpm/angie/fpm-watch longruns ([`s6-rc.d/`](s6-rc.d/)) |
+| Config | one file each: [`angie.conf`](angie.conf) (incl. loopback healthz), [`phpfpm.conf`](phpfpm.conf) |
 
 ## Security & hardening
 
@@ -32,10 +33,12 @@ the **edge** by an Angie WAF, and the **container** by the measures below.
 
 ### Container / image
 
-- **Runs fully unprivileged — no root, anywhere.** PID 1 (bootstrap  the Angie
-  and PHP-FPM masters), every worker, all of it runs as the unprivileged
-  `roundcube` user (`USER roundcube:roundcube` in the image; `user:
-  "10001:10001"` in compose). No root process at any point.
+- **Runs fully unprivileged — no root, anywhere.** PID 1 is **rootless
+  s6-overlay** (`S6_READ_ONLY_ROOT=1`); it, the Angie and PHP-FPM masters, every
+  worker — all of it runs as the unprivileged `roundcube` user (`USER
+  roundcube:roundcube` in the image; `user: "10001:10001"` in compose). No root
+  process at any point. s6 supervises php-fpm + angie, so a killed master is
+  reaped and restarted instead of leaving a silent outage.
 - **Zero Linux capabilities** — `cap_drop: [ALL]` with **no `cap_add`**. Angie
   binds a high port (**:8080**, no `CAP_NET_BIND_SERVICE`); nothing does runtime
   `setuid`/`chown` (the masters are already unprivileged; writable mounts are
@@ -46,8 +49,10 @@ the **edge** by an Angie WAF, and the **container** by the measures below.
   are redirected there so the rest of the rootfs stays immutable.
 - **Codebase read-only to the web/PHP user** — owned `roundcube:roundcube`
   `0440`/`0550`. The web/PHP processes cannot modify a line of code.
-- **No baked secrets** — the Roundcube `des_key` is generated on first boot,
-  unique per deployment, never in an image layer.
+- **No baked secrets** — the Roundcube `des_key` and the Snuffleupagus
+  `secret_key` are each generated on first boot, unique per deployment, persisted
+  on the config volume and never in an image layer (override with a Docker secret
+  or `ROUNDCUBEMAIL_DES_KEY` / `ROUNDCUBEMAIL_SP_SECRET`).
 - **Every setuid/setgid bit stripped** at build time.
 
 ### Runtime (PHP)
@@ -194,14 +199,17 @@ services:
       ROUNDCUBEMAIL_SKIN: elastic
       CLEAN_INACTIVE_USERS_DAYS: 365
     ports:
-      - "8080:8080"        # terminate TLS upstream in production
+      # Loopback only — :8080 trusts X-Forwarded-For from private ranges, so do
+      # not expose it to an untrusted network; terminate TLS at your edge proxy.
+      - "127.0.0.1:8080:8080"
     networks: [rc]
     # ---- hardening ----
     read_only: true        # rootfs is immutable; writes go to the mounts below
     volumes:
       - conf:/var/roundcube/config
     tmpfs:
-      - /tmp:uid=10001,gid=10001,mode=1770
+      - /tmp:uid=10001,gid=10001,mode=1770,noexec,nosuid,nodev
+      - /run:uid=10001,gid=10001,mode=0750,exec,nosuid,nodev   # s6 scratch — exec REQUIRED
     security_opt:
       - no-new-privileges:true
       - apparmor=docker-default
@@ -241,7 +249,7 @@ owned by **uid `10001`**:
 
 - **Named volumes** — nothing to do, they inherit it.
 - **Host bind mounts** — `sudo chown -R 10001:10001 /your/bind/dir`.
-- **tmpfs** — set it inline: `--tmpfs /tmp:uid=10001,gid=10001,mode=1770`.
+- **tmpfs** — set it inline: `--tmpfs /tmp:uid=10001,gid=10001,mode=1770,noexec,nosuid,nodev`.
 
 A *Permission denied* on boot = a writable mount not owned `10001:10001`. The
 fix is always the `chown` — never add a capability back. (The container prints

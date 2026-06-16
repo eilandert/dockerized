@@ -1,0 +1,6 @@
+#!/bin/sh
+# angie longrun (web edge :8080 + loopback healthz :8181). Foreground; s6
+# supervises. Graceful stop via SIGQUIT (./down-signal). Single self-contained
+# config at /etc/angie/angie.conf.
+exec 2>&1
+exec /usr/sbin/angie -c /etc/angie/angie.conf -g 'daemon off;'

@@ -36,7 +36,13 @@
 #     file_put_contents/.php guard is safe.
 
 # ==== Mandatory init ====
-sp.global.secret_key("YOU _DO_ NEED TO CHANGE THIS WITH SOME RANDOM CHARACTERS.");
+# secret_key is injected PER DEPLOYMENT at boot by the s6 init-bootstrap oneshot:
+# it writes a copy of this rulebook onto the writable config volume with the line below replaced by
+# a unique key (Docker secret > env ROUNDCUBEMAIL_SP_SECRET > persisted
+# <config>/.sp_secret > generated), and points sp.configuration_file at that copy.
+# This baked value is a build-time placeholder and is NOT what runs — do not rely
+# on it. (The rootfs is read-only, so this file cannot be rewritten in place.)
+sp.global.secret_key("__SP_SECRET_KEY_REPLACED_AT_BOOT__");
 sp.harden_random.enable();
 
 @condition extension_loaded("xml");
@@ -171,7 +177,7 @@ sp.disable_function.function("getmyuid").drop();
 sp.disable_function.function("getmygid").drop();
 
 # ---- Loadable-code / runtime-module injection ----
-sp.disable_function.function("dl").drop();
+# (dl() is already dropped in the baseline block above.)
 sp.disable_function.function("ini_alter").drop();
 
 # ---- Writing PHP-loadable files: also cover the *_once / stream wrappers
