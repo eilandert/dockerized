@@ -22,6 +22,16 @@ if [ ! -f /etc/angie/angie.conf ]; then
 fi
 cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 
+# Healthz vhost: always (re)install, even when /etc/angie is pre-seeded or
+# bind-mounted (the first-run copy above is skipped once angie.conf exists). The
+# docker HEALTHCHECK and fpm-watch probe the /healthz, /fpm-status and /fpm-ping
+# endpoints this vhost serves on loopback; a bind-mounted config that lacks it
+# would report the container unhealthy forever.
+if [ -f /etc/angie.orig/sites-enabled/healthz ]; then
+    mkdir -p /etc/angie/sites-enabled
+    cp /etc/angie.orig/sites-enabled/healthz /etc/angie/sites-enabled/healthz
+fi
+
 # Snakeoil fallback cert
 if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ] || [ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then
     if command -v make-ssl-cert >/dev/null 2>&1; then

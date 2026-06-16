@@ -22,6 +22,16 @@ if [ ! -f /etc/nginx/nginx.conf ]; then
 fi
 cp -r /etc/modsecurity.orig/* /etc/modsecurity/
 
+# Healthz vhost: always (re)install, even when /etc/nginx is pre-seeded or
+# bind-mounted (the first-run copy above is skipped once nginx.conf exists). The
+# docker HEALTHCHECK and fpm-watch probe the /healthz, /fpm-status and /fpm-ping
+# endpoints this vhost serves on loopback; a bind-mounted config that lacks it
+# would report the container unhealthy forever.
+if [ -f /etc/nginx.orig/sites-enabled/healthz ]; then
+    mkdir -p /etc/nginx/sites-enabled
+    cp /etc/nginx.orig/sites-enabled/healthz /etc/nginx/sites-enabled/healthz
+fi
+
 # Snakeoil fallback cert
 if [ ! -f /etc/ssl/certs/ssl-cert-snakeoil.pem ] || [ ! -f /etc/ssl/private/ssl-cert-snakeoil.key ]; then
     if command -v make-ssl-cert >/dev/null 2>&1; then

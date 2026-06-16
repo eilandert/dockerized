@@ -92,7 +92,11 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          # FTS flatcurve (Xapian, C++) indexing spikes RAM in indexer-worker;
+          # 512M OOMs it with `std::bad_alloc` + signal 6 (NOT a cgroup kill —
+          # malloc returns NULL, operator new aborts). substring_search=yes in
+          # 90-fts-flatcurve.conf amplifies it. 1G headroom for indexing.
+          memory: 1G
           pids: 512
     logging:
       driver: json-file

@@ -70,6 +70,30 @@ if [[ -z "$PUSH_ARG" && "${LOAD:-0}" == "1" ]]; then
     log_info "Load enabled — images will be imported into the local docker daemon"
 fi
 
+# Ensure all git submodules are present + checked out before anything reads them.
+# Several targets bake their source from nested submodules (olefied, yarad,
+# rspamd-dcc-razor-pyzor); a host with an empty or stale submodule checkout would
+# build missing/outdated code. generate.sh (below) reads these trees, so sync
+# first and hard-fail if it can't.
+#   DOCKERIZED_SUBMODULE_REMOTE=1  → pull each submodule's tracked-branch tip
+#                                    (latest code) instead of the recorded pin.
+#   DOCKERIZED_NO_SUBMODULE_SYNC=1 → skip entirely (offline builds).
+if [[ "${DOCKERIZED_NO_SUBMODULE_SYNC:-0}" != "1" ]]; then
+    _SM_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null)"
+    if [[ -n "$_SM_ROOT" ]]; then
+        _SM_REMOTE=""
+        [[ "${DOCKERIZED_SUBMODULE_REMOTE:-0}" == "1" ]] && _SM_REMOTE="--remote"
+        log_info "Syncing git submodules (recursive${_SM_REMOTE:+, remote tips})..."
+        git -C "$_SM_ROOT" submodule sync --recursive >/dev/null 2>&1 || true
+        if ! git -C "$_SM_ROOT" submodule update --init --recursive $_SM_REMOTE; then
+            log_error "git submodule update failed — sources may be missing/stale"
+            exit 1
+        fi
+    else
+        log_warning "Not a git checkout — skipping submodule sync"
+    fi
+fi
+
 # Remote aptly sync — track failure so it shows up in the final summary
 # instead of silently letting the rest of the run use stale packages.
 APTLY_SYNC_OK=1

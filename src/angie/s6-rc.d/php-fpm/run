@@ -11,6 +11,17 @@
 exec 2>&1
 [ -s /run/angie/ld_preload ] && export LD_PRELOAD="$(cat /run/angie/ld_preload)"
 
+# Non-PHP image (Dockerfile-deb / -ubu): no /usr/sbin/php-fpm binary and no pool
+# to run. init-bootstrap and fpm-watch already no-op in this case; do the same
+# here so s6 doesn't respawn-loop trying to exec a missing master every ~1s. The
+# php-fpm service is still enabled (s6-rc.d is shared across all image variants),
+# and angie depends on it, so we must stay running (idle) rather than exit — an
+# exit would loop-respawn, and a non-zero exit could wedge angie's dependency.
+if [ -z "${PHPVERSION:-}" ] && [ "${MODE:-}" != "MULTI" ]; then
+    echo "[php-fpm] non-PHP image (no PHPVERSION, MODE!=MULTI) — nothing to run; idling" >&2
+    while true; do sleep 3600; done
+fi
+
 # A SIGKILL'd master cannot unlink its unix socket; the stale inode then makes a
 # respawn fail with "Another FPM instance seems to already listen on ...sock".
 # Clear stale pool sockets first (real sockets only — never the healthz-fpm.sock
