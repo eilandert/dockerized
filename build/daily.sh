@@ -70,6 +70,14 @@ else
     echo "[daily] all targets built + pushed — no alert"
 fi
 
+# --- sync Docker Hub long-descriptions from each src/<img>/README.md -----------
+# Images were just pushed above; keep every Hub overview page in lock-step with
+# its README.md. Non-fatal: a README-sync hiccup must never fail the build job.
+if [[ "$PUSH" == 1 ]]; then
+    echo "[daily] syncing Docker Hub READMEs"
+    "$REPO_DIR/push-dockerhub-readmes.sh" || echo "[daily] README sync failed (non-fatal)" >&2
+fi
+
 rm -f "$RUN_LOG"
 echo "[daily] done: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 exit "$RC"
