@@ -352,8 +352,16 @@ if [ "$st" != 2 ] && [ "${ROUNDCUBEMAIL_PLUGIN_DB_INIT:-1}" != "0" ]; then
         _initial="${_sqldir}/${db_driver_file}.initial.sql"
         [ -f "$_initial" ] || continue
 
-        # newest delta version = what a fresh initial.sql already corresponds to
-        _ver="$(ls "${_sqldir}/${db_driver_file}/" 2>/dev/null | sed -n 's/\.sql$//p' | sort -n | tail -1)"
+        # newest delta version = what a fresh initial.sql already corresponds to.
+        # The SQL/<driver>/ delta dir is OPTIONAL: a plugin may ship only
+        # <driver>.initial.sql with no deltas (e.g. persistent_login). Guard the
+        # ls — on a missing dir it exits 2, which `set -o pipefail` turns into a
+        # non-zero pipeline -> the `_ver=$(...)` assignment exits non-zero ->
+        # `set -e` kills PID1 and the container restart-loops, silently, before
+        # any per-plugin log line (github.com/eilandert/dockerized#81).
+        _ver=""
+        [ -d "${_sqldir}/${db_driver_file}" ] && \
+            _ver="$(ls "${_sqldir}/${db_driver_file}/" 2>/dev/null | sed -n 's/\.sql$//p' | sort -n | tail -1)"
 
         # schema marker: a created table, else an added column (table + column)
         _mtable="$(sed -n -E 's/.*CREATE TABLE([[:space:]]+IF NOT EXISTS)?[[:space:]]+`?([A-Za-z0-9_]+)`?.*/\2/Ip' "$_initial" | head -1)"
