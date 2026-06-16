@@ -1,9 +1,9 @@
 [submodule "src/rspamd-dcc-razor-pyzor"]
 	path = src/rspamd-dcc-razor-pyzor
 	url = git@github.com:eilandert/rspamd-dcc-razor-pyzor.git
-[submodule "src/olefied"]
-	path = src/olefied
-	url = git@github.com:eilandert/olefied.git
-[submodule "src/yarad"]
-	path = src/yarad
-	url = git@github.com:eilandert/yarad.git
+[submodule "src/rspamd-olefy"]
+	path = src/rspamd-olefy
+	url = git@github.com:eilandert/rspamd-olefy.git
+[submodule "src/rspamd-yarad"]
+	path = src/rspamd-yarad
+	url = git@github.com:eilandert/rspamd-yarad.git

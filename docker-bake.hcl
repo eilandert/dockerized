@@ -689,25 +689,25 @@ target "debian-rspamd-drp" {
    dockerfile = "Dockerfile-deb"
 }
 # olefied — production olefy (oletools-over-TCP) for rspamd: pooled workers +
-# scan timeout + backpressure. Own git repo (eilandert/olefied), submodule at
-# src/olefied. Dockerfile pulls olefy.py + requirements.txt FRESH from upstream
+# scan timeout + backpressure. Own git repo (eilandert/rspamd-olefy), submodule at
+# src/rspamd-olefy. Dockerfile pulls olefy.py + requirements.txt FRESH from upstream
 # HeinleinSupport/olefy at build time, so CACHEBUST=${BUILD_DATE} makes the daily
 # rebuild re-pull the latest. Built from the repo ROOT context (the Dockerfile
-# COPYs docker/olefyd.py etc. from there), so context=src/olefied.
+# COPYs docker/olefyd.py etc. from there), so context=src/rspamd-olefy.
 target "debian-olefied" {
-   tags = ["docker.io/eilandert/olefied:debian", "docker.io/eilandert/olefied:latest"]
-   context = "src/olefied"
+   tags = ["docker.io/eilandert/rspamd-olefy:debian", "docker.io/eilandert/rspamd-olefy:latest"]
+   context = "src/rspamd-olefy"
    dockerfile = "docker/Dockerfile"
    args = { CACHEBUST = "${BUILD_DATE}" }
 }
 # yarad — YARA scanner backend for rspamd (rspamd has no native YARA module).
-# Own git repo (eilandert/yarad), submodule at src/yarad. Go + libyara (CGO,
+# Own git repo (eilandert/rspamd-yarad), submodule at src/rspamd-yarad. Go + libyara (CGO,
 # static libyara), distroless. The image bakes public rulesets (YARA-Forge +
 # signature-base + ANY.RUN) at build time, so CACHEBUST=${BUILD_DATE} makes the
 # daily rebuild re-pull the latest rules. Built from the repo ROOT context.
 target "debian-yarad" {
-   tags = ["docker.io/eilandert/yarad:debian", "docker.io/eilandert/yarad:latest"]
-   context = "src/yarad"
+   tags = ["docker.io/eilandert/rspamd-yarad:debian", "docker.io/eilandert/rspamd-yarad:latest"]
+   context = "src/rspamd-yarad"
    dockerfile = "docker/Dockerfile"
    args = { CACHEBUST = "${BUILD_DATE}" }
 }
