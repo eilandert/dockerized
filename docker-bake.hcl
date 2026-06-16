@@ -204,7 +204,7 @@ group "apache-misc" {
 
 group "mail" {
     targets = [
-       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot", "debian-olefied" ]
+       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot", "debian-olefied", "debian-yarad" ]
 }
 
 group "db" {
@@ -697,6 +697,17 @@ target "debian-rspamd-drp" {
 target "debian-olefied" {
    tags = ["docker.io/eilandert/olefied:debian", "docker.io/eilandert/olefied:latest"]
    context = "src/olefied"
+   dockerfile = "docker/Dockerfile"
+   args = { CACHEBUST = "${BUILD_DATE}" }
+}
+# yarad — YARA scanner backend for rspamd (rspamd has no native YARA module).
+# Own git repo (eilandert/yarad), submodule at src/yarad. Go + libyara (CGO,
+# static libyara), distroless. The image bakes public rulesets (YARA-Forge +
+# signature-base + ANY.RUN) at build time, so CACHEBUST=${BUILD_DATE} makes the
+# daily rebuild re-pull the latest rules. Built from the repo ROOT context.
+target "debian-yarad" {
+   tags = ["docker.io/eilandert/yarad:debian", "docker.io/eilandert/yarad:latest"]
+   context = "src/yarad"
    dockerfile = "docker/Dockerfile"
    args = { CACHEBUST = "${BUILD_DATE}" }
 }

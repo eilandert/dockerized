@@ -4,3 +4,6 @@
 [submodule "src/olefied"]
 	path = src/olefied
 	url = git@github.com:eilandert/olefied.git
+[submodule "src/yarad"]
+	path = src/yarad
+	url = git@github.com:eilandert/yarad.git
