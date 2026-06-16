@@ -204,7 +204,7 @@ group "apache-misc" {
 
 group "mail" {
     targets = [
-       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot" ]
+       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot", "debian-olefied" ]
 }
 
 group "db" {
@@ -687,6 +687,18 @@ target "debian-rspamd-drp" {
    tags = ["docker.io/eilandert/rspamd-dcc-razor-pyzor:debian", "docker.io/eilandert/rspamd-dcc-razor-pyzor:latest"]
    context = "src/rspamd-dcc-razor-pyzor/docker"
    dockerfile = "Dockerfile-deb"
+}
+# olefied — production olefy (oletools-over-TCP) for rspamd: pooled workers +
+# scan timeout + backpressure. Own git repo (eilandert/olefied), submodule at
+# src/olefied. Dockerfile pulls olefy.py + requirements.txt FRESH from upstream
+# HeinleinSupport/olefy at build time, so CACHEBUST=${BUILD_DATE} makes the daily
+# rebuild re-pull the latest. Built from the repo ROOT context (the Dockerfile
+# COPYs docker/olefyd.py etc. from there), so context=src/olefied.
+target "debian-olefied" {
+   tags = ["docker.io/eilandert/olefied:debian", "docker.io/eilandert/olefied:latest"]
+   context = "src/olefied"
+   dockerfile = "docker/Dockerfile"
+   args = { CACHEBUST = "${BUILD_DATE}" }
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]

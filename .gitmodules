@@ -1,3 +1,6 @@
 [submodule "src/rspamd-dcc-razor-pyzor"]
 	path = src/rspamd-dcc-razor-pyzor
 	url = git@github.com:eilandert/rspamd-dcc-razor-pyzor.git
+[submodule "src/olefied"]
+	path = src/olefied
+	url = git@github.com:eilandert/olefied.git
