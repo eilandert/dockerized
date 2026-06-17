@@ -115,13 +115,31 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     # vimbadmin maildir-scan accounting scripts removed: quota usage is tracked
     # live by the quota-clone plugin (dovecot_quota table); no helper scripts.
     apt-get -y autoremove --purge ;\
+    # The packaged 10-ssl.conf ships `ssl_server_prefer_ciphers = yes`, an
+    # invalid value in dovecot 2.4 (it takes client|server) — a fatal parse
+    # error. Fix it BEFORE the sievec calls below: sievec runs doveconf over
+    # the live /etc/dovecot, and an invalid value there aborts compilation.
+    # The `mv /etc/dovecot /etc/dovecot.orig` further down carries this fixed
+    # file into the seed template, so no second pass is needed.
+    sed -ri 's/^(\s*ssl_server_prefer_ciphers\s*=\s*)yes\s*$/\1server/' \
+        /etc/dovecot/conf.d/10-ssl.conf ;\
     # ---- compile the DRP imapsieve scripts to .svbin. The rootfs is read-only
     #      at runtime, so dovecot cannot compile them on first use; pre-compile
-    #      here. The vnd.dovecot.pipe extension is provided by sieve_extprograms
-    #      (pulled in by dovecot-sieve). ----
+    #      here. The vnd.dovecot.pipe extension (and the pipe command's `:copy`
+    #      tag) come from sieve_extprograms, which is wired up by 90-drp-sieve.conf
+    #      (sieve_plugins + sieve_extensions). That file is normally only dropped
+    #      into conf.d by bootstrap.sh at boot, so it is absent during the build.
+    #      Standalone `sievec -P/-x` cannot fully replicate the config path (the
+    #      :copy tag is registered from the loaded extension context, which the
+    #      command-line plugin load does not populate the same way), so seed the
+    #      real config for the compile, then remove it again before the `mv`
+    #      below so the seed template stays untouched — bootstrap re-drops the
+    #      same file from /usr/local/share at runtime. ----
+    cp /usr/local/share/dovecot/90-drp-sieve.conf /etc/dovecot/conf.d/90-drp-sieve.conf ;\
     mkdir -p /usr/lib/dovecot/sieve-pipe ;\
     sievec /usr/lib/dovecot/sieve/report-spam.sieve ;\
     sievec /usr/lib/dovecot/sieve/report-ham.sieve ;\
+    rm -f /etc/dovecot/conf.d/90-drp-sieve.conf ;\
     # ---- syslog-ng: make /etc/syslog-ng a symlink to the /tmp tmpfs so the
     #      config (and the runtime-generated conf.d/remote.conf) is writable
     #      even under a read-only rootfs. The real default config is stashed in
@@ -157,11 +175,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     chown root:root /etc/dovecot.orig/private/dovecot.key /etc/dovecot.orig/private/dovecot.pem ;\
     chmod 0400 /etc/dovecot.orig/private/dovecot.key ;\
     chmod 0444 /etc/dovecot.orig/private/dovecot.pem ;\
-    # The packaged 10-ssl.conf ships `ssl_server_prefer_ciphers = yes`, an
-    # invalid value in dovecot 2.4 (it takes client|server) — a fatal parse
-    # error. Fix it in the template so the seeded config is valid out of box.
-    sed -ri 's/^(\s*ssl_server_prefer_ciphers\s*=\s*)yes\s*$/\1server/' \
-        /etc/dovecot.orig/conf.d/10-ssl.conf ;\
     # ---- jemalloc tuning (read by libjemalloc when selected at runtime) ----
     echo "background_thread:true,metadata_thp:auto" > /etc/malloc.conf ;\
     # ---- strip every setuid/setgid bit (defence in depth). Dovecot does its
