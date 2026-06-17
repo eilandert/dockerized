@@ -165,6 +165,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     fetch skins/elastic-dark https://github.com/tborychowski/elastic-dark/archive/025201f605d817f6ff117ee7ce8910aa0b7511ba.tar.gz & \
     fetch skins/elastic2025  https://github.com/bijanbina/Elastic2025/archive/e54548a6feb339849288ee4bbe456c459112f70d.tar.gz & \
     wait ;\
+    # ---- quota plugin: guard undefined 'percent' key ----
+    # jfcherng plugin-quota reads $args['percent'] in quota_message() even when
+    # the IMAP server returns no QUOTA (unlimited mailbox) and the key is unset,
+    # spamming "Undefined array key percent" PHP warnings. Default to 0.
+    sed -ri "s/\\\$args\\['percent'\\] >= \\\$percent/(\\\$args['percent'] ?? 0) >= \\\$percent/" \
+        plugins/quota/quota.php ;\
     # Local custom skins staged by the COPY above (drop README/thumbnail-only
     # cruft is fine; both extend elastic which is present).
     cp -a /usr/local/share/roundcube-skins/gmail      skins/gmail ;\

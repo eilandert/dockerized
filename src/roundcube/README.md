@@ -6,6 +6,14 @@ run as a non-root user (uid 10001), the container holds **zero Linux
 capabilities**, the root filesystem is **read-only**, and an Angie WAF sits in
 front of PHP.
 
+You bring an IMAP/SMTP server (your own mail host) and a database; the image
+brings the webmail front-end. The bundled `docker-compose.yml` includes a
+hardened MariaDB so you can be running in two commands.
+
+**Just want it running?** Jump to [Quick start](#quick-start). Curious *how* it's
+locked down? See [Security & hardening](#security--hardening). Want to know which
+plugins/skins ship? See [Bundled plugins & skins](#bundled-plugins--skins).
+
 ## Links
 
 - **Image source / this repo:** <https://github.com/eilandert/dockerized/tree/master/src/roundcube>
@@ -242,7 +250,7 @@ The compose file bundles a hardened MariaDB; point `ROUNDCUBEMAIL_DEFAULT_HOST`
 production (terminate at your edge proxy, forward the real client IP via
 `X-Forwarded-For`). The container listens on **:8080** only.
 
-##  Mount ownership (because the container can't chown)
+## Mount ownership (because the container can't chown)
 
 `cap_drop: [ALL]` removes `CAP_CHOWN`, so any **writable** mount must already be
 owned by **uid `10001`**:
