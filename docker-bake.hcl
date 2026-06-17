@@ -3,6 +3,10 @@
 #     docker buildx bake nginx --push
 variable "VCS_REF"    { default = "unknown" }
 variable "BUILD_DATE" { default = "unknown" }
+# yarad's own source version (git describe of src/rspamd-yarad), baked into the
+# binary's main.version and surfaced on its /version endpoint. daily.sh exports
+# it; defaults to "dev" for an ad-hoc build that doesn't set it.
+variable "YARAD_VERSION" { default = "dev" }
 
 # Shared metadata args. Targets inherit this to receive VCS_REF / BUILD_DATE
 # without repeating the args block.
@@ -709,7 +713,7 @@ target "debian-yarad" {
    tags = ["docker.io/eilandert/rspamd-yarad:debian", "docker.io/eilandert/rspamd-yarad:latest"]
    context = "src/rspamd-yarad"
    dockerfile = "docker/Dockerfile"
-   args = { CACHEBUST = "${BUILD_DATE}" }
+   args = { CACHEBUST = "${BUILD_DATE}", VERSION = "${YARAD_VERSION}" }
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]
