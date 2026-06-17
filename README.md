@@ -1,6 +1,10 @@
 # Dockerized — container images that match the deb.myguard.nl stack
 
-A monorepo of Dockerfiles and a Buildx orchestrator for the same web/mail/DB stack that powers [deb.myguard.nl](https://deb.myguard.nl). The container images are built against the **same hardened nginx, Angie, ModSecurity, PHP, Postfix, Dovecot, rspamd and openssl-nginx packages** published at [deb.myguard.nl](https://deb.myguard.nl) — so what you run in a container matches what you'd get from `apt install` on a Debian/Ubuntu box pointed at the repo.
+**In short:** these are Docker images for the same web/mail/DB stack that runs [deb.myguard.nl](https://deb.myguard.nl), built straight from the hardened Debian/Ubuntu packages that site publishes.
+
+This is a monorepo: a directory of Dockerfiles plus a Buildx orchestrator that builds them in the right order. Every image is built on top of the **same hardened packages** — nginx, Angie, ModSecurity, PHP, Postfix, Dovecot, rspamd, openssl-nginx — published at [deb.myguard.nl](https://deb.myguard.nl). The upshot: running one of these containers gets you exactly what `apt install` would give you on a Debian/Ubuntu box pointed at the repo, with none of the manual setup.
+
+New here? Read [Scope](#scope) for what's included, then [Quick start](#quick-start) to build something.
 
 Want to chat, file bugs, suggest a module? Join the Discord: **[discord.gg/UQNsFg2y](https://discord.gg/UQNsFg2y)**.
 
@@ -10,8 +14,8 @@ Numbers are derived from `build/config.sh` and `docker-bake.hcl` — run the com
 
 - **Base distros:** Ubuntu `resolute` (rolling) and Debian `trixie`, plus a few Alpine targets where it matters (rspamd, letsencrypt, unbound)
 - **PHP versions:** `5.6`, `7.4`, `8.0`, `8.2`, `8.4`, `8.5` (six branches; see `PHP_VERSIONS` in [build/config.sh](build/config.sh))
-- **Build targets:** **85** — `grep -c '^target ' docker-bake.hcl`
-- **Source components:** **21** subdirectories under [src/](src/)
+- **Build targets:** **89** — one image variant each; count with `grep -c '^target ' docker-bake.hcl`
+- **Source components:** **24** subdirectories under [src/](src/), one per service
 - **Registry prefix:** `docker.io/eilandert/<image>` (see `DOCKER_REGISTRY_PREFIX` in `build/config.sh`)
 
 ## Repository layout
@@ -20,15 +24,15 @@ Numbers are derived from `build/config.sh` and `docker-bake.hcl` — run the com
 dockerized/
 ├── buildx.sh                # wrapper → build/buildx-sequential.sh
 ├── generate.sh              # wrapper → build/generate.sh
-├── docker-bake.hcl          # 85 targets + groups (base, phpfpm, nginx, angie, mail, db, …)
-├── build/
+├── docker-bake.hcl          # 89 targets + groups (base, phpfpm, nginx, angie, mail, db, …)
+├── build/                   # the build machinery (you rarely edit these directly)
 │   ├── buildx-sequential.sh # orchestrator — builds one target at a time, in layer order
 │   ├── generate.sh          # walks src/<component>/.generate.sh in dependency order
 │   ├── generate-lib.sh      # shared template helpers
 │   ├── config.sh            # distro versions, PHP versions, registry prefix, version markers
 │   └── monitor-builds.sh    # tail/inspect helper for long bake runs
-└── src/                     # one directory per component (21 total)
-    ├── base/                       # ubuntu-base + debian-base
+└── src/                     # one directory per component (24 total) — this is where you make changes
+    ├── base/                       # ubuntu-base + debian-base (everything else builds on these)
     ├── php-fpm/                    # php-fpm 5.6 … 8.5, both distros
     ├── nginx/                      # nginx + ModSecurity3 + PageSpeed (matches deb.myguard.nl nginx)
     ├── angie/                      # Angie-nextgen build (matches deb.myguard.nl angie)
@@ -38,7 +42,10 @@ dockerized/
     ├── postfix/                    # SMTP, paired with the deb.myguard.nl postfix package
     ├── dovecot-ubuntu/             # IMAP/POP3 (debian-dovecot target)
     ├── rspamd-git/                 # rspamd (git/HEAD + stable variants)
-    ├── roundcube/                  # webmail
+    ├── rspamd-dcc-razor-pyzor/     # rspamd DCC/Razor/Pyzor backends (+ gozer)
+    ├── rspamd-olefy/               # rspamd OLE/Office-document scanning sidecar
+    ├── rspamd-yarad/               # rspamd YARA rule daemon
+    ├── roundcube/                  # webmail (hardened — see src/roundcube/README.md)
     ├── vimbadmin/                  # mail admin UI
     ├── unbound/  rbldnsd/          # recursive DNS + RBL DNS
     ├── openssh/                    # ssh daemon image

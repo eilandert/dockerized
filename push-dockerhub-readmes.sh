@@ -23,8 +23,7 @@ TOKEN=$(curl -s -H "Content-Type: application/json" \
 for dir in "$SRC_DIR"/*/; do
   repo=$(basename "$dir")
   # README.md is canonical; DOCKERHUB.md kept only for not-yet-migrated images.
-  if [ -r "$dir/DOCKERHUB.md" ]; then md="$dir/DOCKERHUB.md"
-  elif [ -r "$dir/README.md" ]; then md="$dir/README.md"
+  if [ -r "$dir/README.md" ]; then md="$dir/README.md"
   else continue; fi
   code=$(jq -Rs '{full_description: .}' "$md" | \
     curl -s -o /dev/null -w '%{http_code}' -X PATCH \
