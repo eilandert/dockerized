@@ -205,7 +205,7 @@ if [ "${CREATE:-}" = "YES" ]; then
 fi
 
 run_with_conflict_retry publish-update \
-    aptly -architectures=amd64,arm64,all publish update -gpg-key=67F9C3D8456D7F62 "${DIST}" "filesystem:${REPO}:."
+    aptly -architectures=amd64,arm64,all publish update -force-overwrite -gpg-key=67F9C3D8456D7F62 "${DIST}" "filesystem:${REPO}:."
 
 if [ -f /aptly/bin/dbcleanupcounter.sh ]; then
     /aptly/bin/dbcleanupcounter.sh

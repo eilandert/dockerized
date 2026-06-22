@@ -20,12 +20,29 @@ TOKEN=$(curl -s -H "Content-Type: application/json" \
   https://hub.docker.com/v2/users/login/ | jq -r '.token // empty')
 [ -n "$TOKEN" ] || { echo "login failed (rotate PAT?)" >&2; exit 1; }
 
+# Docker Hub caps full_description at 25000 BYTES (UTF-8); longer bodies 400.
+LIMIT=25000
+
 for dir in "$SRC_DIR"/*/; do
   repo=$(basename "$dir")
   # README.md is canonical; DOCKERHUB.md kept only for not-yet-migrated images.
   if [ -r "$dir/README.md" ]; then md="$dir/README.md"
   else continue; fi
-  code=$(jq -Rs '{full_description: .}' "$md" | \
+  body=$(cat "$md")
+  if [ "$(wc -c < "$md")" -gt "$LIMIT" ]; then
+    gh="https://github.com/$NS/$repo"
+    top=$'> ⚠️ **THIS README IS TOO LONG — Docker Hub caps descriptions at '"$LIMIT"$' bytes.**\n> **See the full README on GitHub: '"$gh"$'**\n\n---\n\n'
+    bot=$'\n\n---\n\n> ⚠️ **TRUNCATED — see the full README on GitHub: '"$gh"$'**\n'
+    bbytes=$(printf '%s%s' "$top" "$bot" | wc -c)
+    # byte-budget the body (UTF-8), then cut to last line boundary so no
+    # partial multibyte char survives. 64-byte margin for safety.
+    budget=$((LIMIT - bbytes - 64))
+    mid=$(head -c "$budget" "$md")
+    mid=${mid%$'\n'*}
+    body="$top$mid$bot"
+    echo "$repo: README too long, truncated to $(printf '%s' "$body" | wc -c) bytes" >&2
+  fi
+  code=$(printf '%s' "$body" | jq -Rs '{full_description: .}' | \
     curl -s -o /dev/null -w '%{http_code}' -X PATCH \
       -H "Authorization: JWT $TOKEN" -H "Content-Type: application/json" \
       -d @- "https://hub.docker.com/v2/repositories/$NS/$repo/")
