@@ -3,10 +3,10 @@
 #     docker buildx bake nginx --push
 variable "VCS_REF"    { default = "unknown" }
 variable "BUILD_DATE" { default = "unknown" }
-# yarad's own source version (git describe of src/rspamd-yarad), baked into the
+# yarad's own source version (git describe of src/mailstrix), baked into the
 # binary's main.version and surfaced on its /version endpoint. daily.sh exports
 # it; defaults to "dev" for an ad-hoc build that doesn't set it.
-variable "YARAD_VERSION" { default = "dev" }
+variable "MAILSTRIX_VERSION" { default = "dev" }
 
 # Shared metadata args. Targets inherit this to receive VCS_REF / BUILD_DATE
 # without repeating the args block.
@@ -208,7 +208,7 @@ group "apache-misc" {
 
 group "mail" {
     targets = [
-       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot", "debian-olefied", "debian-yarad" ]
+       "ubuntu-postfix", "debian-postfix", "debian-rspamd-git", "debian-rspamd", "debian-rspamd-official", "ubuntu-rspamd", "debian-rspamd-drp", "debian-dovecot", "debian-olefied", "debian-mailstrix" ]
 }
 
 group "db" {
@@ -705,15 +705,15 @@ target "debian-olefied" {
    args = { CACHEBUST = "${BUILD_DATE}" }
 }
 # yarad — YARA scanner backend for rspamd (rspamd has no native YARA module).
-# Own git repo (eilandert/rspamd-yarad), submodule at src/rspamd-yarad. Go + libyara (CGO,
+# Own git repo (eilandert/mailstrix), submodule at src/mailstrix. Go + libyara (CGO,
 # static libyara), distroless. The image bakes public rulesets (YARA-Forge +
 # signature-base + ANY.RUN) at build time, so CACHEBUST=${BUILD_DATE} makes the
 # daily rebuild re-pull the latest rules. Built from the repo ROOT context.
-target "debian-yarad" {
-   tags = ["docker.io/eilandert/rspamd-yarad:debian", "docker.io/eilandert/rspamd-yarad:latest"]
-   context = "src/rspamd-yarad"
+target "debian-mailstrix" {
+   tags = ["docker.io/eilandert/mailstrix:debian", "docker.io/eilandert/mailstrix:latest"]
+   context = "src/mailstrix"
    dockerfile = "docker/Dockerfile"
-   args = { CACHEBUST = "${BUILD_DATE}", VERSION = "${YARAD_VERSION}" }
+   args = { CACHEBUST = "${BUILD_DATE}", VERSION = "${MAILSTRIX_VERSION}" }
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]

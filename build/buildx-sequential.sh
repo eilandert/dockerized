@@ -71,7 +71,7 @@ if [[ -z "$PUSH_ARG" && "${LOAD:-0}" == "1" ]]; then
 fi
 
 # Ensure all git submodules are present + checked out before anything reads them.
-# Several targets bake their source from nested submodules (olefied, yarad,
+# Several targets bake their source from nested submodules (olefied, mailstrix,
 # rspamd-dcc-razor-pyzor); a host with an empty or stale submodule checkout would
 # build missing/outdated code. generate.sh (below) reads these trees, so sync
 # first and hard-fail if it can't.

@@ -4,6 +4,6 @@
 [submodule "src/rspamd-olefy"]
 	path = src/rspamd-olefy
 	url = git@github.com:eilandert/rspamd-olefy.git
-[submodule "src/rspamd-yarad"]
-	path = src/rspamd-yarad
-	url = git@github.com:eilandert/rspamd-yarad.git
+[submodule "src/mailstrix"]
+	path = src/mailstrix
+	url = git@github.com:eilandert/mailstrix.git

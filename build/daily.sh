@@ -46,8 +46,8 @@ export VCS_REF="$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo 
 export BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # yarad's own source version (its submodule, not the dockerized superrepo) for
 # its main.version ldflag / /version endpoint.
-export YARAD_VERSION="$(git -C "$REPO_DIR/src/rspamd-yarad" describe --tags --always 2>/dev/null || echo dev)"
-echo "[daily] VCS_REF=$VCS_REF BUILD_DATE=$BUILD_DATE YARAD_VERSION=$YARAD_VERSION"
+export MAILSTRIX_VERSION="$(git -C "$REPO_DIR/src/mailstrix" describe --tags --always 2>/dev/null || echo dev)"
+echo "[daily] VCS_REF=$VCS_REF BUILD_DATE=$BUILD_DATE MAILSTRIX_VERSION=$MAILSTRIX_VERSION"
 
 # --- run the orchestrator, capturing output for the summary --------------------
 RUN_LOG="$(mktemp /tmp/dockerized-daily-run.XXXXXX.log)"
