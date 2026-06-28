@@ -7,6 +7,10 @@ variable "BUILD_DATE" { default = "unknown" }
 # binary's main.version and surfaced on its /version endpoint. daily.sh exports
 # it; defaults to "dev" for an ad-hoc build that doesn't set it.
 variable "MAILSTRIX_VERSION" { default = "dev" }
+# The nearest published release tag (e.g. 1.0.0), from `git describe --abbrev=0`.
+# debian-mailstrix's Dockerfile.release downloads the per-arch release binaries
+# from this tag and tags the image with it. Must name a release that has assets.
+variable "MAILSTRIX_RELEASE" { default = "" }
 
 # Shared metadata args. Targets inherit this to receive VCS_REF / BUILD_DATE
 # without repeating the args block.
@@ -710,10 +714,17 @@ target "debian-olefied" {
 # signature-base + ANY.RUN) at build time, so CACHEBUST=${BUILD_DATE} makes the
 # daily rebuild re-pull the latest rules. Built from the repo ROOT context.
 target "debian-mailstrix" {
-   tags = ["docker.io/eilandert/mailstrix:debian", "docker.io/eilandert/mailstrix:latest"]
+   # Multi-arch from the GitHub release binaries (Dockerfile.release ADDs the
+   # per-arch strixd/strix-scan by TARGETARCH, no Go/libyara compile under QEMU);
+   # only the native yarac rules-compile runs emulated. The final image is
+   # distroless (not a debian: image), so the old :debian tag was wrong and is
+   # dropped — :latest + the version tag are a multi-arch manifest list.
+   tags = ["docker.io/eilandert/mailstrix:latest", "docker.io/eilandert/mailstrix:${MAILSTRIX_RELEASE}"]
    context = "src/mailstrix"
-   dockerfile = "docker/Dockerfile"
-   args = { CACHEBUST = "${BUILD_DATE}", VERSION = "${MAILSTRIX_VERSION}" }
+   dockerfile = "docker/Dockerfile.release"
+   platforms = ["linux/amd64", "linux/arm64"]
+   # VERSION = the release tag whose per-arch binaries Dockerfile.release pulls.
+   args = { CACHEBUST = "${BUILD_DATE}", VERSION = "${MAILSTRIX_RELEASE}" }
 }
 target "debian-sitewarmup" {
    tags = ["docker.io/eilandert/sitemap_warmup"]

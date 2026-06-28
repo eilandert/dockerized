@@ -47,7 +47,12 @@ export BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # yarad's own source version (its submodule, not the dockerized superrepo) for
 # its main.version ldflag / /version endpoint.
 export MAILSTRIX_VERSION="$(git -C "$REPO_DIR/src/mailstrix" describe --tags --always 2>/dev/null || echo dev)"
-echo "[daily] VCS_REF=$VCS_REF BUILD_DATE=$BUILD_DATE MAILSTRIX_VERSION=$MAILSTRIX_VERSION"
+# The nearest published release TAG (no -N-g commit suffix). Dockerfile.release
+# downloads the per-arch binaries from this release, so it must be a tag that has
+# a GitHub release with assets — not the git-describe string above (which is
+# ahead of the tag on any post-release commit and has no release of its own).
+export MAILSTRIX_RELEASE="$(git -C "$REPO_DIR/src/mailstrix" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "")"
+echo "[daily] VCS_REF=$VCS_REF BUILD_DATE=$BUILD_DATE MAILSTRIX_VERSION=$MAILSTRIX_VERSION MAILSTRIX_RELEASE=$MAILSTRIX_RELEASE"
 
 # --- run the orchestrator, capturing output for the summary --------------------
 RUN_LOG="$(mktemp /tmp/dockerized-daily-run.XXXXXX.log)"
