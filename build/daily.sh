@@ -47,11 +47,17 @@ export BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # yarad's own source version (its submodule, not the dockerized superrepo) for
 # its main.version ldflag / /version endpoint.
 export MAILSTRIX_VERSION="$(git -C "$REPO_DIR/src/mailstrix" describe --tags --always 2>/dev/null || echo dev)"
-# The nearest published release TAG (no -N-g commit suffix). Dockerfile.release
-# downloads the per-arch binaries from this release, so it must be a tag that has
-# a GitHub release with assets — not the git-describe string above (which is
-# ahead of the tag on any post-release commit and has no release of its own).
-export MAILSTRIX_RELEASE="$(git -C "$REPO_DIR/src/mailstrix" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "")"
+# The tag of the LATEST *published GitHub release* — Dockerfile.release curls the
+# per-arch binaries from it, so it must be a release that actually has assets.
+# Ask GitHub directly (gh) instead of git describe: a git tag can exist locally
+# (or be pushed) before its release is published, and HEAD is often ahead of the
+# nearest release tag — both cases made describe point at a tag with no assets,
+# so the daily build 404'd (e.g. 2026-06-30: cron ran 12:00 UTC, v1.2.0 release
+# published 21:56). gh release view --latest always tracks the real release.
+export MAILSTRIX_RELEASE="$(gh release view --repo eilandert/mailstrix --json tagName -q .tagName 2>/dev/null | sed 's/^v//')"
+# Fallback to the nearest git tag if gh is unavailable (no network/auth).
+[[ -z "$MAILSTRIX_RELEASE" ]] && \
+    export MAILSTRIX_RELEASE="$(git -C "$REPO_DIR/src/mailstrix" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "")"
 echo "[daily] VCS_REF=$VCS_REF BUILD_DATE=$BUILD_DATE MAILSTRIX_VERSION=$MAILSTRIX_VERSION MAILSTRIX_RELEASE=$MAILSTRIX_RELEASE"
 
 # --- run the orchestrator, capturing output for the summary --------------------
