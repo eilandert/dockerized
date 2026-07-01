@@ -719,7 +719,10 @@ target "debian-mailstrix" {
    # only the native yarac rules-compile runs emulated. The final image is
    # distroless (not a debian: image), so the old :debian tag was wrong and is
    # dropped — :latest + the version tag are a multi-arch manifest list.
-   tags = ["docker.io/eilandert/mailstrix:latest", "docker.io/eilandert/mailstrix:${MAILSTRIX_RELEASE}"]
+   # Guard: an empty MAILSTRIX_RELEASE (release-race: gh release/tag not resolved
+   # yet) must not emit a bare "mailstrix:" tag — that fails as "invalid reference
+   # format". Fall back to :latest-only until a version is available.
+   tags = notequal("", MAILSTRIX_RELEASE) ? ["docker.io/eilandert/mailstrix:latest", "docker.io/eilandert/mailstrix:${MAILSTRIX_RELEASE}"] : ["docker.io/eilandert/mailstrix:latest"]
    context = "src/mailstrix"
    dockerfile = "docker/Dockerfile.release"
    platforms = ["linux/amd64", "linux/arm64"]
